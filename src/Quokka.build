@@ -3,7 +3,7 @@
   <property name="nant.settings.currentframework" value="net-2.0"/>
   <property name="framework.dir" value="${framework::get-framework-directory(nant.settings.currentframework)}"/>
 
-  <property name="output.dir" value="bin"/>
+  <property name="output.dir" value="../bin"/>
   <property name="tools.dir" value="../tools"/>
   <property name="nunit.dir" value="${tools.dir}/NUnit"/>
 
