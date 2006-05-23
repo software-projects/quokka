@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quokka", "Quokka\Quokka.csproj", "{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quokka.Tests", "Quokka.Tests\Quokka.Tests.csproj", "{FA1B5C87-5E8C-4B9A-8493-302C821D31F6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA1B5C87-5E8C-4B9A-8493-302C821D31F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA1B5C87-5E8C-4B9A-8493-302C821D31F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA1B5C87-5E8C-4B9A-8493-302C821D31F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA1B5C87-5E8C-4B9A-8493-302C821D31F6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

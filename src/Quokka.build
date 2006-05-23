@@ -1,0 +1,51 @@
+<?xml version="1.0" ?>
+<project name="Quokka" default="test" xmlns="http://nant.sf.net/nightly/2006-03-08-0.85/nant.xsd">
+  <property name="nant.settings.currentframework" value="net-2.0"/>
+  <property name="framework.dir" value="${framework::get-framework-directory(nant.settings.currentframework)}"/>
+
+  <property name="output.dir" value="bin"/>
+  <property name="tools.dir" value="../tools"/>
+  <property name="nunit.dir" value="${tools.dir}/NUnit"/>
+
+  <target name="init">
+    <mkdir dir="${output.dir}"/>
+  </target>
+
+  <target name="clean">
+    <delete>
+      <fileset>
+        <include name="Quokka/bin/**"/>
+        <include name="Quokka/obj/**"/>
+        <include name="Quokka.Tests/bin/**"/>
+        <include name="Quokka.Tests/obj/**"/>
+      </fileset>
+    </delete>
+  </target>
+  
+  <target name="compile" depends="init">
+    <csc keyfile="Quokka/Quokka.snk" target="library" output="${output.dir}/Quokka.dll">
+      <sources basedir="Quokka">
+        <include name="**.cs"/>
+      </sources>
+    </csc>
+  </target>
+
+  <target name="compile.tests" depends="compile">
+    <csc target="library" output="${output.dir}/Quokka.Tests.dll">
+      <sources basedir="Quokka.Tests">
+        <include name="**.cs"/>
+      </sources>
+      <references>
+        <include name="${nunit.dir}/bin/NUnit.Framework.dll"/>
+        <include name="${output.dir}/Quokka.dll"/>
+      </references>
+    </csc>
+  </target>
+
+  <target name="test" depends="compile.tests">
+    <nunit2>
+      <formatter type="Plain"/>
+      <test assemblyname="${output.dir}/Quokka.Tests.dll"/>
+    </nunit2>
+  </target>
+</project>

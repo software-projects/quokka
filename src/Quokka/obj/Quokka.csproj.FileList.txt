@@ -1,0 +1,5 @@
+bin\Debug\Quokka.dll
+bin\Debug\Quokka.pdb
+obj\Debug\ResolveAssemblyReference.cache
+obj\Debug\Quokka.dll
+obj\Debug\Quokka.pdb
