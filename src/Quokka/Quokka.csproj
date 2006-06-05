@@ -36,8 +36,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DynamicCodeGeneration\ProxyFactory.cs" />
     <Compile Include="DynamicCodeGeneration\DynamicAssembly.cs" />
+    <Compile Include="DynamicCodeGeneration\ProxyFactory.cs" />
+    <Compile Include="DynamicCodeGeneration\DuckProxyBuilder.cs" />
     <Compile Include="QuokkaException.cs" />
     <Compile Include="ServiceContainer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

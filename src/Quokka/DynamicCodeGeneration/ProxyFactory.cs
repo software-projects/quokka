@@ -8,6 +8,7 @@ namespace Quokka.DynamicCodeGeneration
     public static class ProxyFactory
     {
         private static DuckProxyStore duckProxyStore;
+        private static DynamicAssembly dynamicAssembly;
 
         static ProxyFactory() {
             duckProxyStore = new DuckProxyStore();
@@ -57,7 +58,11 @@ namespace Quokka.DynamicCodeGeneration
         }
 
         private static Type CreateDuckProxyType(Type interfaceType, Type innerType) {
-            throw new NotImplementedException();
+            if (dynamicAssembly == null) {
+                dynamicAssembly = new DynamicAssembly();
+            }
+
+            return dynamicAssembly.CreateDuckProxyType(interfaceType, innerType);
         }
     }
 

@@ -175,5 +175,113 @@ namespace Quokka.Tests
 			Assert.IsTrue(inner.Method4Called);
 		}
 
+        public interface IGenericInterface<T>
+        {
+            T DoSomething(T t);
+        }
+
+        public class Inner4
+        {
+            public int DoSomething(int i) {
+                return i * 3;
+            }
+        }
+
+        [Test]
+        public void GenericInterface() {
+            Inner4 inner = new Inner4();
+
+            IGenericInterface<int> i = ProxyFactory.CreateDuckProxy<IGenericInterface<int>>(inner);
+
+            Assert.AreEqual(9, i.DoSomething(3));
+        }
+
+        public interface ITest5
+        {
+            event EventHandler SomethingHappened;
+        }
+
+        public class Inner5 {
+            public event EventHandler SomethingHappened;
+
+            public void RaiseSomethingHappened() {
+                if (SomethingHappened != null) {
+                    SomethingHappened(this, EventArgs.Empty);
+                }
+            }
+        }
+
+        [Test]
+        public void SimpleEvent() {
+            Inner5 inner = new Inner5();
+
+            ITest5 i = ProxyFactory.CreateDuckProxy<ITest5>(inner);
+
+            bool eventRaised = false;
+
+            i.SomethingHappened += delegate(object sender, EventArgs e) {
+                eventRaised = true;
+            };
+
+            inner.RaiseSomethingHappened();
+
+            Assert.IsTrue(eventRaised);
+        }
+
+        public class Test6EventArgs : EventArgs {
+            public int IntValue;
+            public string StringValue;
+        }
+
+        public interface ITest6
+        {
+            event EventHandler<Test6EventArgs> SomethingHappened;
+        }
+
+        public class Inner6
+        {
+            public event EventHandler<Test6EventArgs> SomethingHappened;
+
+            public void RaiseSomethingHappened(int intValue, string stringValue) {
+                if (SomethingHappened != null) {
+                    Test6EventArgs e = new Test6EventArgs();
+                    e.IntValue = intValue;
+                    e.StringValue = stringValue;
+                }
+            }
+        }
+
+        [Test]
+        public void GenericEvent() {
+            Inner6 inner = new Inner6();
+            ITest6 i = ProxyFactory.CreateDuckProxy<ITest6>(inner);
+
+            bool eventRaised = true;
+
+            i.SomethingHappened += delegate(object sender, Test6EventArgs e) {
+                Assert.AreEqual(42, e.IntValue);
+                Assert.AreEqual("Forty Two", e.StringValue);
+                eventRaised = true;
+            };
+
+            inner.RaiseSomethingHappened(42, "FortyTwo");
+            Assert.IsTrue(eventRaised);
+        }
+
+        [Test]
+        [ExpectedException(typeof(ArgumentException))]
+        public void NotAnInterface() {
+            Inner1 inner = new Inner1();
+            Inner2 i2 = ProxyFactory.CreateDuckProxy<Inner2>(inner);
+            
+        }
+
+        [Test]
+        public void NullInner() {
+            ITest1 i = ProxyFactory.CreateDuckProxy<ITest1>(null);
+            Assert.IsNull(i);
+        }
+
+
 	}
 }
