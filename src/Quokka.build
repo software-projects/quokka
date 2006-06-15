@@ -2,10 +2,13 @@
 <project name="Quokka" default="test" xmlns="http://nant.sf.net/nightly/2006-03-08-0.85/nant.xsd">
   <property name="nant.settings.currentframework" value="net-2.0"/>
   <property name="framework.dir" value="${framework::get-framework-directory(nant.settings.currentframework)}"/>
+  
+  <property name="version.major" value="0"/>
+  <property name="version.minor" value="2"/>
 
-  <property name="output.dir" value="../bin"/>
-  <property name="tools.dir" value="../tools"/>
-  <property name="nunit.dir" value="${tools.dir}/NUnit"/>
+  <property name="output.dir" value="${path::get-full-path('../bin')}"/>
+  <property name="tools.dir" value="${path::get-full-path('../tools')}"/>
+  <property name="nunit.dir" value="${path::combine(tools.dir, 'NUnit')}"/>
 
   <target name="init">
     <mkdir dir="${output.dir}"/>
@@ -22,10 +25,35 @@
     </delete>
   </target>
   
-  <target name="compile" depends="init">
+  <target name="AssemblyInfo.tmp.cs" depends="init">
+    <asminfo language="CSharp" output="AssemblyInfo.tmp">
+      <imports>
+        <import namespace="System"/>
+        <import namespace="System.Reflection"/>
+      </imports>
+      <attributes>
+        <attribute type="AssemblyVersionAttribute" value="${version.major}.${version.minor}.$WCMODS?0:$WCREV$$"/>
+        <!-- TBD put something meaningfule in AssemblyConfiguration -->
+        <attribute type="AssemblyConfigurationAttribute" value=""/>
+        <attribute type="AssemblyCompanyAttribute" value="Quokka.org"/>
+        <attribute type="AssemblyProductAttribute" value="Quokka"/>
+        <attribute type="AssemblyCopyrightAttribute" value="Copyright 2004-${datetime::get-year(datetime::now())}. All Rights Reserved."/>
+      </attributes>
+    </asminfo>
+    
+    <exec program="SubWCRev.exe" basedir="${tools.dir}/svn">
+      <arg value="."/>
+      <arg value="AssemblyInfo.tmp"/>
+      <arg value="AssemblyInfo.tmp.cs"/>
+    </exec>
+  </target>
+  
+  <target name="compile" depends="AssemblyInfo.tmp.cs">
     <csc keyfile="Quokka/Quokka.snk" target="library" output="${output.dir}/Quokka.dll">
-      <sources basedir="Quokka">
-        <include name="**.cs"/>
+      <sources>
+        <include name="AssemblyInfo.tmp.cs"/>
+        <include name="Quokka/**.cs"/>
+        <exclude name="Quokka/**/AssemblyInfo.cs"/>
       </sources>
     </csc>
   </target>
