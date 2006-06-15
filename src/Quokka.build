@@ -53,15 +53,15 @@
       <sources>
         <include name="AssemblyInfo.tmp.cs"/>
         <include name="Quokka/**.cs"/>
-        <exclude name="Quokka/**/AssemblyInfo.cs"/>
       </sources>
     </csc>
   </target>
 
   <target name="compile.tests" depends="compile">
     <csc target="library" output="${output.dir}/Quokka.Tests.dll">
-      <sources basedir="Quokka.Tests">
-        <include name="**.cs"/>
+      <sources>
+        <include name="AssemblyInfo.tmp.cs"/>
+        <include name="Quokka.Tests/**.cs"/>
       </sources>
       <references>
         <include name="${nunit.dir}/bin/NUnit.Framework.dll"/>
