@@ -1,9 +1,7 @@
 using System;
 using NUnit.Framework;
 
-using Quokka.DynamicCodeGeneration;
-
-namespace Quokka.Tests
+namespace Quokka.DynamicCodeGeneration
 {
 	[TestFixture]
 	public class DuckProxyTests

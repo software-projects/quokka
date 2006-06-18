@@ -1,10 +1,9 @@
 
 
-namespace Quokka.Tests
+namespace Quokka
 {
     using System;
     using NUnit.Framework;
-    using Quokka;
 
     [TestFixture]
     public class ServiceContainerTests
@@ -23,13 +22,13 @@ namespace Quokka.Tests
             Assert.IsNotNull(i1);
         }
 
-        [Test, ExpectedException(typeof(ArgumentException), ExpectedMessage = "Constructor for Quokka.Tests.ServiceContainerTests+Class1_StringParameter has a non-interface parameter: System.String connectionString")]
+        [Test, ExpectedException(typeof(ArgumentException), ExpectedMessage = "Constructor for Quokka.ServiceContainerTests+Class1_StringParameter has a non-interface parameter: System.String connectionString")]
         public void StringParameterInConstructor() {
             ServiceContainer container = new ServiceContainer();
             container.AddService(typeof(IInterface1), typeof(Class1_StringParameter));
         }
 
-        [Test, ExpectedException(typeof(ArgumentException), ExpectedMessage="Too many constructors for Quokka.Tests.ServiceContainerTests+Class1_MultipleConstructors")]
+        [Test, ExpectedException(typeof(ArgumentException), ExpectedMessage="Too many constructors for Quokka.ServiceContainerTests+Class1_MultipleConstructors")]
         public void MultipleConstructors() {
             ServiceContainer container = new ServiceContainer();
             container.AddService(typeof(IInterface1), typeof(Class1_MultipleConstructors));
@@ -41,7 +40,7 @@ namespace Quokka.Tests
             container.AddService(typeof(IInterface1), typeof(Class1_Generic<IInterface2>));
         }
 
-        [Test, ExpectedException(typeof(QuokkaException), ExpectedMessage="Circular reference detected for Quokka.Tests.ServiceContainerTests+IInterface1")]
+        [Test, ExpectedException(typeof(QuokkaException), ExpectedMessage="Circular reference detected for Quokka.ServiceContainerTests+IInterface1")]
         public void CircularReference() {
             ServiceContainer container = new ServiceContainer();
             container.AddService(typeof(IInterface1), typeof(Class1_DependsOnIInterface3));
@@ -51,7 +50,7 @@ namespace Quokka.Tests
             IInterface1 i1 = (IInterface1)container.GetService(typeof(IInterface1));
         }
 
-        [Test, ExpectedException(typeof(QuokkaException), ExpectedMessage = "No available implementation of Quokka.Tests.ServiceContainerTests+IInterface1")]
+        [Test, ExpectedException(typeof(QuokkaException), ExpectedMessage = "No available implementation of Quokka.ServiceContainerTests+IInterface1")]
         public void MissingType() {
             ServiceContainer container = new ServiceContainer();
             container.AddService(typeof(IInterface2), typeof(Class2));
