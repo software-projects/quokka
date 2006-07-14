@@ -162,7 +162,7 @@ namespace Quokka.Tests
 
         [Test]
         public void CustomAddService() {
-            Quokka.ServiceContainer container = new Quokka.ServiceContainer();
+            QuokkaServiceContainer container = new QuokkaServiceContainer();
 
             container.AddService(typeof(IInterface1), typeof(Class1));
             container.AddService(typeof(IInterface2), typeof(Class2));
@@ -186,7 +186,7 @@ namespace Quokka.Tests
         [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void NoSuitableConstructor() {
-            Quokka.ServiceContainer container = new Quokka.ServiceContainer();
+            QuokkaServiceContainer container = new QuokkaServiceContainer();
 
             // this should throw an exception, because there is no suitable exception for Class3a
             container.AddService(typeof(IInterface3), typeof(Class3a));
@@ -194,7 +194,7 @@ namespace Quokka.Tests
 
         [Test]
         public void ServiceProviderConstructor() {
-            Quokka.ServiceContainer container = new Quokka.ServiceContainer();
+            QuokkaServiceContainer container = new QuokkaServiceContainer();
             container.AddService(typeof(IInterface3), typeof(Class3b));
             container.AddService(typeof(IInterface1), typeof(Class1));
 
