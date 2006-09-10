@@ -2,16 +2,43 @@
 <project name="Quokka" default="test" xmlns="http://nant.sf.net/nightly/2006-03-08-0.85/nant.xsd">
   <property name="nant.settings.currentframework" value="net-2.0"/>
   <property name="framework.dir" value="${framework::get-framework-directory(nant.settings.currentframework)}"/>
-  
-  <property name="version.major" value="0"/>
-  <property name="version.minor" value="3"/>
+  <property name="debug" value="true"/>
 
   <property name="output.dir" value="${path::get-full-path('../bin')}"/>
   <property name="tools.dir" value="${path::get-full-path('../tools')}"/>
   <property name="nunit.dir" value="${path::combine(tools.dir, 'NUnit')}"/>
 
-  <target name="init">
-    <mkdir dir="${output.dir}"/>
+  <property name="svn.dir" value="${path::combine(tools.dir, 'svn')}"/>
+  <property name="svn.bin.dir" value="${path::combine(svn.dir, 'bin')}"/>
+
+  <target name="version">
+    <tstamp>
+      <formatter property="build.year" pattern="yyyy"/>
+      <formatter property="build.timestamp" pattern="yyyy-MM-ddTHH:mm:ss"/>
+      <formatter property="build.date" pattern="yyyy-MM-dd"/>
+      <formatter property="build.year.month" pattern="yyMM"/>
+      <formatter property="build.day.hour" pattern="ddHH"/>
+      <formatter property="build.minute.second" pattern="mmss"/>
+    </tstamp>
+    
+    <property name="svn.revision.file" value="${path::get-temp-file-name()}"/>
+    <exec basedir="${svn.bin.dir}" program="svnversion" output="${svn.revision.file}"/>
+    <loadfile file="${svn.revision.file}" property="svn.revision.string"/>
+    <property name="svn.revision" failonerror="false" value="${int::parse(svn.revision.string)}"/>
+    <if test="${not property::exists('svn.revision')}">
+      <property name="version.major" value="0"/>
+      <property name="version.minor" value="0"/>
+      <property name="version.build" value="0"/>
+      <property name="version.revision" value="0"/>
+    </if>
+    <if test="${property::exists('svn.revision')}">
+      <property name="version.major" value="0"/>
+      <property name="version.minor" value="1"/>
+      <property name="version.build" value="${svn.revision}"/>
+      <property name="version.revision" value="0"/>
+    </if>
+    <property name="version" value="${version.major}.${version.minor}.${version.build}.${version.revision}"/>
+    <echo message="Version: ${version}"/>
   </target>
 
   <target name="clean">
@@ -25,31 +52,34 @@
     </delete>
   </target>
   
-  <target name="AssemblyInfo.tmp.cs" depends="init">
-    <asminfo language="CSharp" output="AssemblyInfo.tmp">
+  <target name="AssemblyInfo.tmp.cs" depends="version">
+    <asminfo language="CSharp" output="AssemblyInfo.tmp.cs">
       <imports>
         <import namespace="System"/>
         <import namespace="System.Reflection"/>
       </imports>
       <attributes>
-        <attribute type="AssemblyVersionAttribute" value="${version.major}.${version.minor}.$WCMODS?0:$WCREV$$"/>
+        <attribute type="AssemblyVersionAttribute" value="${version.major}.${version.minor}.${version.build}.${version.revision}"/>
         <!-- TBD put something meaningfule in AssemblyConfiguration -->
-        <attribute type="AssemblyConfigurationAttribute" value=""/>
+        <attribute type="AssemblyConfigurationAttribute" value="Debug" if="${debug == 'true'}"/>
+        <attribute type="AssemblyConfigurationAttribute" value="Release" if="${debug != 'true'}"/>
+        <attribute type="AssemblyDescriptionAttribute" value="Build timestamp: ${build.timestamp}"/>
         <attribute type="AssemblyCompanyAttribute" value="Quokka.org"/>
         <attribute type="AssemblyProductAttribute" value="Quokka"/>
-        <attribute type="AssemblyCopyrightAttribute" value="Copyright 2004-${datetime::get-year(datetime::now())}. All Rights Reserved."/>
+        <attribute type="AssemblyCopyrightAttribute" value="Copyright 2004-${build.year}. All Rights Reserved."/>
       </attributes>
     </asminfo>
-    
-    <exec program="SubWCRev.exe" basedir="${tools.dir}/svn">
-      <arg value="."/>
-      <arg value="AssemblyInfo.tmp"/>
-      <arg value="AssemblyInfo.tmp.cs"/>
-    </exec>
   </target>
   
   <target name="compile" depends="AssemblyInfo.tmp.cs">
-    <csc keyfile="Quokka/Quokka.snk" target="library" output="${output.dir}/Quokka.dll">
+    <mkdir dir="${output.dir}"/>
+    <csc keyfile="Quokka/Quokka.snk" target="library" output="${output.dir}/Quokka.dll" debug="${debug}">
+      <resources dynamicprefix="true" prefix="Quokka" basedir="Quokka" >
+        <include name="**/*.resources"/>
+        <include name="**/*.xml"/>
+        <include name="**/*.xsd"/>
+        <exclude name="obj/*"/>
+      </resources>
       <sources>
         <include name="AssemblyInfo.tmp.cs"/>
         <include name="Quokka/**.cs"/>
@@ -58,15 +88,20 @@
   </target>
 
   <target name="compile.tests" depends="compile">
-    <csc target="library" output="${output.dir}/Quokka.Tests.dll">
-      <sources>
-        <include name="AssemblyInfo.tmp.cs"/>
-        <include name="Quokka.Tests/**.cs"/>
-      </sources>
+    <csc target="library" output="${output.dir}/Quokka.Tests.dll" debug="${debug}">
       <references>
         <include name="${nunit.dir}/bin/NUnit.Framework.dll"/>
         <include name="${output.dir}/Quokka.dll"/>
       </references>
+      <resources dynamicprefix="true" prefix="Quokka" basedir="Quokka.Tests" >
+        <include name="**/*.resources"/>
+        <include name="**/*.xml"/>
+        <exclude name="obj/*"/>
+      </resources>      
+      <sources>
+        <include name="AssemblyInfo.tmp.cs"/>
+        <include name="Quokka.Tests/**.cs"/>
+      </sources>
     </csc>
   </target>
 

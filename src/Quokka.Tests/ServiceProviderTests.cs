@@ -1,10 +1,9 @@
 using System;
 using System.ComponentModel.Design;
 
-namespace Quokka.Tests
+namespace Quokka
 {
     using NUnit.Framework;
-    using Quokka;
 
     /// <summary>
     /// For testing out how the ServiceProvider class works.
@@ -162,7 +161,7 @@ namespace Quokka.Tests
 
         [Test]
         public void CustomAddService() {
-            QuokkaServiceContainer container = new QuokkaServiceContainer();
+            QuokkaContainer container = new QuokkaContainer();
 
             container.AddService(typeof(IInterface1), typeof(Class1));
             container.AddService(typeof(IInterface2), typeof(Class2));
@@ -186,7 +185,7 @@ namespace Quokka.Tests
         [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void NoSuitableConstructor() {
-            QuokkaServiceContainer container = new QuokkaServiceContainer();
+            QuokkaContainer container = new QuokkaContainer();
 
             // this should throw an exception, because there is no suitable exception for Class3a
             container.AddService(typeof(IInterface3), typeof(Class3a));
@@ -194,7 +193,7 @@ namespace Quokka.Tests
 
         [Test]
         public void ServiceProviderConstructor() {
-            QuokkaServiceContainer container = new QuokkaServiceContainer();
+            QuokkaContainer container = new QuokkaContainer();
             container.AddService(typeof(IInterface3), typeof(Class3b));
             container.AddService(typeof(IInterface1), typeof(Class1));
 

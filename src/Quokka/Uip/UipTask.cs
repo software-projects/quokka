@@ -1,0 +1,306 @@
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+
+using Quokka.DynamicCodeGeneration;
+using Quokka.Reflection;
+using Quokka.Uip.Implementation;
+
+namespace Quokka.Uip
+{
+    public sealed class UipTask
+    {
+        private readonly QuokkaContainer serviceContainer;
+        private readonly UipTaskDefinition taskDefinition;
+        private readonly object state;
+        private UipNode currentNode;
+        private object currentController;
+        private object currentView;
+        private string navigateValue;
+        private bool inNavigateMethod;
+
+        public event EventHandler TaskStarted;
+        public event EventHandler TaskFinished;
+
+        internal UipTask(UipTaskDefinition taskDefinition, IServiceProvider serviceProvider, IUipViewManager viewManager) {
+            if (taskDefinition == null)
+                throw new ArgumentNullException("navigationGraph");
+            if (viewManager == null)
+                throw new ArgumentNullException("viewManager");
+            this.taskDefinition = taskDefinition;
+            this.serviceContainer = new QuokkaContainer(serviceProvider);
+            this.serviceContainer.AddService(typeof(IUipViewManager), viewManager);
+            this.serviceContainer.AddService(typeof(IUipNavigator), new Navigator(this));
+            this.state = ObjectFactory.Create(taskDefinition.StateType, serviceProvider, serviceProvider, this);
+            PropertyUtil.SetValues(this.state, taskDefinition.StateProperties);
+            this.currentNode = null;
+            AddNestedStateInterfaces();
+        }
+
+        public IServiceProvider ServiceProvider {
+            get { return serviceContainer; }
+        }
+
+        public IUipViewManager ViewManager {
+            get { return (IUipViewManager)ServiceProvider.GetService(typeof(IUipViewManager)); }
+        }
+
+        public object State {
+            get { return state; }
+        }
+
+        public object CurrentController {
+            get { return currentController; }
+        }
+
+        public object CurrentView {
+            get { return currentView; }
+        }
+
+        public UipNode CurrentNode {
+            get { return currentNode; }
+        }
+
+        public IList<UipNode> Nodes {
+            get { return taskDefinition.Nodes; }
+        }
+
+        public UipNode FindNode(string name, bool throwOnError) {
+            return taskDefinition.FindNode(name, throwOnError);
+        }
+
+        public void Start() {
+            if (IsRunning) {
+                throw new UipException("Task is already running");
+            }
+
+            Navigate(null);
+
+            if (TaskStarted != null) {
+                TaskStarted(this, EventArgs.Empty);
+            }
+        }
+
+        public bool IsRunning {
+            get { return currentNode != null; }
+        }
+
+        private void Navigate(string navigateValue) {
+            this.navigateValue = navigateValue;
+
+            if (!inNavigateMethod) {
+                inNavigateMethod = true;
+                try {
+                    UipNode nextNode = GetNextNode();
+                    if (nextNode != null) {
+                        ViewManager.BeginTransition();
+                        try {
+                            if (this.currentView != null) {
+                                ViewManager.HideView(this.currentView);
+                                ViewManager.RemoveView(this.currentView);
+                                DisposeOf(ref this.currentView);
+                            }
+
+                            do {
+                                // Perform the navigation. Note that this call
+                                // can result in a recursive call back into this function,
+                                // hence the test using the <c>inNavigateMethod</c> variable.
+                                DoNavigate(nextNode);
+
+                                // If there was a recursive call to this function, then this
+                                // will return non-null.
+                                nextNode = GetNextNode();
+                            } while (nextNode != null);
+
+                            // Finished navigating to a new node, display the new view.
+                            CreateView();
+
+                            if (this.currentView != null) {
+                                ViewManager.AddView(this.currentView);
+                                ViewManager.ShowView(this.currentView);
+                            }
+                        }
+                        finally {
+                            ViewManager.EndTransition();
+                        }
+                    }
+                }
+                finally {
+                    inNavigateMethod = false;
+                }
+            }
+        }
+
+        private UipNode GetNextNode() {
+            UipNode nextNode = null;
+            if (this.currentNode == null) {
+                // Task is just starting
+                nextNode = taskDefinition.StartNode;
+            }
+            else if (this.navigateValue != null) {
+                nextNode = this.currentNode.GetNextNode(navigateValue);
+
+                // forget about the navigate value -- it might get set again when creating the controller
+                this.navigateValue = null;
+
+                if (nextNode == null) {
+                    string message = String.Format("No transition defined: task={0}, node={1}, navigateValue={2}",
+                        this.taskDefinition.Name, this.currentNode.Name, this.navigateValue);
+                    throw new UipException(message);
+                }
+            }
+
+            return nextNode;
+        }
+
+        private void DoNavigate(UipNode nextNode) {
+            if (nextNode != null) {
+                // dispose of the controller and change the current node
+                DisposeOf(ref this.currentView);
+                DisposeOf(ref this.currentController);
+                UipNode prevNode = this.currentNode;
+                this.currentNode = nextNode;
+
+                // signal task started
+                if (prevNode == null) {
+                    // the task has just started 
+                    if (TaskStarted != null) {
+                        TaskStarted(this, EventArgs.Empty);
+                    }
+                }
+
+                // Create the controller for the new current node. Note that it is possible for
+                // a controller to request navigation inside its constructor, and if this happens
+                // the navigateValue variable will be set, and we will continue through this loop again.
+                CreateController();
+            }
+        }
+
+        private void CreateController() {
+            DisposeOf(ref currentController);
+            if (this.currentNode == null) {
+                return;
+            }
+
+            Type controllerType = currentNode.ControllerType;
+            if (controllerType == null) {
+                return;
+            }
+
+            currentController = ObjectFactory.Create(currentNode.ControllerType, ServiceProvider, state, ServiceProvider, this, this.currentNode);
+            if (currentController == null) {
+                throw new UipException("Failed to create controller");
+            }
+            UipUtils.SetState(currentController, this.state, false);
+            PropertyUtil.SetValues(currentController, currentNode.ControllerProperties);
+        }
+
+        private void CreateView() {
+            DisposeOf(ref currentView);
+            if (this.currentNode == null) {
+                throw new UipException("Task is not running, no current node");
+            }
+            if (this.currentController == null) {
+                throw new UipException("No controller defined");
+            }
+
+            Type viewType = currentNode.ViewType;
+            if (viewType == null) {
+                // no view defined, finished
+                return;
+            }
+
+            // Look for a nested controller interface
+            object controllerProxy = null;
+            if (this.currentNode.ControllerInterface != null) {
+                controllerProxy = ProxyFactory.CreateDuckProxy(this.currentNode.ControllerInterface, this.currentController);
+            }
+
+            this.currentView = ObjectFactory.Create(viewType, ServiceProvider, controllerProxy, ServiceProvider, this.currentController, this);
+            if (this.currentView == null) {
+                throw new UipException("Failed to create view");
+            }
+            UipUtils.SetState(this.currentView, this.state, false);
+            UipUtils.SetController(this.currentView, this.currentController, false);
+            PropertyUtil.SetValues(this.currentView, this.currentNode.ViewProperties);
+        }
+
+        /// <summary>
+        /// Create proxies to the state object for nested interfaces called 'IState'
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Iterate through each controller and view class looking for nested interfaces called 'IState'.
+        /// If a class contains a nested interface called 'IState', assume that this is
+        /// a 'duck proxy' reference to the real state object, and create an entry in the service
+        /// container that will return a duck proxy to the state object when a service with the nested
+        /// interface is requested.
+        /// </para>
+        /// </remarks>
+        private void AddNestedStateInterfaces() {
+            // Get the distinct controller types, as a controller type may be present in more than
+            // one node.
+            Dictionary<Type, Type> typeDict = new Dictionary<Type,Type>();
+            foreach (UipNode node in this.Nodes) {
+                Type controllerType = node.ControllerType;
+                if (controllerType != null) {
+                    typeDict[controllerType] = controllerType;
+                }
+                Type viewType = node.ViewType;
+                if (viewType != null) {
+                    typeDict[viewType] = viewType;
+                }
+            }
+
+            // Look for nested interface types called "IState" and assume that they are 
+            // duck typing references to the state object.
+            foreach (Type controllerType in typeDict.Keys) {
+                Type nestedType = controllerType.GetNestedType("IState");
+                if (nestedType != null && nestedType.IsInterface) {
+                    // create a duck proxy for the state object and add it to the service provider
+                    object stateProxy = ProxyFactory.CreateDuckProxy(nestedType, state);
+                    serviceContainer.AddService(nestedType, stateProxy);
+                }
+            }
+        }
+
+        private static void DisposeOf(ref object obj) {
+            if (obj != null) {
+                IDisposable disposable = obj as IDisposable;
+                if (disposable != null) {
+                    // Look for a boolean property called 'IsDisposed', and do not dispose if it has a value of true
+                    // This is a bit of a hack to avoid any attempt to dispose of Windows Forms controls twice.
+                    object isDisposedObject = PropertyUtil.GetValue(disposable, "IsDisposed", false);
+                    if (isDisposedObject is bool) {
+                        bool isDisposed = (bool)isDisposedObject;
+                        if (!isDisposed) {
+                            disposable.Dispose();
+                        }
+                    }
+                }
+                obj = null;
+            }
+        }
+
+        private class Navigator : IUipNavigator
+        {
+            private readonly UipTask task;
+
+            public Navigator(UipTask task) {
+                this.task = task;
+            }
+
+            public void Navigate(string navigateValue) {
+                if (navigateValue == null)
+                    throw new ArgumentNullException("navigateValue");
+                task.Navigate(navigateValue);
+            }
+
+            public bool CanNavigate(string navigateValue) {
+                if (navigateValue == null)
+                    throw new ArgumentNullException("navigateValue");
+                return (task.CurrentNode.GetNextNode(navigateValue) != null);
+            }
+        }
+    }
+}

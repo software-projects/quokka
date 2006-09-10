@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UipTask Name="DailyOrders" xmlns="http://www.quokka.org/schemas/2006/UipTask.xsd">
+  <State Type="Mps.Local.Uip.DailyOrders.DailyOrdersState"/>
+  <StatePersist Type="Microsoft.ApplicationBlocks.UIProcess.MemoryStatePersistence"/>
+  <ViewManager Type="Microsoft.ApplicationBlocks.UIProcess.WinFormViewManager"/>
+
+  <NavigationGraph StartNode="LoadFacilities">
+    <Node Name="LoadFacilities">
+      <View Type="Mps.Local.Client.Win.InProgressForm"/>
+      <Controller Type="Mps.Local.Uip.LoadFacilitiesController">
+        <Property Name="ListPendingDailyOrderCount" Value="true"/>
+      </Controller>
+      <NavigateTo NavigateValue="next" Node="SelectFacility"/>
+      <NavigateTo NavigateValue="error" Node="Error1"/>
+    </Node>
+
+    <Node Name="Error1">
+      <View Type="Mps.Local.Client.Win.NotImplementedForm"/>
+      <Controller Type="Mps.Local.Uip.WizardControllerBase"/>
+      <NavigateTo NavigateValue="next" Node="LoadFacilities"/>
+    </Node>
+
+    <Node Name="SelectFacility">
+      <View Type="Mps.Local.Client.Win.SelectHSFacilityForDailyOrders"/>
+      <Controller Type="Mps.Local.Uip.DispenseRepeatsController"/>
+      <NavigateTo NavigateValue="next" Node="LoadingDailyOrders"/>
+    </Node>
+
+    <Node Name="LoadingDailyOrders">
+      <View Type="Mps.Local.Client.Win.InProgressForm"/>
+      <Controller Type="Mps.Local.Uip.DailyOrders.DailyOrdersLoadController"/>
+      <NavigateTo NavigateValue="next" Node="LoadingScripts"/>
+      <NavigateTo NavigateValue="prev" Node="SelectFacility"/>
+      <NavigateTo NavigateValue="error" Node="SelectFacility"/>
+      <NavigateTo NavigateValue="matchPatient" Node="MatchPatient"/>
+      <NavigateTo NavigateValue="empty" Node="NoPendingOrders"/>
+    </Node>
+
+    <Node Name="NoPendingOrders">
+      <View Type="Mps.Local.Client.Win.MessageBoxForm"/>
+      <Controller Type="Mps.Local.Uip.DailyOrders.NoPendingOrdersController"/>
+      <NavigateTo NavigateValue="ok" Node="SelectFacility"/>
+    </Node>
+
+    <Node Name="MatchPatient">
+      <View Type="Mps.Local.Client.Win.MatchPatientForm"/>
+      <Controller Type="Mps.Local.Uip.MatchPatientController"/>
+      <NavigateTo NavigateValue="updatePatient" Node="UpdatingPatient"/>
+      <NavigateTo NavigateValue="matchPatient" Node="MatchPatient"/>
+      <NavigateTo NavigateValue="next" Node="LoadingScripts"/>
+    </Node>
+
+    <Node Name="UpdatingPatient">
+      <View Type="Mps.Local.Client.Win.InProgressForm"/>
+      <Controller Type="Mps.Local.Uip.MatchPatientController"/>
+      <NavigateTo NavigateValue="matchPatient" Node="MatchPatient"/>
+      <NavigateTo NavigateValue="error" Node="MatchPatient"/>
+      <NavigateTo NavigateValue="next" Node="LoadingScripts"/>
+    </Node>
+
+    <Node Name="LoadingScripts">
+      <View Type="Mps.Local.Client.Win.InProgressForm"/>
+      <Controller Type="Mps.Local.Uip.DailyOrders.DailyOrdersController"/>
+      <NavigateTo NavigateValue="next" Node="UnmatchedPatients"/>
+      <NavigateTo NavigateValue="error" Node="UnmatchedPatients"/>
+    </Node>
+
+    <Node Name="UnmatchedPatients">
+      <View Type="Mps.Local.Client.Win.HtmlReportForm">
+        <Property Name="ReportName" Value="UnmatchedPatients"/>
+      </View>
+      <Controller Type="Mps.Local.Uip.DailyOrders.DailyOrdersController"/>
+      <NavigateTo NavigateValue="next" Node="NoRepeats"/>
+      <NavigateTo NavigateValue="prev" Node="SelectFacility"/>
+      <NavigateTo NavigateValue="cancel" Node="SelectFacility"/>
+    </Node>
+
+    <Node Name="NoRepeats">
+      <View Type="Mps.Local.Client.Win.HtmlReportForm">
+        <Property Name="ReportName" Value="DailyOrdersNoRepeats"/>
+      </View>
+      <Controller Type="Mps.Local.Uip.DailyOrders.DailyOrdersController"/>
+      <NavigateTo NavigateValue="next" Node="SelectDailyOrdersForDispense"/>
+      <NavigateTo NavigateValue="prev" Node="SelectFacility"/>
+      <NavigateTo NavigateValue="cancel" Node="SelectFacility"/>
+    </Node>
+
+    <Node Name="SelectDailyOrdersForDispense">
+      <View Type="Mps.Local.Client.Win.DailyOrderList2">
+        <Property Name="Text" Value="Select Daily Orders To Dispense"/>
+        <Property Name="Description" Value="The following daily orders have scripts with repeats and can be 'dot' dispensed."/>
+        <Property Name="SelectColumnHeaderText" Value="Dispense"/>
+      </View>
+      <Controller Type="Mps.Local.Uip.DailyOrders.SelectDailyOrdersForDispenseController"/>
+      <NavigateTo NavigateValue="prev" Node="SelectFacility"/>
+      <NavigateTo NavigateValue="next" Node="DotDispenseScripts"/>
+      <NavigateTo NavigateValue="cancel" Node="SelectFacility"/>
+    </Node>
+
+    <Node Name="DotDispenseScripts">
+      <View Type="Mps.Local.Client.Win.LocalScriptList"/>
+      <Controller Type="Mps.Local.Uip.DotDispenseController"/>
+      <NavigateTo NavigateValue="prev" Node="SelectFacility"/>
+      <NavigateTo NavigateValue="next" Node="SelectDailyOrdersForUpdate"/>
+      <NavigateTo NavigateValue="cancel" Node="SelectFacility"/>
+    </Node>
+
+    <Node Name="SelectDailyOrdersForUpdate">
+      <View Type="Mps.Local.Client.Win.DailyOrderList2">
+        <Property Name="Text" Value="Dispatch Daily Orders"/>
+        <Property Name="Description" Value="Update Healthstream with details of daily orders"/>
+      </View>
+      <Controller Type="Mps.Local.Uip.DailyOrders.DailyOrdersUpdateController">
+        <Property Name="EnableBack" Value="false"/>
+        <Property Name="EnableCancel" Value="false"/>
+      </Controller>
+      <NavigateTo NavigateValue="next" Node="UpdatingDailyOrders"/>
+    </Node>
+
+    <Node Name="UpdatingDailyOrders">
+      <View Type="Mps.Local.Client.Win.InProgressForm"/>
+      <Controller Type="Mps.Local.Uip.DailyOrders.DailyOrdersUpdateController"/>
+      <NavigateTo NavigateValue="next" Node="Finished"/>
+      <NavigateTo NavigateValue="error" Node="ErrorUpdatingDailyOrders"/>
+    </Node>
+
+    <Node Name="ErrorUpdatingDailyOrders">
+      <View Type="Mps.Local.Client.Win.ErrorMessageForm"/>
+      <Controller Type="Mps.Local.Uip.ErrorMessageController"/>
+      <NavigateTo NavigateValue="retry" Node="SelectDailyOrdersForUpdate"/>
+      <NavigateTo NavigateValue="close" Node="_exit"/>
+    </Node>
+
+    <Node Name="Finished">
+      <View Type="Mps.Local.Client.Win.MessageBoxForm">
+        <Property Name="Caption" Value="Daily Orders Updated"/>
+        <Property Name="Description" Value="Daily order information has been recorded in Healthstream."/>
+      </View>
+      <Controller Type="Mps.Local.Uip.MessageBoxController"/>
+      <NavigateTo NavigateValue="ok" Node="LoadFacilities"/>
+    </Node>
+  </NavigationGraph>
+</UipTask>

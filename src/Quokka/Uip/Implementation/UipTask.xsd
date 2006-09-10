@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xs:schema id="UITask" 
+           targetNamespace="http://www.quokka.org/schemas/2006/UipTask.xsd"
+           elementFormDefault="qualified"
+           xmlns="http://www.quokka.org/schemas/2006/UipTask.xsd"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="UipTask">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Using" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:attribute name="Namespace" type="xs:string" use="required"/>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="State" minOccurs="1" maxOccurs="1">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Property" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:attribute name="Name" type="xs:string" use="required"/>
+                  <xs:attribute name="Value" type="xs:string" use="required"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="Type" type="xs:string" use="required"/>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="StatePersist" minOccurs="0" maxOccurs="1">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Property" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:attribute name="Name" type="xs:string" use="required"/>
+                  <xs:attribute name="Value" type="xs:string" use="required"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="Type" type="xs:string" use="required"/>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="ViewManager" minOccurs="0" maxOccurs="1">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Property" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:attribute name="Name" type="xs:string" use="required"/>
+                  <xs:attribute name="Value" type="xs:string" use="required"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="Type" type="xs:string" use="required"/>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="NavigationGraph" minOccurs="1" maxOccurs="1">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Node" minOccurs="1" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="View" minOccurs="1" maxOccurs="1">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="Property" minOccurs="0" maxOccurs="unbounded">
+                            <xs:complexType>
+                              <xs:attribute name="Name" type="xs:string" use="required"/>
+                              <xs:attribute name="Value" type="xs:string" use="required"/>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                        <xs:attribute name="Type" type="xs:string" use="required"/>
+                        <xs:attribute name="StayOpen" type="xs:boolean" use="optional" default="false"/>
+                        <xs:attribute name="OpenModal" type="xs:boolean" use="optional" default="false"/>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="Controller" minOccurs="1" maxOccurs="1">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="Property" minOccurs="0" maxOccurs="unbounded">
+                            <xs:complexType>
+                              <xs:attribute name="Name" type="xs:string" use="required"/>
+                              <xs:attribute name="Value" type="xs:string" use="required"/>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                        <xs:attribute name="Type" type="xs:string" use="required"/>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="NavigateTo" minOccurs="0" maxOccurs="unbounded">
+                      <xs:complexType>
+                        <xs:sequence />
+                        <xs:attribute name="NavigateValue" type="xs:string" use="required" />
+                        <xs:attribute name="Node" type="xs:string" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="Name" type="xs:string" use="required" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="StartNode" type="xs:string" use="required" />
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="Name" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

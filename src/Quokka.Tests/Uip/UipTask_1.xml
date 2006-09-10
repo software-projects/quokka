@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UipTask Name="VpbUpdate" xmlns="http://www.quokka.org/schemas/2006/UipTask.xsd">
+  <Using Namespace="Mps.Local.Uip"/>
+  <Using Namespace="Mps.Local.Client.Win"/>
+  <State Type="Mps.Local.Uip.VpbUpdateState"/>
+  <StatePersist Type="Microsoft.ApplicationBlocks.UIProcess.MemoryStatePersistence"/>
+  <ViewManager Type="Microsoft.ApplicationBlocks.UIProcess.WinFormViewManager"/>
+
+  <NavigationGraph StartNode="LoadFacilities">
+    <Node Name="LoadFacilities">
+      <View Type="Mps.Local.Client.Win.InProgressForm"/>
+      <Controller Type="Mps.Local.Uip.LoadFacilitiesController"/>
+      <NavigateTo NavigateValue="next" Node="SelectFacility"/>
+      <NavigateTo NavigateValue="error" Node="Error1"/>
+    </Node>
+
+    <Node Name="Error1">
+      <View Type="Mps.Local.Client.Win.NotImplementedForm"/>
+      <Controller Type="Mps.Local.Uip.WizardControllerBase"/>
+      <NavigateTo NavigateValue="next" Node="LoadFacilities"/>
+    </Node>
+
+    <Node Name="SelectFacility">
+      <View Type="Mps.Local.Client.Win.SelectFacility"/>
+      <Controller Type="Mps.Local.Uip.DispenseRepeatsController"/>
+      <NavigateTo NavigateValue="next" Node="LoadVpbProgress"/>
+    </Node>
+
+    <Node Name="LoadVpbProgress">
+      <View Type="Mps.Local.Client.Win.InProgressForm"/>
+      <Controller Type="Mps.Local.Uip.VpbUpdateLoadMedicationController"/>
+      <NavigateTo NavigateValue="next" Node="LoadingScripts"/>
+      <NavigateTo NavigateValue="prev" Node="SelectFacility"/>
+      <NavigateTo NavigateValue="error" Node="SelectFacility"/>
+      <NavigateTo NavigateValue="matchPatient" Node="MatchPatient"/>
+    </Node>
+
+    <Node Name="MatchPatient">
+      <View Type="Mps.Local.Client.Win.MatchPatientForm"/>
+      <Controller Type="Mps.Local.Uip.MatchPatientController"/>
+      <NavigateTo NavigateValue="updatePatient" Node="UpdatingPatient"/>
+      <NavigateTo NavigateValue="matchPatient" Node="MatchPatient"/>
+      <NavigateTo NavigateValue="next" Node="LoadingScripts"/>
+    </Node>
+
+    <Node Name="UpdatingPatient">
+      <View Type="Mps.Local.Client.Win.InProgressForm"/>
+      <Controller Type="Mps.Local.Uip.MatchPatientController"/>
+      <NavigateTo NavigateValue="matchPatient" Node="MatchPatient"/>
+      <NavigateTo NavigateValue="error" Node="MatchPatient"/>
+      <NavigateTo NavigateValue="next" Node="LoadingScripts"/>
+    </Node>
+
+    <Node Name="LoadingScripts">
+      <View Type="Mps.Local.Client.Win.InProgressForm"/>
+      <Controller Type="Mps.Local.Uip.VpbUpdateController"/>
+      <NavigateTo NavigateValue="next" Node="UnmatchedPatients"/>
+      <NavigateTo NavigateValue="error" Node="UnmatchedPatients"/>
+    </Node>
+
+    <Node Name="UnmatchedPatients">
+      <View Type="Mps.Local.Client.Win.HtmlReportForm">
+        <Property Name="ReportName" Value="UnmatchedPatients"/>
+      </View>
+      <Controller Type="Mps.Local.Uip.VpbUpdateController"/>
+      <NavigateTo NavigateValue="next" Node="NoRepeats"/>
+      <NavigateTo NavigateValue="prev" Node="SelectFacility"/>
+      <NavigateTo NavigateValue="cancel" Node="SelectFacility"/>
+    </Node>
+
+    <Node Name="NoRepeats">
+      <View Type="Mps.Local.Client.Win.HtmlReportForm">
+        <Property Name="ReportName" Value="NoRepeats"/>
+      </View>
+      <Controller Type="Mps.Local.Uip.VpbUpdateController"/>
+      <NavigateTo NavigateValue="next" Node="SelectMedication"/>
+      <NavigateTo NavigateValue="prev" Node="SelectFacility"/>
+      <NavigateTo NavigateValue="cancel" Node="SelectFacility"/>
+    </Node>
+
+    <Node Name="SelectMedication">
+      <View Type="Mps.Local.Client.Win.VpbUpdateList2"/>
+      <Controller Type="Mps.Local.Uip.VpbUpdateController"/>
+      <NavigateTo NavigateValue="prev" Node="SelectFacility"/>
+      <NavigateTo NavigateValue="next" Node="DotDispenseScripts"/>
+      <NavigateTo NavigateValue="cancel" Node="SelectFacility"/>
+      <NavigateTo NavigateValue="empty" Node="NoMedications"/>
+    </Node>
+
+    <Node Name="NoMedications">
+      <View Type="Mps.Local.Client.Win.MessageBoxForm">
+        <Property Name="Caption" Value="No Medications"/>
+        <Property Name="Description" Value="There are no medications below threshold for this facility."/>
+      </View>
+      <Controller Type="Mps.Local.Uip.MessageBoxController"/>
+      <NavigateTo NavigateValue="ok" Node="SelectFacility"/>
+    </Node>
+
+    <Node Name="DotDispenseScripts">
+      <View Type="Mps.Local.Client.Win.LocalScriptList"/>
+      <Controller Type="Mps.Local.Uip.DotDispenseController"/>
+      <NavigateTo NavigateValue="prev" Node="SelectFacility"/>
+      <NavigateTo NavigateValue="next" Node="Finished"/>
+      <NavigateTo NavigateValue="cancel" Node="SelectFacility"/>
+    </Node>
+
+    <Node Name="Finished">
+      <View Type="Mps.Local.Client.Win.MessageBoxForm">
+        <Property Name="Caption" Value="Update VPBs"/>
+        <Property Name="Description" Value="To update VPBs in HealthStream, select 'VPB Update Review' from the 'Pharmacy Tools' menu."/>
+      </View>
+      <Controller Type="Mps.Local.Uip.MessageBoxController"/>
+      <NavigateTo NavigateValue="ok" Node="SelectFacility"/>
+    </Node>
+
+  </NavigationGraph>
+</UipTask>

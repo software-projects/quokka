@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UipTask Name="OrderScripts2" xmlns="http://www.quokka.org/schemas/2006/UipTask.xsd">
+  <State Type="Mps.Local.Uip.OrderScriptsState"/>
+  <StatePersist Type="Microsoft.ApplicationBlocks.UIProcess.MemoryStatePersistence"/>
+  <ViewManager Type="Microsoft.ApplicationBlocks.UIProcess.WinFormViewManager"/>
+  <NavigationGraph StartNode="SelectLocalFacilities">
+    <Node Name="SelectLocalFacilities">
+      <View Type="Mps.Local.Client.Win.SelectLocalFacilities">
+        <Property Name="Description" Value="Select the facilities that you want to order scripts for."/>
+      </View>
+      <Controller Type="Mps.Local.Uip.OrderScriptsController">
+        <Property Name="EnableBack" Value="false"/>
+        <Property Name="EnableCancel" Value="false"/>
+      </Controller>
+      <NavigateTo NavigateValue="next" Node="LoadingScripts"/>
+    </Node>
+
+    <Node Name="LoadingScripts">
+      <View Type="Mps.Local.Client.Win.InProgressForm"/>
+      <Controller Type="Mps.Local.Uip.OrderScriptsController"/>
+      <NavigateTo NavigateValue="next" Node="LocalDoctorPatients"/>
+    </Node>
+
+    <Node Name="LocalDoctorPatients">
+      <View Type="Mps.Local.Client.Win.LocalDoctorPatients" StayOpen="true"/>
+      <Controller Type="Mps.Local.Uip.OrderScriptsController"/>
+      <NavigateTo NavigateValue="orderScripts" Node="LocalDoctorAddress"/>
+      <NavigateTo NavigateValue="changeDoctor" Node="ChangeDoctor"/>
+      <NavigateTo NavigateValue="findPatient" Node="FindPatient"/>
+    </Node>
+
+    <Node Name="FindPatient">
+      <View Type="Mps.Local.Client.Win.FindPatientForm2" OpenModal="true"/>
+      <Controller Type="Mps.Local.Uip.FindPatientController"/>
+      <NavigateTo NavigateValue="prev" Node="LocalDoctorPatients"/>
+      <NavigateTo NavigateValue="next" Node="LocalDoctorPatients"/>
+    </Node>
+
+    <Node Name="ChangeDoctor">
+      <View Type="Mps.Local.Client.Win.FindDoctorForm" OpenModal="true"/>
+      <Controller Type="Mps.Local.Uip.OrderScriptsController"/>
+      <NavigateTo NavigateValue="prev" Node="LocalDoctorPatients"/>
+    </Node>
+
+    <Node Name="LocalDoctorAddress">
+      <View Type="Mps.Local.Client.Win.LocalDoctorAddress"/>
+      <Controller Type="Mps.Local.Uip.OrderScriptsController"/>
+      <NavigateTo NavigateValue="next" Node="SelectScripts"/>
+      <NavigateTo NavigateValue="prev" Node="LocalDoctorPatients"/>
+      <NavigateTo NavigateValue="cancel" Node="LocalDoctorPatients"/>
+    </Node>
+    
+    <Node Name='SelectScripts'>
+      <View Type='Mps.Local.Client.Win.LocalScriptOrder'/>
+      <Controller Type='Mps.Local.Uip.OrderScriptsController'/>
+      <NavigateTo NavigateValue="next" Node='CreatingOrders'/>
+      <NavigateTo NavigateValue="prev" Node='LocalDoctorAddress'/>
+      <NavigateTo NavigateValue="cancel" Node='LocalDoctorPatients'/>
+    </Node>
+
+    <Node Name='CreatingOrders'>
+      <View Type='Mps.Local.Client.Win.InProgressForm'/>
+      <Controller Type='Mps.Local.Uip.OrderScripts.OrderScriptsReportController'/>
+      <NavigateTo NavigateValue="next" Node='ReportPreview'/>
+    </Node>
+
+    <Node Name="ReportPreview">
+      <View Type="Mps.Local.Client.Win.SaveReportFile2"/>
+      <Controller Type="Mps.Local.Uip.OrderScripts.OrderScriptsReportController">
+        <Property Name="EnableBack" Value="false"/>
+        <Property Name="EnableCancel" Value="false"/>
+      </Controller>
+      <NavigateTo NavigateValue="prev" Node="LocalDoctorPatients"/>
+      <NavigateTo NavigateValue="next" Node="LocalDoctorPatients"/>
+    </Node>
+
+  </NavigationGraph>
+</UipTask>

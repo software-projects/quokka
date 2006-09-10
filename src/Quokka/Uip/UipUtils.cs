@@ -23,16 +23,22 @@ namespace Quokka.Uip
         /// method will attempt to create a 'Duck Proxy'.
         /// </para>
         /// </remarks>
-        public static void SetController(object view, object controller) {
+        public static bool SetController(object view, object controller, bool throwOnError) {
             Type viewType = view.GetType();
             MethodInfo methodInfo = viewType.GetMethod("SetController");
             if (methodInfo == null) {
-                throw new QuokkaException("Missing method: SetController");
+                if (throwOnError) {
+                    throw new QuokkaException("Missing method: SetController");
+                }
+                return false;
             }
 
             ParameterInfo[] parameters = methodInfo.GetParameters();
             if (parameters.Length != 1) {
-                throw new QuokkaException("Unexpected number of parameters for SetController method");
+                if (throwOnError) {
+                    throw new QuokkaException("Unexpected number of parameters for SetController method");
+                }
+                return false;
             }
 
             ParameterInfo parameterInfo = parameters[0];
@@ -42,7 +48,10 @@ namespace Quokka.Uip
                 // Not directly assignable, so we need to create a duck proxy.
                 // This is not possible unless the required type is an interface
                 if (!requiredControllerType.IsInterface) {
-                    throw new QuokkaException("Cannot assign controller to view, and cannot create a proxy");
+                    if (throwOnError) {
+                        throw new QuokkaException("Cannot assign controller to view, and cannot create a proxy");
+                    }
+                    return false;
                 }
 
                 // create a duck proxy
@@ -50,6 +59,63 @@ namespace Quokka.Uip
             }
 
             methodInfo.Invoke(view, new object[] { controller });
+            return true;
+        }
+
+        /// <summary>
+        /// Assign a state to a view or a controller.
+        /// </summary>
+        /// <param name="obj">The view or controller object</param>
+        /// <param name="state">The state object to assign</param>
+        /// <remarks>
+        /// <para>
+        /// This method assigns a state object to a view or controller. It looks for a public
+        /// method called <c>SetState</c> that takes one parameter, which
+        /// is the state.
+        /// </para>
+        /// <para>
+        /// If the <c>SetState</c> method requires an interface, and the
+        /// controller does not directly implement that interface, then this 
+        /// method will attempt to create a 'Duck Proxy'.
+        /// </para>
+        /// </remarks>
+        public static bool SetState(object obj, object state, bool throwOnError) {
+            Type viewType = obj.GetType();
+            MethodInfo methodInfo = viewType.GetMethod("SetState");
+            if (methodInfo == null) {
+                if (throwOnError) {
+                    throw new QuokkaException("Missing method: SetState");
+                }
+                return false;
+            }
+
+            ParameterInfo[] parameters = methodInfo.GetParameters();
+            if (parameters.Length != 1) {
+                if (throwOnError) {
+                    throw new QuokkaException("Unexpected number of parameters for SetController method");
+                }
+                return false;
+            }
+
+            ParameterInfo parameterInfo = parameters[0];
+            Type requiredControllerType = parameterInfo.ParameterType;
+
+            if (!requiredControllerType.IsAssignableFrom(state.GetType())) {
+                // Not directly assignable, so we need to create a duck proxy.
+                // This is not possible unless the required type is an interface
+                if (!requiredControllerType.IsInterface) {
+                    if (throwOnError) {
+                        throw new QuokkaException("Cannot assign controller to view, and cannot create a proxy");
+                    }
+                    return false;
+                }
+
+                // create a duck proxy
+                state = ProxyFactory.CreateDuckProxy(requiredControllerType, state);
+            }
+
+            methodInfo.Invoke(obj, new object[] { state });
+            return true;
         }
     }
 }

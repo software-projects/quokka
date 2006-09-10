@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<UipTask Name="ReceiveScripts" xmlns="http://www.quokka.org/schemas/2006/UipTask.xsd">
+  <State Type="Mps.Local.Uip.ReceiveScripts.ReceiveScriptsState"/>
+  <StatePersist Type="Microsoft.ApplicationBlocks.UIProcess.MemoryStatePersistence"/>
+  <ViewManager Type="Microsoft.ApplicationBlocks.UIProcess.WinFormViewManager"/>
+  <NavigationGraph StartNode="LocalDoctorSelect">
+    <Node Name="LocalDoctorSelect">
+      <View Type="Mps.Local.Client.Win.LocalDoctorSelect">
+        <Property Name="Description" Value="Select the Doctor that supplied the scripts."/>
+      </View>
+      <Controller Type="Mps.Local.Uip.ReceiveScripts.ReceiveScriptsController"/>
+      <NavigateTo NavigateValue="next" Node="ReceiveScriptDate"/>
+    </Node>
+
+    <Node Name="ReceiveScriptDate">
+      <View Type="Mps.Local.Client.Win.ReceiveScriptDate2"/>
+      <Controller Type="Mps.Local.Uip.ReceiveScripts.ReceiveScriptsController"/>
+      <NavigateTo NavigateValue="prev" Node="LocalDoctorSelect"/>
+      <NavigateTo NavigateValue="cancel" Node="FinishMessage"/>
+      <NavigateTo NavigateValue="next" Node="LoadingData"/>
+    </Node>
+
+    <Node Name="LoadingData">
+      <View Type="Mps.Local.Client.Win.InProgressForm"/>
+      <Controller Type="Mps.Local.Uip.ReceiveScripts.ReceiveScriptsLoadController"/>
+      <NavigateTo NavigateValue="next" Node="SelectScripts"/>
+    </Node>
+
+    <Node Name="SelectScripts">
+      <View Type="Mps.Local.Client.Win.OrderedScriptReceive"/>
+      <Controller Type="Mps.Local.Uip.ReceiveScripts.ReceiveScriptsController"/>
+      <NavigateTo NavigateValue="next" Node="UpdateData"/>
+      <NavigateTo NavigateValue="prev" Node="ReceiveScriptDate"/>
+      <NavigateTo NavigateValue="cancel" Node="FinishMessage"/>
+      <NavigateTo NavigateValue="empty" Node="NoOrderedScripts"/>
+    </Node>
+
+    <Node Name="NoOrderedScripts">
+      <View Type="Mps.Local.Client.Win.MessageBoxForm"/>
+      <Controller Type="Mps.Local.Uip.ReceiveScripts.ReceiveScriptsMessageBoxController">
+        <Property Name="Caption" Value="No Scripts On Order"/>
+        <Property Name="Description" Value="There are no scripts on order for this Doctor."/>
+      </Controller>
+      <NavigateTo NavigateValue="ok" Node="LocalDoctorSelect"/>
+    </Node>
+
+    <Node Name="UpdateData">
+      <View Type="Mps.Local.Client.Win.InProgressForm"/>
+      <Controller Type="Mps.Local.Uip.ReceiveScripts.ReceiveScriptsUpdateController"/>
+      <NavigateTo NavigateValue="prev" Node="LocalDoctorSelect"/>
+      <NavigateTo NavigateValue="next" Node="FinishMessage"/>
+    </Node>
+
+    <Node Name="FinishMessage">
+      <View Type="Mps.Local.Client.Win.MessageBoxForm"/>
+      <Controller Type="Mps.Local.Uip.ReceiveScripts.ReceiveScriptsFinalMessageBoxController"/>
+      <NavigateTo NavigateValue="ok" Node="LocalDoctorSelect"/>
+    </Node>
+
+  </NavigationGraph>
+</UipTask>

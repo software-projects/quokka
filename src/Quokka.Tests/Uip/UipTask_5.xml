@@ -1,0 +1,206 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<UipTask Name="OrderScripts" xmlns="http://www.quokka.org/schemas/2006/UipTask.xsd">
+  <State Type="Microsoft.ApplicationBlocks.UIProcess.State"/>
+  <StatePersist Type="Microsoft.ApplicationBlocks.UIProcess.MemoryStatePersistence"/>
+  <ViewManager Type="Microsoft.ApplicationBlocks.UIProcess.WinFormViewManager"/>
+  <NavigationGraph StartNode="DateRange">
+    <Node Name='DateRange'>
+      <View Type='Mps.Local.Client.Win.DateRange'/>
+      <Controller Type='Mps.Local.Client.Win.Uip.DateRangeController'/>
+      <NavigateTo NavigateValue="next" Node='LoadData'/>
+    </Node>
+
+    <Node Name='DateRange.Doctors'>
+      <View Type='Mps.Local.Client.Win.DateRange'/>
+      <Controller Type='Mps.Local.Client.Win.Uip.DateRangeController'/>
+      <NavigateTo NavigateValue="next" Node='LoadData.Doctors'/>
+    </Node>
+
+    <Node Name='LoadData'>
+      <View Type='Mps.Local.Client.Win.InProgressForm'/>
+      <Controller Type='Mps.Local.Client.Win.Uip.LoadDataController'/>
+      <NavigateTo NavigateValue="prev" Node='DateRange' />
+      <NavigateTo NavigateValue="next" Node="FacilityPatients"/>
+      <NavigateTo NavigateValue="doctors" Node="DoctorPatients"/>
+      <NavigateTo NavigateValue="facilities" Node="FacilityPatients"/>
+    </Node>
+
+    <Node Name='LoadData.Doctors'>
+      <View Type='Mps.Local.Client.Win.InProgressForm'/>
+      <Controller Type='Mps.Local.Client.Win.Uip.LoadDataController'/>
+      <NavigateTo NavigateValue="prev" Node='DateRange.Doctors' />
+      <NavigateTo NavigateValue="next" Node="DoctorPatients"/>
+    </Node>
+
+    <Node Name="FacilityPatients">
+      <View Type="Mps.Local.Client.Win.FacilityPatients" StayOpen="true"/>
+      <Controller Type="Mps.Local.Client.Win.Uip.FacilityPatientsController"/>
+      <NavigateTo NavigateValue="doctors" Node="DoctorPatients"/>
+      <NavigateTo NavigateValue="refresh" Node='DateRange' />
+      <NavigateTo NavigateValue="pendingDispenses" Node="PendingDispenses"/>
+      <NavigateTo NavigateValue="editMedication" Node="EditMedication"/>
+      <NavigateTo NavigateValue="editScript" Node="EditScript"/>
+      <NavigateTo NavigateValue="changeDoctor" Node="ChangeDoctor.Facilities"/>
+      <NavigateTo NavigateValue="findPatient" Node="FindPatient.Facilities"/>
+    </Node>
+
+    <Node Name="PendingDispenses">
+      <View Type="Mps.Local.Client.Win.PendingDispenses"/>
+      <Controller Type="Mps.Local.Client.Win.Uip.PendingDispensesReportController"/>
+      <NavigateTo NavigateValue="prev" Node="FacilityPatients"/>
+      <NavigateTo NavigateValue="next" Node="FacilityPatients"/>
+    </Node>
+
+    <Node Name="EditScript">
+      <View Type="Mps.Local.Client.Win.EditScriptDialog" OpenModal="true"/>
+      <Controller Type="Mps.Local.Client.Win.Uip.EditScriptController"/>
+      <NavigateTo NavigateValue="prev" Node="FacilityPatients"/>
+      <NavigateTo NavigateValue="next" Node="FacilityPatients"/>
+    </Node>
+
+    <Node Name="EditScript.Doctors">
+      <View Type="Mps.Local.Client.Win.EditScriptDialog" OpenModal="true"/>
+      <Controller Type="Mps.Local.Client.Win.Uip.EditScriptController"/>
+      <NavigateTo NavigateValue="prev" Node="DoctorPatients"/>
+      <NavigateTo NavigateValue="next" Node="DoctorPatients"/>
+    </Node>
+
+    <Node Name="EditMedication">
+      <View Type="Mps.Local.Client.Win.EditMedicationDialog" OpenModal="true"/>
+      <Controller Type="Mps.Local.Client.Win.Uip.EditMedicationController"/>
+      <NavigateTo NavigateValue="prev" Node="FacilityPatients"/>
+      <NavigateTo NavigateValue="next" Node="FacilityPatients"/>
+    </Node>
+
+    <Node Name="EditMedication.Doctors">
+      <View Type="Mps.Local.Client.Win.EditMedicationDialog" OpenModal="true"/>
+      <Controller Type="Mps.Local.Client.Win.Uip.EditMedicationController"/>
+      <NavigateTo NavigateValue="prev" Node="DoctorPatients"/>
+      <NavigateTo NavigateValue="next" Node="DoctorPatients"/>
+    </Node>
+
+    <Node Name="ChangeDoctor.Facilities">
+      <View Type="Mps.Local.Client.Win.ChangeDoctor" OpenModal="true"/>
+      <Controller Type="Mps.Local.Client.Win.Uip.ChangeDoctorController"/>
+      <NavigateTo NavigateValue="prev" Node="FacilityPatients"/>
+      <NavigateTo NavigateValue="next" Node="FacilityPatients"/>
+    </Node>
+
+    <Node Name="ChangeDoctor.Doctors">
+      <View Type="Mps.Local.Client.Win.ChangeDoctor" OpenModal="true"/>
+      <Controller Type="Mps.Local.Client.Win.Uip.ChangeDoctorController"/>
+      <NavigateTo NavigateValue="prev" Node="DoctorPatients"/>
+      <NavigateTo NavigateValue="next" Node="DoctorPatients"/>
+    </Node>
+
+    <Node Name="FindPatient.Facilities">
+      <View Type="Mps.Local.Client.Win.FindPatientForm" OpenModal="true"/>
+      <Controller Type="Mps.Local.Client.Win.Uip.FindPatientController"/>
+      <NavigateTo NavigateValue="prev" Node="FacilityPatients"/>
+      <NavigateTo NavigateValue="next" Node="FacilityPatients"/>
+    </Node>
+
+    <Node Name="FindPatient.Doctors">
+      <View Type="Mps.Local.Client.Win.FindPatientForm" OpenModal="true"/>
+      <Controller Type="Mps.Local.Client.Win.Uip.FindPatientController"/>
+      <NavigateTo NavigateValue="prev" Node="DoctorPatients"/>
+      <NavigateTo NavigateValue="next" Node="DoctorPatients"/>
+    </Node>
+
+    <Node Name="DoctorPatients">
+      <View Type="Mps.Local.Client.Win.DoctorPatients2" StayOpen="true"/>
+      <Controller Type="Mps.Local.Client.Win.Uip.DoctorReminderController"/>
+      <NavigateTo NavigateValue="facilities" Node="FacilityPatients"/>
+      <NavigateTo NavigateValue="refresh" Node="DateRange.Doctors"/>
+      <NavigateTo NavigateValue="editMedication" Node="EditMedication.Doctors"/>
+      <NavigateTo NavigateValue="editScript" Node="EditScript.Doctors"/>
+      <NavigateTo NavigateValue="changeDoctor" Node="ChangeDoctor.Doctors"/>
+      <NavigateTo NavigateValue="prev" Node="FacilityPatients"/>
+      <NavigateTo NavigateValue="next" Node="DoctorDetails"/>
+      <NavigateTo NavigateValue="doctorLetterReport" Node="DoctorLetterReport"/>
+      <NavigateTo NavigateValue="receiveScripts" Node="ReceiveScriptDate"/>
+      <NavigateTo NavigateValue="findPatient" Node="FindPatient.Doctors"/>
+    </Node>
+
+    <Node Name="DoctorLetterReport">
+      <View Type="Mps.Local.Client.Win.DoctorLetterReport"/>
+      <Controller Type="Mps.Local.Client.Win.Uip.DoctorLetterReportController"/>
+      <NavigateTo NavigateValue="prev" Node="DoctorPatients"/>
+      <NavigateTo NavigateValue="next" Node="DoctorPatients"/>
+    </Node>
+
+    <Node Name="DoctorDetails">
+      <View Type="Mps.Local.Client.Win.DoctorDetails2"/>
+      <Controller Type="Mps.Local.Client.Win.Uip.DoctorDetailsController"/>
+      <NavigateTo NavigateValue="prev" Node="DoctorPatients"/>
+      <NavigateTo NavigateValue="next" Node="SelectFacilities"/>
+      <NavigateTo NavigateValue="cancel" Node="DoctorPatients"/>
+    </Node>
+    
+    <Node Name="SelectFacilities">
+      <View Type="Mps.Local.Client.Win.SelectFacilities"/>
+      <Controller Type="Mps.Local.Client.Win.Uip.SelectFacilitiesController"/>
+      <NavigateTo NavigateValue="prev" Node="DoctorDetails"/>
+      <NavigateTo NavigateValue="next" Node="SelectPatients"/>
+      <NavigateTo NavigateValue="cancel" Node="DoctorPatients"/>
+    </Node>
+    
+    <Node Name="SelectPatients">
+      <View Type="Mps.Local.Client.Win.SelectPatients"/>
+      <Controller Type="Mps.Local.Client.Win.Uip.SelectPatientsController"/>
+      <NavigateTo NavigateValue="prev" Node="SelectFacilities"/>
+      <NavigateTo NavigateValue="next" Node="OrderMedication"/>
+      <NavigateTo NavigateValue="cancel" Node="DoctorPatients"/>
+    </Node>
+    
+    <Node Name="OrderMedication">
+      <View Type="Mps.Local.Client.Win.OrderMedication"/>
+      <Controller Type="Mps.Local.Client.Win.Uip.OrderMedicationController"/>
+      <NavigateTo NavigateValue="prev" Node="SelectPatients"/>
+      <NavigateTo NavigateValue="next" Node="UpdateOrders"/>
+      <NavigateTo NavigateValue="cancel" Node="DoctorPatients"/>
+    </Node>
+    
+    <Node Name="UpdateOrders">
+      <View Type="Mps.Local.Client.Win.InProgressForm"/>
+      <Controller Type="Mps.Local.Client.Win.Uip.UpdateOrdersController"/>
+      <NavigateTo NavigateValue="next" Node="ReportPreview"/>
+    </Node>
+    
+    <Node Name="ReportPreview">
+      <View Type="Mps.Local.Client.Win.SaveReportFile"/>
+      <Controller Type="Mps.Local.Client.Win.Uip.ReportPreviewController"/>
+      <NavigateTo NavigateValue="prev" Node="OrderMedication"/>
+      <NavigateTo NavigateValue="next" Node="DoctorPatients"/>
+      <NavigateTo NavigateValue="cancel" Node="DoctorPatients"/>
+    </Node>
+    
+    <Node Name="ReceiveScriptDate">
+      <View Type="Mps.Local.Client.Win.ReceiveScriptDate"/>
+      <Controller Type="Mps.Local.Client.Win.Uip.ReceiveScriptController"/>
+      <NavigateTo NavigateValue="prev" Node="DoctorPatients"/>
+      <NavigateTo NavigateValue="next" Node="ReceiveScriptLoading"/>
+      <NavigateTo NavigateValue="cancel" Node="DoctorPatients"/>
+    </Node>
+    
+    <Node Name="ReceiveScriptLoading">
+      <View Type="Mps.Local.Client.Win.InProgressForm"/>
+      <Controller Type="Mps.Local.Client.Win.Uip.ReceiveScriptLoadingController"/>
+      <NavigateTo NavigateValue="next" Node="ReceiveScriptList"/>
+    </Node>
+    
+    <Node Name="ReceiveScriptList">
+      <View Type="Mps.Local.Client.Win.ReceiveScriptList"/>
+      <Controller Type="Mps.Local.Client.Win.Uip.ReceiveScriptController"/>
+      <NavigateTo NavigateValue="next" Node="ReceiveScriptSaving"/>
+      <NavigateTo NavigateValue="prev" Node="ReceiveScriptDate"/>
+      <NavigateTo NavigateValue="cancel" Node="DoctorPatients"/>
+    </Node>
+    
+    <Node Name="ReceiveScriptSaving">
+      <View Type="Mps.Local.Client.Win.InProgressForm"/>
+      <Controller Type="Mps.Local.Client.Win.Uip.ReceiveScriptSavingController"/>
+      <NavigateTo NavigateValue="next" Node="DoctorPatients"/>
+    </Node>
+  </NavigationGraph>
+</UipTask>
