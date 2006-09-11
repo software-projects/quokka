@@ -50,16 +50,7 @@ namespace Quokka.DynamicCodeGeneration
         // construct the associated method in the proxy
         private IDictionary<MethodInfo, MethodBuilder> m_interfaceMethodDict = new Dictionary<MethodInfo, MethodBuilder>();
 
-        public DuckProxyBuilder(ModuleBuilder moduleBuilder, string className, Type interfaceType, Type innerType) {
-            if (moduleBuilder == null)
-                throw new ArgumentNullException();
-            if (className == null)
-                throw new ArgumentNullException();
-            if (interfaceType == null)
-                throw new ArgumentNullException();
-            if (innerType == null)
-                throw new ArgumentNullException();
-
+        internal DuckProxyBuilder(ModuleBuilder moduleBuilder, string className, Type interfaceType, Type innerType) {
             this.m_moduleBuilder = moduleBuilder;
             this.m_className = className;
             this.m_interfaceType = interfaceType;

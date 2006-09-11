@@ -37,6 +37,23 @@ namespace Quokka
             Assert.IsNotNull(i1);
         }
 
+        [Test]
+        public void ParentProvider() {
+            QuokkaContainer parentContainer = new QuokkaContainer();
+            QuokkaContainer container = new QuokkaContainer(parentContainer);
+
+            container.AddService(typeof(IInterface1), typeof(Class1), true);
+            container.AddService(typeof(IInterface2), typeof(Class2));
+
+            IInterface1 i1 = (IInterface1)parentContainer.GetService(typeof(IInterface1));
+            Assert.IsNotNull(i1);
+
+
+            IInterface2 i2 = (IInterface2)container.GetService(typeof(IInterface2));
+            Assert.IsNotNull(i2);
+        }
+
+
         [Test, ExpectedException(typeof(ArgumentException), ExpectedMessage = "Constructor for Quokka.QuokkaContainerTests+Class1_StringParameter has a non-interface parameter: System.String connectionString")]
         public void StringParameterInConstructor() {
             QuokkaContainer container = new QuokkaContainer();

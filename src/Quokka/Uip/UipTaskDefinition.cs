@@ -91,10 +91,6 @@ namespace Quokka.Uip
             return null;
         }
 
-        public void Start() {
-            throw new NotImplementedException();
-        }
-
         private List<string> CreateNamespaces(TaskConfig taskConfig) {
             List<string> list = new List<string>();
             foreach (UsingNamespaceConfig usingNamespaceConfig in taskConfig.UsingNamespaces) {
@@ -112,11 +108,6 @@ namespace Quokka.Uip
                 list.Add(node);
             }
             return list;
-        }
-
-        private void CreateNode(NodeConfig nodeConfig) {
-            Type viewType = TypeUtil.FindType(nodeConfig.View.TypeName, namespaces, assemblies);
-            Type controllerType = TypeUtil.FindType(nodeConfig.Controller.TypeName, namespaces, assemblies);
         }
     }
 }

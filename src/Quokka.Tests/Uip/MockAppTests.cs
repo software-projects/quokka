@@ -29,6 +29,12 @@ namespace Quokka.Uip
             UipTask task = UipManager.CreateTask("MockTask", viewManager);
             Assert.IsNotNull(task);
 
+            Assert.IsInstanceOfType(typeof(MockState), task.State);
+            MockState state = (MockState)task.State;
+
+            // check that the state property was set from the configuration file
+            Assert.AreEqual("Set from config file", state.StringProperty);
+
             task.Start();
 
             Assert.AreEqual("Node1", task.CurrentNode.Name);

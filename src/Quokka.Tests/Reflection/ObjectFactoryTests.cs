@@ -10,9 +10,21 @@ namespace Quokka.Reflection
     public class ObjectFactoryTests
     {
         [Test]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void Create_ArgumentNull_1() {
+            object obj = ObjectFactory.Create(null, null, null);
+        }
+
+        [Test]
         public void NoConstructorsDefined() {
             object obj = ObjectFactory.Create(typeof(MockNoConstructorsDefined), null);
             Assert.IsInstanceOfType(typeof(MockNoConstructorsDefined), obj);
+        }
+
+        [Test]
+        [ExpectedException(typeof(QuokkaException))]
+        public void NoPublicConstructor() {
+            object obj = ObjectFactory.Create(typeof(MockNoPublicConstructor), null);
         }
 
         [Test]
@@ -57,10 +69,22 @@ namespace Quokka.Reflection
             Assert.AreSame(mock3, mock.Mock3);
         }
 
+        [Test]
+        public void RequiresServiceProvider() {
+            QuokkaContainer container = new QuokkaContainer();
+            MockRequiresServiceProvider mock = (MockRequiresServiceProvider)ObjectFactory.Create(typeof(MockRequiresServiceProvider), container);
+            Assert.AreSame(container, mock.ServiceProvider);
+        }
+
         #region Mock classes and interfaces used by this test fixture
 
         public class MockNoConstructorsDefined
         {
+        }
+
+        public class MockNoPublicConstructor
+        {
+            internal MockNoPublicConstructor() { }
         }
 
         public class MockConstructorString
@@ -91,6 +115,16 @@ namespace Quokka.Reflection
         public class MockClass1 : IMockInterface1 { }
         public class MockClass2 : IMockInterface2 { }
         public class MockClass3 {}
+
+        public class MockRequiresServiceProvider
+        {
+            public readonly IServiceProvider ServiceProvider;
+
+            public MockRequiresServiceProvider(IServiceProvider serviceProvider) {
+                Assert.IsNotNull(serviceProvider);
+                ServiceProvider = serviceProvider;
+            }
+        }
 
         #endregion
     }

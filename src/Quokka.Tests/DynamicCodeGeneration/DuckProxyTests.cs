@@ -280,6 +280,43 @@ namespace Quokka.DynamicCodeGeneration
             Assert.IsNull(i);
         }
 
+        public interface ITest7
+        {
+            int ReturnSomething();
+            void DoSomething();
+        }
+
+        public class Inner7
+        {
+            public bool DoneSomething;
+            public bool ReturnSomething() { return true; }
+            public void DoSomething() { DoneSomething = true; }
+        }
+
+        // Test for matching method with incompatible return types.
+        // The other methods defined should still work.
+        [Test]
+        public void MismatchedReturnType_1() {
+            Inner7 inner = new Inner7();
+            ITest7 i7 = ProxyFactory.CreateDuckProxy<ITest7>(inner);
+
+            Assert.IsFalse(inner.DoneSomething);
+            i7.DoSomething();
+            Assert.IsTrue(inner.DoneSomething);
+        }
+
+        // Test for matching method with incompatible return types.
+        // Invoking the method throws NotSupportedException.
+        [Test]
+        [ExpectedException(typeof(NotSupportedException))]
+        public void MismatchedReturnType_2() {
+            Inner7 inner = new Inner7();
+            ITest7 i7 = ProxyFactory.CreateDuckProxy<ITest7>(inner);
+
+            int n = i7.ReturnSomething();
+        }
+
+
 
 	}
 }

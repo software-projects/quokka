@@ -79,6 +79,8 @@ namespace Quokka.Uip
         /// </summary>
         /// <param name="stream">Input stream</param>
         public static void LoadTaskDefinition(Stream stream) {
+            if (stream == null)
+                throw new ArgumentNullException("stream");
             TaskConfig taskConfig = TaskConfig.Create(stream);
             UipTaskDefinition taskDefinition = new UipTaskDefinition(taskConfig, assemblies);
             taskDefinitions[taskConfig.Name] = taskDefinition;
@@ -90,9 +92,14 @@ namespace Quokka.Uip
         /// <param name="type">Type used for locating the embedded resource.</param>
         /// <param name="name">Embedded resource name.</param>
         public static void LoadTaskDefinition(Type type, string name) {
+            if (type == null)
+                throw new ArgumentNullException("type");
+            if (name == null)
+                throw new ArgumentNullException("name");
+
             using (Stream stream = type.Assembly.GetManifestResourceStream(type, name)) {
                 if (stream == null) {
-                    throw new ArgumentException("Cannot load task from " + name);
+                    throw new UipException("Cannot load task: " + name);
                 }
                 LoadTaskDefinition(stream);
             }

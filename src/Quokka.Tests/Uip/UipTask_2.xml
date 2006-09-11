@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<UipTask Name="DailyOrders" xmlns="http://www.quokka.org/schemas/2006/UipTask.xsd">
+<UipTask Name="UipTask_2" xmlns="http://www.quokka.org/schemas/2006/UipTask.xsd">
   <State Type="Mps.Local.Uip.DailyOrders.DailyOrdersState"/>
   <StatePersist Type="Microsoft.ApplicationBlocks.UIProcess.MemoryStatePersistence"/>
   <ViewManager Type="Microsoft.ApplicationBlocks.UIProcess.WinFormViewManager"/>

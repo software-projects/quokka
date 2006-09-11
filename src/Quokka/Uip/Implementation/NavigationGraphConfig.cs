@@ -27,16 +27,5 @@ namespace Quokka.Uip.Implementation
                 this._startNodeName = value;
             }
         }
-
-        public NodeConfig GetNode(string nodeName) {
-            foreach (NodeConfig node in _nodes) {
-                if (node.Name == nodeName) {
-                    return node;
-                }
-            }
-
-            string message = String.Format("Missing node: {0}", nodeName);
-            throw new UipException(message);
-        }
     }
 }

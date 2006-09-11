@@ -37,16 +37,5 @@ namespace Quokka.Uip.Implementation
             get { return this._name; }
             set { this._name = value; }
         }
-
-        public string GetNextNodeName(string navigateValue) {
-            foreach (NavigateToConfig navigateTo in _navigateTos) {
-                if (navigateTo.NavigateValue == navigateValue) {
-                    return navigateTo.NodeName;
-                }
-            }
-
-            string msg = String.Format("Unknown navigate value '{0}' for node '{1}'", navigateValue, this.Name);
-            throw new UipException(msg);
-        }
     }
 }

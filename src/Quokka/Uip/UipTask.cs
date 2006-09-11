@@ -8,6 +8,15 @@ using Quokka.Uip.Implementation;
 
 namespace Quokka.Uip
 {
+    /// <summary>
+    /// A task defines a discrete unit of work-flow within an application.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// An application contains one or more UIP tasks.
+    /// </para>
+    /// <para>TODO: more text</para>
+    /// </remarks>
     public sealed class UipTask
     {
         private readonly QuokkaContainer serviceContainer;
@@ -21,6 +30,8 @@ namespace Quokka.Uip
 
         public event EventHandler TaskStarted;
         public event EventHandler TaskFinished;
+
+        #region Construction
 
         internal UipTask(UipTaskDefinition taskDefinition, IServiceProvider serviceProvider, IUipViewManager viewManager) {
             if (taskDefinition == null)
@@ -37,14 +48,43 @@ namespace Quokka.Uip
             AddNestedStateInterfaces();
         }
 
+        #endregion
+
+        #region Public properties
+
+        /// <summary>
+        /// Provides services to controller and view objects created while this task is running.
+        /// </summary>
         public IServiceProvider ServiceProvider {
             get { return serviceContainer; }
         }
 
+        /// <summary>
+        /// Responsible for displaying view objects within the application.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The UIP framework is independent of the display technology used.
+        /// In theory, any user interface technology could be used, including:
+        /// </para>
+        /// <list type="bullet">
+        /// <item><term>Windows Forms</term><description>Windows Forms</description></item>
+        /// <item><term>GTK#</term><description>GTK#</description></item>
+        /// <item><term>Console text</term><description>Console text</description></item>
+        /// </list>
+        /// </remarks>
         public IUipViewManager ViewManager {
             get { return (IUipViewManager)ServiceProvider.GetService(typeof(IUipViewManager)); }
         }
 
+        /// <summary>
+        /// The task state object.
+        /// </summary>
+        /// <remarks>
+        /// Every UIP task has a state object, which is made available to controllers
+        /// via their constructor arguments. The state object type is specified in the
+        /// UIP task definition.
+        /// </remarks>
         public object State {
             get { return state; }
         }
@@ -65,6 +105,14 @@ namespace Quokka.Uip
             get { return taskDefinition.Nodes; }
         }
 
+        public bool IsRunning {
+            get { return currentNode != null; }
+        }
+
+        #endregion
+
+        #region Public methods
+
         public UipNode FindNode(string name, bool throwOnError) {
             return taskDefinition.FindNode(name, throwOnError);
         }
@@ -81,9 +129,9 @@ namespace Quokka.Uip
             }
         }
 
-        public bool IsRunning {
-            get { return currentNode != null; }
-        }
+        #endregion
+
+        #region Private methods
 
         private void Navigate(string navigateValue) {
             this.navigateValue = navigateValue;
@@ -282,6 +330,10 @@ namespace Quokka.Uip
             }
         }
 
+        #endregion
+
+        #region Nested class Navigator
+
         private class Navigator : IUipNavigator
         {
             private readonly UipTask task;
@@ -302,5 +354,7 @@ namespace Quokka.Uip
                 return (task.CurrentNode.GetNextNode(navigateValue) != null);
             }
         }
+
+        #endregion
     }
 }

@@ -4,12 +4,19 @@
   <property name="framework.dir" value="${framework::get-framework-directory(nant.settings.currentframework)}"/>
   <property name="debug" value="true"/>
 
-  <property name="output.dir" value="${path::get-full-path('../bin')}"/>
+  <property name="output.dir" value="${path::get-full-path('../bin')}" unless="${property::exists('output.dir')}"/>
   <property name="tools.dir" value="${path::get-full-path('../tools')}"/>
   <property name="nunit.dir" value="${path::combine(tools.dir, 'NUnit')}"/>
+  <property name="nunit.bin.dir" value="${path::combine(nunit.dir, 'bin')}"/>
+  <property name="ncover.dir" value="${path::combine(tools.dir, 'NCover')}"/>
+  <property name="temp.dir" value="${path::get-full-path('../temp')}"/>
+  <property name="unittest.dir" value="${path::combine(temp.dir, 'unittest')}"/>
+  <property name="coverage.dir" value="${path::combine(temp.dir, 'coverage')}"/>
 
   <property name="svn.dir" value="${path::combine(tools.dir, 'svn')}"/>
   <property name="svn.bin.dir" value="${path::combine(svn.dir, 'bin')}"/>
+
+  <property name="nunit-console.exe" value="${path::combine(nunit.bin.dir, 'nunit-console.exe')}"/>
 
   <target name="version">
     <tstamp>
@@ -48,6 +55,8 @@
         <include name="Quokka/obj/**"/>
         <include name="Quokka.Tests/bin/**"/>
         <include name="Quokka.Tests/obj/**"/>
+        <include name="${temp.dir}/**"/>
+        <include name="AssemblyInfo.tmp.cs"/>
       </fileset>
     </delete>
   </target>
@@ -110,5 +119,22 @@
       <formatter type="Plain"/>
       <test assemblyname="${output.dir}/Quokka.Tests.dll"/>
     </nunit2>
+  </target>
+
+  <target name="test.coverage" depends="test">
+    <nant target="compile.tests" buildfile="${project::get-buildfile-path()}">
+      <properties>
+        <property name="output.dir" value="${coverage.dir}"/>
+        <property name="debug" value="true"/>
+      </properties>
+    </nant>
+    <copy file="${nunit.bin.dir}/nunit.framework.dll" todir="${coverage.dir}"/>
+    <exec program="NCover.Console.exe" basedir="${ncover.dir}" workingdir="${coverage.dir}">
+      <arg value='"${nunit-console.exe}"'/>
+      <arg value='"Quokka.Tests.dll /xml:Quokka.Tests.dll-results.xml /nologo"'/>
+      <arg value="//a"/>
+      <arg value="Quokka"/>
+    </exec>
+    <copy file="${ncover.dir}/Coverage.xsl" todir="${coverage.dir}"/>
   </target>
 </project>

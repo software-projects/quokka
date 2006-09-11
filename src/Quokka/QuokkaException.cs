@@ -11,6 +11,6 @@ namespace Quokka
         public QuokkaException() { }
         public QuokkaException(string message) : base(message) { }
         public QuokkaException(string message, Exception innerException) : base(message, innerException) { }
-        public QuokkaException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected QuokkaException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
 }

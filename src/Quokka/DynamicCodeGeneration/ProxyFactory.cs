@@ -35,10 +35,6 @@ namespace Quokka.DynamicCodeGeneration
 
             // Find the proxy type
             Type proxyType = GetDuckProxyType(interfaceType, inner.GetType());
-            if (proxyType == null) {
-                proxyType = CreateDuckProxyType(interfaceType, inner.GetType());
-                duckProxyStore.Add(interfaceType, inner.GetType(), proxyType);
-            }
 
             // get the constructor that accepts inner as a parameter
             ConstructorInfo constructor = proxyType.GetConstructor(new Type[] { inner.GetType() });

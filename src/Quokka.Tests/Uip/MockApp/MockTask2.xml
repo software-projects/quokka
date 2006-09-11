@@ -1,9 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<UipTask Name="MockTask" xmlns="http://www.quokka.org/schemas/2006/UipTask.xsd">
+<UipTask Name="MockTask2" xmlns="http://www.quokka.org/schemas/2006/UipTask.xsd">
   <Using Namespace="Quokka.Uip.MockApp"/>
-  <State Type="MockState">
-    <Property Name="StringProperty" Value="Set from config file"/>
-  </State>
+  <State Type="MockState"/>
   <NavigationGraph StartNode="Node1">
     <Node Name="Node1">
       <View Type="MockView1"/>
@@ -27,6 +25,6 @@
       <Controller Type="MockController2"/>
       <NavigateTo NavigateValue="Next" Node="Node1"/>
       <!-- transitions for "Back" and "Error" are missing -->
-    </Node>    
+    </Node>
   </NavigationGraph>
 </UipTask>

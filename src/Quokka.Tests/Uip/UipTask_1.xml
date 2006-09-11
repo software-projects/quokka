@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<UipTask Name="VpbUpdate" xmlns="http://www.quokka.org/schemas/2006/UipTask.xsd">
+<UipTask Name="UipTask_1" xmlns="http://www.quokka.org/schemas/2006/UipTask.xsd">
   <Using Namespace="Mps.Local.Uip"/>
   <Using Namespace="Mps.Local.Client.Win"/>
   <State Type="Mps.Local.Uip.VpbUpdateState"/>

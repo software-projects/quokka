@@ -11,12 +11,6 @@ namespace Quokka.Uip
         private readonly UipNode nextNode;
 
         internal UipTransition(UipNode node, string navigateValue, UipNode nextNode) {
-            if (node == null)
-                throw new ArgumentNullException("node");
-            if (navigateValue == null)
-                throw new ArgumentNullException("navigateValue");
-            if (nextNode == null)
-                throw new ArgumentNullException("nextNode");
             this.node = node;
             this.navigateValue = navigateValue;
             this.nextNode = nextNode;

@@ -53,6 +53,7 @@
     <Compile Include="Uip\MockApp\MockViewManager.cs" />
     <Compile Include="Uip\MockApp\MockViews.cs" />
     <Compile Include="Uip\TaskConfigTests.cs" />
+    <Compile Include="Uip\UipManagerTests.cs" />
     <Compile Include="Uip\UipUtils_SetControllerTests.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -71,6 +72,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Uip\MockApp\MockTask.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Uip\MockApp\MockTask2.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
