@@ -22,7 +22,7 @@ namespace Quokka.Uip
         }
 
         [Test]
-        public void Test1() {
+        public void RunMockApp() {
             UipManager.AddAssembly(this.GetType().Assembly);
             UipManager.LoadTaskDefinition(typeof(MockState), "MockTask.xml");
             MockViewManager viewManager = new MockViewManager();
@@ -67,6 +67,17 @@ namespace Quokka.Uip
             Assert.AreEqual("Node1", task.CurrentNode.Name);
             Assert.IsNotNull(task.CurrentController);
             Assert.IsInstanceOfType(typeof(MockController1), task.CurrentController);
+            Assert.IsNotNull(viewManager.VisibleView);
+            Assert.IsInstanceOfType(typeof(MockView1), viewManager.VisibleView);
+
+            view1 = (MockView1)viewManager.VisibleView;
+            Assert.IsFalse(state.SetByController3);
+            view1.PushBackButton();
+            Assert.IsTrue(state.SetByController3);
+
+            Assert.AreEqual("Node3", task.CurrentNode.Name);
+            Assert.IsNotNull(task.CurrentController);
+            Assert.IsInstanceOfType(typeof(MockController2), task.CurrentController);
             Assert.IsNotNull(viewManager.VisibleView);
             Assert.IsInstanceOfType(typeof(MockView1), viewManager.VisibleView);
         }

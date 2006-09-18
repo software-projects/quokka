@@ -12,5 +12,7 @@ namespace Quokka.Uip.MockApp
             get { return stringField; }
             set { stringField = value; }
         }
+
+        public bool SetByController3;
     }
 }

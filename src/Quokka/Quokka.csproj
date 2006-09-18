@@ -61,6 +61,7 @@
     <Compile Include="Uip\Implementation\UsingNamespaceConfig.cs" />
     <Compile Include="Uip\Implementation\ViewConfig.cs" />
     <Compile Include="Uip\IUipNavigator.cs" />
+    <Compile Include="Uip\IUipEndTask.cs" />
     <Compile Include="Uip\IUipViewManager.cs" />
     <Compile Include="Uip\UipTaskDefinition.cs" />
     <Compile Include="Uip\UipTransition.cs" />

@@ -13,6 +13,7 @@ namespace Quokka.Uip.MockApp
         public interface IController
         {
             void Next();
+            void Back();
         }
 
         // Similar to a Windows Form, where there is always a default
@@ -28,6 +29,10 @@ namespace Quokka.Uip.MockApp
 
         public void PushNextButton() {
             controller.Next();
+        }
+
+        public void PushBackButton() {
+            controller.Back();
         }
 
         public IController Controller {

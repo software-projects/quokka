@@ -79,8 +79,8 @@
       </attributes>
     </asminfo>
   </target>
-  
-  <target name="compile" depends="AssemblyInfo.tmp.cs">
+
+  <target name="Quokka.dll" depends="AssemblyInfo.tmp.cs">
     <mkdir dir="${output.dir}"/>
     <csc keyfile="Quokka/Quokka.snk" target="library" output="${output.dir}/Quokka.dll" debug="${debug}">
       <resources dynamicprefix="true" prefix="Quokka" basedir="Quokka" >
@@ -95,6 +95,31 @@
       </sources>
     </csc>
   </target>
+
+    <!--
+    <resgen>
+      <resources basedir="Quokka.WinForms">
+        <include name="**/*.resx"/>
+      </resources>
+    </resgen>
+    -->
+  <target name="Quokka.WinForms.dll" depends="Quokka.dll">
+    <csc keyfile="Quokka/Quokka.snk" target="library" output="${output.dir}/Quokka.WinForms.dll" debug="${debug}">
+      <references>
+        <include name="${output.dir}/Quokka.dll"/>
+      </references>
+      <resources dynamicprefix="true" prefix="Quokka.WinForms" basedir="Quokka.WinForms" >
+        <include name="**/*.resources"/>
+        <exclude name="obj/*"/>
+      </resources>
+      <sources>
+        <include name="AssemblyInfo.tmp.cs"/>
+        <include name="Quokka.WinForms/**.cs"/>
+      </sources>
+    </csc>
+  </target>
+
+  <target name="compile" depends="Quokka.dll,Quokka.WinForms.dll"/>
 
   <target name="compile.tests" depends="compile">
     <csc target="library" output="${output.dir}/Quokka.Tests.dll" debug="${debug}">

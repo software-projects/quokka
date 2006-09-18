@@ -123,14 +123,20 @@ namespace Quokka.Uip
         /// <param name="viewManager">View manager for controlling view display.</param>
         /// <returns>The <c>UipTask</c> object.</returns>
         public static UipTask CreateTask(string taskName, IUipViewManager viewManager) {
-            UipTaskDefinition taskDefinition = taskDefinitions[taskName];
-            UipTask task = new UipTask(taskDefinition, serviceContainer, viewManager);
-            task.TaskStarted += new EventHandler(task_TaskStarted);
-            task.TaskFinished += new EventHandler(task_TaskFinished);
-            if (TaskCreated != null) {
-                TaskCreated(task, EventArgs.Empty);
+            try {
+                UipTaskDefinition taskDefinition = taskDefinitions[taskName];
+                UipTask task = new UipTask(taskDefinition, serviceContainer, viewManager);
+                task.TaskStarted += new EventHandler(task_TaskStarted);
+                task.TaskFinished += new EventHandler(task_TaskFinished);
+                if (TaskCreated != null) {
+                    TaskCreated(task, EventArgs.Empty);
+                }
+                return task;
             }
-            return task;
+            catch (KeyNotFoundException ex) {
+                string message = "Undefined task: " + taskName;
+                throw new UipException(message, ex);
+            }
         }
 
         /// <summary>

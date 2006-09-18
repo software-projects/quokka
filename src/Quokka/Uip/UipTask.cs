@@ -27,6 +27,8 @@ namespace Quokka.Uip
         private object currentView;
         private string navigateValue;
         private bool inNavigateMethod;
+        private bool endTaskRequested;
+        private bool taskFinished;
 
         public event EventHandler TaskStarted;
         public event EventHandler TaskFinished;
@@ -42,6 +44,7 @@ namespace Quokka.Uip
             this.serviceContainer = new QuokkaContainer(serviceProvider);
             this.serviceContainer.AddService(typeof(IUipViewManager), viewManager);
             this.serviceContainer.AddService(typeof(IUipNavigator), new Navigator(this));
+            this.serviceContainer.AddService(typeof(IUipEndTask), new EndTaskImpl(this));
             this.state = ObjectFactory.Create(taskDefinition.StateType, serviceProvider, serviceProvider, this);
             PropertyUtil.SetValues(this.state, taskDefinition.StateProperties);
             this.currentNode = null;
@@ -109,6 +112,10 @@ namespace Quokka.Uip
             get { return currentNode != null; }
         }
 
+        public bool IsFinished {
+            get { return taskFinished; }
+        }
+
         #endregion
 
         #region Public methods
@@ -134,6 +141,10 @@ namespace Quokka.Uip
         #region Private methods
 
         private void Navigate(string navigateValue) {
+            if (this.taskFinished) {
+                throw new UipException("Task has finished");
+            }
+
             this.navigateValue = navigateValue;
 
             if (!inNavigateMethod) {
@@ -160,16 +171,29 @@ namespace Quokka.Uip
                                 nextNode = GetNextNode();
                             } while (nextNode != null);
 
-                            // Finished navigating to a new node, display the new view.
-                            CreateView();
+                            if (!this.endTaskRequested) {
+                                // Finished navigating to a new node, display the new view.
+                                CreateView();
 
-                            if (this.currentView != null) {
-                                ViewManager.AddView(this.currentView);
-                                ViewManager.ShowView(this.currentView);
+                                if (this.currentView != null) {
+                                    ViewManager.AddView(this.currentView);
+                                    ViewManager.ShowView(this.currentView);
+                                }
                             }
                         }
                         finally {
                             ViewManager.EndTransition();
+                        }
+                    }
+
+                    if (this.endTaskRequested) {
+                        this.currentNode = null;
+                        this.currentController = null;
+                        this.currentView = null;
+                        this.navigateValue = null;
+                        this.taskFinished = true;
+                        if (TaskFinished != null) {
+                            TaskFinished(this, EventArgs.Empty);
                         }
                     }
                 }
@@ -181,20 +205,22 @@ namespace Quokka.Uip
 
         private UipNode GetNextNode() {
             UipNode nextNode = null;
-            if (this.currentNode == null) {
-                // Task is just starting
-                nextNode = taskDefinition.StartNode;
-            }
-            else if (this.navigateValue != null) {
-                nextNode = this.currentNode.GetNextNode(navigateValue);
+            if (!this.endTaskRequested) {
+                if (this.currentNode == null) {
+                    // Task is just starting
+                    nextNode = taskDefinition.StartNode;
+                }
+                else if (this.navigateValue != null) {
+                    nextNode = this.currentNode.GetNextNode(navigateValue);
 
-                // forget about the navigate value -- it might get set again when creating the controller
-                this.navigateValue = null;
+                    // forget about the navigate value -- it might get set again when creating the controller
+                    this.navigateValue = null;
 
-                if (nextNode == null) {
-                    string message = String.Format("No transition defined: task={0}, node={1}, navigateValue={2}",
-                        this.taskDefinition.Name, this.currentNode.Name, this.navigateValue);
-                    throw new UipException(message);
+                    if (nextNode == null) {
+                        string message = String.Format("No transition defined: task={0}, node={1}, navigateValue={2}",
+                            this.taskDefinition.Name, this.currentNode.Name, this.navigateValue);
+                        throw new UipException(message);
+                    }
                 }
             }
 
@@ -312,6 +338,11 @@ namespace Quokka.Uip
             }
         }
 
+        private void EndTask() {
+            endTaskRequested = true;
+            Navigate(null);
+        }
+
         private static void DisposeOf(ref object obj) {
             if (obj != null) {
                 IDisposable disposable = obj as IDisposable;
@@ -353,6 +384,27 @@ namespace Quokka.Uip
                     throw new ArgumentNullException("navigateValue");
                 return (task.CurrentNode.GetNextNode(navigateValue) != null);
             }
+        }
+
+        #endregion
+
+        #region Nested class EndTask
+
+        private class EndTaskImpl : IUipEndTask
+        {
+            private readonly UipTask task;
+
+            public EndTaskImpl(UipTask task) {
+                this.task = task;
+            }
+
+            #region IUipEndTask Members
+
+            public void EndTask() {
+                task.EndTask();
+            }
+
+            #endregion
         }
 
         #endregion

@@ -9,6 +9,7 @@
       <View Type="MockView1"/>
       <Controller Type="MockController1"/>
       <NavigateTo NavigateValue="Next" Node="Node2"/>
+      <NavigateTo NavigateValue="Back" Node="NoViewNode"/>
     </Node>
     <Node Name="Node2">
       <View Type="MockView2"/>
@@ -27,6 +28,10 @@
       <Controller Type="MockController2"/>
       <NavigateTo NavigateValue="Next" Node="Node1"/>
       <!-- transitions for "Back" and "Error" are missing -->
-    </Node>    
+    </Node>
+    <Node Name="NoViewNode">
+      <Controller Type="MockController3"/>
+      <NavigateTo NavigateValue="Next" Node="Node3"/>
+    </Node>
   </NavigationGraph>
 </UipTask>

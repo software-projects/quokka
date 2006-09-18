@@ -27,16 +27,16 @@ namespace Quokka.Uip.MockApp
         public void Next() {
             navigator.Navigate("Next");
         }
+
+        public void Back() {
+            navigator.Navigate("Back");
+        }
     }
 
     public class MockController2 : MockController1
     {
         public MockController2(IUipNavigator navigator, IState state)
             : base(navigator, state) {
-        }
-
-        public void Back() {
-            navigator.Navigate("Back");
         }
 
         public void Error() {
@@ -48,12 +48,23 @@ namespace Quokka.Uip.MockApp
     {
         protected readonly IUipNavigator navigator;
         protected readonly MockState state;
+        protected readonly IUipViewManager viewManager;
 
-        public MockController3(MockState state, IUipNavigator navigator) {
+        public MockController3(MockState state, IUipNavigator navigator, UipTask task, IUipViewManager viewManager) {
             Assert.IsNotNull(state);
             Assert.IsNotNull(navigator);
+            Assert.IsNotNull(task);
             this.state = state;
             this.navigator = navigator;
+
+            // the view manager does not get used, just checking that it is passed if it is needed
+            Assert.IsNotNull(viewManager);
+            this.viewManager = viewManager;
+
+            if (task.CurrentNode.Name == "NoViewNode") {
+                state.SetByController3 = true;
+                navigator.Navigate("Next");
+            }
         }
 
         public void Next() {
