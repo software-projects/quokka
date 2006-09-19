@@ -35,7 +35,10 @@ namespace Quokka.Uip
             foreach (NodeConfig nodeConfig in taskConfig.NavigationGraph.Nodes) {
                 UipNode node = FindNode(nodeConfig.Name, true);
                 foreach (NavigateToConfig transitionConfig in nodeConfig.NavigateTos) {
-                    UipNode nextNode = FindNode(transitionConfig.NodeName, true);
+                    UipNode nextNode = null;
+                    if (transitionConfig.NodeName != "__end__") {
+                        nextNode = FindNode(transitionConfig.NodeName, true);
+                    }
                     UipTransition transition = new UipTransition(node, transitionConfig.NavigateValue, nextNode);
                     node.Transitions.Add(transition);
                 }

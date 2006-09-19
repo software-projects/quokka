@@ -64,13 +64,15 @@ namespace Quokka.Uip
             get { return transitions; }
         }
 
-        public UipNode GetNextNode(string navigateValue) {
+        public bool GetNextNode(string navigateValue, out UipNode node) {
             foreach (UipTransition transition in transitions) {
                 if (transition.NavigateValue == navigateValue) {
-                    return transition.NextNode;
+                    node = transition.NextNode;
+                    return true;
                 }
             }
-            return null;
+            node = null;
+            return false;
         }
     }
 }

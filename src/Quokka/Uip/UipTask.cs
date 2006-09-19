@@ -154,13 +154,7 @@ namespace Quokka.Uip
                 throw new UipException("Task has finished");
             }
 
-            if (navigateValue == "EndTask") {
-                this.endTaskRequested = true;
-                this.navigateValue = null;
-            }
-            else {
-                this.navigateValue = navigateValue;
-            }
+            this.navigateValue = navigateValue;
 
             if (!inNavigateMethod) {
                 inNavigateMethod = true;
@@ -228,16 +222,20 @@ namespace Quokka.Uip
                     nextNode = taskDefinition.StartNode;
                 }
                 else if (this.navigateValue != null) {
-                    nextNode = this.currentNode.GetNextNode(navigateValue);
+                    bool transitionDefined = this.currentNode.GetNextNode(navigateValue, out nextNode);
 
                     // forget about the navigate value -- it might get set again when creating the controller
                     string prevNavigateValue = this.navigateValue; // but remember for the error message
                     this.navigateValue = null;
 
-                    if (nextNode == null) {
+                    if (!transitionDefined) {
                         string message = String.Format("No transition defined: task={0}, node={1}, navigateValue={2}",
                             this.taskDefinition.Name, this.currentNode.Name, prevNavigateValue);
                         throw new UipException(message);
+                    }
+
+                    if (nextNode == null) {
+                        this.endTaskRequested = true;
                     }
                 }
             }
@@ -400,7 +398,8 @@ namespace Quokka.Uip
             public bool CanNavigate(string navigateValue) {
                 if (navigateValue == null)
                     throw new ArgumentNullException("navigateValue");
-                return (task.CurrentNode.GetNextNode(navigateValue) != null);
+                UipNode nextNode;
+                return task.CurrentNode.GetNextNode(navigateValue, out nextNode);
             }
         }
 
