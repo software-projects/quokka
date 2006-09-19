@@ -4,7 +4,7 @@ using Quokka.DynamicCodeGeneration;
 
 namespace Quokka.Uip
 {
-    public static class UipUtils
+    public static class UipUtil
     {
         /// <summary>
         /// Assign a controller to a view.

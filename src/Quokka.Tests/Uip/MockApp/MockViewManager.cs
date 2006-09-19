@@ -29,7 +29,7 @@ namespace Quokka.Uip.MockApp
             inTransition = false;
         }
 
-        public void AddView(object view) { }
+        public void AddView(object view, object controller) { }
         public void RemoveView(object view) { }
 
         public void ShowView(object view) {

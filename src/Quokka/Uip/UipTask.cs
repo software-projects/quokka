@@ -176,7 +176,7 @@ namespace Quokka.Uip
                                 CreateView();
 
                                 if (this.currentView != null) {
-                                    ViewManager.AddView(this.currentView);
+                                    ViewManager.AddView(this.currentView, this.currentController);
                                     ViewManager.ShowView(this.currentView);
                                 }
                             }
@@ -265,7 +265,7 @@ namespace Quokka.Uip
             if (currentController == null) {
                 throw new UipException("Failed to create controller");
             }
-            UipUtils.SetState(currentController, this.state, false);
+            UipUtil.SetState(currentController, this.state, false);
             PropertyUtil.SetValues(currentController, currentNode.ControllerProperties);
         }
 
@@ -294,8 +294,8 @@ namespace Quokka.Uip
             if (this.currentView == null) {
                 throw new UipException("Failed to create view");
             }
-            UipUtils.SetState(this.currentView, this.state, false);
-            UipUtils.SetController(this.currentView, this.currentController, false);
+            UipUtil.SetState(this.currentView, this.state, false);
+            UipUtil.SetController(this.currentView, this.currentController, false);
             PropertyUtil.SetValues(this.currentView, this.currentNode.ViewProperties);
         }
 

@@ -52,6 +52,7 @@
     <Compile Include="Services\GuidProvider.cs" />
     <Compile Include="Uip\Controllers\IInProgressController.cs" />
     <Compile Include="Uip\Controllers\InProgressControllerBase.cs" />
+    <Compile Include="Uip\Controllers\WizardControllerBase.cs" />
     <Compile Include="Uip\Implementation\NavigateToConfig.cs" />
     <Compile Include="Uip\Implementation\NavigationGraphConfig.cs" />
     <Compile Include="Uip\Implementation\NodeConfig.cs" />
@@ -69,7 +70,7 @@
     <Compile Include="Uip\UipManager.cs" />
     <Compile Include="Uip\UipNode.cs" />
     <Compile Include="Uip\UipTask.cs" />
-    <Compile Include="Uip\UipUtils.cs" />
+    <Compile Include="Uip\UipUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Uip\Implementation\UipTask.xsd">

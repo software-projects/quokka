@@ -43,6 +43,13 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="WindowUtil.cs" />
+    <Compile Include="WinFormsUipUtil.cs" />
+    <Compile Include="WizardButtonBar.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="WizardButtonBar.Designer.cs">
+      <DependentUpon>WizardButtonBar.cs</DependentUpon>
+    </Compile>
     <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
   </ItemGroup>
   <ItemGroup>
@@ -50,6 +57,12 @@
       <Project>{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}</Project>
       <Name>Quokka</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="WizardButtonBar.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>WizardButtonBar.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

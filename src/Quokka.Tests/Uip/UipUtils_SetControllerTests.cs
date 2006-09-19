@@ -85,7 +85,7 @@ namespace Quokka.Uip
             Controller1 controller = new Controller1();
 
             Assert.IsNull(view.controller);
-            UipUtils.SetController(view, controller, false);
+            UipUtil.SetController(view, controller, false);
             Assert.IsNotNull(view.controller);
 
             Assert.IsFalse(controller.DoneSomething);
@@ -98,7 +98,7 @@ namespace Quokka.Uip
         public void ViewWithMissingMethod() {
             ViewWithoutSetController view = new ViewWithoutSetController();
             Controller1 controller = new Controller1();
-            UipUtils.SetController(view, controller, true);
+            UipUtil.SetController(view, controller, true);
         }
 
         [Test]
@@ -106,7 +106,7 @@ namespace Quokka.Uip
         public void ViewWithTooManyParametersForSetController() {
             ViewWithIncorrectNumberOfParametersForSetController view = new ViewWithIncorrectNumberOfParametersForSetController();
             Controller1 controller = new Controller1();
-            UipUtils.SetController(view, controller, true);
+            UipUtil.SetController(view, controller, true);
         }
 
         [Test]
@@ -114,7 +114,7 @@ namespace Quokka.Uip
         public void IncorrectControllerType() {
             ViewRequiringController2 view = new ViewRequiringController2();
             Controller1 controller = new Controller1();
-            UipUtils.SetController(view, controller, true);
+            UipUtil.SetController(view, controller, true);
         }
 
         [Test]
@@ -123,7 +123,7 @@ namespace Quokka.Uip
             Controller2 controller = new Controller2();
 
             Assert.IsNull(view.Controller);
-            UipUtils.SetController(view, controller, false);
+            UipUtil.SetController(view, controller, false);
             Assert.AreSame(controller, view.Controller);
 
             Assert.IsFalse(controller.DidSomething);
@@ -137,7 +137,7 @@ namespace Quokka.Uip
             Controller3 controller = new Controller3();
 
             Assert.IsNull(view.Controller);
-            UipUtils.SetController(view, controller, false);
+            UipUtil.SetController(view, controller, false);
             Assert.AreSame(controller, view.Controller);
 
             Assert.IsFalse(controller.DidSomething);

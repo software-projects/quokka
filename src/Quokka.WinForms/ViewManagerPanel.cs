@@ -22,7 +22,7 @@ namespace Quokka.WinForms
             ResumeLayout();
         }
 
-        public void AddView(object view) {
+        public void AddView(object view, object controller) {
             // view object may optionally be a Form, but it must be a control
             Form form = view as Form;
             Control control = (Control)view;
@@ -36,6 +36,13 @@ namespace Quokka.WinForms
             control.Dock = DockStyle.Fill;
             control.Visible = false;
             Controls.Add(control);
+
+            // This gives a chance for all of the controls within the view control
+            // to get a look at the controller. To get the controller, the contained
+            // control must implement a method called "SetController", which accepts
+            // a compatible type. (Could be an embedded "IController" interface.
+            WinFormsUipUtil.SetController(control
+                , controller);
         }
 
         public void RemoveView(object view) {

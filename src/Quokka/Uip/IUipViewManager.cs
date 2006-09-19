@@ -24,7 +24,7 @@ namespace Quokka.Uip
 
         void BeginTransition();
         void EndTransition();
-        void AddView(object view);
+        void AddView(object view, object controller);
         void RemoveView(object view);
         void ShowView(object view);
         void HideView(object view);
