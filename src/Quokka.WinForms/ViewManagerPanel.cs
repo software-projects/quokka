@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 
 using Quokka.Uip;
@@ -7,16 +8,35 @@ namespace Quokka.WinForms
 {
     public class ViewManagerPanel : Panel, IUipViewManager 
     {
+        private List<UipTask> currentTasks = new List<UipTask>();
+
+        public event EventHandler AllTasksFinished;
+
         #region IUipViewManager Members
 
         public event EventHandler<UipViewEventArgs> ViewClosed;
 
+        public void BeginTask(UipTask task) {
+            if (!currentTasks.Contains(task)) {
+                currentTasks.Add(task);
+            }
+        }
+
+        public void EndTask(UipTask task) {
+            currentTasks.Remove(task);
+            if (currentTasks.Count == 0) {
+                OnAllTasksFinished(EventArgs.Empty);
+            }
+        }
+
         public void BeginTransition() {
             SuspendLayout();
             WindowUtil.SetWindowRedraw(this, false);
+            Cursor.Current = Cursors.WaitCursor;
         }
 
         public void EndTransition() {
+            Cursor.Current = Cursors.Default;
             WindowUtil.SetWindowRedraw(this, true);
             Invalidate(true);
             ResumeLayout();
@@ -64,5 +84,11 @@ namespace Quokka.WinForms
         }
 
         #endregion
+
+        protected virtual void OnAllTasksFinished(EventArgs e) {
+            if (AllTasksFinished != null) {
+                AllTasksFinished(this, e);
+            }
+        }
     }
 }

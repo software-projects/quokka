@@ -22,6 +22,8 @@ namespace Quokka.Uip
     {
         event EventHandler<UipViewEventArgs> ViewClosed;
 
+        void BeginTask(UipTask task);
+        void EndTask(UipTask task);
         void BeginTransition();
         void EndTransition();
         void AddView(object view, object controller);

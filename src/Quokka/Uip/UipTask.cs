@@ -80,6 +80,10 @@ namespace Quokka.Uip
             get { return (IUipViewManager)ServiceProvider.GetService(typeof(IUipViewManager)); }
         }
 
+        public string Name {
+            get { return taskDefinition.Name; }
+        }
+
         /// <summary>
         /// The task state object.
         /// </summary>
@@ -129,11 +133,16 @@ namespace Quokka.Uip
                 throw new UipException("Task is already running");
             }
 
+            ViewManager.BeginTask(this);
             Navigate(null);
 
             if (TaskStarted != null) {
                 TaskStarted(this, EventArgs.Empty);
             }
+        }
+
+        public override int GetHashCode() {
+            return this.Name.GetHashCode();
         }
 
         #endregion
@@ -145,7 +154,13 @@ namespace Quokka.Uip
                 throw new UipException("Task has finished");
             }
 
-            this.navigateValue = navigateValue;
+            if (navigateValue == "EndTask") {
+                this.endTaskRequested = true;
+                this.navigateValue = null;
+            }
+            else {
+                this.navigateValue = navigateValue;
+            }
 
             if (!inNavigateMethod) {
                 inNavigateMethod = true;
@@ -192,6 +207,7 @@ namespace Quokka.Uip
                         this.currentView = null;
                         this.navigateValue = null;
                         this.taskFinished = true;
+                        this.ViewManager.EndTask(this);
                         if (TaskFinished != null) {
                             TaskFinished(this, EventArgs.Empty);
                         }
@@ -205,6 +221,7 @@ namespace Quokka.Uip
 
         private UipNode GetNextNode() {
             UipNode nextNode = null;
+
             if (!this.endTaskRequested) {
                 if (this.currentNode == null) {
                     // Task is just starting
@@ -214,11 +231,12 @@ namespace Quokka.Uip
                     nextNode = this.currentNode.GetNextNode(navigateValue);
 
                     // forget about the navigate value -- it might get set again when creating the controller
+                    string prevNavigateValue = this.navigateValue; // but remember for the error message
                     this.navigateValue = null;
 
                     if (nextNode == null) {
                         string message = String.Format("No transition defined: task={0}, node={1}, navigateValue={2}",
-                            this.taskDefinition.Name, this.currentNode.Name, this.navigateValue);
+                            this.taskDefinition.Name, this.currentNode.Name, prevNavigateValue);
                         throw new UipException(message);
                     }
                 }

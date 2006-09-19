@@ -10,6 +10,7 @@ namespace Quokka.Uip.MockApp
     {
         bool inTransition;
         object visibleView;
+        UipTask currentTask;
 
         public object VisibleView {
             get { return visibleView; }
@@ -19,12 +20,25 @@ namespace Quokka.Uip.MockApp
 
         public event EventHandler<UipViewEventArgs> ViewClosed;
 
+        public void BeginTask(UipTask task) {
+            Assert.IsNull(currentTask);
+            Assert.IsNotNull(task);
+            currentTask = task;
+        }
+
+        public void EndTask(UipTask task) {
+            Assert.AreSame(currentTask, task);
+            currentTask = null;
+        }
+
         public void BeginTransition() {
+            Assert.IsNotNull(currentTask);
             Assert.IsFalse(inTransition);
             inTransition = true;
         }
 
         public void EndTransition() {
+            Assert.IsNotNull(currentTask);
             Assert.IsTrue(inTransition);
             inTransition = false;
         }
@@ -33,6 +47,7 @@ namespace Quokka.Uip.MockApp
         public void RemoveView(object view) { }
 
         public void ShowView(object view) {
+            Assert.IsNotNull(currentTask);
             Assert.IsTrue(inTransition);
             Assert.IsNull(visibleView);
             Assert.IsNotNull(view);
@@ -40,6 +55,7 @@ namespace Quokka.Uip.MockApp
         }
 
         public void HideView(object view) {
+            Assert.IsNotNull(currentTask);
             Assert.IsTrue(inTransition);
             Assert.IsNotNull(visibleView);
             Assert.AreSame(visibleView, view);

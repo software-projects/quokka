@@ -18,9 +18,9 @@ namespace Quokka.WinForms
             bool CanMoveNext { get; }
             bool CanMoveBack { get; }
             bool ShowFinish { get; }
-            bool MoveNext();
-            bool MoveBack();
-            bool Cancel();
+            void MoveNext();
+            void MoveBack();
+            void Cancel();
         }
 
         public event CancelEventHandler NextClicked;
