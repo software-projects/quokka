@@ -40,6 +40,40 @@ namespace Quokka.WinForms
             this.controller = controller;
         }
 
+        public void RefreshButtons() {
+            if (controller == null) {
+                nextButton.Enabled = false;
+                backButton.Enabled = false;
+                cancelButton.Enabled = false;
+            }
+            else {
+                // Be wary of NotSupportedExceptions, in case the controller
+                // does not support even the basic properties expected in
+                // the interface.
+                try {
+                    nextButton.Enabled = controller.CanMoveNext;
+                }
+                catch (NotSupportedException) { }
+
+                try {
+                    backButton.Enabled = controller.CanMoveBack;
+                }
+                catch (NotSupportedException) { }
+
+                try {
+                    cancelButton.Enabled = controller.CanCancel;
+                }
+                catch (NotSupportedException) { }
+
+                try {
+                    if (controller.ShowFinish) {
+                        nextButton.Text = "Finish";
+                    }
+                }
+                catch (NotSupportedException) { }
+            }
+        }
+
         protected virtual void OnCancelClicked(CancelEventArgs e) {
             if (CancelClicked != null) {
                 CancelClicked(this, e);
@@ -84,13 +118,30 @@ namespace Quokka.WinForms
 
         private void WizardButtonBar_Load(object sender, EventArgs e) {
             if (controller != null) {
-                nextButton.Enabled = controller.CanMoveNext;
-                backButton.Enabled = controller.CanMoveBack;
-                cancelButton.Enabled = controller.CanCancel;
-
-                if (controller.ShowFinish) {
-                    nextButton.Text = "Finish";
+                // Be wary of NotSupportedExceptions, in case the controller
+                // does not support even the basic properties expected in
+                // the interface.
+                try {
+                    nextButton.Enabled = controller.CanMoveNext;
                 }
+                catch (NotSupportedException) { }
+
+                try {
+                    backButton.Enabled = controller.CanMoveBack;
+                }
+                catch (NotSupportedException) { }
+
+                try {
+                    cancelButton.Enabled = controller.CanCancel;
+                }
+                catch (NotSupportedException) { }
+
+                try {
+                    if (controller.ShowFinish) {
+                        nextButton.Text = "Finish";
+                    }
+                }
+                catch (NotSupportedException) { }
             }
         }
     }
