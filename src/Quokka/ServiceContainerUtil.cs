@@ -1,3 +1,7 @@
+#region Copyright notice
+// Copyright (C) 2005-2006 John Jeffery All rights reserved.
+#endregion
+
 namespace Quokka
 {
     using System;

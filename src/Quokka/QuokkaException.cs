@@ -1,3 +1,8 @@
+#region Copyright notice
+// Copyright (C) 2005-2006 John Jeffery All rights reserved.
+// See README.TXT for usage licence conditions.
+#endregion
+
 using System;
 using System.Runtime.Serialization;
 
