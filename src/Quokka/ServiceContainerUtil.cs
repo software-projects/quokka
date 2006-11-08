@@ -1,5 +1,29 @@
 #region Copyright notice
-// Copyright (C) 2005-2006 John Jeffery All rights reserved.
+//
+// Authors: 
+//  John Jeffery <john@jeffery.id.au>
+//
+// Copyright (C) 2006 John Jeffery. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+// 
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
 #endregion
 
 namespace Quokka
@@ -89,22 +113,81 @@ namespace Quokka
 
         #endregion
 
+        #region TypeDictionary
+
+        private interface ITypeDictionary
+        {
+            bool TryGetValue(Type instanceType, out object obj);
+            void Add(object obj);
+        }
+
+        private class TypeDictionary : ITypeDictionary
+        {
+            private Dictionary<Type, WeakReference> dict = new Dictionary<Type, WeakReference>();
+
+            #region ITypeDictionary Members
+
+            public bool TryGetValue(Type instanceType, out object obj) {
+                obj = null;
+                if (instanceType == null)
+                    throw new ArgumentNullException();
+                WeakReference weakRef;
+                if (!dict.TryGetValue(instanceType, out weakRef)) {
+                    return false;
+                }
+
+                obj = weakRef.Target;
+                if (obj == null) {
+                    dict.Remove(instanceType);
+                }
+
+                return (obj != null);
+            }
+
+            public void Add(object obj) {
+                if (obj == null)
+                    throw new ArgumentNullException();
+                dict.Add(obj.GetType(), new WeakReference(obj));
+            }
+
+            #endregion
+        }
+
+        #endregion
+
         #region ServiceCreator
 
         private class ServiceCreator
         {
             private ConstructorInfo constructor;
+            private static object lockObject = new object();
 
             public ServiceCreator(ConstructorInfo constructor) {
                 this.constructor = constructor;
             }
 
             public object ServiceCreatorCallback(IServiceContainer container, Type serviceType) {
+                object serviceInstance;
+                ITypeDictionary typeDict;
+                ICircularReferenceDetector detector;
 
-                ICircularReferenceDetector detector = (ICircularReferenceDetector)container.GetService(typeof(ICircularReferenceDetector));
-                if (detector == null) {
-                    detector = new CircularReferenceDetector();
-                    container.AddService(typeof(ICircularReferenceDetector), detector, true);
+                lock (lockObject) {
+                    typeDict = (ITypeDictionary)container.GetService(typeof(ITypeDictionary));
+                    if (typeDict == null) {
+                        typeDict = new TypeDictionary();
+                        container.AddService(typeof(ITypeDictionary), typeDict, true);
+                    }
+                    else {
+                        if (typeDict.TryGetValue(constructor.DeclaringType, out serviceInstance)) {
+                            return serviceInstance;
+                        }
+                    }
+
+                    detector = (ICircularReferenceDetector)container.GetService(typeof(ICircularReferenceDetector));
+                    if (detector == null) {
+                        detector = new CircularReferenceDetector();
+                        container.AddService(typeof(ICircularReferenceDetector), detector, true);
+                    }
                 }
 
                 if (detector.Contains(serviceType)) {
@@ -132,7 +215,8 @@ namespace Quokka
                         parameterValues[index] = parameterValue;
                     }
 
-                    object serviceInstance = constructor.Invoke(parameterValues);
+                    serviceInstance = constructor.Invoke(parameterValues);
+                    typeDict.Add(serviceInstance);
                     return serviceInstance;
                 }
                 finally {
