@@ -1,3 +1,31 @@
+#region Copyright notice
+//
+// Authors: 
+//  John Jeffery <john@jeffery.id.au>
+//
+// Copyright (C) 2006 John Jeffery. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+// 
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+#endregion
+
 namespace Quokka
 {
     using System;
@@ -67,6 +95,20 @@ namespace Quokka
 
         }
 
+        [Test]
+        public void ClassImplementsMultipleInterfaces() {
+            ServiceContainer container = new ServiceContainer();
+            ServiceContainerUtil.AddService(container, typeof(IInterface1), typeof(Class4));
+            ServiceContainerUtil.AddService(container, typeof(IInterface2), typeof(Class4));
+
+            IInterface1 i1 = (IInterface1)container.GetService(typeof(IInterface1));
+            IInterface2 i2 = (IInterface2)container.GetService(typeof(IInterface2));
+
+            Assert.IsInstanceOfType(typeof(Class4), i1);
+            Assert.IsInstanceOfType(typeof(Class4), i2);
+            Assert.AreSame(i1, i2);
+        }
+
         #region Test interfaces
 
         public interface IInterface1
@@ -111,6 +153,26 @@ namespace Quokka
             }
 
             public void DoSomething3() { }
+        }
+
+        public class Class4 : IInterface1, IInterface2
+        {
+
+            #region IInterface1 Members
+
+            public void DoSomething1() {
+                throw new Exception("The method or operation is not implemented.");
+            }
+
+            #endregion
+
+            #region IInterface2 Members
+
+            public void DoSomething2() {
+                throw new Exception("The method or operation is not implemented.");
+            }
+
+            #endregion
         }
 
         public class Class1_DependsOnIInterface3 : IInterface1
