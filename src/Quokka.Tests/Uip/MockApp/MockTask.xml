@@ -2,7 +2,7 @@
 <UipTask Name="MockTask" xmlns="http://www.quokka.org/schemas/2006/UipTask.xsd">
   <Using Namespace="Quokka.Uip.MockApp"/>
   <State Type="MockState">
-    <Property Name="StringProperty" Value="Set from config file"/>
+    <Property Name="StringProperty" Value="Set from config"/>
   </State>
   <NavigationGraph StartNode="Node1">
     <Node Name="Node1">

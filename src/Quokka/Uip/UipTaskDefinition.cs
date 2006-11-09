@@ -43,11 +43,10 @@ namespace Quokka.Uip
         private readonly Type stateType;
         private readonly PropertyCollection stateProperties;
         private readonly IList<UipNode> nodes;
-        private readonly UipNode startNode;
+        private UipNode startNode;
 
         internal UipTaskDefinition(TaskConfig taskConfig, IEnumerable<Assembly> assemblies) {
-            if (taskConfig == null)
-                throw new ArgumentNullException("taskConfig");
+            Assert.ArgumentNotNull(taskConfig, "taskConfig");
 
             this.name = taskConfig.Name;
             this.assemblies = new List<Assembly>(assemblies).AsReadOnly();
@@ -57,6 +56,18 @@ namespace Quokka.Uip
             this.nodes = CreateNodes(taskConfig.NavigationGraph.Nodes);
             CreateTransitions(taskConfig);
             this.startNode = FindNode(taskConfig.NavigationGraph.StartNodeName, true);
+        }
+
+        public UipTaskDefinition(string name, Type stateType) {
+            Assert.ArgumentNotNull(name, "name");
+            Assert.ArgumentNotNull(stateType, "stateType");
+
+            this.name = name;
+            this.stateType = stateType;
+            this.assemblies = new List<Assembly>().AsReadOnly();
+            this.namespaces = new List<string>().AsReadOnly();
+            this.stateProperties = new PropertyCollection();
+            this.nodes = new List<UipNode>();
         }
 
         private void CreateTransitions(TaskConfig taskConfig) {
@@ -82,7 +93,21 @@ namespace Quokka.Uip
         }
 
         public UipNode StartNode {
-            get { return startNode; }
+            get {
+                if (startNode != null) {
+                    return startNode;
+                }
+                if (nodes.Count > 0) {
+                    return nodes[0];
+                }
+                return null;
+            }
+            set {
+                if (value != null && !nodes.Contains(value)) {
+                    throw new QuokkaException("Node is not in the Nodes collection");
+                }
+                startNode = value; 
+            }
         }
 
         public Type StateType {
@@ -103,6 +128,21 @@ namespace Quokka.Uip
 
         public IList<UipNode> Nodes {
             get { return nodes; }
+        }
+
+        public UipNode AddNode(string name, Type viewType, Type controllerType) {
+            Assert.ArgumentNotNull(name, "name");
+            // view type can be null
+            Assert.ArgumentNotNull(controllerType , "controllerType");
+
+            if (FindNode(name, false) != null) {
+                throw new UipException("Duplicate node name: " + name);
+            }
+
+            UipNode node = new UipNode(this, name, viewType, controllerType);
+            nodes.Add(node);
+
+            return node;
         }
 
         public UipNode FindNode(string name, bool throwOnError) {

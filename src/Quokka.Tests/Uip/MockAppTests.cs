@@ -50,18 +50,49 @@ namespace Quokka.Uip
         }
 
         [Test]
-        public void RunMockApp() {
+        public void RunMockAppFromXmlDefinition() {
             UipManager.AddAssembly(this.GetType().Assembly);
             UipManager.LoadTaskDefinition(typeof(MockState), "MockTask.xml");
             MockViewManager viewManager = new MockViewManager();
             UipTask task = UipManager.CreateTask("MockTask", viewManager);
             Assert.IsNotNull(task);
 
+            RunMockAppHelper(task, viewManager);
+        }
+
+        [Test]
+        public void RunMockAppFromCodeDefinition() {
+            UipTaskDefinition taskDefinition = new UipTaskDefinition("MockTask", typeof(MockState));
+            taskDefinition.StateProperties.Add("StringProperty", "Set from config");
+            UipNode node1 = taskDefinition.AddNode("Node1", typeof(MockView1), typeof(MockController1))
+                .NavigateTo("Next", "Node2")
+                .NavigateTo("Back", "NoViewNode");
+            UipNode node2 = taskDefinition.AddNode("Node2", typeof(MockView2), typeof(MockController2))
+                .NavigateTo("Back", node1)
+                .NavigateTo("Next", "Node3")
+                .NavigateTo("Error", "ErrorNode");
+            UipNode node3 = taskDefinition.AddNode("Node3", typeof(MockView1), typeof(MockController2))
+                .NavigateTo("Next", node1);
+            UipNode errorNode = taskDefinition.AddNode("ErrorNode", typeof(MockView2), typeof(MockController2))
+                .NavigateTo("Next", node1);
+            UipNode noViewNode = taskDefinition.AddNode("NoViewNode", null, typeof(MockController3))
+                .NavigateTo("Next", node3);
+
+            MockViewManager viewManager = new MockViewManager();
+            UipTask task = UipManager.CreateTask(taskDefinition, viewManager);
+            Assert.IsNotNull(task);
+
+            RunMockAppHelper(task, viewManager);
+        }
+
+        private void RunMockAppHelper(UipTask task, MockViewManager viewManager) {
+            Assert.IsNotNull(task);
+
             Assert.IsInstanceOfType(typeof(MockState), task.State);
             MockState state = (MockState)task.State;
 
             // check that the state property was set from the configuration file
-            Assert.AreEqual("Set from config file", state.StringProperty);
+            Assert.AreEqual("Set from config", state.StringProperty);
 
             task.Start();
 

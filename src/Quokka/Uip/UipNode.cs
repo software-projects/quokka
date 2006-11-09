@@ -52,11 +52,7 @@ namespace Quokka.Uip
             this.name = nodeConfig.Name;
             if (nodeConfig.View != null && !String.IsNullOrEmpty(nodeConfig.View.TypeName)) {
                 this.viewType = TypeUtil.FindType(nodeConfig.View.TypeName, task.Namespaces, task.Assemblies, true);
-                // look for a nested interface in the view called 'IController'
-                Type nestedType = this.viewType.GetNestedType("IController");
-                if (nestedType != null && nestedType.IsInterface) {
-                    this.controllerInterface = nestedType;
-                }
+                this.controllerInterface = GetControllerInterfaceFromViewType(this.viewType);
                 this.viewProperties = new PropertyCollection(nodeConfig.View.Properties);
             }
             this.controllerType = TypeUtil.FindType(nodeConfig.Controller.TypeName, task.Namespaces, task.Assemblies);
@@ -64,8 +60,28 @@ namespace Quokka.Uip
             this.transitions = new List<UipTransition>();
         }
 
+        internal UipNode(UipTaskDefinition taskDefinition, string name, Type viewType, Type controllerType) {
+            Assert.ArgumentNotNull(taskDefinition, "taskDefinition");
+            Assert.ArgumentNotNull(name, "name");
+            // view type can be null
+            Assert.ArgumentNotNull(controllerType, "controllerType");
+
+            this.task = taskDefinition;
+            this.name = name;
+            this.viewType = viewType;
+            this.controllerInterface = GetControllerInterfaceFromViewType(viewType);
+            this.viewProperties = new PropertyCollection();
+            this.controllerType = controllerType;
+            this.controllerProperties = new PropertyCollection();
+            this.transitions = new List<UipTransition>();
+        }
+
         public string Name {
             get { return name; }
+        }
+
+        internal UipTaskDefinition TaskDefinition {
+            get { return this.task; }
         }
 
         public Type ViewType {
@@ -92,6 +108,16 @@ namespace Quokka.Uip
             get { return transitions; }
         }
 
+        public UipNode NavigateTo(string navigateValue, string nodeName) {
+            transitions.Add(new UipTransition(this, navigateValue, nodeName));
+            return this;
+        }
+
+        public UipNode NavigateTo(string navigateValue, UipNode node) {
+            transitions.Add(new UipTransition(this, navigateValue, node));
+            return this;
+        }
+
         public bool GetNextNode(string navigateValue, out UipNode node) {
             foreach (UipTransition transition in transitions) {
                 if (transition.NavigateValue == navigateValue) {
@@ -101,6 +127,18 @@ namespace Quokka.Uip
             }
             node = null;
             return false;
+        }
+
+        private Type GetControllerInterfaceFromViewType(Type viewType) {
+            if (viewType != null) {
+                // look for a nested interface in the view called 'IController'
+                Type nestedType = this.viewType.GetNestedType("IController");
+                if (nestedType != null && nestedType.IsInterface) {
+                    return nestedType;
+                }
+            }
+
+            return null;
         }
     }
 }

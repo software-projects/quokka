@@ -153,18 +153,23 @@ namespace Quokka.Uip
         public static UipTask CreateTask(string taskName, IUipViewManager viewManager) {
             try {
                 UipTaskDefinition taskDefinition = taskDefinitions[taskName];
-                UipTask task = new UipTask(taskDefinition, serviceContainer, viewManager);
-                task.TaskStarted += new EventHandler(task_TaskStarted);
-                task.TaskFinished += new EventHandler(task_TaskFinished);
-                if (TaskCreated != null) {
-                    TaskCreated(task, EventArgs.Empty);
-                }
+                UipTask task = CreateTask(taskDefinition, viewManager);
                 return task;
             }
             catch (KeyNotFoundException ex) {
                 string message = "Undefined task: " + taskName;
                 throw new UipException(message, ex);
             }
+        }
+
+        public static UipTask CreateTask(UipTaskDefinition taskDefinition, IUipViewManager viewManager) {
+            UipTask task = new UipTask(taskDefinition, serviceContainer, viewManager);
+            task.TaskStarted += new EventHandler(task_TaskStarted);
+            task.TaskFinished += new EventHandler(task_TaskFinished);
+            if (TaskCreated != null) {
+                TaskCreated(task, EventArgs.Empty);
+            }
+            return task;
         }
 
         /// <summary>
