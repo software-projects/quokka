@@ -57,7 +57,9 @@ namespace Quokka.Uip
 
             this.node = node;
             this.navigateValue = navigateValue;
-            this.nextNodeName = nextNodeName;
+            if (nextNodeName != "__end__") {
+                this.nextNodeName = nextNodeName;
+            }
         }
 
         public UipNode Node {
@@ -70,7 +72,7 @@ namespace Quokka.Uip
 
         public UipNode NextNode {
             get {
-                if (nextNode == null) {
+                if (nextNode == null && nextNodeName != null) {
                     nextNode = node.TaskDefinition.FindNode(nextNodeName, true);
                 }
                 return nextNode;
