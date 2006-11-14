@@ -50,7 +50,7 @@ namespace Quokka.Uip
 
         public static event EventHandler TaskCreated;
         public static event EventHandler TaskStarted;
-        public static event EventHandler TaskFinished;
+        public static event EventHandler TaskComplete;
 
         #endregion
 
@@ -165,7 +165,7 @@ namespace Quokka.Uip
         public static UipTask CreateTask(UipTaskDefinition taskDefinition, IUipViewManager viewManager) {
             UipTask task = new UipTask(taskDefinition, serviceContainer, viewManager);
             task.TaskStarted += new EventHandler(task_TaskStarted);
-            task.TaskFinished += new EventHandler(task_TaskFinished);
+            task.TaskComplete += new EventHandler(task_TaskComplete);
             if (TaskCreated != null) {
                 TaskCreated(task, EventArgs.Empty);
             }
@@ -186,10 +186,10 @@ namespace Quokka.Uip
 
         #region Event handlers
 
-        private static void task_TaskFinished(object sender, EventArgs e) {
+        private static void task_TaskComplete(object sender, EventArgs e) {
             activeTasks.Remove((UipTask)sender);
-            if (TaskFinished != null) {
-                TaskFinished(sender, e);
+            if (TaskComplete != null) {
+                TaskComplete(sender, e);
             }
         }
 

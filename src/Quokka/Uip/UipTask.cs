@@ -56,10 +56,10 @@ namespace Quokka.Uip
         private string navigateValue;
         private bool inNavigateMethod;
         private bool endTaskRequested;
-        private bool taskFinished;
+        private bool taskComplete;
 
         public event EventHandler TaskStarted;
-        public event EventHandler TaskFinished;
+        public event EventHandler TaskComplete;
 
         #region Construction
 
@@ -144,8 +144,8 @@ namespace Quokka.Uip
             get { return currentNode != null; }
         }
 
-        public bool IsFinished {
-            get { return taskFinished; }
+        public bool IsComplete {
+            get { return taskComplete; }
         }
 
         #endregion
@@ -178,8 +178,8 @@ namespace Quokka.Uip
         #region Private methods
 
         private void Navigate(string navigateValue) {
-            if (this.taskFinished) {
-                throw new UipException("Task has finished");
+            if (this.taskComplete) {
+                throw new UipException("Task has completed");
             }
 
             this.navigateValue = navigateValue;
@@ -228,10 +228,10 @@ namespace Quokka.Uip
                         this.currentController = null;
                         this.currentView = null;
                         this.navigateValue = null;
-                        this.taskFinished = true;
+                        this.taskComplete = true;
                         this.ViewManager.EndTask(this);
-                        if (TaskFinished != null) {
-                            TaskFinished(this, EventArgs.Empty);
+                        if (TaskComplete != null) {
+                            TaskComplete(this, EventArgs.Empty);
                         }
                     }
                 }

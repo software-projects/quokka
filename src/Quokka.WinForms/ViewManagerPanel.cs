@@ -38,7 +38,7 @@ namespace Quokka.WinForms
     {
         private List<UipTask> currentTasks = new List<UipTask>();
 
-        public event EventHandler AllTasksFinished;
+        public event EventHandler AllTasksComplete;
 
         #region IUipViewManager Members
 
@@ -53,7 +53,7 @@ namespace Quokka.WinForms
         public void EndTask(UipTask task) {
             currentTasks.Remove(task);
             if (currentTasks.Count == 0) {
-                OnAllTasksFinished(EventArgs.Empty);
+                OnAllTasksComplete(EventArgs.Empty);
             }
         }
 
@@ -113,9 +113,9 @@ namespace Quokka.WinForms
 
         #endregion
 
-        protected virtual void OnAllTasksFinished(EventArgs e) {
-            if (AllTasksFinished != null) {
-                AllTasksFinished(this, e);
+        protected virtual void OnAllTasksComplete(EventArgs e) {
+            if (AllTasksComplete != null) {
+                AllTasksComplete(this, e);
             }
         }
     }
