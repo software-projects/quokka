@@ -88,10 +88,6 @@ namespace Quokka.Uip
             get { return this.name; }
         }
 
-        public IUipViewManager ViewManager {
-            get { throw new NotImplementedException(); }
-        }
-
         public UipNode StartNode {
             get {
                 if (startNode != null) {
