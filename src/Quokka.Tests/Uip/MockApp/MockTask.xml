@@ -10,6 +10,7 @@
       <Controller Type="MockController1"/>
       <NavigateTo NavigateValue="Next" Node="Node2"/>
       <NavigateTo NavigateValue="Back" Node="NoViewNode"/>
+      <NavigateTo NavigateValue="End" Node="__end__"/>
     </Node>
     <Node Name="Node2">
       <View Type="MockView2"/>

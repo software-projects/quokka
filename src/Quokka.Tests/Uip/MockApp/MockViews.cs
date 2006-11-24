@@ -42,6 +42,7 @@ namespace Quokka.Uip.MockApp
         {
             void Next();
             void Back();
+            void End();
         }
 
         // Similar to a Windows Form, where there is always a default
@@ -61,6 +62,10 @@ namespace Quokka.Uip.MockApp
 
         public void PushBackButton() {
             controller.Back();
+        }
+
+        public void PushEndButton() {
+            controller.End();
         }
 
         public IController Controller {

@@ -39,9 +39,12 @@ namespace Quokka.Uip
     [TestFixture]
     public class MockAppTests
     {
+        bool taskCompleted;
+
         [SetUp]
         public void SetUp() {
             UipManager.Clear();
+            taskCompleted = false;
         }
 
         [TearDown]
@@ -66,7 +69,8 @@ namespace Quokka.Uip
             taskDefinition.StateProperties.Add("StringProperty", "Set from config");
             UipNode node1 = taskDefinition.AddNode("Node1", typeof(MockView1), typeof(MockController1))
                 .NavigateTo("Next", "Node2")
-                .NavigateTo("Back", "NoViewNode");
+                .NavigateTo("Back", "NoViewNode")
+                .NavigateTo("End", "__end__");
             UipNode node2 = taskDefinition.AddNode("Node2", typeof(MockView2), typeof(MockController2))
                 .NavigateTo("Back", node1)
                 .NavigateTo("Next", "Node3")
@@ -95,6 +99,7 @@ namespace Quokka.Uip
             Assert.AreEqual("Set from config", state.StringProperty);
 
             task.Start();
+            task.TaskComplete += new EventHandler(task_TaskComplete);
 
             Assert.AreEqual("Node1", task.CurrentNode.Name);
             Assert.IsNotNull(task.CurrentController);
@@ -139,6 +144,20 @@ namespace Quokka.Uip
             Assert.IsInstanceOfType(typeof(MockController2), task.CurrentController);
             Assert.IsNotNull(viewManager.VisibleView);
             Assert.IsInstanceOfType(typeof(MockView1), viewManager.VisibleView);
+
+            view1.PushNextButton();
+            Assert.AreEqual("Node1", task.CurrentNode.Name);
+            Assert.IsTrue(task.IsRunning);
+            Assert.IsFalse(task.IsComplete);
+            Assert.IsFalse(taskCompleted);
+            view1.PushEndButton();
+            Assert.IsTrue(taskCompleted);
+            Assert.IsTrue(task.IsComplete);
+            Assert.IsFalse(task.IsRunning);
+        }
+
+        void task_TaskComplete(object sender, EventArgs e) {
+            taskCompleted = true;
         }
     }
 }

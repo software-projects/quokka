@@ -59,6 +59,10 @@ namespace Quokka.Uip.MockApp
         public void Back() {
             navigator.Navigate("Back");
         }
+
+        public void End() {
+            navigator.Navigate("End");
+        }
     }
 
     public class MockController2 : MockController1

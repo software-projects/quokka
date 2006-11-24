@@ -42,12 +42,14 @@ namespace Quokka.Uip
         internal UipTransition(UipNode node, string navigateValue, UipNode nextNode) {
             Assert.ArgumentNotNull(node, "node");
             Assert.ArgumentNotNull(navigateValue, "navigateValue");
-            Assert.ArgumentNotNull(nextNode, "nextNode");
+            //Assert.ArgumentNotNull(nextNode, "nextNode");
 
             this.node = node;
             this.navigateValue = navigateValue;
             this.nextNode = nextNode;
-            this.nextNodeName = nextNode.Name;
+            if (nextNode != null) {
+                this.nextNodeName = nextNode.Name;
+            }
         }
 
         internal UipTransition(UipNode node, string navigateValue, string nextNodeName) {
