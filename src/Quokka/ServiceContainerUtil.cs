@@ -35,12 +35,12 @@ namespace Quokka
 
     public static class ServiceContainerUtil
     {
-        public static void AddService(ServiceContainer container, Type serviceType, Type serviceInstanceType) {
+        public static void AddService(IServiceContainer container, Type serviceType, Type serviceInstanceType) {
             ServiceCreatorCallback callback = CreateCallback(serviceType, serviceInstanceType);
             container.AddService(serviceType, callback);
         }
 
-        public static void AddService(ServiceContainer container, Type serviceType, Type serviceInstanceType, bool promote) {
+        public static void AddService(IServiceContainer container, Type serviceType, Type serviceInstanceType, bool promote) {
             ServiceCreatorCallback callback = CreateCallback(serviceType, serviceInstanceType);
             container.AddService(serviceType, callback, promote);
         }
