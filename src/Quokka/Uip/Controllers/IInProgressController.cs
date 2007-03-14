@@ -26,13 +26,11 @@
 //
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace Quokka.Uip
 {
-    /// <summary>
+	using System;
+
+	/// <summary>
     /// Controller interface used for operations which take a long
     /// time and need to provide feedback to the user.
     /// </summary>

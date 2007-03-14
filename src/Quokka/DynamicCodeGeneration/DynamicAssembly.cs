@@ -26,17 +26,15 @@
 //
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reflection;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading;
-
 namespace Quokka.DynamicCodeGeneration
 {
-    internal class DynamicAssembly
+	using System;
+	using System.Diagnostics;
+	using System.Reflection;
+	using System.Reflection.Emit;
+	using System.Threading;
+
+	internal class DynamicAssembly
     {
         // used to create a unique name for each dynamic assembly
         private static int assemblyCount = 0;
@@ -79,7 +77,7 @@ namespace Quokka.DynamicCodeGeneration
 
         private string NewClassName(string text) {
             int classNumber = Interlocked.Increment(ref classCount);
-            return dynamicClassNamespace + "." + text + classNumber.ToString();
+            return dynamicClassNamespace + "." + text + classNumber;
         }
     }
 }

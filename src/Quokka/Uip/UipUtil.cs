@@ -39,6 +39,7 @@ namespace Quokka.Uip
         /// </summary>
         /// <param name="view">The view object</param>
         /// <param name="controller">The controller to assign</param>
+        /// <param name="throwOnError">Throw an exception if the <c>SetController</c> method cannot be found.</param>
         /// <remarks>
         /// <para>
         /// This method assigns a controller to a view. It looks for a public
@@ -95,6 +96,7 @@ namespace Quokka.Uip
         /// </summary>
         /// <param name="obj">The view or controller object</param>
         /// <param name="state">The state object to assign</param>
+        /// <param name="throwOnError">Throw an error if the <c>SetState</c> method cannot be found.</param>
         /// <remarks>
         /// <para>
         /// This method assigns a state object to a view or controller. It looks for a public

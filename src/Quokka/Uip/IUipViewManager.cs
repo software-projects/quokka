@@ -26,13 +26,11 @@
 //
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace Quokka.Uip
 {
-    public class UipViewEventArgs : EventArgs {
+	using System;
+
+	public class UipViewEventArgs : EventArgs {
         private object view;
 
         public UipViewEventArgs(object view) {

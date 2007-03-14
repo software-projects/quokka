@@ -26,14 +26,13 @@
 //
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Text;
-
 namespace Quokka.DynamicCodeGeneration
 {
-    public static class ProxyFactory
+	using System;
+	using System.Collections.Generic;
+	using System.Reflection;
+
+	public static class ProxyFactory
     {
         private static DuckProxyStore duckProxyStore;
         private static DynamicAssembly dynamicAssembly;
@@ -96,7 +95,7 @@ namespace Quokka.DynamicCodeGeneration
 
         public Type Find(Type interfaceType, Type innerType) {
             DictionaryKey key = new DictionaryKey(interfaceType, innerType);
-            Type proxyType = null;
+            Type proxyType;
             m_dict.TryGetValue(key, out proxyType);
             return proxyType;
         }

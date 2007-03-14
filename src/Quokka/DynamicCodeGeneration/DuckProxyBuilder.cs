@@ -26,18 +26,14 @@
 //
 #endregion
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Reflection;
-using System.Reflection.Emit;
-using System.Threading;
-
 namespace Quokka.DynamicCodeGeneration
 {
-    internal class DuckProxyBuilder
+	using System;
+	using System.Collections.Generic;
+	using System.Reflection;
+	using System.Reflection.Emit;
+
+	internal class DuckProxyBuilder
     {
         private readonly Type m_interfaceType;
         private readonly Type m_innerType;

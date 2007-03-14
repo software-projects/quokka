@@ -26,13 +26,11 @@
 //
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace Quokka.Services
 {
-    /// <summary>
+	using System;
+
+	/// <summary>
     ///		Interface used for generating the current date and time
     /// </summary>
     /// <remarks>

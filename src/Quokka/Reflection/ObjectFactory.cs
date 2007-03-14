@@ -26,13 +26,12 @@
 //
 #endregion
 
-using System;
-using System.Collections.Specialized;
-using System.Reflection;
-
 namespace Quokka.Reflection
 {
-    public static class ObjectFactory
+	using System;
+	using System.Reflection;
+
+	public static class ObjectFactory
     {
         public static object Create(Type objectType, IServiceProvider serviceProvider, params object[] concreteObjects) {
             if (objectType == null)

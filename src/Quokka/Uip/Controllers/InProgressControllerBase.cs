@@ -26,13 +26,11 @@
 //
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace Quokka.Uip.Controllers
 {
-    /// <summary>
+	using System;
+
+	/// <summary>
     /// Default implementation of <see cref="IInProgressController"/>. Suitable for use as a base
     /// class for controllers which perform lengthy operations.
     /// </summary>

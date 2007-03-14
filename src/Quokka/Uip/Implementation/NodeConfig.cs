@@ -26,15 +26,12 @@
 //
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Xml;
-using System.Xml.Serialization;
-
 namespace Quokka.Uip.Implementation
 {
-    [XmlType(AnonymousType = true)]
+	using System.Collections.Generic;
+	using System.Xml.Serialization;
+
+	[XmlType(AnonymousType = true)]
     public class NodeConfig
     {
         private ViewConfig _view;

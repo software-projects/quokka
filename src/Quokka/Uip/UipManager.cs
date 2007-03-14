@@ -26,17 +26,15 @@
 //
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
-using System.Xml;
-
-using Quokka.Uip.Implementation;
-
 namespace Quokka.Uip
 {
-    /// <summary>
+	using System;
+	using System.Collections.Generic;
+	using System.IO;
+	using System.Reflection;
+	using Quokka.Uip.Implementation;
+
+	/// <summary>
     /// Used for configuring, creating, and monitoring UIP tasks.
     /// </summary>
     public static class UipManager

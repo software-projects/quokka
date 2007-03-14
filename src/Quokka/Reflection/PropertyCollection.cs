@@ -26,14 +26,12 @@
 //
 #endregion
 
-using System;
-using System.Collections.Specialized;
-using System.Collections.Generic;
-using System.Text;
-
 namespace Quokka.Reflection
 {
-    public class PropertyCollection : NameObjectCollectionBase 
+	using System.Collections.Generic;
+	using System.Collections.Specialized;
+
+	public class PropertyCollection : NameObjectCollectionBase 
     {
         public PropertyCollection() { }
 

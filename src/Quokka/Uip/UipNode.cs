@@ -26,17 +26,14 @@
 //
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-using Quokka.Reflection;
-using Quokka.Uip.Implementation;
-
-
 namespace Quokka.Uip
 {
-    public class UipNode
+	using System;
+	using System.Collections.Generic;
+	using Quokka.Reflection;
+	using Quokka.Uip.Implementation;
+
+	public class UipNode
     {
         private readonly UipTaskDefinition task;
         private readonly string name;

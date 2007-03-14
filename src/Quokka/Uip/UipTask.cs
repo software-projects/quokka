@@ -26,17 +26,14 @@
 //
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-
-using Quokka.DynamicCodeGeneration;
-using Quokka.Reflection;
-using Quokka.Uip.Implementation;
-
 namespace Quokka.Uip
 {
-    /// <summary>
+	using System;
+	using System.Collections.Generic;
+	using Quokka.DynamicCodeGeneration;
+	using Quokka.Reflection;
+
+	/// <summary>
     /// A task defines a discrete unit of work-flow within an application.
     /// </summary>
     /// <remarks>

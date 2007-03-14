@@ -109,9 +109,8 @@ namespace Quokka.Reflection
                 throw new ArgumentNullException("to");
             }
             Type fromType = from.GetType();
-            Type toType = to.GetType();
 
-            foreach (PropertyInfo fromProperty in fromType.GetProperties()) {
+        	foreach (PropertyInfo fromProperty in fromType.GetProperties()) {
                 if (fromProperty.CanRead) {
                     object fromValue = fromProperty.GetValue(from, null);
                     TrySetValue(to, fromProperty.Name, fromValue);

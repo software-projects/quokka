@@ -26,15 +26,12 @@
 //
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Xml;
-using System.Xml.Serialization;
-
 namespace Quokka.Uip.Implementation
 {
-    /// <summary>
+	using System.Collections.Generic;
+	using System.Xml.Serialization;
+
+	/// <summary>
     ///     Element that describes a class
     /// </summary>
     [XmlType(AnonymousType = true)]
