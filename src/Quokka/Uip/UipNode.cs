@@ -73,7 +73,10 @@ namespace Quokka.Uip
 					_options |= UipNodeOptions.ModalView;
 				}
 				if (nodeConfig.View.StayOpen) {
-					_options |= UipNodeOptions.StayOpen;
+					// Cannot stay open if a modal view
+					if (!IsViewModal) {
+						_options |= UipNodeOptions.StayOpen;
+					}
 				}
 			}
 		}

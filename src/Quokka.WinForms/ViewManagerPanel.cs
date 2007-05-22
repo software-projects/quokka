@@ -37,6 +37,7 @@ namespace Quokka.WinForms
     public class ViewManagerPanel : Panel, IUipViewManager 
     {
         private List<UipTask> currentTasks = new List<UipTask>();
+    	private List<Form> modalForms = new List<Form>();
 
         public event EventHandler AllTasksComplete;
 
@@ -78,7 +79,7 @@ namespace Quokka.WinForms
             if (form != null) {
                 form.TopLevel = false;
                 form.FormBorderStyle = FormBorderStyle.None;
-                form.Closed += new EventHandler(view_Closed);
+                form.Closed += new EventHandler(View_Closed);
             }
 
             control.Dock = DockStyle.Fill;
@@ -92,7 +93,7 @@ namespace Quokka.WinForms
             WinFormsUipUtil.SetController(control, controller);
         }
 
-    	private void view_Closed(object sender, EventArgs e)
+    	private void View_Closed(object sender, EventArgs e)
     	{
     		UipViewEventArgs eventArgs = new UipViewEventArgs(sender);
     		OnViewClosed(eventArgs);
@@ -100,8 +101,16 @@ namespace Quokka.WinForms
 
     	public void RemoveView(object view) {
             Control control = (Control)view;
-            Controls.Remove(control);
-        }
+
+    		Form form = view as Form;
+			if (form != null && modalForms.Contains(form)) {
+				// this is a modal form -- close it
+				form.Close();
+			}
+			else {
+				Controls.Remove(control);
+			}
+    	}
 
         public void ShowView(object view) {
             foreach (Control c in Controls) {
@@ -118,7 +127,20 @@ namespace Quokka.WinForms
 
 		public void ShowModalView(object view, object controller)
 		{
-			throw new NotImplementedException();
+			Form form = view as Form;
+			if (form == null) {
+				throw new ArgumentException("Modal views must inherit from System.Windows.Forms.Form");
+			}
+
+			WinFormsUipUtil.SetController(form, controller);
+			modalForms.Add(form);
+			form.Closed += new EventHandler(ModalForm_Closed);
+			form.ShowDialog(this.TopLevelControl);
+		}
+
+		void ModalForm_Closed(object sender, EventArgs e) {
+			Form form = (Form)sender;
+			modalForms.Remove(form);
 		}
 
         #endregion

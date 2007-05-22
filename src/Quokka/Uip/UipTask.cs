@@ -31,10 +31,10 @@
 namespace Quokka.Uip
 {
 	using System;
+	using System.Collections;
 	using System.Collections.Generic;
 	using Quokka.DynamicCodeGeneration;
 	using Quokka.Reflection;
-	using System.Collections;
 
 	/// <summary>
 	/// A task defines a discrete unit of work-flow within an application.
@@ -228,6 +228,11 @@ namespace Quokka.Uip
 								nextNode = GetNextNode();
 							} while (nextNode != null);
 
+							// We are now at the node where we are going to stay, so cleanup
+							// any unwanted views and controllers prior to creating the view for
+							// this node.
+							_controllersAndViews.Cleanup(_currentNode);
+
 							if (!_endTaskRequested && _currentNode != null) {
 								// Finished navigating to a new node, display the new view.
 								_currentView = _controllersAndViews.GetView(_currentNode);
@@ -370,7 +375,8 @@ namespace Quokka.Uip
 		/// interface is requested.
 		/// </para>
 		/// </remarks>
-		private void AddNestedNavigatorInterfaces(IUipNavigator navigator) {
+		private void AddNestedNavigatorInterfaces(IUipNavigator navigator)
+		{
 			// Get the distinct controller types, as a controller type may be present in more than
 			// one node.
 			Dictionary<Type, Type> typeDict = new Dictionary<Type, Type>();
@@ -463,14 +469,16 @@ namespace Quokka.Uip
 			private readonly IDictionary<UipNode, object> _controllers;
 			private readonly IDictionary<UipNode, object> _views;
 
-			public ControllerViewStore(UipTask task) {
+			public ControllerViewStore(UipTask task)
+			{
 				_task = task;
 				_task.ViewManager.ViewClosed += new EventHandler<UipViewEventArgs>(ViewManager_ViewClosed);
 				_controllers = new Dictionary<UipNode, object>(_task.Nodes.Count);
 				_views = new Dictionary<UipNode, object>(_task.Nodes.Count);
 			}
 
-			public void Clear() {
+			public void Clear()
+			{
 				IList<object> views = new List<object>(_views.Values);
 				IList<object> controllers = new List<object>(_controllers.Values);
 				_views.Clear();
@@ -483,7 +491,8 @@ namespace Quokka.Uip
 			/// Cleanup all views and controllers that are no longer needed.
 			/// </summary>
 			/// <param name="currentNode">The current node.</param>
-			public void Cleanup(UipNode currentNode) {
+			public void Cleanup(UipNode currentNode)
+			{
 				if (currentNode != null && currentNode.IsViewModal) {
 					// Never cleanup views or controllers when showing a modal view.
 					// This is because view(s) for previous node(s) may be needed as a
@@ -528,7 +537,8 @@ namespace Quokka.Uip
 				DisposeOfControllers(controllersForDisposal);
 			}
 
-			private void DisposeOfViews(IEnumerable views) {
+			private void DisposeOfViews(IEnumerable views)
+			{
 				// Dispose of the views
 				foreach (object view in views) {
 					_task.ViewManager.RemoveView(view);
@@ -536,13 +546,15 @@ namespace Quokka.Uip
 				}
 			}
 
-			private void DisposeOfControllers(IEnumerable controllers) {
+			private void DisposeOfControllers(IEnumerable controllers)
+			{
 				foreach (object controller in controllers) {
 					DisposeOf(controller);
 				}
 			}
 
-			public object GetController(UipNode node) {
+			public object GetController(UipNode node)
+			{
 				object controller;
 				if (!_controllers.TryGetValue(node, out controller)) {
 					controller = CreateController(node);
@@ -551,19 +563,20 @@ namespace Quokka.Uip
 				return controller;
 			}
 
-			private object CreateController(UipNode node) {
+			private object CreateController(UipNode node)
+			{
 				Type controllerType = node.ControllerType;
 				if (controllerType == null) {
 					return null;
 				}
 
 				object controller = ObjectFactory.Create(
-					node.ControllerType,
-					_task.ServiceProvider,
-					_task.State,
-					_task.ServiceProvider,
-					_task,
-					node);
+						node.ControllerType,
+						_task.ServiceProvider,
+						_task.State,
+						_task.ServiceProvider,
+						_task,
+						node);
 
 				if (controller == null) {
 					throw new UipException("Failed to create controller");
@@ -574,7 +587,8 @@ namespace Quokka.Uip
 				return controller;
 			}
 
-			public object GetView(UipNode node) {
+			public object GetView(UipNode node)
+			{
 				object view;
 				if (!_views.TryGetValue(node, out view)) {
 					view = CreateView(node);
@@ -583,7 +597,8 @@ namespace Quokka.Uip
 				return view;
 			}
 
-			private object CreateView(UipNode node) {
+			private object CreateView(UipNode node)
+			{
 				Type viewType = node.ViewType;
 				if (viewType == null) {
 					// no view defined, finished
@@ -600,12 +615,12 @@ namespace Quokka.Uip
 				}
 
 				object view = ObjectFactory.Create(
-					viewType,
-					_task.ServiceProvider,
-					controllerProxy,
-					_task.ServiceProvider,
-					controller,
-					this);
+						viewType,
+						_task.ServiceProvider,
+						controllerProxy,
+						_task.ServiceProvider,
+						controller,
+						this);
 
 				if (view == null) {
 					throw new UipException("Failed to create view");
@@ -623,7 +638,8 @@ namespace Quokka.Uip
 				return view;
 			}
 
-			private void ViewManager_ViewClosed(object sender, UipViewEventArgs e) {
+			private void ViewManager_ViewClosed(object sender, UipViewEventArgs e)
+			{
 				UipNode node = FindNodeForView(e.View);
 
 				if (node == null) {
@@ -646,7 +662,8 @@ namespace Quokka.Uip
 				}
 			}
 
-			private UipNode FindNodeForView(object view) {
+			private UipNode FindNodeForView(object view)
+			{
 				foreach (KeyValuePair<UipNode, object> keyValuePair in _views) {
 					if (Object.ReferenceEquals(view, keyValuePair.Value)) {
 						return keyValuePair.Key;
@@ -655,7 +672,8 @@ namespace Quokka.Uip
 				return null;
 			}
 
-			private static void DisposeOf(object obj) {
+			private static void DisposeOf(object obj)
+			{
 				if (obj != null) {
 					IDisposable disposable = obj as IDisposable;
 					if (disposable != null) {
