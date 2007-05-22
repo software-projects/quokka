@@ -658,6 +658,13 @@ namespace Quokka.Uip
 					return;
 				}
 
+				if (node.IsViewModal && node == _task.CurrentNode && !_task._inNavigateMethod) {
+					// The current modal view has closed without specifying a navigation.
+					// This can happen if the user clicks the close window button.
+					// All modal views should specify a navigation for 'Close'.
+					_task.Navigate("Close");
+				}
+
 				// Don't try to dispose of the view, or tell the view manager to
 				// remove the view as as we assume that the view manager has already
 				// taken care of this. Just remove the view from our collection of views

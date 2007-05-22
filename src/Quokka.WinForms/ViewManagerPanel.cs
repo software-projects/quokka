@@ -95,6 +95,11 @@ namespace Quokka.WinForms
 
     	private void View_Closed(object sender, EventArgs e)
     	{
+			Form form = sender as Form;
+			if (form != null) {
+				modalForms.Remove(form);
+			}
+
     		UipViewEventArgs eventArgs = new UipViewEventArgs(sender);
     		OnViewClosed(eventArgs);
     	}
@@ -134,13 +139,8 @@ namespace Quokka.WinForms
 
 			WinFormsUipUtil.SetController(form, controller);
 			modalForms.Add(form);
-			form.Closed += new EventHandler(ModalForm_Closed);
+			form.Closed += new EventHandler(View_Closed);
 			form.ShowDialog(this.TopLevelControl);
-		}
-
-		void ModalForm_Closed(object sender, EventArgs e) {
-			Form form = (Form)sender;
-			modalForms.Remove(form);
 		}
 
         #endregion
