@@ -212,6 +212,7 @@ namespace Quokka.Uip
 			// just set the _navigateValue member and exit.
 			if (!_inNavigateMethod) {
 				_inNavigateMethod = true;
+				bool showModalView = false;
 				try {
 					UipNode nextNode = GetNextNode();
 					if (nextNode != null) {
@@ -238,7 +239,13 @@ namespace Quokka.Uip
 								_currentView = _controllersAndViews.GetView(_currentNode);
 								if (_currentView != null) {
 									if (_currentNode.IsViewModal) {
-										ViewManager.ShowModalView(_currentView, _currentController);
+										// We can't block and show a modal view here
+										// because the _inNavigateMethod member is set to 
+										// true and this will prevent any navigation from
+										// within the modal view. For this reason set a variable
+										// to remind us to show the modal view before leaving this
+										// method.
+										showModalView = true;
 									}
 									else {
 										ViewManager.ShowView(_currentView);
@@ -267,6 +274,10 @@ namespace Quokka.Uip
 				}
 				finally {
 					_inNavigateMethod = false;
+				}
+
+				if (showModalView) {
+					ViewManager.ShowModalView(_currentView, _currentController);
 				}
 			}
 		}
@@ -654,7 +665,7 @@ namespace Quokka.Uip
 				_views.Remove(node);
 
 				// The view manager will not have disposed of the associated controller, so we
-				// look after.
+				// look after cleaning up the controller.
 				object controller;
 				if (_controllers.TryGetValue(node, out controller)) {
 					_controllers.Remove(node);
