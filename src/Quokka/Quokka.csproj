@@ -39,6 +39,7 @@
     <Compile Include="Assert.cs" />
     <Compile Include="DynamicCodeGeneration\DynamicAssembly.cs" />
     <Compile Include="DynamicCodeGeneration\MemberMapping.cs" />
+    <Compile Include="DynamicCodeGeneration\NavigatorProxyBuilder.cs" />
     <Compile Include="DynamicCodeGeneration\ProxyFactory.cs" />
     <Compile Include="DynamicCodeGeneration\DuckProxyBuilder.cs" />
     <Compile Include="Reflection\ObjectFactory.cs" />

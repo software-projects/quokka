@@ -26,15 +26,11 @@
 //
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-using NUnit.Framework;
-
 namespace Quokka.Uip.MockApp
 {
-    public class MockView1
+	using NUnit.Framework;
+
+	public class MockView1
     {
         private readonly IController controller;
 

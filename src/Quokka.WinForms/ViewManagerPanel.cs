@@ -78,7 +78,7 @@ namespace Quokka.WinForms
             if (form != null) {
                 form.TopLevel = false;
                 form.FormBorderStyle = FormBorderStyle.None;
-                //form.Closed += new EventHandler(view_Closed);
+                form.Closed += new EventHandler(view_Closed);
             }
 
             control.Dock = DockStyle.Fill;
@@ -89,11 +89,16 @@ namespace Quokka.WinForms
             // to get a look at the controller. To get the controller, the contained
             // control must implement a method called "SetController", which accepts
             // a compatible type. (Could be an embedded "IController" interface.
-            WinFormsUipUtil.SetController(control
-                , controller);
+            WinFormsUipUtil.SetController(control, controller);
         }
 
-        public void RemoveView(object view) {
+    	private void view_Closed(object sender, EventArgs e)
+    	{
+    		UipViewEventArgs eventArgs = new UipViewEventArgs(sender);
+    		OnViewClosed(eventArgs);
+    	}
+
+    	public void RemoveView(object view) {
             Control control = (Control)view;
             Controls.Remove(control);
         }
@@ -111,6 +116,11 @@ namespace Quokka.WinForms
             control.Visible = false;
         }
 
+		public void ShowModalView(object view, object controller)
+		{
+			throw new NotImplementedException();
+		}
+
         #endregion
 
         protected virtual void OnAllTasksComplete(EventArgs e) {
@@ -118,5 +128,12 @@ namespace Quokka.WinForms
                 AllTasksComplete(this, e);
             }
         }
+
+		protected virtual void OnViewClosed(UipViewEventArgs e)
+		{
+			if (ViewClosed != null) {
+				ViewClosed(this, e);
+			}
+		}
     }
 }

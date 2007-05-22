@@ -26,17 +26,13 @@
 //
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-using NUnit.Framework;
-
-using Quokka.Uip.MockApp;
-
 namespace Quokka.Uip
 {
-    [TestFixture]
+	using System;
+	using NUnit.Framework;
+	using Quokka.Uip.MockApp;
+
+	[TestFixture]
     public class MockAppTests
     {
         bool taskCompleted;

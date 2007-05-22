@@ -26,15 +26,12 @@
 //
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-using NUnit.Framework;
-
 namespace Quokka.Uip.MockApp
 {
-    public class MockViewManager : IUipViewManager
+	using System;
+	using NUnit.Framework;
+
+	public class MockViewManager : IUipViewManager
     {
         bool inTransition;
         object visibleView;
@@ -77,7 +74,7 @@ namespace Quokka.Uip.MockApp
         public void ShowView(object view) {
             Assert.IsNotNull(currentTask);
             Assert.IsTrue(inTransition);
-            Assert.IsNull(visibleView);
+            //Assert.IsNull(visibleView);
             Assert.IsNotNull(view);
             visibleView = view;
         }
@@ -85,10 +82,18 @@ namespace Quokka.Uip.MockApp
         public void HideView(object view) {
             Assert.IsNotNull(currentTask);
             Assert.IsTrue(inTransition);
-            Assert.IsNotNull(visibleView);
-            Assert.AreSame(visibleView, view);
-            visibleView = null;
+            //Assert.IsNotNull(visibleView);
+			if (view == visibleView) {
+				visibleView = null;
+			}
+            //Assert.AreSame(visibleView, view);
+            //visibleView = null;
         }
+
+		public void ShowModalView(object view, object controller)
+		{
+			throw new NotImplementedException();
+		}
 
         #endregion
 

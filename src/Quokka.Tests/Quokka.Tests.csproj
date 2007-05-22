@@ -39,6 +39,7 @@
   <ItemGroup>
     <Compile Include="DynamicCodeGeneration\DuckProxyTests.cs" />
     <Compile Include="DynamicCodeGeneration\MemberMappingTests.cs" />
+    <Compile Include="DynamicCodeGeneration\NavigatorProxyTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QuokkaContainerTests.cs" />
     <Compile Include="Reflection\ObjectFactoryTests.cs" />

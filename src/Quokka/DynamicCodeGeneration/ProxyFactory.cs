@@ -1,4 +1,5 @@
 #region Copyright notice
+
 //
 // Authors: 
 //  John Jeffery <john@jeffery.id.au>
@@ -24,6 +25,7 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
+
 #endregion
 
 namespace Quokka.DynamicCodeGeneration
@@ -33,105 +35,175 @@ namespace Quokka.DynamicCodeGeneration
 	using System.Reflection;
 
 	public static class ProxyFactory
-    {
-        private static DuckProxyStore duckProxyStore;
-        private static DynamicAssembly dynamicAssembly;
+	{
+		private static readonly ProxyStore duckProxyStore;
+		private static readonly ProxyStore navigatorProxyStore;
+		private static DynamicAssembly dynamicAssembly;
 
-        static ProxyFactory() {
-            duckProxyStore = new DuckProxyStore();
-        }
+		static ProxyFactory()
+		{
+			duckProxyStore = new ProxyStore();
+			navigatorProxyStore = new ProxyStore();
+		}
 
-        public static T CreateDuckProxy<T>(object inner) {
-            return (T)CreateDuckProxy(typeof(T), inner);
-        }
+		#region Duck proxy
 
-        public static object CreateDuckProxy(Type interfaceType, object inner) {
-            if (!interfaceType.IsInterface) {
-                throw new ArgumentException("Must be an interface", "interfaceType");
-            }
+		public static T CreateDuckProxy<T>(object inner)
+		{
+			return (T)CreateDuckProxy(typeof(T), inner);
+		}
 
-            if (inner == null) {
-                return null;
-            }
+		public static object CreateDuckProxy(Type interfaceType, object inner)
+		{
+			if (!interfaceType.IsInterface) {
+				throw new ArgumentException("Must be an interface", "interfaceType");
+			}
 
-            if (interfaceType.IsInstanceOfType(inner)) {
-                // when the inner object already supports the interface, do
-                // not bother with a proxy
-                return inner;
-            }
+			if (inner == null) {
+				return null;
+			}
 
-            // Find the proxy type
-            Type proxyType = GetDuckProxyType(interfaceType, inner.GetType());
+			if (interfaceType.IsInstanceOfType(inner)) {
+				// when the inner object already supports the interface, do
+				// not bother with a proxy
+				return inner;
+			}
 
-            // get the constructor that accepts inner as a parameter
-            ConstructorInfo constructor = proxyType.GetConstructor(new Type[] { inner.GetType() });
+			// Find the proxy type
+			Type proxyType = GetDuckProxyType(interfaceType, inner.GetType());
 
-            // construct an instance of the wrapper class and return
-            object proxy = constructor.Invoke(new object[] { inner });
-            return proxy;
-        }
+			// get the constructor that accepts inner as a parameter
+			ConstructorInfo constructor = proxyType.GetConstructor(new Type[] {inner.GetType()});
 
-        public static Type GetDuckProxyType(Type interfaceType, Type innerType) {
-            Type proxyType = duckProxyStore.Find(interfaceType, innerType);
-            if (proxyType == null) {
-                proxyType = CreateDuckProxyType(interfaceType, innerType);
-                duckProxyStore.Add(interfaceType, innerType, proxyType);
-            }
-            return proxyType;
-        }
+			// construct an instance of the wrapper class and return
+			object proxy = constructor.Invoke(new object[] {inner});
+			return proxy;
+		}
 
-        private static Type CreateDuckProxyType(Type interfaceType, Type innerType) {
-            if (dynamicAssembly == null) {
-                dynamicAssembly = new DynamicAssembly();
-            }
+		public static Type GetDuckProxyType(Type interfaceType, Type innerType)
+		{
+			Type proxyType = duckProxyStore.Find(interfaceType, innerType);
+			if (proxyType == null) {
+				proxyType = CreateDuckProxyType(interfaceType, innerType);
+				duckProxyStore.Add(interfaceType, innerType, proxyType);
+			}
+			return proxyType;
+		}
 
-            return dynamicAssembly.CreateDuckProxyType(interfaceType, innerType);
-        }
-    }
+		private static Type CreateDuckProxyType(Type interfaceType, Type innerType)
+		{
+			if (dynamicAssembly == null) {
+				dynamicAssembly = new DynamicAssembly();
+			}
 
-    internal class DuckProxyStore
-    {
-        private Dictionary<DictionaryKey, Type> m_dict = new Dictionary<DictionaryKey,Type>();
+			return dynamicAssembly.CreateDuckProxyType(interfaceType, innerType);
+		}
 
-        public Type Find(Type interfaceType, Type innerType) {
-            DictionaryKey key = new DictionaryKey(interfaceType, innerType);
-            Type proxyType;
-            m_dict.TryGetValue(key, out proxyType);
-            return proxyType;
-        }
+		#endregion
 
-        public void Add(Type interfaceType, Type innerType, Type proxyType) {
-            m_dict.Add(new DictionaryKey(interfaceType, innerType), proxyType);
-        }
+		#region NavigatorProxy
 
-        #region class DictionaryKey
+		public static T CreateNavigatorProxy<T>(object inner)
+		{
+			return (T)CreateNavigatorProxy(typeof(T), inner);
+		}
 
-        /// <summary>
-        ///		Key used in dictionary
-        /// </summary>
-        private class DictionaryKey
-        {
-            public readonly Type InterfaceType;
-            public readonly Type InnerType;
+		public static object CreateNavigatorProxy(Type interfaceType, object inner)
+		{
+			if (!interfaceType.IsInterface) {
+				throw new ArgumentException("Must be an interface", "interfaceType");
+			}
 
-            public DictionaryKey(Type interfaceType, Type innerType) {
-                this.InterfaceType = interfaceType;
-                this.InnerType = innerType;
-            }
+			if (inner == null) {
+				return null;
+			}
 
-            public override bool Equals(object obj) {
-                DictionaryKey other = (DictionaryKey)obj;
-                return this.InterfaceType == other.InterfaceType
-                    && this.InnerType == other.InnerType;
-            }
+			if (interfaceType.IsInstanceOfType(inner)) {
+				// when the inner object already supports the interface, do
+				// not bother with a proxy
+				return inner;
+			}
 
-            public override int GetHashCode() {
-                return this.InterfaceType.GetHashCode() ^ this.InnerType.GetHashCode();
-            }
-        }
+			// Find the proxy type
+			Type proxyType = GetNavigatorProxyType(interfaceType, inner.GetType());
 
-        #endregion
-    }
+			// get the constructor that accepts inner as a parameter
+			ConstructorInfo constructor = proxyType.GetConstructor(new Type[] {inner.GetType()});
 
+			// construct an instance of the wrapper class and return
+			object proxy = constructor.Invoke(new object[] {inner});
+			return proxy;
+		}
 
+		public static Type GetNavigatorProxyType(Type interfaceType, Type innerType)
+		{
+			Type proxyType = navigatorProxyStore.Find(interfaceType, innerType);
+			if (proxyType == null) {
+				proxyType = CreateNavigatorProxyType(interfaceType, innerType);
+				navigatorProxyStore.Add(interfaceType, innerType, proxyType);
+			}
+			return proxyType;
+		}
+
+		private static Type CreateNavigatorProxyType(Type interfaceType, Type innerType)
+		{
+			if (dynamicAssembly == null) {
+				dynamicAssembly = new DynamicAssembly();
+			}
+
+			return dynamicAssembly.CreateNavigatorProxyType(interfaceType, innerType);
+		}
+
+		#endregion
+
+	}
+
+	internal class ProxyStore
+	{
+		private Dictionary<TypePair, Type> m_dict = new Dictionary<TypePair, Type>();
+
+		public Type Find(Type interfaceType, Type innerType)
+		{
+			TypePair key = new TypePair(interfaceType, innerType);
+			Type proxyType;
+			m_dict.TryGetValue(key, out proxyType);
+			return proxyType;
+		}
+
+		public void Add(Type interfaceType, Type innerType, Type proxyType)
+		{
+			m_dict.Add(new TypePair(interfaceType, innerType), proxyType);
+		}
+
+		#region class TypePair
+
+		/// <summary>
+		///		Key used in dictionary
+		/// </summary>
+		private class TypePair
+		{
+			public readonly Type InterfaceType;
+			public readonly Type InnerType;
+
+			public TypePair(Type interfaceType, Type innerType)
+			{
+				InterfaceType = interfaceType;
+				InnerType = innerType;
+			}
+
+			public override bool Equals(object obj)
+			{
+				TypePair other = (TypePair)obj;
+				return InterfaceType == other.InterfaceType
+				       && InnerType == other.InnerType;
+			}
+
+			public override int GetHashCode()
+			{
+				return InterfaceType.GetHashCode() ^ InnerType.GetHashCode();
+			}
+		}
+
+		#endregion
+	}
 }

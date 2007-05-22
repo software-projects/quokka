@@ -75,6 +75,13 @@ namespace Quokka.DynamicCodeGeneration
             return builder.CreateType();
         }
 
+		public Type CreateNavigatorProxyType(Type interfaceType, Type innerType)
+		{
+			string className = NewClassName("NavigatorProxy");
+			NavigatorProxyBuilder builder = new NavigatorProxyBuilder(m_moduleBuilder, className, interfaceType, innerType);
+			return builder.CreateType();
+		}
+
         private string NewClassName(string text) {
             int classNumber = Interlocked.Increment(ref classCount);
             return dynamicClassNamespace + "." + text + classNumber;

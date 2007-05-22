@@ -1,4 +1,5 @@
 #region Copyright notice
+
 //
 // Authors: 
 //  John Jeffery <john@jeffery.id.au>
@@ -24,6 +25,7 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
+
 #endregion
 
 namespace Quokka.Uip
@@ -33,109 +35,161 @@ namespace Quokka.Uip
 	using Quokka.Reflection;
 	using Quokka.Uip.Implementation;
 
+	[Flags]
+	public enum UipNodeOptions
+	{
+		None = 0,
+		ModalView = 1,
+		StayOpen = 2,
+	}
+
 	public class UipNode
-    {
-        private readonly UipTaskDefinition task;
-        private readonly string name;
-        private readonly Type viewType;
-        private readonly Type controllerType;
-        private readonly PropertyCollection viewProperties;
-        private readonly PropertyCollection controllerProperties;
-        private readonly List<UipTransition> transitions;
-        private readonly Type controllerInterface;
+	{
+		private readonly UipTaskDefinition _task;
+		private readonly string _name;
+		private readonly Type _viewType;
+		private readonly Type _controllerType;
+		private readonly PropertyCollection _viewProperties;
+		private readonly PropertyCollection _controllerProperties;
+		private readonly List<UipTransition> _transitions;
+		private readonly Type _controllerInterface;
+		private readonly UipNodeOptions _options;
 
-        internal UipNode(UipTaskDefinition task, NodeConfig nodeConfig) {
-            this.task = task;
-            this.name = nodeConfig.Name;
-            if (nodeConfig.View != null && !String.IsNullOrEmpty(nodeConfig.View.TypeName)) {
-                this.viewType = TypeUtil.FindType(nodeConfig.View.TypeName, task.Namespaces, task.Assemblies, true);
-                this.controllerInterface = GetControllerInterfaceFromViewType(this.viewType);
-                this.viewProperties = new PropertyCollection(nodeConfig.View.Properties);
-            }
-            this.controllerType = TypeUtil.FindType(nodeConfig.Controller.TypeName, task.Namespaces, task.Assemblies);
-            this.controllerProperties = new PropertyCollection(nodeConfig.Controller.Properties);
-            this.transitions = new List<UipTransition>();
-        }
+		internal UipNode(UipTaskDefinition task, NodeConfig nodeConfig)
+		{
+			_task = task;
+			_name = nodeConfig.Name;
+			if (nodeConfig.View != null && !String.IsNullOrEmpty(nodeConfig.View.TypeName)) {
+				_viewType = TypeUtil.FindType(nodeConfig.View.TypeName, task.Namespaces, task.Assemblies, true);
+				_controllerInterface = GetControllerInterfaceFromViewType(_viewType);
+				_viewProperties = new PropertyCollection(nodeConfig.View.Properties);
+			}
+			_controllerType = TypeUtil.FindType(nodeConfig.Controller.TypeName, task.Namespaces, task.Assemblies);
+			_controllerProperties = new PropertyCollection(nodeConfig.Controller.Properties);
+			_transitions = new List<UipTransition>();
+			_options = UipNodeOptions.None;
+			if (nodeConfig.View != null) {
+				if (nodeConfig.View.OpenModal) {
+					_options |= UipNodeOptions.ModalView;
+				}
+				if (nodeConfig.View.StayOpen) {
+					_options |= UipNodeOptions.StayOpen;
+				}
+			}
+		}
 
-        internal UipNode(UipTaskDefinition taskDefinition, string name, Type viewType, Type controllerType) {
-            Assert.ArgumentNotNull(taskDefinition, "taskDefinition");
-            Assert.ArgumentNotNull(name, "name");
-            // view type can be null
-            Assert.ArgumentNotNull(controllerType, "controllerType");
+		internal UipNode(UipTaskDefinition taskDefinition,
+		                 string name,
+		                 Type viewType,
+		                 Type controllerType,
+		                 UipNodeOptions options)
+		{
+			Assert.ArgumentNotNull(taskDefinition, "taskDefinition");
+			Assert.ArgumentNotNull(name, "name");
+			// view type can be null
+			Assert.ArgumentNotNull(controllerType, "controllerType");
 
-            this.task = taskDefinition;
-            this.name = name;
-            this.viewType = viewType;
-            this.controllerInterface = GetControllerInterfaceFromViewType(viewType);
-            this.viewProperties = new PropertyCollection();
-            this.controllerType = controllerType;
-            this.controllerProperties = new PropertyCollection();
-            this.transitions = new List<UipTransition>();
-        }
+			_task = taskDefinition;
+			_name = name;
+			_viewType = viewType;
+			_controllerInterface = GetControllerInterfaceFromViewType(viewType);
+			_viewProperties = new PropertyCollection();
+			_controllerType = controllerType;
+			_controllerProperties = new PropertyCollection();
+			_transitions = new List<UipTransition>();
+			_options = options;
+		}
 
-        public string Name {
-            get { return name; }
-        }
+		public string Name
+		{
+			get { return _name; }
+		}
 
-        internal UipTaskDefinition TaskDefinition {
-            get { return this.task; }
-        }
+		internal UipTaskDefinition TaskDefinition
+		{
+			get { return _task; }
+		}
 
-        public Type ViewType {
-            get { return viewType; }
-        }
+		public Type ViewType
+		{
+			get { return _viewType; }
+		}
 
-        public Type ControllerInterface {
-            get { return controllerInterface; }
-        }
+		public Type ControllerInterface
+		{
+			get { return _controllerInterface; }
+		}
 
-        public PropertyCollection ViewProperties {
-            get { return viewProperties; }
-        }
+		public PropertyCollection ViewProperties
+		{
+			get { return _viewProperties; }
+		}
 
-        public Type ControllerType {
-            get { return controllerType; }
-        }
+		public Type ControllerType
+		{
+			get { return _controllerType; }
+		}
 
-        public PropertyCollection ControllerProperties {
-            get { return controllerProperties; }
-        }
+		public UipNodeOptions Options
+		{
+			get { return _options; }
+		}
 
-        public IList<UipTransition> Transitions {
-            get { return transitions; }
-        }
+		public bool IsViewModal
+		{
+			get { return (_options & UipNodeOptions.ModalView) != 0; }
+		}
 
-        public UipNode NavigateTo(string navigateValue, string nodeName) {
-            transitions.Add(new UipTransition(this, navigateValue, nodeName));
-            return this;
-        }
+		public bool StayOpen
+		{
+			get { return (_options & UipNodeOptions.StayOpen) != 0; }
+		}
 
-        public UipNode NavigateTo(string navigateValue, UipNode node) {
-            transitions.Add(new UipTransition(this, navigateValue, node));
-            return this;
-        }
+		public PropertyCollection ControllerProperties
+		{
+			get { return _controllerProperties; }
+		}
 
-        public bool GetNextNode(string navigateValue, out UipNode node) {
-            foreach (UipTransition transition in transitions) {
-                if (transition.NavigateValue == navigateValue) {
-                    node = transition.NextNode;
-                    return true;
-                }
-            }
-            node = null;
-            return false;
-        }
+		public IList<UipTransition> Transitions
+		{
+			get { return _transitions; }
+		}
 
-        private Type GetControllerInterfaceFromViewType(Type viewType) {
-            if (viewType != null) {
-                // look for a nested interface in the view called 'IController'
-                Type nestedType = this.viewType.GetNestedType("IController");
-                if (nestedType != null && nestedType.IsInterface) {
-                    return nestedType;
-                }
-            }
+		public UipNode NavigateTo(string navigateValue, string nodeName)
+		{
+			_transitions.Add(new UipTransition(this, navigateValue, nodeName));
+			return this;
+		}
 
-            return null;
-        }
-    }
+		public UipNode NavigateTo(string navigateValue, UipNode node)
+		{
+			_transitions.Add(new UipTransition(this, navigateValue, node));
+			return this;
+		}
+
+		public bool GetNextNode(string navigateValue, out UipNode node)
+		{
+			foreach (UipTransition transition in _transitions) {
+				if (transition.NavigateValue == navigateValue) {
+					node = transition.NextNode;
+					return true;
+				}
+			}
+			node = null;
+			return false;
+		}
+
+		private Type GetControllerInterfaceFromViewType(Type viewType)
+		{
+			if (viewType != null) {
+				// look for a nested interface in the view called 'IController'
+				Type nestedType = _viewType.GetNestedType("IController");
+				if (nestedType != null && nestedType.IsInterface) {
+					return nestedType;
+				}
+			}
+
+			return null;
+		}
+	}
 }

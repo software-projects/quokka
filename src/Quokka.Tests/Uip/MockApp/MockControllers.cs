@@ -26,15 +26,11 @@
 //
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-using NUnit.Framework;
-
 namespace Quokka.Uip.MockApp
 {
-    public class MockController1
+	using NUnit.Framework;
+
+	public class MockController1
     {
         protected readonly IUipNavigator navigator;
         protected readonly IState state;
@@ -78,11 +74,16 @@ namespace Quokka.Uip.MockApp
 
     public class MockController3
     {
-        protected readonly IUipNavigator navigator;
+		public interface INavigator
+		{
+			void Next();
+		}
+
+        protected readonly INavigator navigator;
         protected readonly MockState state;
         protected readonly IUipViewManager viewManager;
 
-        public MockController3(MockState state, IUipNavigator navigator, UipTask task, IUipViewManager viewManager) {
+        public MockController3(MockState state, INavigator navigator, UipTask task, IUipViewManager viewManager) {
             Assert.IsNotNull(state);
             Assert.IsNotNull(navigator);
             Assert.IsNotNull(task);
@@ -95,12 +96,12 @@ namespace Quokka.Uip.MockApp
 
             if (task.CurrentNode.Name == "NoViewNode") {
                 state.SetByController3 = true;
-                navigator.Navigate("Next");
+            	navigator.Next();
             }
         }
 
         public void Next() {
-            navigator.Navigate("Next");
+        	navigator.Next();
         }
     }
 }
