@@ -58,33 +58,4 @@ namespace Quokka.Uip
         void HideView(object view);
     	void ShowModalView(object view, object controller);
     }
-
-    /// <summary>
-    /// I don't know if this is a good idea.
-    /// </summary>
-    public interface IUipInteraction {
-        /// <summary>
-        ///     Display a modal information message
-        /// </summary>
-        /// <param name="message">Message</param>
-        /// <param name="caption">Caption, or message summary</param>
-        void InfoMessage(string message, string caption);
-
-        /// <summary>
-        ///     Display a modal error message
-        /// </summary>
-        /// <param name="message">Message</param>
-        /// <param name="caption">Caption, or message summary</param>
-        void ErrorMessage(string message, string caption);
-
-        /// <summary>
-        ///     Display a modal question message, whose answer is 'yes' or 'no'
-        /// </summary>
-        /// <param name="taskId"></param>
-        /// <param name="message"></param>
-        /// <param name="caption"></param>
-        /// <param name="defaultAnswer"></param>
-        /// <returns>Returns <c>true</c> for 'yes', <c>false</c> for 'no'.</returns>
-        bool AskYesNoQuestion(string message, string caption, bool defaultAnswer);
-    }
 }

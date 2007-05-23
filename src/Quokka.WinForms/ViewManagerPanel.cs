@@ -60,13 +60,13 @@ namespace Quokka.WinForms
 
         public void BeginTransition() {
             SuspendLayout();
-            WindowUtil.SetWindowRedraw(this, false);
+            Win32.SetWindowRedraw(this, false);
             Cursor.Current = Cursors.WaitCursor;
         }
 
         public void EndTransition() {
             Cursor.Current = Cursors.Default;
-            WindowUtil.SetWindowRedraw(this, true);
+            Win32.SetWindowRedraw(this, true);
             Invalidate(true);
             ResumeLayout();
         }

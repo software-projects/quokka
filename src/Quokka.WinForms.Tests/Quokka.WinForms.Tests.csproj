@@ -4,11 +4,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.50727</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{2E9F1CF5-C91E-4B40-B5F0-273C0E2ADFB6}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{BC3DF433-038F-4781-9A1E-865756FC91BA}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Quokka.WinForms</RootNamespace>
-    <AssemblyName>Quokka.WinForms</AssemblyName>
+    <RootNamespace>Quokka.WinForms.Tests</RootNamespace>
+    <AssemblyName>Quokka.WinForms.Tests</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,80 +30,52 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CustomPanel.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="MessageBoxForm.cs">
+    <Compile Include="MessageBoxTestForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MessageBoxForm.Designer.cs">
-      <DependentUpon>MessageBoxForm.cs</DependentUpon>
+    <Compile Include="MessageBoxTestForm.Designer.cs">
+      <DependentUpon>MessageBoxTestForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="MessageBoxTestForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>MessageBoxTestForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="ViewManagerPanel.cs">
-      <SubType>Component</SubType>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="Win32.cs" />
-    <Compile Include="WinFormsUipUtil.cs" />
-    <Compile Include="WizardButtonBar.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="WizardButtonBar.Designer.cs">
-      <DependentUpon>WizardButtonBar.cs</DependentUpon>
-    </Compile>
-    <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Quokka.WinForms\Quokka.WinForms.csproj">
+      <Project>{2E9F1CF5-C91E-4B40-B5F0-273C0E2ADFB6}</Project>
+      <Name>Quokka.WinForms</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Quokka\Quokka.csproj">
       <Project>{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}</Project>
       <Name>Quokka</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="MessageBoxForm.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>MessageBoxForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <SubType>Designer</SubType>
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="WizardButtonBar.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>WizardButtonBar.cs</DependentUpon>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Information.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Warning.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Failure.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Forbidden.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\NoEntry.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Question.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Success.gif" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

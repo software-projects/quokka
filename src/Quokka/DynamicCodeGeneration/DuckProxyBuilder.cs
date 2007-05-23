@@ -229,7 +229,7 @@ namespace Quokka.DynamicCodeGeneration
             return methodBuilder;
         }
 
-        void BuildNotSupportedException(ILGenerator generator, string name) {
+        private void BuildNotSupportedException(ILGenerator generator, string name) {
             Type exceptionType = typeof(NotSupportedException);
             // TODO: pass name as a parameter to the constructor
             ConstructorInfo constructor = exceptionType.GetConstructor(Type.EmptyTypes);
