@@ -143,8 +143,15 @@ namespace Quokka.WinForms
 			form.ShowDialog(this.TopLevelControl);
 		}
 
+    	private delegate UipAnswer AskQuestionDelegate(UipQuestion question);
+
     	public UipAnswer AskQuestion(UipQuestion question)
     	{
+			// This might be called from a different thread
+			if (InvokeRequired) {
+				return (UipAnswer)Invoke(new AskQuestionDelegate(AskQuestion), question);
+			}
+
     		MessageBoxForm questionForm = new MessageBoxForm();
     		questionForm.Question = question;
     		questionForm.ShowDialog(this);
