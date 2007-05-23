@@ -2,7 +2,7 @@ namespace Quokka.WinForms.Tests
 {
 	using System;
 	using System.Windows.Forms;
-	using Quokka.Uip.Interactive;
+	using Quokka.Uip;
 
 	public partial class MessageBoxTestForm : Form
 	{
@@ -15,16 +15,16 @@ namespace Quokka.WinForms.Tests
 			UipQuestion question = new UipQuestion();
 			question.MainInstruction = mainInstructionTextBox.Text;
 			question.Content = contentTextBox.Text;
-			question.MessageType = (MessageType)Enum.Parse(typeof(MessageType), messageTypeComboBox.Text, true);
-			//message.PossibleAnswers.Add(new UipMessageButton(ButtonType.OK));
-			//message.PossibleAnswers.Add(new UipMessageButton(ButtonType.Cancel));
-			question.MessageButtons.Add(new UipMessageButton(ButtonType.Yes));
-			question.MessageButtons.Add(new UipMessageButton(ButtonType.No));
-			question.MessageButtons.Add(new UipMessageButton("Do another complicated thing"));
+			question.QuestionType = (UipQuestionType)Enum.Parse(typeof(UipQuestionType), messageTypeComboBox.Text, true);
+			//message.PossibleAnswers.Add(new UipAnswer(UipAnswerType.OK));
+			//message.PossibleAnswers.Add(new UipAnswer(UipAnswerType.Cancel));
+			question.PossibleAnswers.Add(new UipAnswer(UipAnswerType.Yes));
+			question.PossibleAnswers.Add(new UipAnswer(UipAnswerType.No));
+			question.PossibleAnswers.Add(new UipAnswer("Do another complicated thing"));
 			MessageBoxForm messageBox = new MessageBoxForm();
 			messageBox.Question = question;
 			DialogResult dialogResult = messageBox.ShowDialog(this);
-			UipMessageButton pressedButton = messageBox.Question.PressedButton;
+			UipAnswer pressedButton = messageBox.Question.SelectedAnswer;
 			string text = String.Format("Return value = {0}, pressed button = {1}", dialogResult, pressedButton);
 			MessageBox.Show(this, text, Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Information);
 		}

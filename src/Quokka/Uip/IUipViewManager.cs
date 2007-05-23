@@ -57,5 +57,6 @@ namespace Quokka.Uip
         void ShowView(object view);
         void HideView(object view);
     	void ShowModalView(object view, object controller);
+    	UipAnswer AskQuestion(UipQuestion question);
     }
 }

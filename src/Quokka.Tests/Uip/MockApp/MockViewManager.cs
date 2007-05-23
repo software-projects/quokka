@@ -95,7 +95,12 @@ namespace Quokka.Uip.MockApp
 			throw new NotImplementedException();
 		}
 
-        #endregion
+		public UipAnswer AskQuestion(UipQuestion question)
+		{
+			throw new NotImplementedException();
+		}
+
+		#endregion
 
         protected void OnViewClosed(object view) {
             if (ViewClosed != null) {

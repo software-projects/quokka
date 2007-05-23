@@ -143,7 +143,15 @@ namespace Quokka.WinForms
 			form.ShowDialog(this.TopLevelControl);
 		}
 
-        #endregion
+    	public UipAnswer AskQuestion(UipQuestion question)
+    	{
+    		MessageBoxForm questionForm = new MessageBoxForm();
+    		questionForm.Question = question;
+    		questionForm.ShowDialog(this);
+    		return question.SelectedAnswer;
+    	}
+
+    	#endregion
 
         protected virtual void OnAllTasksComplete(EventArgs e) {
             if (AllTasksComplete != null) {

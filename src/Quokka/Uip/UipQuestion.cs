@@ -44,7 +44,7 @@ namespace Quokka.Uip
 			_possibleAnswers = new List<UipAnswer>();
 		}
 
-		public UipQuestionType UipQuestionType
+		public UipQuestionType QuestionType
 		{
 			get { return _questionType; }
 			set { _questionType = value; }
@@ -92,7 +92,7 @@ namespace Quokka.Uip
 			_answerType = answerType;
 		}
 
-		public UipAnswerType UipAnswerType
+		public UipAnswerType AnswerType
 		{
 			get { return _answerType; }
 		}
@@ -100,10 +100,5 @@ namespace Quokka.Uip
 		public override string ToString() {
 			return _text;
 		}
-	}
-
-	public interface IUipInteraction
-	{
-		UipAnswer AskQuestion(UipQuestion question);
 	}
 }

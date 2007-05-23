@@ -3,27 +3,27 @@ namespace Quokka.WinForms
 	using System;
 	using System.Drawing;
 	using System.Windows.Forms;
-	using Quokka.Uip.Interactive;
+	using Quokka.Uip;
 
 	public partial class MessageBoxForm : Form
 	{
-		private UipMessage uipMessage;
+		private UipQuestion _uipQuestion;
 
 		public MessageBoxForm()
 		{
 			InitializeComponent();
-			uipMessage = CreateDefaultMessage();
+			_uipQuestion = CreateDefaultMessage();
 		}
 
-		public UipMessage Message
+		public UipQuestion Question
 		{
-			get { return uipMessage; }
+			get { return _uipQuestion; }
 			set
 			{
-				if (uipMessage == null) {
+				if (_uipQuestion == null) {
 					throw new ArgumentNullException();
 				}
-				uipMessage = value;
+				_uipQuestion = value;
 			}
 		}
 
@@ -49,9 +49,9 @@ namespace Quokka.WinForms
 		{
 			bool enable = false;
 
-			foreach (UipMessageButton buttonSpec in uipMessage.MessageButtons)
+			foreach (UipAnswer buttonSpec in _uipQuestion.PossibleAnswers)
 			{
-				if (buttonSpec.ButtonType == ButtonType.Cancel) {
+				if (buttonSpec.AnswerType == UipAnswerType.Cancel) {
 					enable = true;
 					break;
 				}
@@ -60,40 +60,40 @@ namespace Quokka.WinForms
 			Win32.SetWindowCloseButtonEnabled(this, enable);
 		}
 
-		private UipMessage CreateDefaultMessage()
+		private UipQuestion CreateDefaultMessage()
 		{
-			UipMessage message = new UipMessage();
-			message.MainInstruction = "Main instruction goes here";
-			message.Content = "Content goes here";
-			message.MessageType = MessageType.Information;
-			message.MessageButtons.Add(new UipMessageButton(ButtonType.OK));
-			return message;
+			UipQuestion question = new UipQuestion();
+			question.MainInstruction = "Main instruction goes here";
+			question.Content = "Content goes here";
+			question.QuestionType = UipQuestionType.Information;
+			question.PossibleAnswers.Add(new UipAnswer(UipAnswerType.OK));
+			return question;
 		}
 
 		private void DisplayMessage()
 		{
-			mainInstructionTextBox.Text = uipMessage.MainInstruction;
-			contentTextBox.Text = uipMessage.Content;
-			switch (uipMessage.MessageType) {
-				case MessageType.Information:
+			mainInstructionTextBox.Text = _uipQuestion.MainInstruction;
+			contentTextBox.Text = _uipQuestion.Content;
+			switch (_uipQuestion.QuestionType) {
+				case UipQuestionType.Information:
 					pictureBox.Image = Properties.Resources.Information;
 					break;
-				case MessageType.Success:
+				case UipQuestionType.Success:
 					pictureBox.Image = Properties.Resources.Success;
 					break;
-				case MessageType.Question:
+				case UipQuestionType.Question:
 					pictureBox.Image = Properties.Resources.Question;
 					break;
-				case MessageType.Warning:
+				case UipQuestionType.Warning:
 					pictureBox.Image = Properties.Resources.Warning;
 					break;
-				case MessageType.Forbidden:
+				case UipQuestionType.Forbidden:
 					pictureBox.Image = Properties.Resources.Forbidden;
 					break;
-				case MessageType.Unauthorized:
+				case UipQuestionType.Unauthorized:
 					pictureBox.Image = Properties.Resources.NoEntry;
 					break;
-				case MessageType.Failure:
+				case UipQuestionType.Failure:
 				default:
 					pictureBox.Image = Properties.Resources.Failure;
 					break;
@@ -104,8 +104,8 @@ namespace Quokka.WinForms
 		{
 			Button button = null;
 			buttonFlowPanel.Controls.Clear();
-			for (int index = uipMessage.MessageButtons.Count - 1; index >= 0; --index) {
-				button = CreateButton(uipMessage.MessageButtons[index], index);
+			for (int index = _uipQuestion.PossibleAnswers.Count - 1; index >= 0; --index) {
+				button = CreateButton(_uipQuestion.PossibleAnswers[index], index);
 				buttonFlowPanel.Controls.Add(button);
 			}
 
@@ -117,7 +117,7 @@ namespace Quokka.WinForms
 			}
 		}
 
-		private Button CreateButton(UipMessageButton specification, int index)
+		private Button CreateButton(UipAnswer answer, int index)
 		{
 			Button button = new Button();
 			button.AutoSize = true;
@@ -125,12 +125,12 @@ namespace Quokka.WinForms
 			button.Name = "MessageButton" + index;
 			button.Size = new System.Drawing.Size(75, 23);
 			button.TabIndex = index;
-			button.Text = specification.ToString();
+			button.Text = answer.ToString();
 			button.UseVisualStyleBackColor = true;
-			button.Tag = specification;
+			button.Tag = answer;
 			button.Click += new EventHandler(Button_Click);
-			// TODO: this assumes that DialogResult and ButtonType values are the same (which they are at the moment).
-			button.DialogResult = (DialogResult)specification.ButtonType;
+			// TODO: this assumes that DialogResult and Answer values are the same (which they are at the moment).
+			button.DialogResult = (DialogResult)answer.AnswerType;
 			return button;
 		}
 
@@ -178,9 +178,9 @@ namespace Quokka.WinForms
 		private void Button_Click(object sender, EventArgs e)
 		{
 			Button button = (Button)sender;
-			UipMessageButton buttonSpec = (UipMessageButton)button.Tag;
-			uipMessage.PressedButton = buttonSpec;
-			DialogResult = (DialogResult)buttonSpec.ButtonType;
+			UipAnswer answer = (UipAnswer)button.Tag;
+			_uipQuestion.SelectedAnswer = answer;
+			DialogResult = (DialogResult)answer.AnswerType;
 			Close();
 		}
 	}
