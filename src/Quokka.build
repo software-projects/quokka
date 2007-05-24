@@ -104,7 +104,12 @@
     </resgen>
     -->
   <target name="Quokka.WinForms.dll" depends="Quokka.dll">
-    <csc keyfile="Quokka/Quokka.snk" target="library" output="${output.dir}/Quokka.WinForms.dll" debug="${debug}">
+		<resgen usesourcepath="true">
+			<resources basedir=".">
+				<include name="**/*.resx"/>
+			</resources>
+		</resgen>
+		<csc keyfile="Quokka/Quokka.snk" target="library" output="${output.dir}/Quokka.WinForms.dll" debug="${debug}">
       <references>
         <include name="${output.dir}/Quokka.dll"/>
       </references>
