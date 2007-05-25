@@ -58,12 +58,6 @@
     <Compile Include="Uip\UipUtils_SetControllerTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Quokka\Quokka.csproj">
-      <Project>{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}</Project>
-      <Name>Quokka</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Uip\UipTask_1.xml" />
     <EmbeddedResource Include="Uip\UipTask_2.xml" />
     <EmbeddedResource Include="Uip\UipTask_3.xml" />
@@ -76,6 +70,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Uip\MockApp\MockTask2.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Quokka.Core\Quokka.Core.csproj">
+      <Project>{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}</Project>
+      <Name>Quokka.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

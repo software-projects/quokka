@@ -51,8 +51,8 @@
   <target name="clean">
     <delete>
       <fileset>
-        <include name="Quokka/bin/**"/>
-        <include name="Quokka/obj/**"/>
+        <include name="Quokka.Core/bin/**"/>
+        <include name="Quokka.Core/obj/**"/>
         <include name="Quokka.Tests/bin/**"/>
         <include name="Quokka.Tests/obj/**"/>
         <include name="${temp.dir}/**"/>
@@ -72,7 +72,7 @@
         <!-- TBD put something meaningfule in AssemblyConfiguration -->
         <attribute type="AssemblyConfigurationAttribute" value="Debug" if="${debug == 'true'}"/>
         <attribute type="AssemblyConfigurationAttribute" value="Release" if="${debug != 'true'}"/>
-        <attribute type="AssemblyDescriptionAttribute" value="Build timestamp: ${build.timestamp}"/>
+        <attribute type="AssemblyDescriptionAttribute" value="Quokka library"/>
         <attribute type="AssemblyCompanyAttribute" value="Quokka.org"/>
         <attribute type="AssemblyProductAttribute" value="Quokka"/>
         <attribute type="AssemblyCopyrightAttribute" value="Copyright 2004-${build.year}. All Rights Reserved."/>
@@ -80,10 +80,10 @@
     </asminfo>
   </target>
 
-  <target name="Quokka.dll" depends="AssemblyInfo.tmp.cs">
+  <target name="Quokka.Core.dll" depends="AssemblyInfo.tmp.cs">
     <mkdir dir="${output.dir}"/>
-    <csc keyfile="Quokka/Quokka.snk" target="library" output="${output.dir}/Quokka.dll" debug="${debug}">
-      <resources dynamicprefix="true" prefix="Quokka" basedir="Quokka" >
+    <csc keyfile="Quokka.Core/Quokka.snk" target="library" output="${output.dir}/Quokka.Core.dll" debug="${debug}">
+      <resources dynamicprefix="true" prefix="Quokka" basedir="Quokka.Core" >
         <include name="**/*.resources"/>
         <include name="**/*.xml"/>
         <include name="**/*.xsd"/>
@@ -91,27 +91,20 @@
       </resources>
       <sources>
         <include name="AssemblyInfo.tmp.cs"/>
-        <include name="Quokka/**.cs"/>
+        <include name="Quokka.Core/**.cs"/>
       </sources>
     </csc>
   </target>
 
-    <!--
-    <resgen>
-      <resources basedir="Quokka.WinForms">
-        <include name="**/*.resx"/>
-      </resources>
-    </resgen>
-    -->
-  <target name="Quokka.WinForms.dll" depends="Quokka.dll">
+  <target name="Quokka.WinForms.dll" depends="Quokka.Core.dll">
 		<resgen usesourcepath="true">
 			<resources basedir=".">
 				<include name="**/*.resx"/>
 			</resources>
 		</resgen>
-		<csc keyfile="Quokka/Quokka.snk" target="library" output="${output.dir}/Quokka.WinForms.dll" debug="${debug}">
+		<csc keyfile="Quokka.Core/Quokka.snk" target="library" output="${output.dir}/Quokka.WinForms.dll" debug="${debug}">
       <references>
-        <include name="${output.dir}/Quokka.dll"/>
+        <include name="${output.dir}/Quokka.Core.dll"/>
       </references>
       <resources dynamicprefix="true" prefix="Quokka.WinForms" basedir="Quokka.WinForms" >
         <include name="**/*.resources"/>
@@ -124,13 +117,13 @@
     </csc>
   </target>
 
-  <target name="compile" depends="Quokka.dll,Quokka.WinForms.dll"/>
+  <target name="compile" depends="Quokka.Core.dll,Quokka.WinForms.dll"/>
 
   <target name="compile.tests" depends="compile">
     <csc target="library" output="${output.dir}/Quokka.Tests.dll" debug="${debug}">
       <references>
         <include name="${nunit.dir}/bin/NUnit.Framework.dll"/>
-        <include name="${output.dir}/Quokka.dll"/>
+        <include name="${output.dir}/Quokka.Core.dll"/>
       </references>
       <resources dynamicprefix="true" prefix="Quokka" basedir="Quokka.Tests" >
         <include name="**/*.resources"/>

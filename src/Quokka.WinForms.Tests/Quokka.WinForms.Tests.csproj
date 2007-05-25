@@ -68,13 +68,13 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Quokka.Core\Quokka.Core.csproj">
+      <Project>{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}</Project>
+      <Name>Quokka.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Quokka.WinForms\Quokka.WinForms.csproj">
       <Project>{2E9F1CF5-C91E-4B40-B5F0-273C0E2ADFB6}</Project>
       <Name>Quokka.WinForms</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Quokka\Quokka.csproj">
-      <Project>{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}</Project>
-      <Name>Quokka</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

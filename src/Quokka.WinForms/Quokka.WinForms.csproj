@@ -64,12 +64,6 @@
     <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Quokka\Quokka.csproj">
-      <Project>{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}</Project>
-      <Name>Quokka</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="MessageBoxForm.resx">
       <SubType>Designer</SubType>
       <DependentUpon>MessageBoxForm.cs</DependentUpon>
@@ -104,6 +98,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Success.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Quokka.Core\Quokka.Core.csproj">
+      <Project>{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}</Project>
+      <Name>Quokka.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
