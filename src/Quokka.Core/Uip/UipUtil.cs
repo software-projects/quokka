@@ -52,7 +52,114 @@ namespace Quokka.Uip
         /// method will attempt to create a 'Duck Proxy'.
         /// </para>
         /// </remarks>
-        public static bool SetController(object view, object controller, bool throwOnError) {
+        public static bool SetController(object view, object controller, bool throwOnError)
+        {
+			if (SetControllerMethod(view, controller, false))
+			{
+				return true;
+			}
+			
+			if (SetProperty(view, "Controller", controller))
+			{
+				return true;
+			}
+			if (throwOnError)
+			{
+				throw new QuokkaException("Cannot set controller using SetController or Controller property");
+			}
+        	return false;
+        }
+
+		public static bool SetNavigator(object controller, object navigator)
+		{
+			if (SetMethod(controller, "SetNavigator", navigator))
+			{
+				return true;
+			}
+
+			if (SetProperty(controller, "Navigator", navigator))
+			{
+				return true;
+			}
+
+			return false;
+		}
+
+		public static bool SetViewManager(object target, object viewManager)
+		{
+			return SetProperty(target, "ViewManager", viewManager);
+		}
+
+		private static bool SetProperty(object target, string propertyName, object value)
+		{
+			Type targetType = target.GetType();
+			PropertyInfo propertyInfo = targetType.GetProperty(propertyName);
+			if (propertyInfo == null)
+			{
+				return false;
+			}
+
+			if (!propertyInfo.CanWrite)
+			{
+				return false;
+			}
+
+			Type requiredType = propertyInfo.PropertyType;
+
+			if (!requiredType.IsAssignableFrom(value.GetType()))
+			{
+				// Not directly assignable, so we need to create a duck proxy.
+				// This is not possible unless the required type is an interface
+				if (!requiredType.IsInterface)
+				{
+					return false;
+				}
+
+				// create a duck proxy
+				value = ProxyFactory.CreateDuckProxy(requiredType, value);
+			}
+
+			propertyInfo.SetValue(target, value, null);
+			return true;
+		}
+
+		private static bool SetMethod(object target, string methodName, object value)
+		{
+			Type targetType = target.GetType();
+			MethodInfo methodInfo = targetType.GetMethod(methodName);
+			if (methodInfo == null)
+			{
+				return false;
+			}
+
+			ParameterInfo[] parameters = methodInfo.GetParameters();
+			if (parameters.Length != 1)
+			{
+				return false;
+			}
+
+			ParameterInfo parameterInfo = parameters[0];
+			Type requiredType = parameterInfo.ParameterType;
+
+			if (!requiredType.IsAssignableFrom(value.GetType()))
+			{
+				// Not directly assignable, so we need to create a duck proxy.
+				// This is not possible unless the required type is an interface
+				if (!requiredType.IsInterface)
+				{
+					return false;
+				}
+
+				// create a duck proxy
+				value = ProxyFactory.CreateDuckProxy(requiredType, value);
+			}
+
+			methodInfo.Invoke(target, new object[] { value });
+			return true;			
+		}
+
+
+        private static bool SetControllerMethod(object view, object controller, bool throwOnError) {
             Type viewType = view.GetType();
             MethodInfo methodInfo = viewType.GetMethod("SetController");
             if (methodInfo == null) {
@@ -110,42 +217,21 @@ namespace Quokka.Uip
         /// </para>
         /// </remarks>
         public static bool SetState(object obj, object state, bool throwOnError) {
-            Type viewType = obj.GetType();
-            MethodInfo methodInfo = viewType.GetMethod("SetState");
-            if (methodInfo == null) {
-                if (throwOnError) {
-                    throw new QuokkaException("Missing method: SetState");
-                }
-                return false;
-            }
+			if (SetMethod(obj, "SetState", state))
+			{
+				return true;
+			}
 
-            ParameterInfo[] parameters = methodInfo.GetParameters();
-            if (parameters.Length != 1) {
-                if (throwOnError) {
-                    throw new QuokkaException("Unexpected number of parameters for SetController method");
-                }
-                return false;
-            }
+			if (SetProperty(obj, "State", state))
+			{
+				return true;
+			}
 
-            ParameterInfo parameterInfo = parameters[0];
-            Type requiredControllerType = parameterInfo.ParameterType;
-
-            if (!requiredControllerType.IsAssignableFrom(state.GetType())) {
-                // Not directly assignable, so we need to create a duck proxy.
-                // This is not possible unless the required type is an interface
-                if (!requiredControllerType.IsInterface) {
-                    if (throwOnError) {
-                        throw new QuokkaException("Cannot assign controller to view, and cannot create a proxy");
-                    }
-                    return false;
-                }
-
-                // create a duck proxy
-                state = ProxyFactory.CreateDuckProxy(requiredControllerType, state);
-            }
-
-            methodInfo.Invoke(obj, new object[] { state });
-            return true;
+			if (throwOnError)
+			{
+				throw new QuokkaException("Cannot set state via SetState method or State property");
+			}
+        	return false;
         }
     }
 }

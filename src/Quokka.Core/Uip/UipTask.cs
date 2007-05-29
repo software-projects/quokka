@@ -28,6 +28,8 @@
 
 #endregion
 
+using System.ComponentModel;
+
 namespace Quokka.Uip
 {
 	using System;
@@ -50,6 +52,7 @@ namespace Quokka.Uip
 		private readonly QuokkaContainer _serviceContainer;
 		private readonly UipTaskDefinition _taskDefinition;
 		private readonly ControllerViewStore _controllersAndViews;
+		private readonly Navigator _navigator;
 		private readonly object state;
 		private UipNode _currentNode;
 		private object _currentController;
@@ -73,17 +76,17 @@ namespace Quokka.Uip
 				throw new ArgumentNullException("viewManager");
 			}
 			_taskDefinition = taskDefinition;
-			Navigator navigator = new Navigator(this);
+			_navigator = new Navigator(this);
 			_serviceContainer = new QuokkaContainer(serviceProvider);
 			_serviceContainer.AddService(typeof(IUipViewManager), viewManager);
-			_serviceContainer.AddService(typeof(IUipNavigator), navigator);
+			_serviceContainer.AddService(typeof(IUipNavigator), _navigator);
 			_serviceContainer.AddService(typeof(IUipEndTask), new EndTaskImpl(this));
 			state = ObjectFactory.Create(taskDefinition.StateType, serviceProvider, serviceProvider, this);
 			PropertyUtil.SetValues(state, taskDefinition.StateProperties);
 			_currentNode = null;
 			_controllersAndViews = new ControllerViewStore(this);
 			AddNestedStateInterfaces();
-			AddNestedNavigatorInterfaces(navigator);
+			AddNestedNavigatorInterfaces(_navigator);
 		}
 
 		#endregion
@@ -557,7 +560,7 @@ namespace Quokka.Uip
 				}
 			}
 
-			private void DisposeOfControllers(IEnumerable controllers)
+			private static void DisposeOfControllers(IEnumerable controllers)
 			{
 				foreach (object controller in controllers) {
 					DisposeOf(controller);
@@ -593,8 +596,21 @@ namespace Quokka.Uip
 					throw new UipException("Failed to create controller");
 				}
 
+				ISupportInitialize initialize = controller as ISupportInitialize;
+				if (initialize != null)
+				{
+					initialize.BeginInit();
+				}
+
 				UipUtil.SetState(controller, _task.State, false);
+				UipUtil.SetNavigator(controller, _task._navigator);
+				UipUtil.SetViewManager(controller, _task.ViewManager);
 				PropertyUtil.SetValues(controller, node.ControllerProperties);
+
+				if (initialize != null)
+				{
+					initialize.EndInit();
+				}
 				return controller;
 			}
 
