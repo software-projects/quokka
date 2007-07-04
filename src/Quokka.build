@@ -92,6 +92,7 @@
       <sources>
         <include name="AssemblyInfo.tmp.cs"/>
         <include name="Quokka.Core/**.cs"/>
+        <exclude name="**/Copy of*.cs"/>
       </sources>
     </csc>
   </target>

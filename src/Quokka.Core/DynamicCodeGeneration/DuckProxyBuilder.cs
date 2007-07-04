@@ -124,7 +124,7 @@ namespace Quokka.DynamicCodeGeneration
 				property.Name,
 				property.Attributes,
 				property.PropertyType,
-				new Type[] {property.PropertyType});
+				GetParameterTypes(property.GetIndexParameters()));
 
 			MethodInfo getMethod = property.GetGetMethod();
 			if (getMethod != null) {
@@ -167,6 +167,9 @@ namespace Quokka.DynamicCodeGeneration
 
 		private static Type[] GetParameterTypes(ParameterInfo[] parameters)
 		{
+			if (parameters == null)
+				return Type.EmptyTypes;
+
 			Type[] types = new Type[parameters.Length];
 			for (int i = 0; i < parameters.Length; ++i) {
 				types[i] = parameters[i].ParameterType;

@@ -10,5 +10,12 @@ namespace Quokka
 				throw new ArgumentNullException(paramName);
 			}
 		}
+
+		public static void IsNotNull(object obj)
+		{
+			if (obj == null) {
+				throw new NullReferenceException();
+			}
+		}
 	}
 }

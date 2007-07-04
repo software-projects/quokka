@@ -1,4 +1,5 @@
 #region Copyright notice
+
 //
 // Authors: 
 //  John Jeffery <john@jeffery.id.au>
@@ -24,6 +25,7 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
+
 #endregion
 
 using System;
@@ -32,33 +34,33 @@ using Quokka.DynamicCodeGeneration;
 
 namespace Quokka.Uip
 {
-    public static class UipUtil
-    {
-        /// <summary>
-        /// Assign a controller to a view.
-        /// </summary>
-        /// <param name="view">The view object</param>
-        /// <param name="controller">The controller to assign</param>
-        /// <param name="throwOnError">Throw an exception if the <c>SetController</c> method cannot be found.</param>
-        /// <remarks>
-        /// <para>
-        /// This method assigns a controller to a view. It looks for a public
-        /// method called <c>SetController</c> that takes one parameter, which
-        /// is the controller.
-        /// </para>
-        /// <para>
-        /// If the <c>SetController</c> method requires an interface, and the
-        /// controller does not directly implement that interface, then this 
-        /// method will attempt to create a 'Duck Proxy'.
-        /// </para>
-        /// </remarks>
-        public static bool SetController(object view, object controller, bool throwOnError)
-        {
+	public static class UipUtil
+	{
+		/// <summary>
+		/// Assign a controller to a view.
+		/// </summary>
+		/// <param name="view">The view object</param>
+		/// <param name="controller">The controller to assign</param>
+		/// <param name="throwOnError">Throw an exception if the <c>SetController</c> method cannot be found.</param>
+		/// <remarks>
+		/// <para>
+		/// This method assigns a controller to a view. It looks for a public
+		/// method called <c>SetController</c> that takes one parameter, which
+		/// is the controller.
+		/// </para>
+		/// <para>
+		/// If the <c>SetController</c> method requires an interface, and the
+		/// controller does not directly implement that interface, then this 
+		/// method will attempt to create a 'Duck Proxy'.
+		/// </para>
+		/// </remarks>
+		public static bool SetController(object view, object controller, bool throwOnError)
+		{
 			if (SetControllerMethod(view, controller, false))
 			{
 				return true;
 			}
-			
+
 			if (SetProperty(view, "Controller", controller))
 			{
 				return true;
@@ -67,8 +69,8 @@ namespace Quokka.Uip
 			{
 				throw new QuokkaException("Cannot set controller using SetController or Controller property");
 			}
-        	return false;
-        }
+			return false;
+		}
 
 		public static bool SetNavigator(object controller, object navigator)
 		{
@@ -154,69 +156,78 @@ namespace Quokka.Uip
 				value = ProxyFactory.CreateDuckProxy(requiredType, value);
 			}
 
-			methodInfo.Invoke(target, new object[] { value });
-			return true;			
+			methodInfo.Invoke(target, new object[] {value});
+			return true;
 		}
 
 
-        private static bool SetControllerMethod(object view, object controller, bool throwOnError) {
-            Type viewType = view.GetType();
-            MethodInfo methodInfo = viewType.GetMethod("SetController");
-            if (methodInfo == null) {
-                if (throwOnError) {
-                    throw new QuokkaException("Missing method: SetController");
-                }
-                return false;
-            }
+		private static bool SetControllerMethod(object view, object controller, bool throwOnError)
+		{
+			Type viewType = view.GetType();
+			MethodInfo methodInfo = viewType.GetMethod("SetController");
+			if (methodInfo == null)
+			{
+				if (throwOnError)
+				{
+					throw new QuokkaException("Missing method: SetController");
+				}
+				return false;
+			}
 
-            ParameterInfo[] parameters = methodInfo.GetParameters();
-            if (parameters.Length != 1) {
-                if (throwOnError) {
-                    throw new QuokkaException("Unexpected number of parameters for SetController method");
-                }
-                return false;
-            }
+			ParameterInfo[] parameters = methodInfo.GetParameters();
+			if (parameters.Length != 1)
+			{
+				if (throwOnError)
+				{
+					throw new QuokkaException("Unexpected number of parameters for SetController method");
+				}
+				return false;
+			}
 
-            ParameterInfo parameterInfo = parameters[0];
-            Type requiredControllerType = parameterInfo.ParameterType;
+			ParameterInfo parameterInfo = parameters[0];
+			Type requiredControllerType = parameterInfo.ParameterType;
 
-            if (!requiredControllerType.IsAssignableFrom(controller.GetType())) {
-                // Not directly assignable, so we need to create a duck proxy.
-                // This is not possible unless the required type is an interface
-                if (!requiredControllerType.IsInterface) {
-                    if (throwOnError) {
-                        throw new QuokkaException("Cannot assign controller to view, and cannot create a proxy");
-                    }
-                    return false;
-                }
+			if (!requiredControllerType.IsAssignableFrom(controller.GetType()))
+			{
+				// Not directly assignable, so we need to create a duck proxy.
+				// This is not possible unless the required type is an interface
+				if (!requiredControllerType.IsInterface)
+				{
+					if (throwOnError)
+					{
+						throw new QuokkaException("Cannot assign controller to view, and cannot create a proxy");
+					}
+					return false;
+				}
 
-                // create a duck proxy
-                controller = ProxyFactory.CreateDuckProxy(requiredControllerType, controller);
-            }
+				// create a duck proxy
+				controller = ProxyFactory.CreateDuckProxy(requiredControllerType, controller);
+			}
 
-            methodInfo.Invoke(view, new object[] { controller });
-            return true;
-        }
+			methodInfo.Invoke(view, new object[] {controller});
+			return true;
+		}
 
-        /// <summary>
-        /// Assign a state to a view or a controller.
-        /// </summary>
-        /// <param name="obj">The view or controller object</param>
-        /// <param name="state">The state object to assign</param>
-        /// <param name="throwOnError">Throw an error if the <c>SetState</c> method cannot be found.</param>
-        /// <remarks>
-        /// <para>
-        /// This method assigns a state object to a view or controller. It looks for a public
-        /// method called <c>SetState</c> that takes one parameter, which
-        /// is the state.
-        /// </para>
-        /// <para>
-        /// If the <c>SetState</c> method requires an interface, and the
-        /// controller does not directly implement that interface, then this 
-        /// method will attempt to create a 'Duck Proxy'.
-        /// </para>
-        /// </remarks>
-        public static bool SetState(object obj, object state, bool throwOnError) {
+		/// <summary>
+		/// Assign a state to a view or a controller.
+		/// </summary>
+		/// <param name="obj">The view or controller object</param>
+		/// <param name="state">The state object to assign</param>
+		/// <param name="throwOnError">Throw an error if the <c>SetState</c> method cannot be found.</param>
+		/// <remarks>
+		/// <para>
+		/// This method assigns a state object to a view or controller. It looks for a public
+		/// method called <c>SetState</c> that takes one parameter, which
+		/// is the state.
+		/// </para>
+		/// <para>
+		/// If the <c>SetState</c> method requires an interface, and the
+		/// controller does not directly implement that interface, then this 
+		/// method will attempt to create a 'Duck Proxy'.
+		/// </para>
+		/// </remarks>
+		public static bool SetState(object obj, object state, bool throwOnError)
+		{
 			if (SetMethod(obj, "SetState", state))
 			{
 				return true;
@@ -231,7 +242,7 @@ namespace Quokka.Uip
 			{
 				throw new QuokkaException("Cannot set state via SetState method or State property");
 			}
-        	return false;
-        }
-    }
+			return false;
+		}
+	}
 }

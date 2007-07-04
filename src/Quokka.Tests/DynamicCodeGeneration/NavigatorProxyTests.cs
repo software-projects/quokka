@@ -1,11 +1,12 @@
 namespace Quokka.DynamicCodeGeneration
 {
 	using System;
+	using System.Collections.Generic;
 	using NUnit.Framework;
 	using Quokka.Uip;
 
 	[TestFixture]
-	public class NavigatorProxyTests
+	public class NavigatorProxyTests : CodeBuilderTestBase
 	{
 		private Navigator _inner;
 
@@ -13,60 +14,53 @@ namespace Quokka.DynamicCodeGeneration
 		public void SetUp()
 		{
 			_inner = new Navigator();
+			CreateAssemblyBuilder();
+		}
+
+		[TearDown]
+		public void TearDown()
+		{
+			VerifyAssembly();
 		}
 
 		public class Navigator : IUipNavigator
 		{
 			public string LastMethodCalled;
+			private readonly List<string> navigateValues = new List<string>();
 
 			public bool CanNavigate(string navigateValue)
 			{
-				throw new NotImplementedException();
+				return navigateValues.Contains(navigateValue);
 			}
 
 			public void Navigate(string navigateValue)
 			{
 				LastMethodCalled = navigateValue;
 			}
+
+			public void AddNavigateValues(params string[] values)
+			{
+				navigateValues.Clear();
+				navigateValues.AddRange(values);
+			}
 		}
 
-		public interface INavigator
+		public interface INavigatorNextBack
 		{
 			void Next();
 			void Back();
-		}
-
-		public interface INavigatorWithProperties
-		{
-			void Next();
-			string Property { get; }
-		}
-
-		public interface INavigatorWithEvent
-		{
-			void Next();
-			event EventHandler SomeEvent;
-		}
-
-		public interface INavigatorWithWrongReturnType
-		{
-			string Next();
-		}
-
-		public interface INavigatorWithWrongMethodSignature
-		{
-			void Next(string s);
-		}
-
-		public class NavigatorWithMissingNavigateMethod
-		{
-			public void NotNavigate() {}
+			bool CanNavigateNext { get; }
 		}
 
 		[Test]
-		public void Navigate()
+		public void NavigateNextBack()
 		{
-			INavigator navigator = ProxyFactory.CreateNavigatorProxy<INavigator>(_inner);
+			NavigatorProxyBuilder builder =
+				new NavigatorProxyBuilder(moduleBuilder, "Class1", typeof(INavigatorNextBack), typeof(Navigator));
+			Assert.IsTrue(builder.CanCreateType);
+
+			Type proxyType = builder.CreateType();
+			INavigatorNextBack navigator = CreateProxy<INavigatorNextBack, Navigator>(proxyType, _inner);
 
 			Assert.IsNull(_inner.LastMethodCalled);
 			navigator.Next();
@@ -75,49 +69,90 @@ namespace Quokka.DynamicCodeGeneration
 			Assert.AreEqual("Back", _inner.LastMethodCalled);
 			navigator.Next();
 			Assert.AreEqual("Next", _inner.LastMethodCalled);
+
+			Assert.IsFalse(navigator.CanNavigateNext);
+			_inner.AddNavigateValues("Next");
+			Assert.IsTrue(navigator.CanNavigateNext);
+
+		}
+
+		public enum NavigateValue
+		{
+			One,
+			Two,
+			Three
+		}
+
+		public interface INavigatorEnum
+		{
+			bool CanNavigate(NavigateValue navigateValue);
+			void Navigate(NavigateValue navigateValue);
 		}
 
 		[Test]
-		public void WrapperTypeCache()
+		public void NavigatorEnum()
 		{
-			Type wrapperType1 = ProxyFactory.GetNavigatorProxyType(typeof(INavigator), typeof(Navigator));
-			Type wrapperType2 = ProxyFactory.GetNavigatorProxyType(typeof(INavigator), typeof(Navigator));
-			Assert.AreSame(wrapperType1, wrapperType2);
+			NavigatorProxyBuilder builder =
+				new NavigatorProxyBuilder(moduleBuilder, "Class1", typeof(INavigatorEnum), typeof(Navigator));
+			Assert.IsTrue(builder.CanCreateType);
+
+			Type proxyType = builder.CreateType();
+			INavigatorEnum navigator = CreateProxy<INavigatorEnum, Navigator>(proxyType, _inner);
+
+			_inner.AddNavigateValues("One", "Two");
+			Assert.IsTrue(navigator.CanNavigate(NavigateValue.One));
+			Assert.IsTrue(navigator.CanNavigate(NavigateValue.Two));
+			Assert.IsFalse(navigator.CanNavigate(NavigateValue.Three));
+
+			Assert.IsNull(_inner.LastMethodCalled);
+
+			navigator.Navigate(NavigateValue.One);
+			Assert.AreEqual("One", _inner.LastMethodCalled);
+
+			navigator.Navigate(NavigateValue.Two);
+			Assert.AreEqual("Two", _inner.LastMethodCalled);
+		}
+
+		public interface INavigatorMix
+		{
+			bool CanNavigate(NavigateValue navigateValue);
+			void Navigate(NavigateValue navigateValue);
+
+			bool CanNavigateTwo { get; }
+			void One();
 		}
 
 		[Test]
-		[ExpectedException(typeof(ArgumentException))]
-		public void NavigatorWithProperties()
+		public void NavigatorMix()
 		{
-			ProxyFactory.CreateNavigatorProxy<INavigatorWithProperties>(_inner);
-		}
+			NavigatorProxyBuilder builder =
+				new NavigatorProxyBuilder(moduleBuilder, "Class1", typeof(INavigatorMix), typeof(Navigator));
+			Assert.IsTrue(builder.CanCreateType);
 
-		[Test]
-		[ExpectedException(typeof(ArgumentException))]
-		public void NavigatorWithEvent()
-		{
-			ProxyFactory.CreateNavigatorProxy<INavigatorWithEvent>(_inner);
-		}
+			Type proxyType = builder.CreateType();
+			INavigatorMix navigator = CreateProxy<INavigatorMix, Navigator>(proxyType, _inner);
 
-		[Test]
-		[ExpectedException(typeof(ArgumentException))]
-		public void NavigatorWithWrongReturnType()
-		{
-			ProxyFactory.CreateNavigatorProxy<INavigatorWithWrongReturnType>(_inner);
-		}
+			Assert.IsFalse(navigator.CanNavigateTwo);
+			Assert.IsFalse(navigator.CanNavigate(NavigateValue.One));
+			Assert.IsFalse(navigator.CanNavigate(NavigateValue.Two));
+			Assert.IsFalse(navigator.CanNavigate(NavigateValue.Three));
 
-		[Test]
-		[ExpectedException(typeof(ArgumentException))]
-		public void NavigatorWithWrongMethodSignature()
-		{
-			ProxyFactory.CreateNavigatorProxy<INavigatorWithWrongMethodSignature>(_inner);
-		}
+			_inner.AddNavigateValues("One", "Two");
+			Assert.IsTrue(navigator.CanNavigate(NavigateValue.One));
+			Assert.IsTrue(navigator.CanNavigate(NavigateValue.Two));
+			Assert.IsFalse(navigator.CanNavigate(NavigateValue.Three));
+			Assert.IsTrue(navigator.CanNavigateTwo);
 
-		[Test]
-		[ExpectedException(typeof(ArgumentException))]
-		public void NavigatorWithMissingMethod()
-		{
-			ProxyFactory.CreateNavigatorProxy<INavigator>(new NavigatorWithMissingNavigateMethod());
+			Assert.IsNull(_inner.LastMethodCalled);
+
+			navigator.Navigate(NavigateValue.One);
+			Assert.AreEqual("One", _inner.LastMethodCalled);
+
+			navigator.Navigate(NavigateValue.Two);
+			Assert.AreEqual("Two", _inner.LastMethodCalled);
+
+			navigator.One();
+			Assert.AreEqual("One", _inner.LastMethodCalled);
 		}
 	}
 }
