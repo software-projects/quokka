@@ -56,35 +56,40 @@ namespace Quokka.Uip
 		/// </remarks>
 		public static bool SetController(object view, object controller, bool throwOnError)
 		{
+			bool result = false;
+
 			if (SetControllerMethod(view, controller, false))
 			{
-				return true;
+				result = true;
 			}
 
 			if (SetProperty(view, "Controller", controller))
 			{
-				return true;
+				result = true;
 			}
-			if (throwOnError)
+			if (!result && throwOnError)
 			{
 				throw new QuokkaException("Cannot set controller using SetController or Controller property");
 			}
-			return false;
+
+			return result;
 		}
 
 		public static bool SetNavigator(object controller, object navigator)
 		{
+			bool result = false;
+
 			if (SetMethod(controller, "SetNavigator", navigator))
 			{
-				return true;
+				result = true;
 			}
 
 			if (SetProperty(controller, "Navigator", navigator))
 			{
-				return true;
+				result = true;
 			}
 
-			return false;
+			return result;
 		}
 
 		public static bool SetViewManager(object target, object viewManager)
