@@ -155,6 +155,9 @@ namespace Quokka.WinForms
     		MessageBoxForm questionForm = new MessageBoxForm();
     		questionForm.Question = question;
     		questionForm.ShowDialog(this);
+			if (question.SelectedAnswer != null && question.SelectedAnswer.Callback != null) {
+				question.SelectedAnswer.Callback();
+			}
     		return question.SelectedAnswer;
     	}
 
