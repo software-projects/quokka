@@ -13,8 +13,8 @@
     <CanBeNullValueAttribute>
     </CanBeNullValueAttribute>
   </CodeInspection>
+  	<Sharing>EXTERNAL</Sharing>
+  	<ExternalPath>Quokka.CodeStyle.xml</ExternalPath>
   <CodeStyleSettings>
-    <Sharing>EXTERNAL</Sharing>
-    <ExternalPath>D:\Projects\Quokka\src\Quokka.CodeStyle.xml</ExternalPath>
   </CodeStyleSettings>
 </Configuration>
