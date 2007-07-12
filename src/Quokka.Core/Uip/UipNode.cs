@@ -173,7 +173,7 @@ namespace Quokka.Uip
 		public bool GetNextNode(string navigateValue, out UipNode node)
 		{
 			foreach (UipTransition transition in _transitions) {
-				if (transition.NavigateValue == navigateValue) {
+				if (StringComparer.InvariantCultureIgnoreCase.Compare(transition.NavigateValue, navigateValue) == 0) {
 					node = transition.NextNode;
 					return true;
 				}
