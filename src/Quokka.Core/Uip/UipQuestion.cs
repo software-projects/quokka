@@ -72,12 +72,29 @@ namespace Quokka.Uip
 		{
 			get { return _possibleAnswers; }
 		}
+
+		public UipAnswer AddAnswer(UipAnswerType answerType)
+		{
+			UipAnswer answer = new UipAnswer(answerType);
+			_possibleAnswers.Add(answer);
+			return answer;
+		}
+
+		public UipAnswer AddAnswer(string text)
+		{
+			UipAnswer answer = new UipAnswer(text);
+			_possibleAnswers.Add(answer);
+			return answer;
+		}
 	}
+
+	public delegate void UipAnswerCallback();
 
 	public class UipAnswer
 	{
 		private readonly string _text;
 		private readonly UipAnswerType _answerType;
+		private UipAnswerCallback _callback;
 
 		public UipAnswer(string text) {
 			_text = text;
@@ -95,6 +112,12 @@ namespace Quokka.Uip
 		public UipAnswerType AnswerType
 		{
 			get { return _answerType; }
+		}
+
+		public UipAnswerCallback Callback
+		{
+			get { return _callback; }
+			set { _callback = value; }
 		}
 
 		public override string ToString() {
