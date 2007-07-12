@@ -58,15 +58,16 @@ namespace Quokka.Uip
 		{
 			bool result = false;
 
-			if (SetControllerMethod(view, controller, false))
+			if (SetMethod(view, "SetController", ProxyType.DuckProxy, controller))
 			{
 				result = true;
 			}
 
-			if (SetProperty(view, "Controller", controller))
+			if (SetProperty(view, "Controller", ProxyType.DuckProxy, controller))
 			{
 				result = true;
 			}
+
 			if (!result && throwOnError)
 			{
 				throw new QuokkaException("Cannot set controller using SetController or Controller property");
@@ -75,16 +76,16 @@ namespace Quokka.Uip
 			return result;
 		}
 
-		public static bool SetNavigator(object controller, object navigator)
+		public static bool SetNavigator(object target, object navigator)
 		{
 			bool result = false;
 
-			if (SetMethod(controller, "SetNavigator", navigator))
+			if (SetMethod(target, "SetNavigator", ProxyType.NavigatorProxy, navigator))
 			{
 				result = true;
 			}
 
-			if (SetProperty(controller, "Navigator", navigator))
+			if (SetProperty(target, "Navigator", ProxyType.NavigatorProxy, navigator))
 			{
 				result = true;
 			}
@@ -94,10 +95,56 @@ namespace Quokka.Uip
 
 		public static bool SetViewManager(object target, object viewManager)
 		{
-			return SetProperty(target, "ViewManager", viewManager);
+			bool result = false;
+
+			if (SetMethod(target, "SetViewManager", ProxyType.DuckProxy, viewManager)) {
+				result = true;
+			}
+
+			if (SetProperty(target, "ViewManager", ProxyType.DuckProxy, viewManager)) {
+				result = true;
+			}
+
+			return result;
 		}
 
-		private static bool SetProperty(object target, string propertyName, object value)
+		/// <summary>
+		/// Assign a state to a view or a controller.
+		/// </summary>
+		/// <param name="obj">The view or controller object</param>
+		/// <param name="state">The state object to assign</param>
+		/// <param name="throwOnError">Throw an error if the <c>SetState</c> method cannot be found.</param>
+		/// <remarks>
+		/// <para>
+		/// This method assigns a state object to a view or controller. It looks for a public
+		/// method called <c>SetState</c> that takes one parameter, which
+		/// is the state.
+		/// </para>
+		/// <para>
+		/// If the <c>SetState</c> method requires an interface, and the
+		/// controller does not directly implement that interface, then this 
+		/// method will attempt to create a 'Duck Proxy'.
+		/// </para>
+		/// </remarks>
+		public static bool SetState(object obj, object state, bool throwOnError) {
+			bool result = false;
+
+			if (SetMethod(obj, "SetState", ProxyType.DuckProxy, state)) {
+				result = true;
+			}
+
+			if (SetProperty(obj, "State", ProxyType.DuckProxy, state)) {
+				result = true;
+			}
+
+			if (!result && throwOnError) {
+				throw new QuokkaException("Cannot set state via SetState method or State property");
+			}
+
+			return result;
+		}
+
+		private static bool SetProperty(object target, string propertyName, ProxyType proxyType, object value)
 		{
 			Type targetType = target.GetType();
 			PropertyInfo propertyInfo = targetType.GetProperty(propertyName);
@@ -123,14 +170,14 @@ namespace Quokka.Uip
 				}
 
 				// create a duck proxy
-				value = ProxyFactory.CreateDuckProxy(requiredType, value);
+				value = ProxyFactory.CreateProxy(requiredType, proxyType, value);
 			}
 
 			propertyInfo.SetValue(target, value, null);
 			return true;
 		}
 
-		private static bool SetMethod(object target, string methodName, object value)
+		private static bool SetMethod(object target, string methodName, ProxyType proxyType, object value)
 		{
 			Type targetType = target.GetType();
 			MethodInfo methodInfo = targetType.GetMethod(methodName);
@@ -157,97 +204,12 @@ namespace Quokka.Uip
 					return false;
 				}
 
-				// create a duck proxy
-				value = ProxyFactory.CreateDuckProxy(requiredType, value);
+				// create a proxy
+				value = ProxyFactory.CreateProxy(requiredType, proxyType, value);
 			}
 
 			methodInfo.Invoke(target, new object[] {value});
 			return true;
-		}
-
-
-		private static bool SetControllerMethod(object view, object controller, bool throwOnError)
-		{
-			Type viewType = view.GetType();
-			MethodInfo methodInfo = viewType.GetMethod("SetController");
-			if (methodInfo == null)
-			{
-				if (throwOnError)
-				{
-					throw new QuokkaException("Missing method: SetController");
-				}
-				return false;
-			}
-
-			ParameterInfo[] parameters = methodInfo.GetParameters();
-			if (parameters.Length != 1)
-			{
-				if (throwOnError)
-				{
-					throw new QuokkaException("Unexpected number of parameters for SetController method");
-				}
-				return false;
-			}
-
-			ParameterInfo parameterInfo = parameters[0];
-			Type requiredControllerType = parameterInfo.ParameterType;
-
-			if (!requiredControllerType.IsAssignableFrom(controller.GetType()))
-			{
-				// Not directly assignable, so we need to create a duck proxy.
-				// This is not possible unless the required type is an interface
-				if (!requiredControllerType.IsInterface)
-				{
-					if (throwOnError)
-					{
-						throw new QuokkaException("Cannot assign controller to view, and cannot create a proxy");
-					}
-					return false;
-				}
-
-				// create a duck proxy
-				controller = ProxyFactory.CreateDuckProxy(requiredControllerType, controller);
-			}
-
-			methodInfo.Invoke(view, new object[] {controller});
-			return true;
-		}
-
-		/// <summary>
-		/// Assign a state to a view or a controller.
-		/// </summary>
-		/// <param name="obj">The view or controller object</param>
-		/// <param name="state">The state object to assign</param>
-		/// <param name="throwOnError">Throw an error if the <c>SetState</c> method cannot be found.</param>
-		/// <remarks>
-		/// <para>
-		/// This method assigns a state object to a view or controller. It looks for a public
-		/// method called <c>SetState</c> that takes one parameter, which
-		/// is the state.
-		/// </para>
-		/// <para>
-		/// If the <c>SetState</c> method requires an interface, and the
-		/// controller does not directly implement that interface, then this 
-		/// method will attempt to create a 'Duck Proxy'.
-		/// </para>
-		/// </remarks>
-		public static bool SetState(object obj, object state, bool throwOnError)
-		{
-			if (SetMethod(obj, "SetState", state))
-			{
-				return true;
-			}
-
-			if (SetProperty(obj, "State", state))
-			{
-				return true;
-			}
-
-			if (throwOnError)
-			{
-				throw new QuokkaException("Cannot set state via SetState method or State property");
-			}
-			return false;
 		}
 	}
 }

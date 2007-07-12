@@ -34,6 +34,12 @@ namespace Quokka.DynamicCodeGeneration
 	using System.Collections.Generic;
 	using System.Reflection;
 
+	public enum ProxyType
+	{
+		DuckProxy,
+		NavigatorProxy,
+	}
+
 	public static class ProxyFactory
 	{
 		private static readonly ProxyStore duckProxyStore;
@@ -44,6 +50,18 @@ namespace Quokka.DynamicCodeGeneration
 		{
 			duckProxyStore = new ProxyStore();
 			navigatorProxyStore = new ProxyStore();
+		}
+
+		public static object CreateProxy(Type interfaceType, ProxyType proxyType, object inner)
+		{
+			switch (proxyType) {
+				case ProxyType.DuckProxy:
+					return CreateDuckProxy(interfaceType, inner);
+				case ProxyType.NavigatorProxy:
+					return CreateNavigatorProxy(interfaceType, inner);
+				default:
+					throw new NotSupportedException();
+			}
 		}
 
 		#region Duck proxy
@@ -155,7 +173,6 @@ namespace Quokka.DynamicCodeGeneration
 		}
 
 		#endregion
-
 	}
 
 	internal class ProxyStore
