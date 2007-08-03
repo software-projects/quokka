@@ -109,6 +109,37 @@ namespace Quokka
             Assert.AreSame(i1, i2);
         }
 
+		[Test]
+		public void AddServices()
+		{
+			ServiceContainer container = new ServiceContainer();
+
+			Type[] types = new Type[] {
+					typeof(IInterface1), typeof(Class1),
+					typeof(IInterface2), typeof(Class2),
+					typeof(IInterface3), typeof(Class3),
+			};
+
+			ServiceContainerUtil.AddServices(container, types);
+
+			Assert.IsInstanceOfType(typeof(Class1), container.GetService(typeof(IInterface1)));
+			Assert.IsInstanceOfType(typeof(Class2), container.GetService(typeof(IInterface2)));
+			Assert.IsInstanceOfType(typeof(Class3), container.GetService(typeof(IInterface3)));
+		}
+
+		[Test]
+		[ExpectedException(typeof(ArgumentException))]
+		public void AddServicesFailsIfOddNumberOfItems()
+		{
+			ServiceContainer container = new ServiceContainer();
+			Type[] types = new Type[] {
+					typeof(IInterface1), typeof(Class1),
+					typeof(IInterface2), typeof(Class2),
+					typeof(IInterface3), 
+			};
+			ServiceContainerUtil.AddServices(container, types);
+		}
+
         #region Test interfaces
 
         public interface IInterface1
