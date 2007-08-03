@@ -45,6 +45,22 @@ namespace Quokka
             container.AddService(serviceType, callback, promote);
         }
 
+		public static void AddServices(IServiceContainer container, IList<Type> types)
+		{
+			if (container == null)
+				throw new ArgumentNullException("container");
+			if (types == null)
+				throw new ArgumentNullException("types");
+			if (types.Count % 2 != 0)
+				throw new ArgumentException("types must have an even number of items");
+
+			for (int index = 0; index < types.Count; index += 2) {
+				Type serviceType = types[index];
+				Type serviceInstanceType = types[index + 1];
+				AddService(container, serviceType, serviceInstanceType);
+			}
+		}
+
         public static ServiceCreatorCallback CreateCallback(Type serviceType, Type serviceInstanceType) {
             if (serviceType == null)
                 throw new ArgumentNullException("serviceType");
