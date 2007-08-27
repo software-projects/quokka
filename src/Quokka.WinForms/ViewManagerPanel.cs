@@ -118,11 +118,15 @@ namespace Quokka.WinForms
     	}
 
         public void ShowView(object view) {
-            foreach (Control c in Controls) {
-                c.Visible = false;
-            }
-            Control control = (Control)view;
-            control.Visible = true;
+			Control control = (Control)view;
+			control.Visible = true; 
+			foreach (Control c in Controls)
+			{
+				if (!Object.ReferenceEquals(c, control)) {
+					c.Visible = false;
+				}
+			}
+
         }
 
         public void HideView(object view) {

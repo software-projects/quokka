@@ -35,6 +35,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommandLink.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="CustomPanel.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -104,6 +107,11 @@
       <Project>{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}</Project>
       <Name>Quokka.Core</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Arrow.gif" />
+    <EmbeddedResource Include="Resources\SelectedArrow.gif" />
+    <EmbeddedResource Include="Resources\Shield.gif" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

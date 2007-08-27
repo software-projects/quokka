@@ -36,6 +36,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommandLinkTestForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CommandLinkTestForm.Designer.cs">
+      <DependentUpon>CommandLinkTestForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MessageBoxTestForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -44,6 +50,10 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="CommandLinkTestForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>CommandLinkTestForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MessageBoxTestForm.resx">
       <SubType>Designer</SubType>
       <DependentUpon>MessageBoxTestForm.cs</DependentUpon>

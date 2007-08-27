@@ -13,7 +13,7 @@ namespace Quokka.WinForms.Tests
 		static void Main() {
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new MessageBoxTestForm());
+			Application.Run(new CommandLinkTestForm());
 		}
 	}
 }

@@ -17,6 +17,9 @@ namespace Quokka.WinForms
 		private const int MF_BYCOMMAND = 0;
 		private const int SC_CLOSE = 0xf060;
 		private const int WM_SETREDRAW = 0x000b;
+		public const int BS_COMMANDLINK = 0x0000000E;
+		public const int BCM_SETNOTE = 0x00001609;
+		public const int BCM_SETSHIELD = 0x0000160C; 
 
 		public static void SetWindowRedraw(IWin32Window window, bool redraw) {
 			SendMessage(window, WM_SETREDRAW, redraw ? 1 : 0, 0);
@@ -42,14 +45,24 @@ namespace Quokka.WinForms
 			User32.EnableMenuItem(hmenu, SC_CLOSE, flags);
 		}
 
-		#region Private methods
+		public static int SendMessage(IWin32Window window, int msg, int wparam, int lparam)
+		{
+			if (window.Handle == IntPtr.Zero)
+			{
+				throw new ArgumentNullException("window");
+			}
+			return User32.SendMessage(window.Handle, msg, wparam, lparam);
+		}
 
-		private static int SendMessage(IWin32Window window, int msg, int wparam, int lparam) {
+		public static int SendMessage(IWin32Window window, int msg, int wparam, string lparam)
+		{
 			if (window.Handle == IntPtr.Zero) {
 				throw new ArgumentNullException("window");
 			}
 			return User32.SendMessage(window.Handle, msg, wparam, lparam);
 		}
+
+		#region Private methods
 
 		private static void ThrowWin32Exception()
 		{
@@ -65,6 +78,9 @@ namespace Quokka.WinForms
 		{
 			[DllImport("user32", SetLastError=true)]
 			public static extern int SendMessage(IntPtr hwnd, int msg, int wparam, int lparam);
+
+			[DllImport("user32", CharSet = CharSet.Unicode, SetLastError=true)]
+			public static extern int SendMessage(IntPtr hwnd, int msg, int wparam, string lparam);
 
 			[DllImport("user32", SetLastError=true)]
 			public static extern IntPtr GetSystemMenu(IntPtr hwnd, int revert);
