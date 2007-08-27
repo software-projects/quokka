@@ -13,8 +13,4 @@
     <CanBeNullValueAttribute>
     </CanBeNullValueAttribute>
   </CodeInspection>
-  	<Sharing>EXTERNAL</Sharing>
-  	<ExternalPath>Quokka.CodeStyle.xml</ExternalPath>
-  <CodeStyleSettings>
-  </CodeStyleSettings>
 </Configuration>

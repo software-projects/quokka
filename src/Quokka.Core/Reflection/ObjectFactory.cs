@@ -108,7 +108,7 @@ namespace Quokka.Reflection
             }
 
             if (chosenConstructor == null) {
-                throw new QuokkaException("No public constructors for type: " + objectType.ToString());
+                throw new QuokkaException("No public constructors for type: " + objectType);
             }
 
             return chosenConstructor;

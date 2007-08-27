@@ -72,42 +72,42 @@ namespace Quokka.Uip.Implementation
 
         [XmlElement("Using")]
         public List<UsingNamespaceConfig> UsingNamespaces {
-            get { return this._usingNamespaces; }
-            set { this._usingNamespaces = value; }
+            get { return _usingNamespaces; }
+            set { _usingNamespaces = value; }
         }
 
         [XmlElement("State")]
         public ObjectTypeConfig State {
-            get { return this._state; }
-            set { this._state = value; }
+            get { return _state; }
+            set { _state = value; }
         }
 
         [XmlElement("StatePersist")]
         public ObjectTypeConfig StatePersist {
-            get { return this._statePersist; }
-            set { this._statePersist = value; }
+            get { return _statePersist; }
+            set { _statePersist = value; }
         }
 
         [XmlElement("ViewManager")]
         public ObjectTypeConfig ViewManager {
-            get { return this._viewManager; }
-            set { this._viewManager = value; }
+            get { return _viewManager; }
+            set { _viewManager = value; }
         }
 
         [XmlElement("NavigationGraph")]
         public NavigationGraphConfig NavigationGraph {
             get {
-                return this._navigationGraph;
+                return _navigationGraph;
             }
             set {
-                this._navigationGraph = value;
+                _navigationGraph = value;
             }
         }
 
         [XmlAttribute("Name")]
         public string Name {
-            get { return this._name; }
-            set { this._name = value; }
+            get { return _name; }
+            set { _name = value; }
         }
     }
 }

@@ -39,9 +39,8 @@ namespace Quokka.Uip
     /// </summary>
     public static class UipManager
     {
+		private static UipTaskDefinitionStore store = new UipTaskDefinitionStore();
         private static QuokkaContainer serviceContainer;
-        private static readonly List<Assembly> assemblies = new List<Assembly>();
-        private static readonly Dictionary<string, UipTaskDefinition> taskDefinitions = new Dictionary<string, UipTaskDefinition>();
         private static readonly IList<UipTask> activeTasks = new List<UipTask>();
 
         #region Public events
@@ -95,21 +94,31 @@ namespace Quokka.Uip
         /// Call this method for all relevant assemblies prior to loading task definitions.
         /// </remarks>
         public static void AddAssembly(Assembly assembly) {
-            if (!assemblies.Contains(assembly)) {
-                assemblies.Add(assembly);
-            }
+			if (!store.Assemblies.Contains(assembly)) {
+				store.Assemblies.Add(assembly);
+			}
         }
+
+		/// <summary>
+		/// Define a UIP task using a callback delegate
+		/// </summary>
+		/// <param name="name">Name of the task</param>
+		/// <param name="callback">Callback delegate that will create the task definition when required.</param>
+		public static void DefineTask(string name, UipTaskDefinitionCreatorCallback callback)
+		{
+			store.DefineTask(name, callback);
+		}
 
         /// <summary>
         /// Load a task definition from an input stream
         /// </summary>
         /// <param name="stream">Input stream</param>
-        public static void LoadTaskDefinition(Stream stream) {
+        public static void DefineTask(Stream stream) {
             if (stream == null)
                 throw new ArgumentNullException("stream");
             TaskConfig taskConfig = TaskConfig.Create(stream);
-            UipTaskDefinition taskDefinition = new UipTaskDefinition(taskConfig, assemblies);
-            taskDefinitions[taskConfig.Name] = taskDefinition;
+            UipTaskDefinition taskDefinition = new UipTaskDefinition(taskConfig, store.Assemblies);
+        	store.Add(taskDefinition);
         }
 
         /// <summary>
@@ -117,7 +126,7 @@ namespace Quokka.Uip
         /// </summary>
         /// <param name="type">Type used for locating the embedded resource.</param>
         /// <param name="name">Embedded resource name.</param>
-        public static void LoadTaskDefinition(Type type, string name) {
+        public static void DefineTask(Type type, string name) {
             if (type == null)
                 throw new ArgumentNullException("type");
             if (name == null)
@@ -127,38 +136,59 @@ namespace Quokka.Uip
                 if (stream == null) {
                     throw new UipException("Cannot load task: " + name);
                 }
-                LoadTaskDefinition(stream);
+                DefineTask(stream);
             }
         }
 
         /// <summary>
-        /// Load many task definitions from embedded resources
+        /// Define many tasks from embedded resources
         /// </summary>
         /// <param name="type">Type used for locating the embedded resources.</param>
         /// <param name="names">Embedded resource names.</param>
-        public static void LoadTaskDefinitions(Type type, params string[] names) {
+        public static void DefineTasks(Type type, params string[] names) {
             foreach (string name in names) {
-                LoadTaskDefinition(type, name);
+                DefineTask(type, name);
             }
-        }
+		}
 
-        /// <summary>
+		#region obsolete methods
+
+		[Obsolete("Renamed to DefineTask")]
+		public static void LoadTaskDefinition(Stream stream) {
+			DefineTask(stream);
+		}
+
+		[Obsolete("Renamed to DefineTask")]
+		public static void LoadTaskDefinition(Type type, string name)
+		{
+			DefineTask(type, name);
+		}
+
+		[Obsolete("Renamed to DefineTask")]
+		public static void LoadTaskDefinitions(Type type, params string[] names)
+		{
+			DefineTasks(type, names);
+		}
+
+		#endregion
+
+		/// <summary>
         /// Create a new UIP task.
         /// </summary>
         /// <param name="taskName">Name of the task definition</param>
         /// <param name="viewManager">View manager for controlling view display.</param>
         /// <returns>The <c>UipTask</c> object.</returns>
-        public static UipTask CreateTask(string taskName, IUipViewManager viewManager) {
-            try {
-                UipTaskDefinition taskDefinition = taskDefinitions[taskName];
-                UipTask task = CreateTask(taskDefinition, viewManager);
-                return task;
-            }
-            catch (KeyNotFoundException ex) {
-                string message = "Undefined task: " + taskName;
-                throw new UipException(message, ex);
-            }
+		public static UipTask CreateTask(string taskName, IUipViewManager viewManager)
+        {
+        	UipTaskDefinition taskDefinition = store[taskName];
+        	UipTask task = CreateTask(taskDefinition, viewManager);
+        	return task;
         }
+
+		public static UipTaskDefinition CreateTaskDefinition(string name, Type stateType)
+		{
+			return store.CreateTaskDefinition(name, stateType);
+		}
 
         public static UipTask CreateTask(UipTaskDefinition taskDefinition, IUipViewManager viewManager) {
             UipTask task = new UipTask(taskDefinition, serviceContainer, viewManager);
@@ -175,8 +205,7 @@ namespace Quokka.Uip
         /// </summary>
         public static void Clear() {
             serviceContainer = null;
-            assemblies.Clear();
-            taskDefinitions.Clear();
+        	store.Clear();
             activeTasks.Clear();
         }
 

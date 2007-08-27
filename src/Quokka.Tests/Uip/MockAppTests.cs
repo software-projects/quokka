@@ -50,8 +50,8 @@ namespace Quokka.Uip
 
         [Test]
         public void RunMockAppFromXmlDefinition() {
-            UipManager.AddAssembly(this.GetType().Assembly);
-            UipManager.LoadTaskDefinition(typeof(MockState), "MockTask.xml");
+            UipManager.AddAssembly(GetType().Assembly);
+            UipManager.DefineTask(typeof(MockState), "MockTask.xml");
             MockViewManager viewManager = new MockViewManager();
             UipTask task = UipManager.CreateTask("MockTask", viewManager);
             Assert.IsNotNull(task);
@@ -67,15 +67,15 @@ namespace Quokka.Uip
                 .NavigateTo("Next", "Node2")
                 .NavigateTo("Back", "NoViewNode")
                 .NavigateTo("End", "__end__");
-            UipNode node2 = taskDefinition.AddNode("Node2", typeof(MockView2), typeof(MockController2))
+            /*UipNode node2 = */taskDefinition.AddNode("Node2", typeof(MockView2), typeof(MockController2))
                 .NavigateTo("Back", node1)
                 .NavigateTo("Next", "Node3")
                 .NavigateTo("Error", "ErrorNode");
             UipNode node3 = taskDefinition.AddNode("Node3", typeof(MockView1), typeof(MockController2))
                 .NavigateTo("Next", node1);
-            UipNode errorNode = taskDefinition.AddNode("ErrorNode", typeof(MockView2), typeof(MockController2))
+            /*UipNode errorNode = */taskDefinition.AddNode("ErrorNode", typeof(MockView2), typeof(MockController2))
                 .NavigateTo("Next", node1);
-            UipNode noViewNode = taskDefinition.AddNode("NoViewNode", null, typeof(MockController3))
+            /*UipNode noViewNode = */taskDefinition.AddNode("NoViewNode", null, typeof(MockController3))
                 .NavigateTo("Next", node3);
 
             MockViewManager viewManager = new MockViewManager();
@@ -84,6 +84,54 @@ namespace Quokka.Uip
 
             RunMockAppHelper(task, viewManager);
         }
+
+		[Test]
+		public void RunMockAppFromCodeDefinition2()
+		{
+			UipTaskDefinition taskDefinition = new UipTaskDefinition("MockTask", typeof(MockState));
+			taskDefinition.StateProperties.Add("StringProperty", "Set from config");
+
+			UipNode node1 = taskDefinition.AddNode("Node1");
+			UipNode node2 = taskDefinition.AddNode("Node2");
+			UipNode node3 = taskDefinition.AddNode("Node3");
+			UipNode errorNode = taskDefinition.AddNode("ErrorNode");
+			UipNode noViewNode = taskDefinition.AddNode("NoViewNode");
+
+			node1.SetViewType(typeof(MockView1))
+				.SetControllerType(typeof(MockController1))
+				.NavigateTo("Next", node2)
+				.NavigateTo("Back", noViewNode)
+				.NavigateTo("End", (UipNode)null);
+
+			node2
+				.SetViewType(typeof(MockView2))
+				.SetControllerType(typeof(MockController2))
+				.NavigateTo("Back", node1)
+				.NavigateTo("Next", node3)
+				.NavigateTo("Error", errorNode);
+
+			node3
+				.SetViewType(typeof(MockView1))
+				.SetControllerType(typeof(MockController2))
+				.NavigateTo("Next", node1);
+
+			errorNode
+				.SetViewType(typeof(MockView2))
+				.SetControllerType(typeof(MockController2))
+				.NavigateTo("Next", node1);
+
+			noViewNode
+				.SetControllerType(typeof(MockController3))
+				.NavigateTo("Next", node3);
+
+			MockViewManager viewManager = new MockViewManager();
+			UipTask task = UipManager.CreateTask(taskDefinition, viewManager);
+			Assert.IsNotNull(task);
+
+			taskDefinition.StartNode = node1;
+
+			RunMockAppHelper(task, viewManager);			
+		}
 
         private void RunMockAppHelper(UipTask task, MockViewManager viewManager) {
             Assert.IsNotNull(task);

@@ -56,6 +56,7 @@
     <Compile Include="Uip\MockApp\MockViewManager.cs" />
     <Compile Include="Uip\MockApp\MockViews.cs" />
     <Compile Include="Uip\TaskConfigTests.cs" />
+    <Compile Include="Uip\UipTaskDefinitionStoreTests.cs" />
     <Compile Include="Uip\UipManagerTests.cs" />
     <Compile Include="Uip\UipUtils_SetControllerTests.cs" />
   </ItemGroup>

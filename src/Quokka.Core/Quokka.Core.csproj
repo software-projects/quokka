@@ -69,6 +69,7 @@
     <Compile Include="Uip\IUipEndTask.cs" />
     <Compile Include="Uip\IUipViewManager.cs" />
     <Compile Include="Uip\UipTaskDefinition.cs" />
+    <Compile Include="Uip\UipTaskDefinitionStore.cs" />
     <Compile Include="Uip\UipTransition.cs" />
     <Compile Include="Uip\UipException.cs" />
     <Compile Include="Uip\UipManager.cs" />

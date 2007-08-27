@@ -47,13 +47,14 @@ namespace Quokka.Uip
 	{
 		private readonly UipTaskDefinition _task;
 		private readonly string _name;
-		private readonly Type _viewType;
-		private readonly Type _controllerType;
+		private Type _viewType;
+		private Type _controllerType;
 		private readonly PropertyCollection _viewProperties;
 		private readonly PropertyCollection _controllerProperties;
 		private readonly List<UipTransition> _transitions;
-		private readonly Type _controllerInterface;
-		private readonly UipNodeOptions _options;
+		private bool _controllerInterfaceValid;
+		private Type _controllerInterface;
+		private UipNodeOptions _options;
 
 		internal UipNode(UipTaskDefinition task, NodeConfig nodeConfig)
 		{
@@ -61,7 +62,6 @@ namespace Quokka.Uip
 			_name = nodeConfig.Name;
 			if (nodeConfig.View != null && !String.IsNullOrEmpty(nodeConfig.View.TypeName)) {
 				_viewType = TypeUtil.FindType(nodeConfig.View.TypeName, task.Namespaces, task.Assemblies, true);
-				_controllerInterface = GetControllerInterfaceFromViewType(_viewType);
 				_viewProperties = new PropertyCollection(nodeConfig.View.Properties);
 			}
 			_controllerType = TypeUtil.FindType(nodeConfig.Controller.TypeName, task.Namespaces, task.Assemblies);
@@ -85,22 +85,28 @@ namespace Quokka.Uip
 		                 string name,
 		                 Type viewType,
 		                 Type controllerType,
-		                 UipNodeOptions options)
+		                 UipNodeOptions options) : this(taskDefinition, name)
 		{
-			Assert.ArgumentNotNull(taskDefinition, "taskDefinition");
-			Assert.ArgumentNotNull(name, "name");
 			// view type can be null
 			Assert.ArgumentNotNull(controllerType, "controllerType");
 
-			_task = taskDefinition;
-			_name = name;
 			_viewType = viewType;
-			_controllerInterface = GetControllerInterfaceFromViewType(viewType);
 			_viewProperties = new PropertyCollection();
 			_controllerType = controllerType;
 			_controllerProperties = new PropertyCollection();
 			_transitions = new List<UipTransition>();
 			_options = options;
+		}
+
+		internal UipNode(UipTaskDefinition taskDefinition, string name)
+		{
+			Assert.ArgumentNotNull(taskDefinition, "taskDefinition");
+			Assert.ArgumentNotNull(name, "name");
+			_task = taskDefinition;
+			_name = name;
+			_viewProperties = new PropertyCollection();
+			_controllerProperties = new PropertyCollection();
+			_transitions = new List<UipTransition>();
 		}
 
 		public string Name
@@ -120,7 +126,14 @@ namespace Quokka.Uip
 
 		public Type ControllerInterface
 		{
-			get { return _controllerInterface; }
+			get
+			{
+				if (!_controllerInterfaceValid) {
+					_controllerInterface = GetControllerInterfaceFromViewType(_viewType);
+					_controllerInterfaceValid = true;
+				}
+				return _controllerInterface;
+			}
 		}
 
 		public PropertyCollection ViewProperties
@@ -145,7 +158,13 @@ namespace Quokka.Uip
 
 		public bool StayOpen
 		{
-			get { return (_options & UipNodeOptions.StayOpen) != 0; }
+			get
+			{
+				// A modal view can never stay open, regardless of the setting
+				if (IsViewModal)
+					return false;
+				return (_options & UipNodeOptions.StayOpen) != 0;
+			}
 		}
 
 		public PropertyCollection ControllerProperties
@@ -156,6 +175,38 @@ namespace Quokka.Uip
 		public IList<UipTransition> Transitions
 		{
 			get { return _transitions; }
+		}
+
+		public UipNode SetViewType(Type viewType)
+		{
+			_viewType = viewType;
+			_controllerInterfaceValid = false;
+			return this;
+		}
+
+		public UipNode SetControllerType(Type controllerType)
+		{
+			_controllerType = controllerType;
+			return this;
+		}
+
+		public UipNode SetOptions(UipNodeOptions options)
+		{
+			_options = options;
+			return this;
+		}
+
+		public UipNode SetViewProperty(string propertyName, string propertyValue)
+		{
+			ViewProperties.Add(propertyName, propertyValue);
+			return this;
+		}
+
+
+		public UipNode SetControllerProperty(string propertyName, string propertyValue)
+		{
+			ControllerProperties.Add(propertyName, propertyValue);
+			return this;
 		}
 
 		public UipNode NavigateTo(string navigateValue, string nodeName)

@@ -213,7 +213,7 @@ namespace Quokka.DynamicCodeGeneration
 			}
 
 			if (innerMethod == null) {
-				BuildNotSupportedException(generator, method.Name);
+				BuildNotSupportedException(generator);
 			}
 			else {
 				generator.Emit(OpCodes.Ldarg_0);
@@ -241,7 +241,7 @@ namespace Quokka.DynamicCodeGeneration
 			return methodBuilder;
 		}
 
-		private static void BuildNotSupportedException(ILGenerator generator, string name)
+		private static void BuildNotSupportedException(ILGenerator generator)
 		{
 			Type exceptionType = typeof(NotSupportedException);
 			// TODO: pass name as a parameter to the constructor

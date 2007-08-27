@@ -38,14 +38,14 @@ namespace Quokka.Uip.Implementation
 
         [XmlAttribute("NavigateValue")]
         public string NavigateValue {
-            get { return this._navigateValue; }
-            set { this._navigateValue = value; }
+            get { return _navigateValue; }
+            set { _navigateValue = value; }
         }
 
         [XmlAttribute("Node")]
         public string NodeName {
-            get { return this._nodeName; }
-            set { this._nodeName = value; }
+            get { return _nodeName; }
+            set { _nodeName = value; }
         }
     }
 }

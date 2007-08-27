@@ -44,7 +44,7 @@ namespace Quokka.Uip
             this.navigateValue = navigateValue;
             this.nextNode = nextNode;
             if (nextNode != null) {
-                this.nextNodeName = nextNode.Name;
+                nextNodeName = nextNode.Name;
             }
         }
 

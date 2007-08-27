@@ -108,7 +108,7 @@ namespace Quokka.Uip
 			set
 			{
 				if (value != null && !_nodes.Contains(value)) {
-					throw new QuokkaException("Node is not in the Nodes collection");
+					throw new UipException("Node is not in the Nodes collection");
 				}
 				_startNode = value;
 			}
@@ -144,14 +144,18 @@ namespace Quokka.Uip
 			Assert.ArgumentNotNull(name, "name");
 			// view type can be null
 			Assert.ArgumentNotNull(controllerType, "controllerType");
-
-			if (FindNode(name, false) != null) {
-				throw new UipException("Duplicate node name: " + name);
-			}
-
+			CheckForDuplicateName(name);
 			UipNode node = new UipNode(this, name, viewType, controllerType, options);
 			_nodes.Add(node);
+			return node;
+		}
 
+		public UipNode AddNode(string name)
+		{
+			Assert.ArgumentNotNull(name, "name");
+			CheckForDuplicateName(name);
+			UipNode node = new UipNode(this, name);
+			_nodes.Add(node);
 			return node;
 		}
 
@@ -179,7 +183,15 @@ namespace Quokka.Uip
 			return null;
 		}
 
-		private List<string> CreateNamespaces(TaskConfig taskConfig)
+		private void CheckForDuplicateName(string name)
+		{
+			if (FindNode(name, false) != null) {
+				string message = String.Format("Duplicate node name '{0}' in task '{1}'", name, Name);
+				throw new UipDuplicateNodeNameException(message);
+			}
+		}
+
+		private static List<string> CreateNamespaces(TaskConfig taskConfig)
 		{
 			List<string> list = new List<string>();
 			foreach (UsingNamespaceConfig usingNamespaceConfig in taskConfig.UsingNamespaces) {

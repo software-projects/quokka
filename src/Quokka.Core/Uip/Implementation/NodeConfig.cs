@@ -41,26 +41,26 @@ namespace Quokka.Uip.Implementation
 
         [XmlElement("View")]
         public ViewConfig View {
-            get { return this._view; }
-            set { this._view = value; }
+            get { return _view; }
+            set { _view = value; }
         }
 
         [XmlElement("Controller")]
         public ObjectTypeConfig Controller {
-            get { return this._controller; }
-            set { this._controller = value; }
+            get { return _controller; }
+            set { _controller = value; }
         }
 
         [XmlElement("NavigateTo")]
         public List<NavigateToConfig> NavigateTos {
-            get { return this._navigateTos; }
-            set { this._navigateTos = value; }
+            get { return _navigateTos; }
+            set { _navigateTos = value; }
         }
 
         [XmlAttribute("Name")]
         public string Name {
-            get { return this._name; }
-            set { this._name = value; }
+            get { return _name; }
+            set { _name = value; }
         }
     }
 }

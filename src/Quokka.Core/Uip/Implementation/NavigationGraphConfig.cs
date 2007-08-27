@@ -39,17 +39,17 @@ namespace Quokka.Uip.Implementation
 
         [XmlElement("Node")]
         public List<NodeConfig> Nodes {
-            get { return this._nodes; }
-            set { this._nodes = value; }
+            get { return _nodes; }
+            set { _nodes = value; }
         }
 
         [XmlAttribute("StartNode")]
         public string StartNodeName {
             get {
-                return this._startNodeName;
+                return _startNodeName;
             }
             set {
-                this._startNodeName = value;
+                _startNodeName = value;
             }
         }
     }

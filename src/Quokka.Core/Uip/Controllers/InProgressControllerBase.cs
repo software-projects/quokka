@@ -36,7 +36,7 @@ namespace Quokka.Uip.Controllers
     /// </summary>
     /// <remarks>
     /// Using this class as a base class is simpler that implementing the <see cref="IInProgressController"/>
-    /// from scratch. The base class has to implement <see cref="DoWork"/> and <see cref="FinishWork"/>, as they
+    /// from scratch. The base class has to implement <see cref="DoWork"/> and <see cref="FinishedWork"/>, as they
     /// are defined as abstract methods in this class.
     /// </remarks>
     public abstract class InProgressControllerBase : IInProgressController

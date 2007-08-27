@@ -41,8 +41,8 @@ namespace Quokka.Uip.Implementation
 
         [XmlAttribute("Type")]
         public string TypeName {
-            get { return this._typeName; }
-            set { this._typeName = value; }
+            get { return _typeName; }
+            set { _typeName = value; }
         }
 
         [XmlElement("Property")]

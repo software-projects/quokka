@@ -48,9 +48,52 @@ namespace Quokka.Uip
     /// <seealso cref="IUipNavigator"/>
     public class UipUndefinedTransitionException : UipException
     {
-        public UipUndefinedTransitionException() { }
+        public UipUndefinedTransitionException() : base("Undefined UIP transition") { }
         public UipUndefinedTransitionException(string message) : base(message) { }
         public UipUndefinedTransitionException(string message, Exception innerException) : base(message, innerException) { }
         protected UipUndefinedTransitionException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
+
+	/// <summary>
+	/// Thrown when an attempt is made to define a UIP task when a task with the same name already exists.
+	/// </summary>
+	public class UipTaskAlreadyExistsException : UipException
+	{
+        public UipTaskAlreadyExistsException() : base("A UIP task with that name already exists") { }
+        public UipTaskAlreadyExistsException(string message) : base(message) { }
+        public UipTaskAlreadyExistsException(string message, Exception innerException) : base(message, innerException) { }
+		protected UipTaskAlreadyExistsException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+	}
+
+	public class UipTaskDefinitionCreateException : UipException
+	{
+        public UipTaskDefinitionCreateException() : base("Failed to create task definition") { }
+        public UipTaskDefinitionCreateException(string message) : base(message) { }
+        public UipTaskDefinitionCreateException(string message, Exception innerException) : base(message, innerException) { }
+		protected UipTaskDefinitionCreateException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+	}
+
+	public class UipUnknownTaskException : UipException
+	{
+        public UipUnknownTaskException() : base("Unknown task") { }
+        public UipUnknownTaskException(string message) : base(message) { }
+        public UipUnknownTaskException(string message, Exception innerException) : base(message, innerException) { }
+		protected UipUnknownTaskException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+	}
+
+	public class UipTaskDefinitionNameMismatchException : UipException 
+	{
+        public UipTaskDefinitionNameMismatchException() : base("Task definition name mismatch") { }
+        public UipTaskDefinitionNameMismatchException(string message) : base(message) { }
+        public UipTaskDefinitionNameMismatchException(string message, Exception innerException) : base(message, innerException) { }
+		protected UipTaskDefinitionNameMismatchException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+	}
+
+	public class UipDuplicateNodeNameException : UipException
+	{
+		public UipDuplicateNodeNameException() : base("Duplicate node name") { }
+		public UipDuplicateNodeNameException(string message) : base(message) { }
+		public UipDuplicateNodeNameException(string message, Exception innerException) : base(message, innerException) { }
+		protected UipDuplicateNodeNameException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+	}
 }
