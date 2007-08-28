@@ -87,8 +87,9 @@
         <include name="**/*.resources"/>
         <include name="**/*.xml"/>
         <include name="**/*.xsd"/>
-        <exclude name="obj/*"/>
-      </resources>
+        <exclude name="obj/**"/>
+				<exclude name="bin/**"/>
+			</resources>
       <sources>
         <include name="AssemblyInfo.tmp.cs"/>
         <include name="Quokka.Core/**.cs"/>
@@ -109,8 +110,10 @@
       </references>
       <resources dynamicprefix="true" prefix="Quokka.WinForms" basedir="Quokka.WinForms" >
         <include name="**/*.resources"/>
-        <exclude name="obj/*"/>
-      </resources>
+				<include name="Resources/*.gif"/>
+        <exclude name="obj/**"/>
+				<exclude name="bin/**"/>
+			</resources>
       <sources>
         <include name="AssemblyInfo.tmp.cs"/>
         <include name="Quokka.WinForms/**.cs"/>
@@ -129,8 +132,9 @@
       <resources dynamicprefix="true" prefix="Quokka" basedir="Quokka.Tests" >
         <include name="**/*.resources"/>
         <include name="**/*.xml"/>
-        <exclude name="obj/*"/>
-      </resources>      
+        <exclude name="obj/**"/>
+				<exclude name="bin/**"/>
+			</resources>      
       <sources>
         <include name="AssemblyInfo.tmp.cs"/>
         <include name="Quokka.Tests/**.cs"/>
