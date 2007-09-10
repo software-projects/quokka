@@ -1,8 +1,11 @@
-namespace Quokka
+namespace Quokka.Diagnostics
 {
 	using System;
 
-	internal static class Assert
+	/// <summary>
+	/// Used for internal consistency checking.
+	/// </summary>
+	public static class Verify
 	{
 		public static void ArgumentNotNull(object param, string paramName)
 		{

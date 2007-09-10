@@ -36,7 +36,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assert.cs" />
+    <Compile Include="Diagnostics\Verify.cs" />
     <Compile Include="DynamicCodeGeneration\AbstractProxyBuilder.cs" />
     <Compile Include="DynamicCodeGeneration\DynamicAssembly.cs" />
     <Compile Include="DynamicCodeGeneration\MemberMapping.cs" />

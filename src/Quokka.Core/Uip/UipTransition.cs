@@ -28,7 +28,9 @@
 
 namespace Quokka.Uip
 {
-    public class UipTransition
+	using Quokka.Diagnostics;
+
+	public class UipTransition
     {
         private readonly UipNode node;
         private readonly string navigateValue;
@@ -36,8 +38,8 @@ namespace Quokka.Uip
         private UipNode nextNode;
 
         internal UipTransition(UipNode node, string navigateValue, UipNode nextNode) {
-            Assert.ArgumentNotNull(node, "node");
-            Assert.ArgumentNotNull(navigateValue, "navigateValue");
+            Verify.ArgumentNotNull(node, "node");
+            Verify.ArgumentNotNull(navigateValue, "navigateValue");
             //Assert.ArgumentNotNull(nextNode, "nextNode");
 
             this.node = node;
@@ -49,9 +51,9 @@ namespace Quokka.Uip
         }
 
         internal UipTransition(UipNode node, string navigateValue, string nextNodeName) {
-            Assert.ArgumentNotNull(node, "node");
-            Assert.ArgumentNotNull(navigateValue, "navigateValue");
-            Assert.ArgumentNotNull(nextNodeName, "nextNodeName");
+            Verify.ArgumentNotNull(node, "node");
+            Verify.ArgumentNotNull(navigateValue, "navigateValue");
+            Verify.ArgumentNotNull(nextNodeName, "nextNodeName");
 
             this.node = node;
             this.navigateValue = navigateValue;

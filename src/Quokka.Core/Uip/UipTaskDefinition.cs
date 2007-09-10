@@ -33,6 +33,7 @@ namespace Quokka.Uip
 	using System;
 	using System.Collections.Generic;
 	using System.Reflection;
+	using Quokka.Diagnostics;
 	using Quokka.Reflection;
 	using Quokka.Uip.Implementation;
 
@@ -48,7 +49,7 @@ namespace Quokka.Uip
 
 		internal UipTaskDefinition(TaskConfig taskConfig, IEnumerable<Assembly> assemblies)
 		{
-			Assert.ArgumentNotNull(taskConfig, "taskConfig");
+			Verify.ArgumentNotNull(taskConfig, "taskConfig");
 
 			_name = taskConfig.Name;
 			_assemblies = new List<Assembly>(assemblies).AsReadOnly();
@@ -62,8 +63,8 @@ namespace Quokka.Uip
 
 		public UipTaskDefinition(string name, Type stateType)
 		{
-			Assert.ArgumentNotNull(name, "name");
-			Assert.ArgumentNotNull(stateType, "stateType");
+			Verify.ArgumentNotNull(name, "name");
+			Verify.ArgumentNotNull(stateType, "stateType");
 
 			_name = name;
 			_stateType = stateType;
@@ -141,9 +142,9 @@ namespace Quokka.Uip
 
 		public UipNode AddNode(string name, Type viewType, Type controllerType, UipNodeOptions options)
 		{
-			Assert.ArgumentNotNull(name, "name");
+			Verify.ArgumentNotNull(name, "name");
 			// view type can be null
-			Assert.ArgumentNotNull(controllerType, "controllerType");
+			Verify.ArgumentNotNull(controllerType, "controllerType");
 			CheckForDuplicateName(name);
 			UipNode node = new UipNode(this, name, viewType, controllerType, options);
 			_nodes.Add(node);
@@ -152,7 +153,7 @@ namespace Quokka.Uip
 
 		public UipNode AddNode(string name)
 		{
-			Assert.ArgumentNotNull(name, "name");
+			Verify.ArgumentNotNull(name, "name");
 			CheckForDuplicateName(name);
 			UipNode node = new UipNode(this, name);
 			_nodes.Add(node);

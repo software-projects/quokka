@@ -5,6 +5,7 @@ namespace Quokka.DynamicCodeGeneration
 	using System.Reflection;
 	using System.Reflection.Emit;
 	using System.Text;
+	using Quokka.Diagnostics;
 
 	public abstract class AbstractProxyBuilder
 	{
@@ -19,10 +20,10 @@ namespace Quokka.DynamicCodeGeneration
 
 		public AbstractProxyBuilder(ModuleBuilder moduleBuilder, string className, Type interfaceType, Type innerType)
 		{
-			Assert.ArgumentNotNull(moduleBuilder, "moduleBuilder");
-			Assert.ArgumentNotNull(className, "className");
-			Assert.ArgumentNotNull(interfaceType, "interfaceType");
-			Assert.ArgumentNotNull(innerType, "innerType");
+			Verify.ArgumentNotNull(moduleBuilder, "moduleBuilder");
+			Verify.ArgumentNotNull(className, "className");
+			Verify.ArgumentNotNull(interfaceType, "interfaceType");
+			Verify.ArgumentNotNull(innerType, "innerType");
 
 			if (!interfaceType.IsInterface) {
 				throw new ArgumentException("must be an interface type", "interfaceType");

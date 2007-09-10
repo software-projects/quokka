@@ -42,6 +42,8 @@
     <Compile Include="CommandLinkTestForm.Designer.cs">
       <DependentUpon>CommandLinkTestForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controllers\CommandLinkTestController.cs" />
+    <Compile Include="Controllers\MessageBoxTestController.cs" />
     <Compile Include="MessageBoxTestForm.cs">
       <SubType>Form</SubType>
     </Compile>

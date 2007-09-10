@@ -32,6 +32,7 @@ namespace Quokka.Uip
 {
 	using System;
 	using System.Collections.Generic;
+	using Quokka.Diagnostics;
 	using Quokka.Reflection;
 	using Quokka.Uip.Implementation;
 
@@ -88,7 +89,7 @@ namespace Quokka.Uip
 		                 UipNodeOptions options) : this(taskDefinition, name)
 		{
 			// view type can be null
-			Assert.ArgumentNotNull(controllerType, "controllerType");
+			Verify.ArgumentNotNull(controllerType, "controllerType");
 
 			_viewType = viewType;
 			_viewProperties = new PropertyCollection();
@@ -100,8 +101,8 @@ namespace Quokka.Uip
 
 		internal UipNode(UipTaskDefinition taskDefinition, string name)
 		{
-			Assert.ArgumentNotNull(taskDefinition, "taskDefinition");
-			Assert.ArgumentNotNull(name, "name");
+			Verify.ArgumentNotNull(taskDefinition, "taskDefinition");
+			Verify.ArgumentNotNull(name, "name");
 			_task = taskDefinition;
 			_name = name;
 			_viewProperties = new PropertyCollection();

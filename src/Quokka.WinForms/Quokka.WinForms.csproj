@@ -41,6 +41,7 @@
     <Compile Include="CustomPanel.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="DisplaySettings.cs" />
     <Compile Include="MessageBoxForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -53,6 +54,21 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Testing\SelectViewTestNodeForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Testing\SelectViewTestNodeForm.Designer.cs">
+      <DependentUpon>SelectViewTestNodeForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Testing\TestsViewAttribute.cs" />
+    <Compile Include="Testing\ViewTestForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Testing\ViewTestForm.Designer.cs">
+      <DependentUpon>ViewTestForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Testing\ViewTestManager.cs" />
+    <Compile Include="Testing\ViewTestNode.cs" />
     <Compile Include="ViewManagerPanel.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -112,6 +128,14 @@
     <EmbeddedResource Include="Resources\Arrow.gif" />
     <EmbeddedResource Include="Resources\SelectedArrow.gif" />
     <EmbeddedResource Include="Resources\Shield.gif" />
+    <EmbeddedResource Include="Testing\SelectViewTestNodeForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>SelectViewTestNodeForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Testing\ViewTestForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ViewTestForm.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

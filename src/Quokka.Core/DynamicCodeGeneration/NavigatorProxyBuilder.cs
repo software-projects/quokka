@@ -34,6 +34,7 @@ namespace Quokka.DynamicCodeGeneration
 	using System.Collections.Generic;
 	using System.Reflection;
 	using System.Reflection.Emit;
+	using Quokka.Diagnostics;
 	using Quokka.Uip;
 
 	public class NavigatorProxyBuilder : AbstractProxyBuilder
@@ -412,7 +413,7 @@ namespace Quokka.DynamicCodeGeneration
 
 			Type[] parameterTypes = new Type[] { _navigateValueEnumType };
 			MethodInfo toStringMethod = typeof(object).GetMethod("ToString", Type.EmptyTypes);
-			Assert.IsNotNull(toStringMethod);
+			Verify.IsNotNull(toStringMethod);
 
 			MethodBuilder methodBuilder = TypeBuilder.DefineMethod(_outerCanNavigateEnumMethod.Name,
 																   methodAttributes,
@@ -450,7 +451,7 @@ namespace Quokka.DynamicCodeGeneration
 			Type[] parameterTypes = new Type[] { _navigateValueEnumType };
 
 			MethodInfo toStringMethod = typeof(object).GetMethod("ToString", Type.EmptyTypes);
-			Assert.IsNotNull(toStringMethod);
+			Verify.IsNotNull(toStringMethod);
 
 			MethodBuilder methodBuilder = TypeBuilder.DefineMethod(_outerNavigateEnumMethod.Name,
 																   methodAttributes,

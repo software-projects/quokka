@@ -74,7 +74,7 @@ namespace Quokka
             ServiceContainerUtil.AddService(container, typeof(IInterface2), typeof(Class2));
             ServiceContainerUtil.AddService(container, typeof(IInterface3), typeof(Class3));
 
-            IInterface1 i1 = (IInterface1)container.GetService(typeof(IInterface1));
+            container.GetService(typeof(IInterface1));
         }
 
         [Test, ExpectedException(typeof(QuokkaException), ExpectedMessage = "No available implementation of Quokka.ServiceContainerUtilTests+IInterface1")]
@@ -83,7 +83,7 @@ namespace Quokka
             ServiceContainerUtil.AddService(container, typeof(IInterface2), typeof(Class2));
             ServiceContainerUtil.AddService(container, typeof(IInterface3), typeof(Class3));
 
-            IInterface2 i2 = (IInterface2)container.GetService(typeof(IInterface2));
+            container.GetService(typeof(IInterface2));
         }
 
         [Test]
@@ -92,7 +92,9 @@ namespace Quokka
             ServiceContainerUtil.AddService(container, typeof(IInterface1), typeof(Class1_ServiceProviderConstructor));
 
             IInterface1 i1 = (IInterface1)container.GetService(typeof(IInterface1));
-
+        	Assert.IsNotNull(i1);
+        	Assert.IsInstanceOfType(typeof(IInterface1), i1);
+        	Assert.IsInstanceOfType(typeof(Class1_ServiceProviderConstructor), i1);
         }
 
         [Test]
@@ -163,7 +165,6 @@ namespace Quokka
 
         public class Class1 : IInterface1
         {
-            public Class1() { }
             public void DoSomething1() { }
         }
 

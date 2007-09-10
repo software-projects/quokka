@@ -4,6 +4,8 @@ using System.Windows.Forms;
 
 namespace Quokka.WinForms.Tests
 {
+	using Quokka.WinForms.Testing;
+
 	static class Program
 	{
 		/// <summary>
@@ -13,7 +15,7 @@ namespace Quokka.WinForms.Tests
 		static void Main() {
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new CommandLinkTestForm());
+			Application.Run(new ViewTestForm());
 		}
 	}
 }
