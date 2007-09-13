@@ -183,7 +183,7 @@ namespace Quokka.WinForms
 			get
 			{
 				if (_arrowBitmap == null) {
-					_arrowBitmap = new Bitmap(GetType(), "Resources.Arrow.gif");
+					_arrowBitmap = new Bitmap(typeof(CommandLink), "Resources.Arrow.gif");
 				}
 				return _arrowBitmap;
 			}
@@ -197,7 +197,7 @@ namespace Quokka.WinForms
 			get
 			{
 				if (_selectedArrowBitmap == null) {
-					_selectedArrowBitmap = new Bitmap(GetType(), "Resources.SelectedArrow.gif");
+					_selectedArrowBitmap = new Bitmap(typeof(CommandLink), "Resources.SelectedArrow.gif");
 				}
 				return _selectedArrowBitmap;
 			}
@@ -211,7 +211,7 @@ namespace Quokka.WinForms
 			get
 			{
 				if (_shieldBitmap == null) {
-					_shieldBitmap = new Bitmap(GetType(), "Resources.Shield.gif");
+					_shieldBitmap = new Bitmap(typeof(CommandLink), "Resources.Shield.gif");
 				}
 				return _shieldBitmap;
 			}
