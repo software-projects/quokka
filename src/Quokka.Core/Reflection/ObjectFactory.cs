@@ -46,7 +46,31 @@ namespace Quokka.Reflection
                 parameterValues[index] = GetParameterValue(parameters[index], serviceProvider, concreteObjects);
             }
 
-            return constructor.Invoke(parameterValues);
+			try {
+				return constructor.Invoke(parameterValues);
+			}
+			catch (Exception ex) {
+				ArgumentNullException innerException = ex.InnerException as ArgumentNullException;
+				if (innerException == null) {
+					string message = String.Format("Failed to create object of type {0}", objectType.FullName);
+					throw new QuokkaException(message, ex);
+				}
+				else {
+					// Special case where an object has failed to be constructed because
+					// of a missing parameter. Attempt to throw a more meaningful exception.
+					string message;
+					if (String.IsNullOrEmpty(innerException.ParamName)) {
+						message = String.Format("Failed to create object of type {0} because of a missing parameter", objectType.FullName);
+					}
+					else {
+						message =
+							String.Format("Failed to create object of type {0} because of missing parameter: {1}", objectType.FullName,
+							              innerException.ParamName);
+					}
+
+					throw new QuokkaException(message, ex);
+				}
+			}
         }
 
         private static object GetParameterValue(ParameterInfo parameterInfo, IServiceProvider serviceProvider, object[] concreteObjects) {
