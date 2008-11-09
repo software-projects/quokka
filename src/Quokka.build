@@ -92,6 +92,13 @@
         <include name="*.xml"/>
       </fileset>
     </copy>
+    <copy todir="${output.dir}">
+      <fileset basedir="Quokka.WinForms/bin/${config}">
+        <include name="*.dll"/>
+        <include name="*.pdb"/>
+        <include name="*.xml"/>
+      </fileset>
+    </copy>    
   </target>
 
 
