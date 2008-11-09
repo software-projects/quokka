@@ -28,19 +28,20 @@
 
 #endregion
 
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Reflection.Emit;
+
 namespace Quokka.DynamicCodeGeneration
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Reflection;
-	using System.Reflection.Emit;
-
-	internal class DuckProxyBuilder
+    internal class DuckProxyBuilder
 	{
 		private readonly Type m_interfaceType;
 		private readonly Type m_innerType;
 		private readonly string m_className;
 		private readonly ModuleBuilder m_moduleBuilder;
+        private readonly Dictionary<MethodInfo, MethodBuilder> _unsupportedMethods = new Dictionary<MethodInfo, MethodBuilder>();
 
 		private TypeBuilder m_typeBuilder;
 		private FieldBuilder m_innerFieldBuilder;
@@ -48,7 +49,7 @@ namespace Quokka.DynamicCodeGeneration
 
 		// Maps a MethodInfo in the interface onto a MethodBuilder used to 
 		// construct the associated method in the proxy
-		private IDictionary<MethodInfo, MethodBuilder> m_interfaceMethodDict = new Dictionary<MethodInfo, MethodBuilder>();
+		private readonly IDictionary<MethodInfo, MethodBuilder> m_interfaceMethodDict = new Dictionary<MethodInfo, MethodBuilder>();
 
 		internal DuckProxyBuilder(ModuleBuilder moduleBuilder, string className, Type interfaceType, Type innerType)
 		{
@@ -87,6 +88,11 @@ namespace Quokka.DynamicCodeGeneration
 				foreach (EventInfo eventInfo in m_interfaceType.GetEvents()) {
 					BuildEvent(eventInfo);
 				}
+
+                foreach (MethodBuilder methodBuilder in _unsupportedMethods.Values)
+                {
+                    BuildNotSupportedException(methodBuilder);
+                }
 
 				m_proxyType = m_typeBuilder.CreateType();
 			}
@@ -129,6 +135,19 @@ namespace Quokka.DynamicCodeGeneration
 			MethodInfo getMethod = property.GetGetMethod();
 			if (getMethod != null) {
 				MethodBuilder getMethodBuilder = m_interfaceMethodDict[getMethod];
+                if (_unsupportedMethods.ContainsKey(getMethod) && getMethodBuilder.ReturnType == typeof(bool))
+                {
+                    // The property is not supported by the inner class, but it is a bool property so it
+                    // might be a test for is a member supported. Using naming convention, try to extract
+                    // the name of the member we are testing for.
+                    string testMemberName = GetTestMemberName(property.Name);
+                    if (testMemberName != null)
+                    {
+                        // This is a property for checking whether a member is supported.
+                        _unsupportedMethods.Remove(getMethod);
+                        BuildCheckMemberSupported(testMemberName, getMethodBuilder);
+                    }
+                }
 				propertyBuilder.SetGetMethod(getMethodBuilder);
 			}
 
@@ -138,6 +157,26 @@ namespace Quokka.DynamicCodeGeneration
 				propertyBuilder.SetSetMethod(setMethodBuilder);
 			}
 		}
+
+        private static string GetTestMemberName(string propertyName)
+        {
+            const string prefix1 = "Can";
+
+            if (propertyName.StartsWith(prefix1))
+            {
+                return propertyName.Substring(prefix1.Length);
+            }
+
+            const string prefix2 = "Is";
+            const string suffix2 = "Supported";
+
+            if (propertyName.StartsWith(prefix2) && propertyName.EndsWith(suffix2))
+            {
+                return propertyName.Substring(prefix2.Length, propertyName.Length - prefix2.Length - suffix2.Length);
+            }
+
+            return null;
+        }
 
 		private void BuildEvent(EventInfo eventInfo)
 		{
@@ -201,7 +240,6 @@ namespace Quokka.DynamicCodeGeneration
 			// wiring up the get/set methods to properties
 			m_interfaceMethodDict.Add(method, methodBuilder);
 
-			ILGenerator generator = methodBuilder.GetILGenerator();
 
 			MethodInfo innerMethod = m_innerType.GetMethod(method.Name, parameterTypes);
 
@@ -213,9 +251,12 @@ namespace Quokka.DynamicCodeGeneration
 			}
 
 			if (innerMethod == null) {
-				BuildNotSupportedException(generator);
+				//BuildNotSupportedException(generator);
+			    _unsupportedMethods.Add(method, methodBuilder);
 			}
 			else {
+                ILGenerator generator = methodBuilder.GetILGenerator();
+
 				generator.Emit(OpCodes.Ldarg_0);
 				generator.Emit(OpCodes.Ldfld, m_innerFieldBuilder);
 
@@ -249,5 +290,28 @@ namespace Quokka.DynamicCodeGeneration
 			generator.Emit(OpCodes.Newobj, constructor);
 			generator.Emit(OpCodes.Throw);
 		}
+
+        private static void BuildNotSupportedException(MethodBuilder methodBuilder)
+        {
+            BuildNotSupportedException(methodBuilder.GetILGenerator());
+        }
+
+        private void BuildCheckMemberSupported(string memberName, MethodBuilder methodBuilder)
+        {
+            ILGenerator generator = methodBuilder.GetILGenerator();
+
+            foreach (MemberInfo member in m_innerType.GetMembers())
+            {
+                if (member.Name == memberName)
+                {
+                    generator.Emit(OpCodes.Ldc_I4_1);
+                    generator.Emit(OpCodes.Ret);
+                    return;
+                }
+            }
+
+            generator.Emit(OpCodes.Ldc_I4_0);
+            generator.Emit(OpCodes.Ret);
+        }
 	}
 }

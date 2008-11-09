@@ -26,6 +26,8 @@
 //
 #endregion
 
+using Quokka.Diagnostics;
+
 namespace Quokka.Reflection
 {
 	using System;
@@ -33,6 +35,8 @@ namespace Quokka.Reflection
 
 	public static class ObjectFactory
     {
+		private static readonly ILogger _logger = LogManager.GetLogger();
+
         public static object Create(Type objectType, IServiceProvider serviceProvider, params object[] concreteObjects) {
             if (objectType == null)
                 throw new ArgumentNullException("objectType");
@@ -53,6 +57,7 @@ namespace Quokka.Reflection
 				ArgumentNullException innerException = ex.InnerException as ArgumentNullException;
 				if (innerException == null) {
 					string message = String.Format("Failed to create object of type {0}", objectType.FullName);
+					_logger.Error(message, ex);
 					throw new QuokkaException(message, ex);
 				}
 				else {
@@ -68,6 +73,7 @@ namespace Quokka.Reflection
 							              innerException.ParamName);
 					}
 
+					_logger.Error(message, ex);
 					throw new QuokkaException(message, ex);
 				}
 			}
@@ -132,7 +138,9 @@ namespace Quokka.Reflection
             }
 
             if (chosenConstructor == null) {
-                throw new QuokkaException("No public constructors for type: " + objectType);
+            	string message = "No public constructors for type: " + objectType;
+            	_logger.Error(message);
+                throw new QuokkaException(message);
             }
 
             return chosenConstructor;

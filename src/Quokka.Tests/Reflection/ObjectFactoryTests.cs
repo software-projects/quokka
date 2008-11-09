@@ -6,7 +6,9 @@ using NUnit.Framework;
 
 namespace Quokka.Reflection
 {
-    [TestFixture]
+	using System.ComponentModel.Design;
+
+	[TestFixture]
     public class ObjectFactoryTests
     {
         [Test]
@@ -40,7 +42,7 @@ namespace Quokka.Reflection
             MockClass1 mock1 = new MockClass1();
             MockClass2 mock2 = new MockClass2();
             MockClass3 mock3 = new MockClass3();
-            QuokkaContainer container = new QuokkaContainer();
+            ServiceContainer container = new ServiceContainer();
             container.AddService(typeof(IMockInterface1), mock1);
             container.AddService(typeof(IMockInterface2), mock2);
             object obj = ObjectFactory.Create(typeof(MockConstructorInterfaces), container, mock3);
@@ -57,7 +59,7 @@ namespace Quokka.Reflection
             MockClass1 mock1 = new MockClass1();
             MockClass2 mock2 = new MockClass2();
             MockClass3 mock3 = new MockClass3();
-            QuokkaContainer container = new QuokkaContainer();
+            ServiceContainer container = new ServiceContainer();
             container.AddService(typeof(IMockInterface1), mock1);
             container.AddService(typeof(IMockInterface2), mock2);
             object obj = ObjectFactory.Create(typeof(MockConstructorInterfaces), container, mock3, null);
@@ -71,7 +73,7 @@ namespace Quokka.Reflection
 
         [Test]
         public void RequiresServiceProvider() {
-            QuokkaContainer container = new QuokkaContainer();
+            ServiceContainer container = new ServiceContainer();
             MockRequiresServiceProvider mock = (MockRequiresServiceProvider)ObjectFactory.Create(typeof(MockRequiresServiceProvider), container);
             Assert.AreSame(container, mock.ServiceProvider);
         }

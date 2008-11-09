@@ -41,9 +41,14 @@ namespace Quokka.WinForms
 				FlatStyle = FlatStyle.System;
 			}
 			else {
-				// default text color
+				// Default text color
 				_textColor = Color.FromArgb(21, 28, 85);
 				_mouseOverTextColor = Color.FromArgb(7, 74, 229);
+
+                // On Windows earlier than vista, it is not possible to guarantee that the 
+                // Segoe UI font is installed. It would be good to include some code here to
+                // see if that font is installed and use it if it is. (It is installed if Office 2007
+                // is installed). Have not found a .NET API to tell which fonts are installed.
 				_textFont = new Font("Tahoma", 12F, FontStyle.Bold);
 				_descriptionFont = new Font("Tahoma", 8F, FontStyle.Regular, GraphicsUnit.Point, 0);
 				_focusButtonBorderColor = Color.FromArgb(198, 244, 255);
@@ -51,12 +56,12 @@ namespace Quokka.WinForms
 				base.BackColor = SystemColors.Window;
 				FlatStyle = FlatStyle.Standard;
 				TabStop = false;
-				MouseEnter += new EventHandler(CommandLink_MouseEnter);
-				MouseLeave += new EventHandler(CommandLink_MouseLeave);
+				MouseEnter += CommandLink_MouseEnter;
+				MouseLeave += CommandLink_MouseLeave;
 			}
 
 			// default size is bigger than a normal button
-			Size = new System.Drawing.Size(432, 72); 
+			Size = new Size(432, 72); 
 		}
 
 		protected override CreateParams CreateParams
@@ -98,6 +103,10 @@ namespace Quokka.WinForms
 					_text = value;
 					if (_supportedNatively) {
 						base.Text = value;
+
+                        // The text does not show on vista unless you explicitly
+                        // set it like this.
+                        Win32.SendMessage(this, Win32.WM_SETTEXT, 0, value);
 					}
 					else {
 						Invalidate();
@@ -308,7 +317,7 @@ namespace Quokka.WinForms
 			return graphicsPath;
 		}
 
-		protected override void OnPaint(System.Windows.Forms.PaintEventArgs e)
+		protected override void OnPaint(PaintEventArgs e)
 		{
 			if (_supportedNatively) {
 				base.OnPaint(e);
@@ -391,7 +400,7 @@ namespace Quokka.WinForms
 		/// </summary>
 		private void CheckIfMouseOver()
 		{
-			Point p = PointToClient(Control.MousePosition);
+			Point p = PointToClient(MousePosition);
 			bool mouseOver = ClientRectangle.Contains(p);
 			if (mouseOver != _isMouseOver)
 			{
@@ -404,12 +413,12 @@ namespace Quokka.WinForms
 
 		#region Event Handlers
 
-		private void CommandLink_MouseEnter(object sender, System.EventArgs e)
+		private void CommandLink_MouseEnter(object sender, EventArgs e)
 		{
 			CheckIfMouseOver();
 		}
 
-		private void CommandLink_MouseLeave(object sender, System.EventArgs e)
+		private void CommandLink_MouseLeave(object sender, EventArgs e)
 		{
 			CheckIfMouseOver();
 		}

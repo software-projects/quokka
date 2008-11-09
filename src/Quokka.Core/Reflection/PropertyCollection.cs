@@ -28,21 +28,10 @@
 
 namespace Quokka.Reflection
 {
-	using System.Collections.Generic;
 	using System.Collections.Specialized;
 
 	public class PropertyCollection : NameObjectCollectionBase 
     {
-        public PropertyCollection() { }
-
-        internal PropertyCollection(IEnumerable<Quokka.Uip.Implementation.PropertyConfig> propertyConfigs) {
-            if (propertyConfigs != null) {
-                foreach (Quokka.Uip.Implementation.PropertyConfig propertyConfig in propertyConfigs) {
-                    Add(propertyConfig.Name, propertyConfig.Value);
-                }
-            }
-        }
-
         public string this[string name] {
             get { return (string)BaseGet(name); }
             set { BaseSet(name, value); }

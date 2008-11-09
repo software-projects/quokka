@@ -1,8 +1,10 @@
 <?xml version="1.0" ?>
-<project name="Quokka" default="test" xmlns="http://nant.sf.net/nightly/2006-03-08-0.85/nant.xsd">
-  <property name="nant.settings.currentframework" value="net-2.0"/>
+<project name="Quokka" default="test" xmlns="http://nant.sf.net/release/0.86-beta1/nant.xsd">
+  <property name="nant.settings.currentframework" value="net-3.5"/>
   <property name="framework.dir" value="${framework::get-framework-directory(nant.settings.currentframework)}"/>
-  <property name="debug" value="true"/>
+
+
+  <property name="config" value="Release"/>
 
   <property name="output.dir" value="${path::get-full-path('../bin')}" unless="${property::exists('output.dir')}"/>
   <property name="tools.dir" value="${path::get-full-path('../tools')}"/>
@@ -12,8 +14,9 @@
   <property name="temp.dir" value="${path::get-full-path('../temp')}"/>
   <property name="unittest.dir" value="${path::combine(temp.dir, 'unittest')}"/>
   <property name="coverage.dir" value="${path::combine(temp.dir, 'coverage')}"/>
+  <property name="msbuild.dir" value="${framework.dir}"/>
 
-  <property name="svn.dir" value="d:\build\programs\svn-win32-1.4.2" overwrite="false"/>
+  <property name="svn.dir" value="d:\build\programs\svn-win32-1.5.0" overwrite="false"/>
   <property name="svn.bin.dir" value="${path::combine(svn.dir, 'bin')}"/>
 
   <property name="nunit-console.exe" value="${path::combine(nunit.bin.dir, 'nunit-console.exe')}"/>
@@ -40,7 +43,7 @@
     </if>
     <if test="${property::exists('svn.revision')}">
       <property name="version.major" value="0"/>
-      <property name="version.minor" value="1"/>
+      <property name="version.minor" value="3"/>
       <property name="version.build" value="${svn.revision}"/>
       <property name="version.revision" value="0"/>
     </if>
@@ -51,98 +54,48 @@
   <target name="clean">
     <delete>
       <fileset>
-        <include name="Quokka.Core/bin/**"/>
-        <include name="Quokka.Core/obj/**"/>
-        <include name="Quokka.Tests/bin/**"/>
-        <include name="Quokka.Tests/obj/**"/>
+        <include name="Quokka.*/bin/**"/>
+        <include name="Quokka.*/obj/**"/>
         <include name="${temp.dir}/**"/>
-        <include name="AssemblyInfo.tmp.cs"/>
+        <include name="CommonAssemblyInfo.cs"/>
       </fileset>
     </delete>
   </target>
   
-  <target name="AssemblyInfo.tmp.cs" depends="version">
-    <asminfo language="CSharp" output="AssemblyInfo.tmp.cs">
+  <target name="CommonAssemblyInfo.cs" depends="version">
+    <asminfo language="CSharp" output="CommonAssemblyInfo.cs">
       <imports>
         <import namespace="System"/>
         <import namespace="System.Reflection"/>
       </imports>
       <attributes>
         <attribute type="AssemblyVersionAttribute" value="${version.major}.${version.minor}.${version.build}.${version.revision}"/>
-        <!-- TBD put something meaningfule in AssemblyConfiguration -->
-        <attribute type="AssemblyConfigurationAttribute" value="Debug" if="${debug == 'true'}"/>
-        <attribute type="AssemblyConfigurationAttribute" value="Release" if="${debug != 'true'}"/>
-        <attribute type="AssemblyDescriptionAttribute" value="Quokka library"/>
+        <attribute type="AssemblyConfigurationAttribute" value="${config}"/>
         <attribute type="AssemblyCompanyAttribute" value="Quokka.org"/>
-        <attribute type="AssemblyProductAttribute" value="Quokka"/>
+        <attribute type="AssemblyProductAttribute" value="Quokka Assemblies"/>
         <attribute type="AssemblyCopyrightAttribute" value="Copyright 2004-${build.year}. All Rights Reserved."/>
       </attributes>
     </asminfo>
   </target>
 
-  <target name="Quokka.Core.dll" depends="AssemblyInfo.tmp.cs">
-    <mkdir dir="${output.dir}"/>
-    <csc keyfile="Quokka.Core/Quokka.snk" target="library" output="${output.dir}/Quokka.Core.dll" debug="${debug}">
-      <resources dynamicprefix="true" prefix="Quokka" basedir="Quokka.Core" >
-        <include name="**/*.resources"/>
-        <include name="**/*.xml"/>
-        <include name="**/*.xsd"/>
-        <exclude name="obj/**"/>
-				<exclude name="bin/**"/>
-			</resources>
-      <sources>
-        <include name="AssemblyInfo.tmp.cs"/>
-        <include name="Quokka.Core/**.cs"/>
-        <exclude name="**/Copy of*.cs"/>
-      </sources>
-    </csc>
+  <target name="compile" depends="CommonAssemblyInfo.cs">
+    <exec program="msbuild.exe" basedir="${msbuild.dir}">
+      <arg value="/property:Configuration=${config}"/>
+      <arg value="/property:FormalBuild=true"/>
+      <arg file="Quokka.sln"/>
+    </exec>
+
+    <copy todir="${output.dir}">
+      <fileset basedir="Quokka.Tests/bin/${config}">
+        <include name="*.dll"/>
+        <include name="*.pdb"/>
+        <include name="*.xml"/>
+      </fileset>
+    </copy>
   </target>
 
-  <target name="Quokka.WinForms.dll" depends="Quokka.Core.dll">
-		<resgen usesourcepath="true">
-			<resources basedir=".">
-				<include name="**/*.resx"/>
-			</resources>
-		</resgen>
-		<csc keyfile="Quokka.Core/Quokka.snk" target="library" output="${output.dir}/Quokka.WinForms.dll" debug="${debug}">
-      <references>
-        <include name="${output.dir}/Quokka.Core.dll"/>
-      </references>
-      <resources dynamicprefix="true" prefix="Quokka.WinForms" basedir="Quokka.WinForms" >
-        <include name="**/*.resources"/>
-				<include name="Resources/*.gif"/>
-        <exclude name="obj/**"/>
-				<exclude name="bin/**"/>
-			</resources>
-      <sources>
-        <include name="AssemblyInfo.tmp.cs"/>
-        <include name="Quokka.WinForms/**.cs"/>
-      </sources>
-    </csc>
-  </target>
 
-  <target name="compile" depends="Quokka.Core.dll,Quokka.WinForms.dll"/>
-
-  <target name="compile.tests" depends="compile">
-    <csc target="library" output="${output.dir}/Quokka.Tests.dll" debug="${debug}">
-      <references>
-        <include name="${nunit.dir}/bin/NUnit.Framework.dll"/>
-        <include name="${output.dir}/Quokka.Core.dll"/>
-      </references>
-      <resources dynamicprefix="true" prefix="Quokka" basedir="Quokka.Tests" >
-        <include name="**/*.resources"/>
-        <include name="**/*.xml"/>
-        <exclude name="obj/**"/>
-				<exclude name="bin/**"/>
-			</resources>      
-      <sources>
-        <include name="AssemblyInfo.tmp.cs"/>
-        <include name="Quokka.Tests/**.cs"/>
-      </sources>
-    </csc>
-  </target>
-
-  <target name="test" depends="compile.tests">
+  <target name="test" depends="compile">
     <nunit2>
       <formatter type="Plain"/>
       <test assemblyname="${output.dir}/Quokka.Tests.dll"/>

@@ -32,33 +32,61 @@ namespace Quokka.Uip.MockApp
 
 	public class MockController1
     {
-        protected readonly IUipNavigator navigator;
-        protected readonly IState state;
+        protected readonly IUipNavigator _navigator;
+        protected readonly IState _state;
+	    private IView _view;
 
         public interface IState
         {
             string StringProperty { get; }
         }
 
+        public interface IView
+        {
+            bool CanDoSomething { get; }
+            bool DoSomething();
+        }
+
         public MockController1(IUipNavigator navigator, IState state) {
             Assert.IsNotNull(navigator);
             Assert.IsNotNull(state);
 
-            this.navigator = navigator;
-            this.state = state;
+            _navigator = navigator;
+            _state = state;
+        }
+
+        public void SetView(IView view)
+        {
+            _view = view;
         }
 
         public void Next() {
-            navigator.Navigate("Next");
+            // This is testing that the UIP framework injects the view when
+            // the controller provides a 'SetView' method.
+            Assert.IsNotNull(_view);
+            if (_view.CanDoSomething)
+                Assert.IsTrue(_view.DoSomething());
+
+            _navigator.Navigate("Next");
         }
 
         public void Back() {
-            navigator.Navigate("Back");
+            _navigator.Navigate("Back");
         }
 
         public void End() {
-            navigator.Navigate("End");
+            _navigator.Navigate("End");
         }
+
+        public void NavigateInViewLoad()
+        {
+            _navigator.Navigate("NavigateInViewLoadEvent");
+        }
+
+		public void View5()
+		{
+			_navigator.Navigate("View5");
+		}
     }
 
     public class MockController2 : MockController1
@@ -68,7 +96,7 @@ namespace Quokka.Uip.MockApp
         }
 
         public void Error() {
-            navigator.Navigate("Error");
+            _navigator.Navigate("Error");
         }
     }
 

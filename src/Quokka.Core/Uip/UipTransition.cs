@@ -31,52 +31,33 @@ namespace Quokka.Uip
 	using Quokka.Diagnostics;
 
 	public class UipTransition
-    {
-        private readonly UipNode node;
-        private readonly string navigateValue;
-        private readonly string nextNodeName;
-        private UipNode nextNode;
+	{
+		private readonly UipNode node;
+		private readonly string navigateValue;
+		private readonly UipNode nextNode;
 
-        internal UipTransition(UipNode node, string navigateValue, UipNode nextNode) {
-            Verify.ArgumentNotNull(node, "node");
-            Verify.ArgumentNotNull(navigateValue, "navigateValue");
-            //Assert.ArgumentNotNull(nextNode, "nextNode");
+		internal UipTransition(UipNode node, string navigateValue, UipNode nextNode)
+		{
+			Verify.ArgumentNotNull(node, "node");
+			Verify.ArgumentNotNull(navigateValue, "navigateValue");
+			this.node = node;
+			this.navigateValue = navigateValue;
+			this.nextNode = nextNode;
+		}
 
-            this.node = node;
-            this.navigateValue = navigateValue;
-            this.nextNode = nextNode;
-            if (nextNode != null) {
-                nextNodeName = nextNode.Name;
-            }
-        }
+		public UipNode Node
+		{
+			get { return node; }
+		}
 
-        internal UipTransition(UipNode node, string navigateValue, string nextNodeName) {
-            Verify.ArgumentNotNull(node, "node");
-            Verify.ArgumentNotNull(navigateValue, "navigateValue");
-            Verify.ArgumentNotNull(nextNodeName, "nextNodeName");
+		public string NavigateValue
+		{
+			get { return navigateValue; }
+		}
 
-            this.node = node;
-            this.navigateValue = navigateValue;
-            if (nextNodeName != "__end__") {
-                this.nextNodeName = nextNodeName;
-            }
-        }
-
-        public UipNode Node {
-            get { return node; }
-        }
-
-        public string NavigateValue {
-            get { return navigateValue; }
-        }
-
-        public UipNode NextNode {
-            get {
-                if (nextNode == null && nextNodeName != null) {
-                    nextNode = node.TaskDefinition.FindNode(nextNodeName, true);
-                }
-                return nextNode;
-            }
-        }
-    }
+		public UipNode NextNode
+		{
+			get { return nextNode; }
+		}
+	}
 }

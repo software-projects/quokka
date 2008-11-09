@@ -30,6 +30,74 @@ namespace Quokka.Uip
 {
 	using System;
 
+	public interface IProgressReport
+	{
+		/// <summary>
+		/// Event fired on a separate thread when a cancel request
+		/// is received.
+		/// </summary>
+		event EventHandler CancelRequest;
+
+		/// <summary>
+		/// Summary of work currently being performed.
+		/// </summary>
+		string ProgressSummary { get; set; }
+
+		/// <summary>
+		/// More detail of work currently being performed.
+		/// </summary>
+		string ProgressDetail { get; set; }
+
+		/// <summary>
+		/// Minimum progress value
+		/// </summary>
+		int ProgressMinimum { get; set; }
+
+		/// <summary>
+		/// Maximum progress value
+		/// </summary>
+		/// <remarks>
+		/// Do not set this value if the worker process cannot report on
+		/// its percentage progress.
+		/// </remarks>
+		int ProgressMaximum { get; set; }
+
+		/// <summary>
+		/// Current progress value
+		/// </summary>
+		/// <remarks>
+		/// Do not set this value if the worker process cannot report on
+		/// its percentage progress.
+		/// </remarks>
+		int ProgressValue { get; set; }
+
+		/// <summary>
+		/// Can the worker process act on a request to cancel
+		/// </summary>
+		bool CanCancel { get; set; }
+
+		/// <summary>
+		/// Has a cancel request been received.
+		/// </summary>
+		bool CancelRequested { get; }
+
+		/// <summary>
+		/// Specifies whether an exception is thrown when a cancel
+		/// request is received.
+		/// </summary>
+		/// <remarks>
+		/// <para>
+		/// Set this property to <c>true</c> to enable throwing of an
+		/// <see cref="OperationCanceledException"/> when any methods of
+		/// this object are accessed after a cancel request has been received.
+		/// </para>
+		/// <para>
+		/// This can make it easier to code the worker function.
+		/// </para>
+		/// </remarks>
+		bool ThrowOperationCanceledException { get; set; }
+	}
+
 	/// <summary>
     /// Controller interface used for operations which take a long
     /// time and need to provide feedback to the user.

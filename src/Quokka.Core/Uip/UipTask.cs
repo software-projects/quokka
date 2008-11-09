@@ -1,59 +1,25 @@
-#region Copyright notice
-
-//
-// Authors: 
-//  John Jeffery <john@jeffery.id.au>
-//
-// Copyright (C) 2006 John Jeffery. All rights reserved.
-//
-// Permission is hereby granted, free of charge, to any person obtaining
-// a copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so, subject to
-// the following conditions:
-// 
-// The above copyright notice and this permission notice shall be
-// included in all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-//
-
-#endregion
-
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.Design;
+using System.Reflection;
+using Quokka.Diagnostics;
+using Quokka.DynamicCodeGeneration;
+using Quokka.Reflection;
 
 namespace Quokka.Uip
 {
-	using System;
-	using System.Collections;
-	using System.Collections.Generic;
-	using Quokka.DynamicCodeGeneration;
-	using Quokka.Reflection;
-
-	/// <summary>
-	/// A task defines a discrete unit of work-flow within an application.
-	/// </summary>
-	/// <remarks>
-	/// <para>
-	/// An application contains one or more UIP tasks.
-	/// </para>
-	/// <para>TODO: more text</para>
-	/// </remarks>
-	public sealed class UipTask
+    public abstract class UipTask
 	{
-		private readonly QuokkaContainer _serviceContainer;
-		private readonly UipTaskDefinition _taskDefinition;
-		private readonly ControllerViewStore _controllersAndViews;
+		private static IServiceProvider _parentServiceProvider;
+		private static readonly List<UipTask> _runningTasks = new List<UipTask>();
+		protected readonly ServiceContainer _serviceContainer;
+		private ControllerViewStore _controllersAndViews;
 		private readonly Navigator _navigator;
-		private readonly object state;
+		private IUipViewManager _viewManager;
+		private EventHelper _eventHelper;
+		private IList<UipNode> _nodes;
 		private UipNode _currentNode;
 		private object _currentController;
 		private object _currentView;
@@ -61,37 +27,65 @@ namespace Quokka.Uip
 		private bool _inNavigateMethod;
 		private bool _endTaskRequested;
 		private bool _taskComplete;
+		private bool _registeredWithViewManager;
+		private string _name;
+    	private ILogger _logger = LogManager.GetLogger();
 
-		public event EventHandler TaskStarted;
-		public event EventHandler TaskComplete;
+		public event EventHandler TaskStarted
+		{
+			add { _eventHelper.TaskStarted += value; }
+			remove { _eventHelper.TaskStarted -= value; }
+		}
+
+		public event EventHandler TaskComplete
+		{
+			add { _eventHelper.TaskComplete += value; }
+			remove { _eventHelper.TaskComplete -= value; }
+		}
+
+		private class EventHelper
+		{
+			public event EventHandler TaskStarted;
+			public event EventHandler TaskComplete;
+
+			public void RaiseTaskStarted(object sender)
+			{
+				if (TaskStarted != null) {
+					TaskStarted(sender, EventArgs.Empty);
+				}
+			}
+
+			public void RaiseTaskComplete(object sender)
+			{
+				if (TaskComplete != null) {
+					TaskComplete(sender, EventArgs.Empty);
+				}
+			}
+		}
 
 		#region Construction
 
-		internal UipTask(UipTaskDefinition taskDefinition, IServiceProvider serviceProvider, IUipViewManager viewManager)
+		protected UipTask()
 		{
-			if (taskDefinition == null) {
-				throw new ArgumentNullException("navigationGraph");
-			}
-			if (viewManager == null) {
-				throw new ArgumentNullException("viewManager");
-			}
-			_taskDefinition = taskDefinition;
+			// may be overridden by a derived class
+			_name = GetType().Name;
 			_navigator = new Navigator(this);
-			_serviceContainer = new QuokkaContainer(serviceProvider);
-			_serviceContainer.AddService(typeof(IUipViewManager), viewManager);
+			_serviceContainer = new ServiceContainer(_parentServiceProvider);
 			_serviceContainer.AddService(typeof(IUipNavigator), _navigator);
-			_serviceContainer.AddService(typeof(IUipEndTask), new EndTaskImpl(this));
-			state = ObjectFactory.Create(taskDefinition.StateType, serviceProvider, serviceProvider, this);
-			PropertyUtil.SetValues(state, taskDefinition.StateProperties);
 			_currentNode = null;
-			_controllersAndViews = new ControllerViewStore(this);
-			AddNestedStateInterfaces();
+			_eventHelper = new EventHelper();
 			AddNestedNavigatorInterfaces(_navigator);
 		}
 
 		#endregion
 
 		#region Public properties
+
+		public static IServiceProvider ParentServiceProvider
+		{
+			get { return _parentServiceProvider; }
+			set { _parentServiceProvider = value; }
+		}
 
 		/// <summary>
 		/// Provides services to controller and view objects created while this task is running.
@@ -117,7 +111,7 @@ namespace Quokka.Uip
 		/// </remarks>
 		public IUipViewManager ViewManager
 		{
-			get { return (IUipViewManager)ServiceProvider.GetService(typeof(IUipViewManager)); }
+			get { return _viewManager; }
 		}
 
 		/// <summary>
@@ -125,21 +119,25 @@ namespace Quokka.Uip
 		/// </summary>
 		public string Name
 		{
-			get { return _taskDefinition.Name; }
+			get { return _name; }
+			protected set { _name = value ?? String.Empty; }
 		}
 
 		/// <summary>
-		/// The task state object.
+		/// The start node. Override to change from the default.
 		/// </summary>
 		/// <remarks>
-		/// Every UIP task has a state object, which is made available to controllers
-		/// via their constructor arguments. The state object type is specified in the
-		/// UIP task definition.
+		/// By default, the start node is the first node specified.
 		/// </remarks>
-		public object State
+		public virtual UipNode GetStartNode()
 		{
-			get { return state; }
+			if (Nodes.Count == 0) {
+				throw new UipException("No nodes defined for task: " + Name);
+			}
+			return Nodes[0];
 		}
+
+		public abstract object GetStateObject();
 
 		public object CurrentController
 		{
@@ -158,7 +156,43 @@ namespace Quokka.Uip
 
 		public IList<UipNode> Nodes
 		{
-			get { return _taskDefinition.Nodes; }
+			get
+			{
+				if (_nodes == null) {
+					List<UipNode> nodes = new List<UipNode>();
+					foreach (FieldInfo field in GetType().GetFields()) {
+						// only interested in UipNode fields
+						if (field.FieldType != typeof(UipNode))
+							continue;
+
+						// only interested in static fields
+						if (!field.IsStatic)
+							continue;
+
+						// only interested in readonly fields
+						if (!field.IsInitOnly)
+							continue;
+
+						// only interested in public fields (TODO: is public necessary?)
+						if (!field.IsPublic)
+							continue;
+
+						// found a field that defines a node, get the value
+						UipNode node = (UipNode) field.GetValue(null);
+
+						// the first time we create a task the name is not set
+						if (node.Name == null) {
+							node.Name = field.Name;
+						}
+
+						nodes.Add(node);
+					}
+
+					_nodes = nodes.AsReadOnly();
+				}
+
+				return _nodes;
+			}
 		}
 
 		public bool IsRunning
@@ -177,21 +211,34 @@ namespace Quokka.Uip
 
 		public UipNode FindNode(string name, bool throwOnError)
 		{
-			return _taskDefinition.FindNode(name, throwOnError);
+			foreach (UipNode node in Nodes) {
+				if (node.Name == name) {
+					return node;
+				}
+			}
+
+			if (throwOnError) {
+				string message = "Cannot find node: " + name;
+				_logger.Error(message);
+				throw new UipException(message);
+			}
+
+			return null;
 		}
 
-		public void Start()
+		public void Start(IUipViewManager viewManager)
 		{
+			Verify.ArgumentNotNull(viewManager, "viewManager");
 			if (IsRunning) {
-				throw new UipException("Task is already running");
+				const string message = "Task is already running";
+				_logger.Error(message);
+				throw new UipException(message);
 			}
 
-			ViewManager.BeginTask(this);
+			_viewManager = viewManager;
+			_serviceContainer.AddService(typeof(IUipViewManager), _viewManager);
+			_controllersAndViews = new ControllerViewStore(this);
 			Navigate(null);
-
-			if (TaskStarted != null) {
-				TaskStarted(this, EventArgs.Empty);
-			}
 		}
 
 		public override int GetHashCode()
@@ -203,96 +250,149 @@ namespace Quokka.Uip
 
 		#region Private methods
 
-		private void Navigate(string navigateValue)
-		{
-			if (_taskComplete) {
-				throw new UipException("Task has completed");
-			}
+        private void Navigate(string navigateValue)
+        {
+            if (_taskComplete)
+            {
+            	string message = String.Format("Attempt to navigate '{0}', but task has already completed", navigateValue);
+            	_logger.Error(message);
+                throw new UipException(message);
+            }
 
-			_navigateValue = navigateValue;
+            _navigateValue = navigateValue;
 
-			// Recursive calls will not perform any actual navigation, they
-			// just set the _navigateValue member and exit.
-			if (!_inNavigateMethod) {
-				_inNavigateMethod = true;
-				bool showModalView = false;
-				try {
-					UipNode nextNode = GetNextNode();
-					if (nextNode != null) {
-						ViewManager.BeginTransition();
-						try {
-							do {
-								// Perform the navigation. Note that this call
-								// can result in a recursive call back into this function,
-								// hence the test using the <c>inNavigateMethod</c> variable.
-								DoNavigate(nextNode);
+            // Recursive calls will not perform any actual navigation, they
+            // just set the _navigateValue member and exit.
+            if (_inNavigateMethod)
+                return;
 
-								// If there was a recursive call to this function, then this
-								// will return non-null.
-								nextNode = GetNextNode();
-							} while (nextNode != null);
+            NavigateHelper();
 
-							// We are now at the node where we are going to stay, so cleanup
-							// any unwanted views and controllers prior to creating the view for
-							// this node.
-							_controllersAndViews.Cleanup(_currentNode);
+            // This loop is here to catch the condition where the view navigates
+            // while it is in the process of being shown.
+            while (!_inNavigateMethod && _navigateValue != null && !_endTaskRequested)
+            {
+                NavigateHelper();
+            }
+        }
 
-							if (!_endTaskRequested && _currentNode != null) {
-								// Finished navigating to a new node, display the new view.
-								_currentView = _controllersAndViews.GetView(_currentNode);
-								if (_currentView != null) {
-									if (_currentNode.IsViewModal) {
-										// We can't block and show a modal view here
-										// because the _inNavigateMethod member is set to 
-										// true and this will prevent any navigation from
-										// within the modal view. For this reason set a variable
-										// to remind us to show the modal view before leaving this
-										// method.
-										showModalView = true;
-									}
-									else {
-										ViewManager.ShowView(_currentView);
-									}
-								}
-							}
-						}
-						finally {
-							_controllersAndViews.Cleanup(_currentNode);
-							ViewManager.EndTransition();
-						}
-					}
+	    private void NavigateHelper()
+        {
+            _inNavigateMethod = true;
+            bool showModalView = false;
+            try
+            {
+                UipNode nextNode = GetNextNode();
+                if (nextNode != null)
+                {
+                    ViewManager.BeginTransition();
+                    try
+                    {
+                        // We wait until now to register with the view manager so that all calls
+                        // to the view manager occur withing a BeginTransition/EndTransition pair
+                        if (!_registeredWithViewManager)
+                        {
+                            _viewManager.BeginTask(this);
+                            _registeredWithViewManager = true;
+                        }
 
-					if (_endTaskRequested) {
-						_currentNode = null;
-						_currentController = null;
-						_currentView = null;
-						_navigateValue = null;
-						_taskComplete = true;
-						_controllersAndViews.Clear();
-						ViewManager.EndTask(this);
-						if (TaskComplete != null) {
-							TaskComplete(this, EventArgs.Empty);
-						}
-					}
-				}
-				finally {
-					_inNavigateMethod = false;
-				}
+                        do
+                        {
+                            // Perform the navigation. This call
+                            // can result in a recursive call back into this function,
+                            // hence the test using the <c>inNavigateMethod</c> variable.
+                            DoNavigate(nextNode);
 
-				if (showModalView) {
-					ViewManager.ShowModalView(_currentView, _currentController);
-				}
-			}
-		}
+                            // If there was a recursive call to this function, then this
+                            // will return non-null.
+                            nextNode = GetNextNode();
+                        } while (nextNode != null);
 
-		private UipNode GetNextNode()
+                        // We are now at the node where we are going to stay, so cleanup
+                        // any unwanted views and controllers prior to displaying the view for
+                        // this node.
+                        _controllersAndViews.Cleanup(_currentNode);
+
+                        if (!_endTaskRequested && _currentNode != null)
+                        {
+                            // Finished navigating to a new node, display the new view.
+                            if (_currentView != null)
+                            {
+                                if (_currentNode.IsViewModal)
+                                {
+                                    // We can't block and show a modal view here
+                                    // because the _inNavigateMethod member is set to 
+                                    // true and this will prevent any navigation from
+                                    // within the modal view. For this reason set a variable
+                                    // to remind us to show the modal view before leaving this
+                                    // method.
+                                    showModalView = true;
+                                }
+                                else
+                                {
+                                    // It is possible for the view to navigate while it is
+                                    // in the process of showing the view. It is a bit difficult
+                                    // to handle this here, as there is cleanup to perform. This
+                                    // code could all do with a good refactor, but for now the way
+                                    // this is handled is by the loop in the Navigate method.
+                                    ViewManager.ShowView(_currentView);
+                                }
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        _controllersAndViews.Cleanup(_currentNode);
+                        ViewManager.EndTransition();
+                    }
+                }
+
+                if (_endTaskRequested)
+                {
+                    try
+                    {
+                        _viewManager.BeginTransition();
+                        _controllersAndViews.Clear();
+                        _viewManager.EndTask(this);
+                    }
+                    finally
+                    {
+                        _viewManager.EndTransition();
+                    }
+
+                    _currentNode = null;
+                    _currentController = null;
+                    _currentView = null;
+                    _navigateValue = null;
+                    _taskComplete = true;
+                    _runningTasks.Remove(this);
+                    _eventHelper.RaiseTaskComplete(this);
+
+                    // After raising the TaskComplete event, remove reference to the event
+                    // helper object. This helps avoid any circular memory references, which
+                    // would result in a memory leak.
+                    _eventHelper = null;
+                }
+            }
+            finally
+            {
+                _inNavigateMethod = false;
+            }
+
+            if (showModalView)
+            {
+                ViewManager.ShowModalView(_currentView, _currentController);
+            }
+        }
+
+	    private UipNode GetNextNode()
 		{
 			UipNode nextNode = null;
 
 			if (!_endTaskRequested) {
 				if (_currentNode == null) {
 					// Task is just starting
-					nextNode = _taskDefinition.StartNode;
+					nextNode = GetStartNode();
 				}
 				else if (_navigateValue != null) {
 					bool transitionDefined = _currentNode.GetNextNode(_navigateValue, out nextNode);
@@ -303,7 +403,8 @@ namespace Quokka.Uip
 
 					if (!transitionDefined) {
 						string message = String.Format("No transition defined: task={0}, node={1}, navigateValue={2}",
-						                               _taskDefinition.Name, _currentNode.Name, prevNavigateValue);
+						                               Name, _currentNode.Name, prevNavigateValue);
+						_logger.Error(message);
 						throw new UipException(message);
 					}
 
@@ -325,55 +426,27 @@ namespace Quokka.Uip
 				// signal task started
 				if (prevNode == null) {
 					// the task has just started 
-					if (TaskStarted != null) {
-						TaskStarted(this, EventArgs.Empty);
-					}
+					_eventHelper.RaiseTaskStarted(this);
+					_runningTasks.Add(this);
 				}
 
-				// Create the controller for the new current node. Note that it is possible for
+				// Create the controller for the new current node. It is possible for
 				// a controller to request navigation inside its constructor, and if this happens
 				// the navigateValue variable will be set, and we will continue through this loop again.
 				_currentController = _controllersAndViews.GetController(_currentNode);
-			}
-		}
 
-		/// <summary>
-		/// Create proxies to the state object for nested interfaces called 'IState'
-		/// </summary>
-		/// <remarks>
-		/// <para>
-		/// Iterate through each controller and view class looking for nested interfaces called 'IState'.
-		/// If a class contains a nested interface called 'IState', assume that this is
-		/// a 'duck proxy' reference to the real state object, and create an entry in the service
-		/// container that will return a duck proxy to the state object when a service with the nested
-		/// interface is requested.
-		/// </para>
-		/// </remarks>
-		private void AddNestedStateInterfaces()
-		{
-			// Get the distinct controller types, as a controller type may be present in more than
-			// one node.
-			Dictionary<Type, Type> typeDict = new Dictionary<Type, Type>();
-			foreach (UipNode node in Nodes) {
-				Type controllerType = node.ControllerType;
-				if (controllerType != null) {
-					typeDict[controllerType] = controllerType;
-				}
-				Type viewType = node.ViewType;
-				if (viewType != null) {
-					typeDict[viewType] = viewType;
-				}
-			}
+                //
+                if (_navigateValue != null)
+                {
+                    // if the controller navigated during its constructor, stop now without
+                    // creating the current view
+                    return;
+                }
 
-			// Look for nested interface types called "IState" and assume that they are 
-			// duck typing references to the state object.
-			foreach (Type controllerType in typeDict.Keys) {
-				Type nestedType = controllerType.GetNestedType("IState");
-				if (nestedType != null && nestedType.IsInterface) {
-					// create a duck proxy for the state object and add it to the service provider
-					object stateProxy = ProxyFactory.CreateDuckProxy(nestedType, state);
-					_serviceContainer.AddService(nestedType, stateProxy);
-				}
+                // Create the view for the new current node. It is possible for a view to
+                // request navigation inside its constructor, and if this happens the navigateValue
+                // variable will be set, and we will continue through this loop again.
+                _currentView = _controllersAndViews.GetView(_currentNode);
 			}
 		}
 
@@ -382,7 +455,7 @@ namespace Quokka.Uip
 		/// </summary>
 		/// <remarks>
 		/// <para>
-		/// Iterate through each controller class looking for nested interfaces called 'INavigator'.
+		/// Iterate through each controller and view class looking for nested interfaces called 'INavigator'.
 		/// If a class contains a nested interface called 'INavigator', assume that this is
 		/// a 'navigator proxy' reference to the real navigator object, and create an entry in the service
 		/// container that will return a proxy to the navigator object when a service with the nested
@@ -399,21 +472,30 @@ namespace Quokka.Uip
 				if (controllerType != null) {
 					typeDict[controllerType] = controllerType;
 				}
+
+				Type viewType = node.ViewType;
+				if (viewType != null)
+				{
+					typeDict[viewType] = viewType;
+				}
 			}
+
+			Dictionary<Type, Type> nestedTypeDict = new Dictionary<Type, Type>();
 
 			// Look for nested interface types called "INavigator" and assume that they are 
 			// duck typing references to the state object.
-			foreach (Type controllerType in typeDict.Keys) {
-				Type nestedType = controllerType.GetNestedType("INavigator");
-				if (nestedType != null && nestedType.IsInterface) {
+			foreach (Type type in typeDict.Keys) {
+				Type nestedType = TypeUtil.FindNestedInterface(type, "INavigator");
+				if (nestedType != null && !nestedTypeDict.ContainsKey(nestedType)) {
 					// create a proxy for the navigator object and add it to the service provider
 					object navigatorProxy = ProxyFactory.CreateNavigatorProxy(nestedType, navigator);
 					_serviceContainer.AddService(nestedType, navigatorProxy);
+					nestedTypeDict.Add(nestedType, nestedType);
 				}
 			}
 		}
 
-		private void EndTask()
+		public void EndTask()
 		{
 			_endTaskRequested = true;
 			Navigate(null);
@@ -452,29 +534,6 @@ namespace Quokka.Uip
 
 		#endregion
 
-		#region Nested class EndTask
-
-		private class EndTaskImpl : IUipEndTask
-		{
-			private readonly UipTask task;
-
-			public EndTaskImpl(UipTask task)
-			{
-				this.task = task;
-			}
-
-			#region IUipEndTask Members
-
-			public void EndTask()
-			{
-				task.EndTask();
-			}
-
-			#endregion
-		}
-
-		#endregion
-
 		#region Nested class ControllerViewStore
 
 		internal class ControllerViewStore
@@ -486,17 +545,21 @@ namespace Quokka.Uip
 			public ControllerViewStore(UipTask task)
 			{
 				_task = task;
-				_task.ViewManager.ViewClosed += new EventHandler<UipViewEventArgs>(ViewManager_ViewClosed);
-				_controllers = new Dictionary<UipNode, object>(_task.Nodes.Count);
-				_views = new Dictionary<UipNode, object>(_task.Nodes.Count);
+				_task.ViewManager.ViewClosed += ViewManager_ViewClosed;
+				_controllers = new Dictionary<UipNode, object>();
+				_views = new Dictionary<UipNode, object>();
 			}
 
 			public void Clear()
 			{
 				IList<object> views = new List<object>(_views.Values);
 				IList<object> controllers = new List<object>(_controllers.Values);
+
 				_views.Clear();
 				_controllers.Clear();
+				foreach (object view in views) {
+					_task.ViewManager.RemoveView(view);
+				}
 				DisposeOfViews(views);
 				DisposeOfControllers(controllers);
 			}
@@ -523,6 +586,7 @@ namespace Quokka.Uip
 				foreach (UipNode node in _task.Nodes) {
 					if (node != currentNode) {
 						object view;
+                        object controller;
 						if (_views.TryGetValue(node, out view)) {
 							if (node.StayOpen) {
 								// This is not the current node, but it has been marked
@@ -537,13 +601,19 @@ namespace Quokka.Uip
 								_views.Remove(node);
 								viewsForDisposal.Add(view);
 
-								object controller;
 								if (_controllers.TryGetValue(node, out controller)) {
 									_controllers.Remove(node);
 									controllersForDisposal.Add(controller);
 								}
 							}
 						}
+
+                        // If there is no view, then the controller will always be disposed of
+                        else if (_controllers.TryGetValue(node, out controller))
+                        {
+                            _controllers.Remove(node);
+                            controllersForDisposal.Add(controller);
+                        }
 					}
 				}
 
@@ -585,30 +655,28 @@ namespace Quokka.Uip
 				}
 
 				object controller = ObjectFactory.Create(
-						node.ControllerType,
-						_task.ServiceProvider,
-						_task.State,
-						_task.ServiceProvider,
-						_task,
-						node);
+					node.ControllerType,
+					_task.ServiceProvider,
+					_task.GetStateObject(),
+					_task.ServiceProvider,
+					_task,
+					node);
 
 				if (controller == null) {
 					throw new UipException("Failed to create controller");
 				}
 
 				ISupportInitialize initialize = controller as ISupportInitialize;
-				if (initialize != null)
-				{
+				if (initialize != null) {
 					initialize.BeginInit();
 				}
 
-				UipUtil.SetState(controller, _task.State, false);
+				UipUtil.SetState(controller, _task.GetStateObject(), false);
 				UipUtil.SetNavigator(controller, _task._navigator);
 				UipUtil.SetViewManager(controller, _task.ViewManager);
 				PropertyUtil.SetValues(controller, node.ControllerProperties);
 
-				if (initialize != null)
-				{
+				if (initialize != null) {
 					initialize.EndInit();
 				}
 				return controller;
@@ -632,30 +700,40 @@ namespace Quokka.Uip
 					return null;
 				}
 
-				// this will throw an exception if there is not controller defined
-				object controller = _controllers[node];
-
-				// Look for a nested controller interface
+				// controller for the view
+				object controller;
 				object controllerProxy = null;
-				if (node.ControllerInterface != null) {
-					controllerProxy = ProxyFactory.CreateDuckProxy(node.ControllerInterface, controller);
+
+				if (_controllers.TryGetValue(node, out controller))
+				{
+					// Look for a nested controller interface
+					if (node.ControllerInterface != null)
+					{
+						controllerProxy = ProxyFactory.CreateDuckProxy(node.ControllerInterface, controller);
+					}
 				}
 
 				object view = ObjectFactory.Create(
-						viewType,
-						_task.ServiceProvider,
-						controllerProxy,
-						_task.ServiceProvider,
-						controller,
-						this);
+					viewType,
+					_task.ServiceProvider,
+					controllerProxy,
+					_task.ServiceProvider,
+					controller,
+					this);
 
 				if (view == null) {
 					throw new UipException("Failed to create view");
 				}
 
-				UipUtil.SetState(view, _task.State, false);
+				UipUtil.SetState(view, _task.GetStateObject(), false);
 				UipUtil.SetController(view, controller, false);
 				PropertyUtil.SetValues(view, node.ViewProperties);
+
+                // Assign the view to the controller if the controller wants it.
+				if (controller != null)
+				{
+					UipUtil.SetView(controller, view, false);
+				}
 
 				// If this view is not shown modally, tell the view manager about it.
 				if (!node.IsViewModal) {
@@ -699,7 +777,7 @@ namespace Quokka.Uip
 			private UipNode FindNodeForView(object view)
 			{
 				foreach (KeyValuePair<UipNode, object> keyValuePair in _views) {
-					if (Object.ReferenceEquals(view, keyValuePair.Value)) {
+					if (ReferenceEquals(view, keyValuePair.Value)) {
 						return keyValuePair.Key;
 					}
 				}
@@ -715,7 +793,7 @@ namespace Quokka.Uip
 						// This is a bit of a hack to avoid any attempt to dispose of Windows Forms controls twice.
 						object isDisposedObject = PropertyUtil.GetValue(disposable, "IsDisposed", false);
 						if (isDisposedObject is bool) {
-							bool isDisposed = (bool)isDisposedObject;
+							bool isDisposed = (bool) isDisposedObject;
 							if (!isDisposed) {
 								disposable.Dispose();
 							}

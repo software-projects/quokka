@@ -26,124 +26,43 @@
 //
 #endregion
 
+using System;
+using NUnit.Framework;
+using Quokka.Uip.MockApp;
+
 namespace Quokka.Uip
 {
-	using System;
-	using NUnit.Framework;
-	using Quokka.Uip.MockApp;
-
-	[TestFixture]
+    [TestFixture]
     public class MockAppTests
     {
         bool taskCompleted;
 
         [SetUp]
         public void SetUp() {
-            UipManager.Clear();
             taskCompleted = false;
         }
 
         [TearDown]
         public void TearDown() {
-            UipManager.Clear();
         }
 
-        [Test]
-        public void RunMockAppFromXmlDefinition() {
-            UipManager.AddAssembly(GetType().Assembly);
-            UipManager.DefineTask(typeof(MockState), "MockTask.xml");
-            MockViewManager viewManager = new MockViewManager();
-            UipTask task = UipManager.CreateTask("MockTask", viewManager);
-            Assert.IsNotNull(task);
 
+        [Test]
+        public void RunMockApp() {
+        	MockViewManager viewManager = new MockViewManager();
+        	MockTask task = new MockTask();
             RunMockAppHelper(task, viewManager);
         }
 
-        [Test]
-        public void RunMockAppFromCodeDefinition() {
-            UipTaskDefinition taskDefinition = new UipTaskDefinition("MockTask", typeof(MockState));
-            taskDefinition.StateProperties.Add("StringProperty", "Set from config");
-            UipNode node1 = taskDefinition.AddNode("Node1", typeof(MockView1), typeof(MockController1))
-                .NavigateTo("Next", "Node2")
-                .NavigateTo("Back", "NoViewNode")
-                .NavigateTo("End", "__end__");
-            /*UipNode node2 = */taskDefinition.AddNode("Node2", typeof(MockView2), typeof(MockController2))
-                .NavigateTo("Back", node1)
-                .NavigateTo("Next", "Node3")
-                .NavigateTo("Error", "ErrorNode");
-            UipNode node3 = taskDefinition.AddNode("Node3", typeof(MockView1), typeof(MockController2))
-                .NavigateTo("Next", node1);
-            /*UipNode errorNode = */taskDefinition.AddNode("ErrorNode", typeof(MockView2), typeof(MockController2))
-                .NavigateTo("Next", node1);
-            /*UipNode noViewNode = */taskDefinition.AddNode("NoViewNode", null, typeof(MockController3))
-                .NavigateTo("Next", node3);
-
-            MockViewManager viewManager = new MockViewManager();
-            UipTask task = UipManager.CreateTask(taskDefinition, viewManager);
-            Assert.IsNotNull(task);
-
-            RunMockAppHelper(task, viewManager);
-        }
-
-		[Test]
-		public void RunMockAppFromCodeDefinition2()
-		{
-			UipTaskDefinition taskDefinition = new UipTaskDefinition("MockTask", typeof(MockState));
-			taskDefinition.StateProperties.Add("StringProperty", "Set from config");
-
-			UipNode node1 = taskDefinition.AddNode("Node1");
-			UipNode node2 = taskDefinition.AddNode("Node2");
-			UipNode node3 = taskDefinition.AddNode("Node3");
-			UipNode errorNode = taskDefinition.AddNode("ErrorNode");
-			UipNode noViewNode = taskDefinition.AddNode("NoViewNode");
-
-			node1.SetViewType(typeof(MockView1))
-				.SetControllerType(typeof(MockController1))
-				.NavigateTo("Next", node2)
-				.NavigateTo("Back", noViewNode)
-				.NavigateTo("End", (UipNode)null);
-
-			node2
-				.SetViewType(typeof(MockView2))
-				.SetControllerType(typeof(MockController2))
-				.NavigateTo("Back", node1)
-				.NavigateTo("Next", node3)
-				.NavigateTo("Error", errorNode);
-
-			node3
-				.SetViewType(typeof(MockView1))
-				.SetControllerType(typeof(MockController2))
-				.NavigateTo("Next", node1);
-
-			errorNode
-				.SetViewType(typeof(MockView2))
-				.SetControllerType(typeof(MockController2))
-				.NavigateTo("Next", node1);
-
-			noViewNode
-				.SetControllerType(typeof(MockController3))
-				.NavigateTo("Next", node3);
-
-			MockViewManager viewManager = new MockViewManager();
-			UipTask task = UipManager.CreateTask(taskDefinition, viewManager);
-			Assert.IsNotNull(task);
-
-			taskDefinition.StartNode = node1;
-
-			RunMockAppHelper(task, viewManager);			
-		}
 
         private void RunMockAppHelper(UipTask task, MockViewManager viewManager) {
             Assert.IsNotNull(task);
 
-            Assert.IsInstanceOfType(typeof(MockState), task.State);
-            MockState state = (MockState)task.State;
+            Assert.IsInstanceOfType(typeof(MockState), task.GetStateObject());
+            MockState state = (MockState)task.GetStateObject();
 
-            // check that the state property was set from the configuration file
-            Assert.AreEqual("Set from config", state.StringProperty);
-
-            task.Start();
-            task.TaskComplete += new EventHandler(task_TaskComplete);
+        	task.Start(viewManager);
+            task.TaskComplete += task_TaskComplete;
 
             Assert.AreEqual("Node1", task.CurrentNode.Name);
             Assert.IsNotNull(task.CurrentController);
@@ -154,6 +73,8 @@ namespace Quokka.Uip
             MockView1 view1 = (MockView1)viewManager.VisibleView;
             view1.PushNextButton();
 
+            // Should be in Node2
+
             Assert.AreEqual("Node2", task.CurrentNode.Name);
             Assert.IsNotNull(task.CurrentController);
             Assert.IsInstanceOfType(typeof(MockController2), task.CurrentController);
@@ -163,6 +84,8 @@ namespace Quokka.Uip
             MockView2 view2 = (MockView2)viewManager.VisibleView;
             view2.PushNextButton();
 
+            // Should be in Node3 
+
             Assert.AreEqual("Node3", task.CurrentNode.Name);
             Assert.IsNotNull(task.CurrentController);
             Assert.IsInstanceOfType(typeof(MockController2), task.CurrentController);
@@ -171,6 +94,8 @@ namespace Quokka.Uip
 
             view1 = (MockView1)viewManager.VisibleView;
             view1.PushNextButton();
+
+            // Should navigate to NavigateInViewConstructorNode and then straight to Node1
 
             Assert.AreEqual("Node1", task.CurrentNode.Name);
             Assert.IsNotNull(task.CurrentController);
@@ -190,10 +115,30 @@ namespace Quokka.Uip
             Assert.IsInstanceOfType(typeof(MockView1), viewManager.VisibleView);
 
             view1.PushNextButton();
+
             Assert.AreEqual("Node1", task.CurrentNode.Name);
             Assert.IsTrue(task.IsRunning);
             Assert.IsFalse(task.IsComplete);
             Assert.IsFalse(taskCompleted);
+
+            // Should navigate to NavigateInViewLoadEvent and then straight to Node2
+
+            view1.PushNavigateInViewLoadButton();
+            Assert.AreEqual("Node2", task.CurrentNode.Name);
+
+            view2 = (MockView2) viewManager.VisibleView;
+            view2.PushBackButton();
+
+			Assert.AreEqual("Node1", task.CurrentNode.Name);
+        	view1 = (MockView1) viewManager.VisibleView;
+        	view1.PushButtonForView5();
+
+        	Assert.AreEqual("Node5", task.CurrentNode.Name);
+        	MockView5 view5 = (MockView5) viewManager.VisibleView;
+			view5.PushBackButton();
+
+            Assert.AreEqual("Node1", task.CurrentNode.Name);
+            view1 = (MockView1)viewManager.VisibleView;
             view1.PushEndButton();
             Assert.IsTrue(taskCompleted);
             Assert.IsTrue(task.IsComplete);

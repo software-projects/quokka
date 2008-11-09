@@ -1,3 +1,5 @@
+using Quokka.Util;
+
 namespace Quokka.WinForms
 {
 	using System;
@@ -21,41 +23,51 @@ namespace Quokka.WinForms
 	{
         private const string DisplaySettingsKeyName = "DisplaySettings";
 
-		private static string s_companyName;
-		private static string s_productName;
-		private static string s_majorVersion;
-
         private readonly string _name;
         private RegistryKey _key;
         private Form _form;
 
 		static DisplaySettings()
 		{
-			s_companyName = (Application.CompanyName ?? String.Empty).Trim();
-			s_productName = (Application.ProductName ?? String.Empty).Trim();
+			// TODO: This initialisation is done for backward compatibility with existing
+			// applications that make use of DisplaySettings, but its use is not ideal.
+			// The application should probably set this.
+
+			if (String.IsNullOrEmpty(RegistryUtil.CompanyName))
+			{
+				RegistryUtil.CompanyName = Application.CompanyName;
+			}
+
+			if (String.IsNullOrEmpty(RegistryUtil.ProductName))
+			{
+				RegistryUtil.ProductName = Application.ProductName;
+			}
 
 			// Don't use the full ProductVersion here, because it includes the build
 			// number and the revision number. Usually we do not want the display settings
 			// being changed with every build. This code uses the major version number only.
-			s_majorVersion = (Application.ProductVersion ?? "0").Split('.')[0].Trim();
+			RegistryUtil.MajorVersion = (Application.ProductVersion ?? "0").Split('.')[0].Trim();
 		}
 
+		[Obsolete("Use RegistryUtil instead")]
 		public static string CompanyName
 		{
-			get { return s_companyName; }
-			set { s_companyName = (value ?? "").Trim(); }
+			get { return RegistryUtil.CompanyName; }
+			set { RegistryUtil.CompanyName = value; }
 		}
 
+		[Obsolete("Use RegistryUtil instead")]
 		public static string ProductName
 		{
-			get { return s_productName; }
-			set { s_productName = (value ?? "").Trim(); }
+			get { return RegistryUtil.ProductName; }
+			set { RegistryUtil.ProductName = value; }
 		}
 
+		[Obsolete("Use RegistryUtil instead")]
 		public static string MajorVersion
 		{
-			get { return s_majorVersion; }
-			set { s_majorVersion = (value ?? "").Trim(); }
+			get { return RegistryUtil.MajorVersion; }
+			set { RegistryUtil.MajorVersion = value; }
 		}
 
 		/// <summary>
@@ -170,30 +182,7 @@ namespace Quokka.WinForms
 
 		private static string BuildRegistryKeyPath(string formName)
 		{
-			if (String.IsNullOrEmpty(CompanyName) && String.IsNullOrEmpty(ProductName)) {
-				throw new QuokkaException("DisplaySettings: CompanyName and/or ProductName must be specified.");
-			}
-
-			StringBuilder sb = new StringBuilder(@"Software");
-			if (!String.IsNullOrEmpty(CompanyName)) {
-				sb.Append(@"\");
-				sb.Append(CompanyName);
-			}
-			if (!String.IsNullOrEmpty(ProductName)) {
-				sb.Append(@"\");
-				sb.Append(ProductName);
-			}
-			if (!String.IsNullOrEmpty(MajorVersion)) {
-				sb.Append(@"\");
-				sb.Append(MajorVersion);
-			}
-			sb.Append(@"\" + DisplaySettingsKeyName);
-
-			if (!String.IsNullOrEmpty(formName)) {
-				sb.Append(@"\");
-				sb.Append(formName.Trim());
-			}
-			return sb.ToString();
+			return RegistryUtil.SubKeyPath(DisplaySettingsKeyName, formName);
 		}
 
         public void SavePosition(Form form) {

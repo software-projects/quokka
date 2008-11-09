@@ -99,5 +99,30 @@ namespace Quokka.Reflection
             // not found
             return null;
         }
+
+		/// <summary>
+		/// Attempt to find a nested interface type with the specified name.
+		/// If not found, look for the nested interface in all base classes
+		/// </summary>
+		/// <param name="type">Class type to search for a nested interface</param>
+		/// <param name="name">Name of the interface to look for</param>
+		/// <returns>The nested interface type, or <c>null</c> if not found.</returns>
+		public static Type FindNestedInterface(Type type, string name)
+		{
+			while (type != null && type != typeof(object))
+			{
+				// look for a nested interface 
+				Type nestedType = type.GetNestedType(name);
+				if (nestedType != null && nestedType.IsInterface)
+				{
+					return nestedType;
+				}
+
+				// look in the base type
+				type = type.BaseType;
+			}
+
+			return null;
+		}
     }
 }

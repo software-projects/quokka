@@ -29,18 +29,18 @@
 namespace Quokka.Uip
 {
 	using System;
+	using Quokka.Diagnostics;
 
 	public class UipViewEventArgs : EventArgs {
-        private object view;
+        private readonly object _view;
 
         public UipViewEventArgs(object view) {
-            if (view == null)
-                throw new ArgumentNullException("view");
-            this.view = view;
+        	Verify.ArgumentNotNull(view, "view");
+            _view = view;
         }
 
         public object View {
-            get { return view; }
+            get { return _view; }
         }
     }
 
@@ -48,9 +48,9 @@ namespace Quokka.Uip
     {
         event EventHandler<UipViewEventArgs> ViewClosed;
 
-        void BeginTask(UipTask task);
-        void EndTask(UipTask task);
-        void BeginTransition();
+    	void BeginTask(UipTask task);
+		void EndTask(UipTask task);
+		void BeginTransition();
         void EndTransition();
         void AddView(object view, object controller);
         void RemoveView(object view);

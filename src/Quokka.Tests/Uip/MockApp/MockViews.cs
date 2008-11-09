@@ -30,7 +30,12 @@ namespace Quokka.Uip.MockApp
 {
 	using NUnit.Framework;
 
-	public class MockView1
+    public class MockViewBase
+    {
+        public virtual void OnLoad() {}
+    }
+
+	public class MockView1 : MockViewBase
     {
         private readonly IController controller;
 
@@ -39,6 +44,8 @@ namespace Quokka.Uip.MockApp
             void Next();
             void Back();
             void End();
+            void NavigateInViewLoad();
+        	void View5();
         }
 
         // Similar to a Windows Form, where there is always a default
@@ -52,6 +59,12 @@ namespace Quokka.Uip.MockApp
             this.controller = controller;
         }
 
+        // this method is called directly from Controller1
+        public bool DoSomething()
+        {
+            return true;
+        }
+
         public void PushNextButton() {
             controller.Next();
         }
@@ -60,16 +73,26 @@ namespace Quokka.Uip.MockApp
             controller.Back();
         }
 
+        public void PushNavigateInViewLoadButton()
+        {
+            controller.NavigateInViewLoad();
+        }
+
         public void PushEndButton() {
             controller.End();
         }
+
+		public void PushButtonForView5()
+		{
+			controller.View5();
+		}
 
         public IController Controller {
             get { return controller; }
         }
     }
 
-    public class MockView2
+    public class MockView2 : MockViewBase
     {
         private readonly MockController2 controller;
 
@@ -93,4 +116,63 @@ namespace Quokka.Uip.MockApp
             controller.Error();
         }
     }
+
+    /// <summary>
+    /// This view navigates inside its constructor
+    /// </summary>
+    public class MockView3 : MockViewBase
+    {
+        public MockView3() {}
+
+        public MockView3(MockController3 controller) : this()
+        {
+            Assert.IsNotNull(controller);
+            controller.Next();
+        }
+    }
+
+    /// <summary>
+    /// This view navigates inside its constructor
+    /// </summary>
+    public class MockView4 : MockViewBase
+    {
+        private readonly MockController3 controller;
+
+        public MockView4() { }
+
+        public MockView4(MockController3 controller)
+            : this()
+        {
+            Assert.IsNotNull(controller);
+            this.controller = controller;
+        }
+
+        public override void OnLoad()
+        {
+            controller.Next();
+        }
+    }
+
+	public class MockView5 : MockViewBase
+	{
+		private readonly INavigator _navigator;
+
+		public interface INavigator
+		{
+			void Back();
+		}
+
+		public MockView5() {}
+
+		public MockView5(INavigator navigator)
+		{
+			Assert.IsNotNull(navigator);
+			_navigator = navigator;
+		}
+
+		public void PushBackButton()
+		{
+			_navigator.Back();
+		}
+	}
 }

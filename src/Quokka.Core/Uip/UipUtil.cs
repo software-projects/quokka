@@ -70,11 +70,33 @@ namespace Quokka.Uip
 
 			if (!result && throwOnError)
 			{
-				throw new QuokkaException("Cannot set controller using SetController or Controller property");
+				throw new QuokkaException("Cannot set controller using SetController method or Controller property");
 			}
 
 			return result;
 		}
+
+        public static bool SetView(object controller, object view, bool throwOnError)
+        {
+            bool result = false;
+
+            if (SetMethod(controller, "SetView", ProxyType.DuckProxy, view))
+            {
+                result = true;
+            }
+
+            else if (SetProperty(controller, "View", ProxyType.DuckProxy, view))
+            {
+                result = true;
+            }
+
+            if (!result && throwOnError)
+            {
+                throw new QuokkaException("Cannot set view using SetView method or View property");
+            }
+
+            return result;
+        }
 
 		public static bool SetNavigator(object target, object navigator)
 		{

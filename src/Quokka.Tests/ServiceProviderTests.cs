@@ -77,12 +77,16 @@ namespace Quokka
 
         public class Class3a : IInterface3
         {
+        	private int i;
             public Class3a(int i) {
                 // the purpose of this class is to throw an exception
                 // because it does not have a suitable constructor
+            	this.i = i;
             }
 
-            public void DoOneMoreThing() { }
+			public void DoOneMoreThing() {
+				++i; 
+			}
         }
 
         public class Class3b : IInterface3
@@ -96,6 +100,11 @@ namespace Quokka
             }
 
             public void DoOneMoreThing() { }
+
+        	public IServiceProvider Provider
+        	{
+				get { return provider; }
+        	}
         }
 
         #endregion
@@ -189,10 +198,10 @@ namespace Quokka
 
         [Test]
         public void CustomAddService() {
-            QuokkaContainer container = new QuokkaContainer();
+            ServiceContainer container = new ServiceContainer();
 
-            container.AddService(typeof(IInterface1), typeof(Class1));
-            container.AddService(typeof(IInterface2), typeof(Class2));
+            ServiceContainerUtil.AddService(container, typeof(IInterface1), typeof(Class1));
+            ServiceContainerUtil.AddService(container, typeof(IInterface2), typeof(Class2));
 
             IInterface1 i1 = (IInterface1)container.GetService(typeof(IInterface1));
             Assert.IsNotNull(i1);
@@ -213,17 +222,17 @@ namespace Quokka
         [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void NoSuitableConstructor() {
-            QuokkaContainer container = new QuokkaContainer();
+            ServiceContainer container = new ServiceContainer();
 
             // this should throw an exception, because there is no suitable exception for Class3a
-            container.AddService(typeof(IInterface3), typeof(Class3a));
+			ServiceContainerUtil.AddService(container, typeof(IInterface3), typeof(Class3a));
         }
 
         [Test]
         public void ServiceProviderConstructor() {
-            QuokkaContainer container = new QuokkaContainer();
-            container.AddService(typeof(IInterface3), typeof(Class3b));
-            container.AddService(typeof(IInterface1), typeof(Class1));
+            ServiceContainer container = new ServiceContainer();
+			ServiceContainerUtil.AddService(container, typeof(IInterface3), typeof(Class3b));
+			ServiceContainerUtil.AddService(container, typeof(IInterface1), typeof(Class1));
 
             Assert.IsNotNull(container.GetService(typeof(IInterface3)));
         }

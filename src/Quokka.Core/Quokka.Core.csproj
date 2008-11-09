@@ -1,8 +1,8 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -12,6 +12,11 @@
     <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -36,6 +41,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\SqlExpressUtil.cs" />
+    <Compile Include="Diagnostics\ILogger.cs" />
+    <Compile Include="Diagnostics\ILogManager.cs" />
+    <Compile Include="Diagnostics\LogManager.cs" />
+    <Compile Include="Diagnostics\NullLogger.cs" />
     <Compile Include="Diagnostics\Verify.cs" />
     <Compile Include="DynamicCodeGeneration\AbstractProxyBuilder.cs" />
     <Compile Include="DynamicCodeGeneration\DynamicAssembly.cs" />
@@ -44,7 +54,6 @@
     <Compile Include="DynamicCodeGeneration\ProxyFactory.cs" />
     <Compile Include="DynamicCodeGeneration\DuckProxyBuilder.cs" />
     <Compile Include="Reflection\ObjectFactory.cs" />
-    <Compile Include="QuokkaContainer.cs" />
     <Compile Include="QuokkaException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\PropertyCollection.cs" />
@@ -56,36 +65,20 @@
     <Compile Include="Uip\Controllers\IInProgressController.cs" />
     <Compile Include="Uip\Controllers\InProgressControllerBase.cs" />
     <Compile Include="Uip\Controllers\WizardControllerBase.cs" />
-    <Compile Include="Uip\Implementation\NavigateToConfig.cs" />
-    <Compile Include="Uip\Implementation\NavigationGraphConfig.cs" />
-    <Compile Include="Uip\Implementation\NodeConfig.cs" />
-    <Compile Include="Uip\Implementation\ObjectTypeConfig.cs" />
-    <Compile Include="Uip\Implementation\PropertyConfig.cs" />
-    <Compile Include="Uip\Implementation\TaskConfig.cs" />
-    <Compile Include="Uip\Implementation\UsingNamespaceConfig.cs" />
-    <Compile Include="Uip\Implementation\ViewConfig.cs" />
     <Compile Include="Uip\UipQuestion.cs" />
     <Compile Include="Uip\IUipNavigator.cs" />
-    <Compile Include="Uip\IUipEndTask.cs" />
     <Compile Include="Uip\IUipViewManager.cs" />
-    <Compile Include="Uip\UipTaskDefinition.cs" />
-    <Compile Include="Uip\UipTaskDefinitionStore.cs" />
+    <Compile Include="Uip\UipTask.Generic.cs" />
     <Compile Include="Uip\UipTransition.cs" />
     <Compile Include="Uip\UipException.cs" />
-    <Compile Include="Uip\UipManager.cs" />
     <Compile Include="Uip\UipNode.cs" />
     <Compile Include="Uip\UipTask.cs" />
     <Compile Include="Uip\UipUtil.cs" />
+    <Compile Include="Util\RegistryUtil.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Uip\Implementation\UipTask.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Uip\Implementation\UipTask.xsx">
-      <DependentUpon>UipTask.xsd</DependentUpon>
-    </None>
+  <ItemGroup Condition=" '$(FormalBuild)' == 'true' ">
+    <!-- include NAnt-generated assembly info during a formal build -->
+    <Compile Include="..\CommonAssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

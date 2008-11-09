@@ -17,6 +17,7 @@ namespace Quokka.WinForms
 		private const int MF_BYCOMMAND = 0;
 		private const int SC_CLOSE = 0xf060;
 		private const int WM_SETREDRAW = 0x000b;
+	    public const int WM_SETTEXT = 0x000c;
 		public const int BS_COMMANDLINK = 0x0000000E;
 		public const int BCM_SETNOTE = 0x00001609;
 		public const int BCM_SETSHIELD = 0x0000160C; 

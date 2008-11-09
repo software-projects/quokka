@@ -28,16 +28,16 @@
 
 #endregion
 
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Reflection.Emit;
+using Quokka.Diagnostics;
+using Quokka.Uip;
+
 namespace Quokka.DynamicCodeGeneration
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Reflection;
-	using System.Reflection.Emit;
-	using Quokka.Diagnostics;
-	using Quokka.Uip;
-
-	public class NavigatorProxyBuilder : AbstractProxyBuilder
+    public class NavigatorProxyBuilder : AbstractProxyBuilder
 	{
 		private const string CanNavigatePropertyPrefix = "CanNavigate";
 		private const string CanNavigateMethodName = "CanNavigate";
@@ -516,5 +516,10 @@ namespace Quokka.DynamicCodeGeneration
 		{
 			inner.Navigate("OneValue");
 		}
+
+	    public bool IsOneValueSupported
+	    {
+            get { return true; }
+	    }
 	}
 }

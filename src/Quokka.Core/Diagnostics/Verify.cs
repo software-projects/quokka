@@ -14,6 +14,16 @@ namespace Quokka.Diagnostics
 			}
 		}
 
+		public static void ArgumentNotNull<T>(T param, string paramName, out T copy)
+		{
+			object obj = param;
+			if (obj == null)
+			{
+				throw new ArgumentNullException(paramName);
+			}
+			copy = param;
+		}
+
 		public static void IsNotNull(object obj)
 		{
 			if (obj == null) {

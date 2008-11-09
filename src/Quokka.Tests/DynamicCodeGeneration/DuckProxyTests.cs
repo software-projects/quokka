@@ -316,7 +316,49 @@ namespace Quokka.DynamicCodeGeneration
             int n = i7.ReturnSomething();
         }
 
+        public interface Interface8
+        {
+            bool CanDoSomething { get; }
+            bool DoSomething();
+            bool IsDoSomethingSupported { get; }
+        }
 
+        public class Inner8a
+        {
+            public bool DoSomething() {
+                return true; 
+            }
+        }
 
+        public class Inner8b
+        {
+            public void DoesNotDoAnything() {}
+        }
+
+        [Test]
+        public void CanCheckWhetherAMethodIsSupported()
+        {
+            Inner8a isSupported = new Inner8a();
+            Interface8 i8 = ProxyFactory.CreateDuckProxy<Interface8>(isSupported);
+
+            Assert.IsTrue(i8.CanDoSomething);
+            Assert.IsTrue(i8.DoSomething());
+            Assert.IsTrue(i8.IsDoSomethingSupported);
+
+            Inner8b notSupported = new Inner8b();
+            i8 = ProxyFactory.CreateDuckProxy<Interface8>(notSupported);
+
+            Assert.IsFalse(i8.CanDoSomething);
+            Assert.IsFalse(i8.IsDoSomethingSupported);
+
+            try
+            {
+                i8.DoSomething();
+                Assert.Fail();
+            }
+            catch (NotSupportedException)
+            {
+            }
+        }
 	}
 }

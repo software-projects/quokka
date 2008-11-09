@@ -13,8 +13,8 @@ namespace Quokka.WinForms.Testing
 
 		public SelectViewTestNodeForm()
 		{
-			InitializeComponent();
-			_displaySettings = new DisplaySettings(Name);
+            _displaySettings = new DisplaySettings("SelectViewTestNodeForm");
+            InitializeComponent();
 		}
 
 		public SelectViewTestNodeForm(ViewTestManager viewTestManager) : this()

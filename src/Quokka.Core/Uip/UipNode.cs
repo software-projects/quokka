@@ -28,14 +28,12 @@
 
 #endregion
 
+using System;
+using System.Collections.Generic;
+using Quokka.Reflection;
+
 namespace Quokka.Uip
 {
-	using System;
-	using System.Collections.Generic;
-	using Quokka.Diagnostics;
-	using Quokka.Reflection;
-	using Quokka.Uip.Implementation;
-
 	[Flags]
 	public enum UipNodeOptions
 	{
@@ -46,8 +44,7 @@ namespace Quokka.Uip
 
 	public class UipNode
 	{
-		private readonly UipTaskDefinition _task;
-		private readonly string _name;
+		private string _name;
 		private Type _viewType;
 		private Type _controllerType;
 		private readonly PropertyCollection _viewProperties;
@@ -57,54 +54,8 @@ namespace Quokka.Uip
 		private Type _controllerInterface;
 		private UipNodeOptions _options;
 
-		internal UipNode(UipTaskDefinition task, NodeConfig nodeConfig)
+		public UipNode()
 		{
-			_task = task;
-			_name = nodeConfig.Name;
-			if (nodeConfig.View != null && !String.IsNullOrEmpty(nodeConfig.View.TypeName)) {
-				_viewType = TypeUtil.FindType(nodeConfig.View.TypeName, task.Namespaces, task.Assemblies, true);
-				_viewProperties = new PropertyCollection(nodeConfig.View.Properties);
-			}
-			_controllerType = TypeUtil.FindType(nodeConfig.Controller.TypeName, task.Namespaces, task.Assemblies);
-			_controllerProperties = new PropertyCollection(nodeConfig.Controller.Properties);
-			_transitions = new List<UipTransition>();
-			_options = UipNodeOptions.None;
-			if (nodeConfig.View != null) {
-				if (nodeConfig.View.OpenModal) {
-					_options |= UipNodeOptions.ModalView;
-				}
-				if (nodeConfig.View.StayOpen) {
-					// Cannot stay open if a modal view
-					if (!IsViewModal) {
-						_options |= UipNodeOptions.StayOpen;
-					}
-				}
-			}
-		}
-
-		internal UipNode(UipTaskDefinition taskDefinition,
-		                 string name,
-		                 Type viewType,
-		                 Type controllerType,
-		                 UipNodeOptions options) : this(taskDefinition, name)
-		{
-			// view type can be null
-			Verify.ArgumentNotNull(controllerType, "controllerType");
-
-			_viewType = viewType;
-			_viewProperties = new PropertyCollection();
-			_controllerType = controllerType;
-			_controllerProperties = new PropertyCollection();
-			_transitions = new List<UipTransition>();
-			_options = options;
-		}
-
-		internal UipNode(UipTaskDefinition taskDefinition, string name)
-		{
-			Verify.ArgumentNotNull(taskDefinition, "taskDefinition");
-			Verify.ArgumentNotNull(name, "name");
-			_task = taskDefinition;
-			_name = name;
 			_viewProperties = new PropertyCollection();
 			_controllerProperties = new PropertyCollection();
 			_transitions = new List<UipTransition>();
@@ -113,11 +64,8 @@ namespace Quokka.Uip
 		public string Name
 		{
 			get { return _name; }
-		}
-
-		internal UipTaskDefinition TaskDefinition
-		{
-			get { return _task; }
+			// The name is set when the task starts
+			internal set { _name = value; }
 		}
 
 		public Type ViewType
@@ -129,7 +77,8 @@ namespace Quokka.Uip
 		{
 			get
 			{
-				if (!_controllerInterfaceValid) {
+				if (!_controllerInterfaceValid)
+				{
 					_controllerInterface = GetControllerInterfaceFromViewType(_viewType);
 					_controllerInterfaceValid = true;
 				}
@@ -178,11 +127,26 @@ namespace Quokka.Uip
 			get { return _transitions; }
 		}
 
+		public UipNode SetView<TView>()
+		{
+			return SetViewType(typeof (TView));
+		}
+
 		public UipNode SetViewType(Type viewType)
 		{
 			_viewType = viewType;
 			_controllerInterfaceValid = false;
 			return this;
+		}
+
+		public UipNode SetController<TController>()
+		{
+			return SetControllerType(typeof (TController));
+		}
+
+		public UipNode SetPresenter<TPresenter>()
+		{
+			return SetControllerType(typeof (TPresenter));
 		}
 
 		public UipNode SetControllerType(Type controllerType)
@@ -210,12 +174,6 @@ namespace Quokka.Uip
 			return this;
 		}
 
-		public UipNode NavigateTo(string navigateValue, string nodeName)
-		{
-			_transitions.Add(new UipTransition(this, navigateValue, nodeName));
-			return this;
-		}
-
 		public UipNode NavigateTo(string navigateValue, UipNode node)
 		{
 			_transitions.Add(new UipTransition(this, navigateValue, node));
@@ -224,8 +182,10 @@ namespace Quokka.Uip
 
 		public bool GetNextNode(string navigateValue, out UipNode node)
 		{
-			foreach (UipTransition transition in _transitions) {
-				if (StringComparer.InvariantCultureIgnoreCase.Compare(transition.NavigateValue, navigateValue) == 0) {
+			foreach (UipTransition transition in _transitions)
+			{
+				if (StringComparer.InvariantCultureIgnoreCase.Compare(transition.NavigateValue, navigateValue) == 0)
+				{
 					node = transition.NextNode;
 					return true;
 				}
@@ -234,17 +194,9 @@ namespace Quokka.Uip
 			return false;
 		}
 
-		private Type GetControllerInterfaceFromViewType(Type viewType)
+		private static Type GetControllerInterfaceFromViewType(Type viewType)
 		{
-			if (viewType != null) {
-				// look for a nested interface in the view called 'IController'
-				Type nestedType = _viewType.GetNestedType("IController");
-				if (nestedType != null && nestedType.IsInterface) {
-					return nestedType;
-				}
-			}
-
-			return null;
+			return TypeUtil.FindNestedInterface(viewType, "IController");
 		}
 	}
 }

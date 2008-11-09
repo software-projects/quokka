@@ -1,14 +1,34 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{FA1B5C87-5E8C-4B9A-8493-302C821D31F6}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Quokka</RootNamespace>
     <AssemblyName>Quokka.Tests</AssemblyName>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -32,16 +52,21 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\tools\NUnit\bin\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="PostSharp.Laos, Version=1.0.11.424, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL" />
+    <Reference Include="PostSharp.Public, Version=1.0.11.424, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\SqlExpressUtilTests.cs" />
+    <Compile Include="Diagnostics\VerifyTests.cs" />
     <Compile Include="DynamicCodeGeneration\CodeBuilderTestBase.cs" />
     <Compile Include="DynamicCodeGeneration\DuckProxyTests.cs" />
     <Compile Include="DynamicCodeGeneration\MemberMappingTests.cs" />
     <Compile Include="DynamicCodeGeneration\NavigatorProxyBuilderErrorTests.cs" />
     <Compile Include="DynamicCodeGeneration\NavigatorProxyTests.cs" />
+    <Compile Include="PresentationModel\NotifyChangedTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QuokkaContainerTests.cs" />
     <Compile Include="Reflection\ObjectFactoryTests.cs" />
@@ -49,36 +74,53 @@
     <Compile Include="Reflection\TypeUtilTests.cs" />
     <Compile Include="ServiceContainerUtilTests.cs" />
     <Compile Include="ServiceProviderTests.cs" />
+    <Compile Include="Uip\Fakes\FakeViewManager.cs" />
     <Compile Include="Uip\InProgressControllerTests.cs" />
+    <Compile Include="Uip\FakeAppTests2.cs" />
+    <Compile Include="Uip\MockApp2\MockTask2.cs" />
     <Compile Include="Uip\MockAppTests.cs" />
     <Compile Include="Uip\MockApp\MockControllers.cs" />
     <Compile Include="Uip\MockApp\MockState.cs" />
+    <Compile Include="Uip\MockApp\MockTask.cs" />
     <Compile Include="Uip\MockApp\MockViewManager.cs" />
     <Compile Include="Uip\MockApp\MockViews.cs" />
-    <Compile Include="Uip\TaskConfigTests.cs" />
-    <Compile Include="Uip\UipTaskDefinitionStoreTests.cs" />
-    <Compile Include="Uip\UipManagerTests.cs" />
     <Compile Include="Uip\UipUtils_SetControllerTests.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Uip\UipTask_1.xml" />
-    <EmbeddedResource Include="Uip\UipTask_2.xml" />
-    <EmbeddedResource Include="Uip\UipTask_3.xml" />
-    <EmbeddedResource Include="Uip\UipTask_4.xml" />
-    <EmbeddedResource Include="Uip\UipTask_5.xml" />
-    <EmbeddedResource Include="Uip\UipTask_6.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Uip\MockApp\MockTask.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Uip\MockApp\MockTask2.xml" />
+    <Compile Include="Util\RegistryUtilTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Quokka.Core\Quokka.Core.csproj">
       <Project>{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}</Project>
       <Name>Quokka.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Quokka.Domain\Quokka.Domain.csproj">
+      <Project>{59F8AE7F-F658-4902-A915-A871F54208DB}</Project>
+      <Name>Quokka.Domain</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Quokka.NH\Quokka.NH.csproj">
+      <Project>{BA85A91F-6C8C-4E54-8CA8-0952E6556231}</Project>
+      <Name>Quokka.NH</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(FormalBuild)' == 'true' ">
+    <!-- include NAnt-generated assembly info during a formal build -->
+    <Compile Include="..\CommonAssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
