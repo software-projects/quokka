@@ -40,6 +40,9 @@ namespace Quokka.Transactions
 		private readonly ISession _session;
 		private bool _rollbackOnly;
 
+		public event EventHandler Committed;
+		public event EventHandler RolledBack;
+
 		public NHTransaction(ISession session)
 		{
 			Verify.ArgumentNotNull(session, "session", out _session);
@@ -49,6 +52,7 @@ namespace Quokka.Transactions
 		{
 			get { return _session; }
 		}
+
 
 		public bool IsActive
 		{
@@ -81,6 +85,7 @@ namespace Quokka.Transactions
 			try
 			{
 				_session.Transaction.Commit();
+				RaiseCommitted();
 			}
 			catch (Exception ex)
 			{
@@ -96,6 +101,7 @@ namespace Quokka.Transactions
 			try
 			{
 				_session.Transaction.Rollback();
+				RaiseRolledBack();
 			}
 			catch (Exception ex)
 			{
@@ -106,6 +112,22 @@ namespace Quokka.Transactions
 		public void SetRollbackOnly()
 		{
 			_rollbackOnly = true;
+		}
+
+		private void RaiseRolledBack()
+		{
+			if (RolledBack != null)
+			{
+				RolledBack(this, EventArgs.Empty);
+			}
+		}
+
+		private void RaiseCommitted()
+		{
+			if (Committed != null)
+			{
+				Committed(this, EventArgs.Empty);
+			}
 		}
 	}
 }

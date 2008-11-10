@@ -28,10 +28,15 @@
 
 #endregion
 
+using System;
+
 namespace Quokka.Transactions
 {
 	public interface ITransaction
 	{
+		event EventHandler Committed;
+		event EventHandler RolledBack;
+
 		bool IsActive { get; }
 		bool IsRollbackOnly { get; }
 
