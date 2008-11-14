@@ -108,7 +108,7 @@ namespace Quokka.Transactions
 				throw new DataException("Cannot dispose of transaction of type " + transaction.GetType());
 			}
 
-			if (nhtx == Current)
+			if (nhtx != Current)
 			{
 				throw new DataException("Cannot dispose of transaction if it is not the current transaction");
 			}
