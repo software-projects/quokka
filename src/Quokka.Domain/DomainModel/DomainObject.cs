@@ -48,7 +48,7 @@ namespace Quokka.DomainModel
 	{
 		// ReSharper disable UnusedAutoPopertyAccessor
 		// Can be updated by the ORM
-		public virtual int Id { get; private set; }
+		public virtual int Id { get; protected set; }
 		// ReSharper restore UnusedAutoPopertyAccessor
 	}
 }
