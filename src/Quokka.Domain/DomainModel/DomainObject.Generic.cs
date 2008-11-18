@@ -43,7 +43,7 @@ namespace Quokka.DomainModel
 			return Equals(obj as T);
 		}
 
-		public bool Equals(T other)
+		public virtual bool Equals(T other)
 		{
 			if (other == null)
 				return false;
