@@ -28,21 +28,28 @@
 
 #endregion
 
+using System;
+
 namespace Quokka.DomainModel
 {
 	/// <summary>
 	/// Base class for domain model objects. Provides correct semantics for comparing
 	/// </summary>
 	/// <typeparam name="T">Derived class type</typeparam>
-	public abstract class DomainObject<T> : DomainObject where T : DomainObject<T>
+	public abstract class DomainObject<T> : DomainObject, IEquatable<T> where T : DomainObject<T>
 	{
 		public override bool Equals(object obj)
 		{
-			T other = obj as T;
+			return Equals(obj as T);
+		}
+
+		public bool Equals(T other)
+		{
 			if (other == null)
 				return false;
+
 			if (Id == 0)
-				return false;
+				return Object.ReferenceEquals(this, other);
 			return Id == other.Id;
 		}
 
