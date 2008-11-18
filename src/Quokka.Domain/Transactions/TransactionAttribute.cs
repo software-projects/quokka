@@ -48,6 +48,7 @@ namespace Quokka.Transactions
 			{
 				// No transaction is current, so create one.
 				tx = txMgr.CreateTransaction();
+				tx.Begin();
 				try
 				{
 					eventArgs.Proceed();
