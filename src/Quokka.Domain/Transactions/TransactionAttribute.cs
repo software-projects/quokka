@@ -53,23 +53,37 @@ namespace Quokka.Transactions
 				{
 					eventArgs.Proceed();
 
-					if (tx.IsRollbackOnly)
+					// There is the possibility that the method has acquired the
+					// transaction manager and committed the transaction itself, so
+					// acquire the current transaction again.
+					tx = txMgr.Current;
+					if (tx != null && tx.IsActive)
 					{
-						tx.Rollback();
-					}
-					else
-					{
-						tx.Commit();
+						if (tx.IsRollbackOnly)
+						{
+							tx.Rollback();
+						}
+						else
+						{
+							tx.Commit();
+						}
 					}
 				}
 				catch (Exception)
 				{
-					tx.Rollback();
+					tx = txMgr.Current;
+					if (tx != null && tx.IsActive)
+					{
+						tx.Rollback();
+					}
 					throw;
 				}
 				finally
 				{
-					txMgr.Dispose(tx);
+					if (tx != null)
+					{
+						txMgr.Dispose(tx);
+					}
 				}
 			}
 			else
@@ -83,7 +97,11 @@ namespace Quokka.Transactions
 				{
 					// Exception thrown by the method, so the outer transaction should
 					// not be able to be committed.
-					tx.SetRollbackOnly();
+					tx = txMgr.Current;
+					if (tx != null && tx.IsActive)
+					{
+						tx.SetRollbackOnly();
+					}
 					throw;
 				}
 			}
