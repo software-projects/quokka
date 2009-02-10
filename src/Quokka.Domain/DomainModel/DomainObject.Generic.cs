@@ -43,19 +43,31 @@ namespace Quokka.DomainModel
 			return Equals(obj as T);
 		}
 
+		public override int GetHashCode()
+		{
+			// Zero Id means that the domain object has not been saved to the database yet.
+			// A domain object with a non-zero Id has been saved to the database.
+			//
+			// The purpose of this test is if a number of unsaved domain objects are used as
+			// the key to a hash table or a set -- that set will still work efficiently.
+			// If all of the objects had a hash code of zero then that hash table would
+			// be very inefficient.
+			return Id == 0 ? base.GetHashCode() : Id.GetHashCode();
+		}
+
 		public virtual bool Equals(T other)
 		{
+			// Never equals null
 			if (other == null)
 				return false;
 
+			// If Id == 0, then the domain object has not been saved yet.
+			// In this case, equality means the same object only.
 			if (Id == 0)
-				return Object.ReferenceEquals(this, other);
-			return Id == other.Id;
-		}
+				return ReferenceEquals(this, other);
 
-		public override int GetHashCode()
-		{
-			return Id.GetHashCode();
+			// If Id != 0, then equality means the same Id
+			return Id == other.Id;
 		}
 	}
 }

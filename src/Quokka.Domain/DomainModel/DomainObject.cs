@@ -40,15 +40,11 @@ namespace Quokka.DomainModel
 	///		writeable only by the ORM. This might be too restrictive for some.
 	/// </para>
 	/// <para>
-	///		Could consider this being generic, but note that there already is
-	///		a generic DomainObject class.
+	///		In a future version, the type of the Id property might become a generic parameter.
 	/// </para>
 	/// </remarks>
 	public abstract class DomainObject
 	{
-		// ReSharper disable UnusedAutoPopertyAccessor
-		// Can be updated by the ORM
 		public virtual int Id { get; protected set; }
-		// ReSharper restore UnusedAutoPopertyAccessor
 	}
 }
