@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
@@ -217,13 +216,8 @@ namespace Quokka.EnumTypes
 
 		public void SetParameterValues(IDictionary<string, string> parameters)
 		{
-			throw new System.NotImplementedException();
-		}
-
-		public void SetParameterValues(IDictionary parameters)
-		{
-			_tableName = (string)parameters["table-name"];
-			_columnName = (string)parameters["column-name"];
+			_tableName = parameters["table-name"];
+			_columnName = parameters["column-name"];
 		}
 
 		public string SqlCreateString(Dialect dialect, IMapping p, string defaultCatalog, string defaultSchema)
