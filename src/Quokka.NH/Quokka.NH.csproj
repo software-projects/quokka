@@ -45,6 +45,8 @@
     <Compile Include="Data\INHConfig.cs" />
     <Compile Include="Data\NHConfig.cs" />
     <Compile Include="Data\NHRepo.cs" />
+    <Compile Include="EnumTypes\EnumStringConverter.cs" />
+    <Compile Include="EnumTypes\EnumStringMapper.cs" />
     <Compile Include="Transactions\NHTransaction.cs" />
     <Compile Include="Transactions\NHTransactionManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
