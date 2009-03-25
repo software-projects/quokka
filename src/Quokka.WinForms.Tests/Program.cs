@@ -7,8 +7,6 @@ namespace Quokka.WinForms.Tests
 {
 	public class Program : SplashScreenApplication
 	{
-		private SplashScreenPresenter _presenter;
-
 		/// <summary>
 		/// The main entry point for the application.
 		/// </summary>

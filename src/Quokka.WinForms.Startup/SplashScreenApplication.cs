@@ -3,38 +3,78 @@ using System.Windows.Forms;
 
 namespace Quokka.WinForms.Startup
 {
+	/// <summary>
+	/// Application context for a Windows Forms application that displays a splash screen at startup.
+	/// </summary>
 	public class SplashScreenApplication : ApplicationContext
 	{
-		private SplashScreenPresenter _presenter;
-
 		public event EventHandler SplashScreenDisplayed;
 		public event EventHandler SplashScreenClosed;
 
 		public SplashScreenApplication()
 		{
-			_presenter = new SplashScreenPresenter();
-			_presenter.SplashScreenDisplayed += Presenter_SplashScreenDisplayed;
-			_presenter.SplashScreenClosed += Presenter_SplashScreenClosed;
-			_presenter.DisplaySplashScreen();
-			MainForm = _presenter.SplashScreen;
+			// Register for the application idle loop. This prevents the class from calling
+			// a virtual method (CreateSplashScreen) inside its constructor.
+			Application.Idle += Application_Idle;
+
+			// Create the presenter and wire the events. By doing this in the constructor, it
+			// allows the derived class to set properties on the presenter (copyright, company name, etc).
+			Presenter = new SplashScreenPresenter();
+			Presenter.SplashScreenDisplayed += Presenter_SplashScreenDisplayed;
+			Presenter.SplashScreenClosed += Presenter_SplashScreenClosed;
 		}
 
-		public SplashScreenApplication(Type formType) : this()
-		{
-			_presenter.FormType = formType;
-		}
+		/// <summary>
+		/// The splash screen presenter.
+		/// </summary>
+		/// <value>
+		/// A <see cref="SplashScreenPresenter"/> object, which controls the display of the
+		/// splash screen.
+		/// </value>
+		public SplashScreenPresenter Presenter { get; private set; }
 
-		public SplashScreenPresenter SplashScreenPresenter
-		{
-			get { return _presenter; }
-		}
-
+		/// <summary>
+		/// Override this method to perform application startup after the splash screen has
+		/// been displayed. In particular, this method should assign a form to the <see cref="ApplicationContext.MainForm"/>
+		/// property.
+		/// </summary>
 		protected virtual void OnSplashScreenDisplayed()
 		{
 		}
 
+		/// <summary>
+		/// Override this method to perform application startup after the splash screen has closed.
+		/// </summary>
+		/// <remarks>
+		/// The splash screen is closed a short delay after the main form has been displayed.
+		/// </remarks>
 		protected virtual void OnSplashScreenClosed()
 		{
+		}
+
+		/// <summary>
+		/// Override this method to create a custom splash screen.
+		/// </summary>
+		/// <returns>
+		/// A <see cref="Form"/> object to display as the splash screen, or <c>null</c> to display
+		/// the default splash screen.
+		/// </returns>
+		protected virtual Form CreateSplashScreen()
+		{
+			// null means display the default splash screen
+			return null;
+		}
+
+		/// <summary>
+		/// Gets run the first time that the application is idle -- displays the splash screen
+		/// </summary>
+		private void Application_Idle(object sender, EventArgs e)
+		{
+			// Unsubscribe to the Application.Idle event
+			Application.Idle -= Application_Idle;
+
+			Presenter.DisplaySplashScreen(CreateSplashScreen());
+			MainForm = Presenter.SplashScreen;
 		}
 
 		private void Presenter_SplashScreenDisplayed(object sender, EventArgs e)
@@ -42,13 +82,13 @@ namespace Quokka.WinForms.Startup
 			OnSplashScreenDisplayed();
 			RaiseSplashScreenDisplayed(this, e);
 
-			if (MainForm != _presenter.SplashScreen)
+			if (MainForm != Presenter.SplashScreen)
 			{
 				if (!MainForm.IsHandleCreated)
 				{
 					MainForm.Show();
 				}
-				_presenter.FadeAway();
+				Presenter.FadeAway();
 			}
 		}
 
@@ -58,10 +98,10 @@ namespace Quokka.WinForms.Startup
 			RaiseSplashScreenClosed(this, e);
 
 			// unsubscribe events so that the presenter will be garbage collected
-			_presenter.SplashScreenDisplayed -= Presenter_SplashScreenDisplayed;
-			_presenter.SplashScreenClosed -= Presenter_SplashScreenClosed;
-			_presenter.Dispose();
-			_presenter = null;
+			Presenter.SplashScreenDisplayed -= Presenter_SplashScreenDisplayed;
+			Presenter.SplashScreenClosed -= Presenter_SplashScreenClosed;
+			Presenter.Dispose();
+			Presenter = null;
 		}
 
 		private void RaiseSplashScreenDisplayed(object sender, EventArgs e)

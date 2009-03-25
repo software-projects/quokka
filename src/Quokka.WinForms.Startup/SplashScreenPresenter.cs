@@ -13,7 +13,6 @@ namespace Quokka.WinForms.Startup
 		private const int _timerInterval = 50;
 		private int _showingDelay = 150;
 		private bool _fadingAway;
-		private Type _formType = typeof (DefaultSplashScreen);
 
 		// Status and progress bar
 		private Timer _timer;
@@ -28,15 +27,6 @@ namespace Quokka.WinForms.Startup
 
 		#region Construction/disposal
 
-		public SplashScreenPresenter()
-		{
-		}
-
-		public SplashScreenPresenter(Type formType)
-			: this()
-		{
-			FormType = formType;
-		}
 
 		public void Dispose()
 		{
@@ -89,19 +79,6 @@ namespace Quokka.WinForms.Startup
 			}
 		}
 
-		public Type FormType
-		{
-			get { return _formType; }
-			set
-			{
-				if (value == null)
-					throw new ArgumentNullException();
-				if (!typeof (Form).IsAssignableFrom(value))
-					throw new ArgumentException("Splash screen type must inherit from System.Windows.Form");
-				_formType = value;
-			}
-		}
-
 		public string ProductName { get; set; }
 		public string CopyrightText { get; set; }
 		public string CompanyName { get; set; }
@@ -115,9 +92,17 @@ namespace Quokka.WinForms.Startup
 
 		#region Public methods
 
-		public void DisplaySplashScreen()
+		/// <summary>
+		/// Display a splash screen.
+		/// </summary>
+		/// <param name="splashScreen">
+		/// The splash screen form to display. If <c>null</c>, then a default splash screen form is used.
+		/// </param>
+		public void DisplaySplashScreen(Form splashScreen)
 		{
-			_splashScreen = (Form) Activator.CreateInstance(_formType);
+			if (splashScreen == null)
+				splashScreen = new DefaultSplashScreen();
+			_splashScreen = splashScreen;
 			_splashScreen.Opacity = _initialOpacity;
 			_splashScreen.TopMost = true;
 			_splashScreen.ShowInTaskbar = false;
