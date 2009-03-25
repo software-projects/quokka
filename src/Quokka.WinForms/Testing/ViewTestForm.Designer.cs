@@ -29,14 +29,14 @@ namespace Quokka.WinForms.Testing
 		private void InitializeComponent()
 		{
 			this.currentNodeDetailsPanel = new System.Windows.Forms.Panel();
+			this.clearButton = new System.Windows.Forms.Button();
+			this.refreshButton = new System.Windows.Forms.Button();
 			this.changeButton = new System.Windows.Forms.Button();
 			this.viewNameLabel = new System.Windows.Forms.Label();
 			this.controllerNameLabel = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
 			this.label1 = new System.Windows.Forms.Label();
-			this.refreshButton = new System.Windows.Forms.Button();
 			this.viewManagerPanel = new Quokka.WinForms.ViewManagerPanel();
-			this.clearButton = new System.Windows.Forms.Button();
 			this.currentNodeDetailsPanel.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -56,6 +56,28 @@ namespace Quokka.WinForms.Testing
 			this.currentNodeDetailsPanel.Name = "currentNodeDetailsPanel";
 			this.currentNodeDetailsPanel.Size = new System.Drawing.Size(573, 62);
 			this.currentNodeDetailsPanel.TabIndex = 1;
+			// 
+			// clearButton
+			// 
+			this.clearButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.clearButton.Location = new System.Drawing.Point(488, 4);
+			this.clearButton.Name = "clearButton";
+			this.clearButton.Size = new System.Drawing.Size(75, 23);
+			this.clearButton.TabIndex = 6;
+			this.clearButton.Text = "Clear";
+			this.clearButton.UseVisualStyleBackColor = true;
+			this.clearButton.Click += new System.EventHandler(this.clearButton_Click);
+			// 
+			// refreshButton
+			// 
+			this.refreshButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.refreshButton.Location = new System.Drawing.Point(407, 4);
+			this.refreshButton.Name = "refreshButton";
+			this.refreshButton.Size = new System.Drawing.Size(75, 23);
+			this.refreshButton.TabIndex = 5;
+			this.refreshButton.Text = "Refresh";
+			this.refreshButton.UseVisualStyleBackColor = true;
+			this.refreshButton.Click += new System.EventHandler(this.refreshButton_Click);
 			// 
 			// changeButton
 			// 
@@ -104,17 +126,6 @@ namespace Quokka.WinForms.Testing
 			this.label1.TabIndex = 0;
 			this.label1.Text = "View:";
 			// 
-			// refreshButton
-			// 
-			this.refreshButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.refreshButton.Location = new System.Drawing.Point(407, 4);
-			this.refreshButton.Name = "refreshButton";
-			this.refreshButton.Size = new System.Drawing.Size(75, 23);
-			this.refreshButton.TabIndex = 5;
-			this.refreshButton.Text = "Refresh";
-			this.refreshButton.UseVisualStyleBackColor = true;
-			this.refreshButton.Click += new System.EventHandler(this.refreshButton_Click);
-			// 
 			// viewManagerPanel
 			// 
 			this.viewManagerPanel.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -122,17 +133,6 @@ namespace Quokka.WinForms.Testing
 			this.viewManagerPanel.Name = "viewManagerPanel";
 			this.viewManagerPanel.Size = new System.Drawing.Size(573, 444);
 			this.viewManagerPanel.TabIndex = 0;
-			// 
-			// clearButton
-			// 
-			this.clearButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.clearButton.Location = new System.Drawing.Point(488, 4);
-			this.clearButton.Name = "clearButton";
-			this.clearButton.Size = new System.Drawing.Size(75, 23);
-			this.clearButton.TabIndex = 6;
-			this.clearButton.Text = "Clear";
-			this.clearButton.UseVisualStyleBackColor = true;
-			this.clearButton.Click += new System.EventHandler(this.clearButton_Click);
 			// 
 			// ViewTestForm
 			// 
@@ -143,6 +143,7 @@ namespace Quokka.WinForms.Testing
 			this.Controls.Add(this.currentNodeDetailsPanel);
 			this.MinimumSize = new System.Drawing.Size(360, 300);
 			this.Name = "ViewTestForm";
+			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "View Test Form";
 			this.Load += new System.EventHandler(this.ViewTestForm_Load);
 			this.currentNodeDetailsPanel.ResumeLayout(false);

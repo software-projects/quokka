@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quokka.Domain", "Quokka.Dom
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quokka.NH", "Quokka.NH\Quokka.NH.csproj", "{BA85A91F-6C8C-4E54-8CA8-0952E6556231}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quokka.WinForms.Startup", "Quokka.WinForms.Startup\Quokka.WinForms.Startup.csproj", "{CD4991EE-AF09-4E88-BBF0-0BB8EB843DD5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,10 @@ Global
 		{BA85A91F-6C8C-4E54-8CA8-0952E6556231}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA85A91F-6C8C-4E54-8CA8-0952E6556231}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA85A91F-6C8C-4E54-8CA8-0952E6556231}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD4991EE-AF09-4E88-BBF0-0BB8EB843DD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD4991EE-AF09-4E88-BBF0-0BB8EB843DD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD4991EE-AF09-4E88-BBF0-0BB8EB843DD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD4991EE-AF09-4E88-BBF0-0BB8EB843DD5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

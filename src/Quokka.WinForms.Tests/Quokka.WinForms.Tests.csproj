@@ -1,8 +1,8 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{BC3DF433-038F-4781-9A1E-865756FC91BA}</ProjectGuid>
     <OutputType>WinExe</OutputType>
@@ -89,6 +89,10 @@
     <ProjectReference Include="..\Quokka.Core\Quokka.Core.csproj">
       <Project>{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}</Project>
       <Name>Quokka.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Quokka.WinForms.Startup\Quokka.WinForms.Startup.csproj">
+      <Project>{CD4991EE-AF09-4E88-BBF0-0BB8EB843DD5}</Project>
+      <Name>Quokka.WinForms.Startup</Name>
     </ProjectReference>
     <ProjectReference Include="..\Quokka.WinForms\Quokka.WinForms.csproj">
       <Project>{2E9F1CF5-C91E-4B40-B5F0-273C0E2ADFB6}</Project>

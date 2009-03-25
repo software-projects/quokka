@@ -1,21 +1,28 @@
 using System;
-using System.Collections.Generic;
 using System.Windows.Forms;
+using Quokka.WinForms.Startup;
+using Quokka.WinForms.Testing;
 
 namespace Quokka.WinForms.Tests
 {
-	using Quokka.WinForms.Testing;
-
-	static class Program
+	public class Program : SplashScreenApplication
 	{
+		private SplashScreenPresenter _presenter;
+
 		/// <summary>
 		/// The main entry point for the application.
 		/// </summary>
 		[STAThread]
-		static void Main() {
+		private static void Main()
+		{
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new ViewTestForm());
+			Application.Run(new Program());
+		}
+
+		protected override void OnSplashScreenDisplayed()
+		{
+			MainForm = new ViewTestForm();
 		}
 	}
 }
