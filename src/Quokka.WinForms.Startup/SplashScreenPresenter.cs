@@ -158,7 +158,7 @@ namespace Quokka.WinForms.Startup
 			ISplashScreenView view = _splashScreen as ISplashScreenView;
 			if (view != null)
 			{
-				Assembly assembly = Assembly.GetExecutingAssembly();
+				Assembly assembly = Assembly.GetEntryAssembly();
 				Version version = assembly.GetName().Version;
 
 				if (CompanyName == null)
