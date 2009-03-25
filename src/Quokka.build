@@ -93,7 +93,7 @@
       </fileset>
     </copy>
     <copy todir="${output.dir}">
-      <fileset basedir="Quokka.WinForms/bin/${config}">
+      <fileset basedir="Quokka.WinForms.Tests/bin/${config}">
         <include name="*.dll"/>
         <include name="*.pdb"/>
         <include name="*.xml"/>
