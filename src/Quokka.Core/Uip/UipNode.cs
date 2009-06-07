@@ -30,20 +30,22 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Reflection;
+using Common.Logging;
+using Quokka.Diagnostics;
+using Quokka.DynamicCodeGeneration;
 using Quokka.Reflection;
+using Quokka.ServiceLocation;
 
 namespace Quokka.Uip
 {
-	[Flags]
-	public enum UipNodeOptions
-	{
-		None = 0,
-		ModalView = 1,
-		StayOpen = 2,
-	}
-
+	/// <summary>
+	/// Represents a single UI node in the UI task.
+	/// </summary>
 	public class UipNode
 	{
+		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
 		private string _name;
 		private Type _viewType;
 		private Type _controllerType;
@@ -53,6 +55,15 @@ namespace Quokka.Uip
 		private bool _controllerInterfaceValid;
 		private Type _controllerInterface;
 		private UipNodeOptions _options;
+
+		// fields set once the task has started
+		private UipTask _task;
+		private IServiceContainer _container;
+		private object _controller;
+		private object _view;
+		private readonly HashSet<Type> _controllerInterfaces = new HashSet<Type>();
+		private bool _controllerInterfacesLoaded;
+
 
 		public UipNode()
 		{
@@ -68,9 +79,24 @@ namespace Quokka.Uip
 			internal set { _name = value; }
 		}
 
+		public object Controller
+		{
+			get { return _controller; }
+		}
+
+		public object View
+		{
+			get { return _view; }
+		}
+
 		public Type ViewType
 		{
 			get { return _viewType; }
+		}
+
+		public Type ControllerType
+		{
+			get { return _controllerType; }
 		}
 
 		public Type ControllerInterface
@@ -91,9 +117,9 @@ namespace Quokka.Uip
 			get { return _viewProperties; }
 		}
 
-		public Type ControllerType
+		public PropertyCollection ControllerProperties
 		{
-			get { return _controllerType; }
+			get { return _controllerProperties; }
 		}
 
 		public UipNodeOptions Options
@@ -115,11 +141,6 @@ namespace Quokka.Uip
 					return false;
 				return (_options & UipNodeOptions.StayOpen) != 0;
 			}
-		}
-
-		public PropertyCollection ControllerProperties
-		{
-			get { return _controllerProperties; }
 		}
 
 		public IList<UipTransition> Transitions
@@ -192,6 +213,274 @@ namespace Quokka.Uip
 			}
 			node = null;
 			return false;
+		}
+
+		internal void Initialize(UipTask task)
+		{
+			Verify.ArgumentNotNull(task, "task", out _task);
+			task.ViewManager.ViewClosed += ViewManager_ViewClosed;
+		}
+
+		private void ViewManager_ViewClosed(object sender, UipViewEventArgs e)
+		{
+			if (e.View != _view)
+			{
+				// not this view
+				return;
+			}
+
+			if (IsViewModal && this == _task.CurrentNode && !_task.InNavigateMethod)
+			{
+				// The current modal view has closed without specifying a navigation.
+				// This can happen if the user clicks the close window button.
+				// All modal views should specify a navigation for 'Close'.
+				const string close = "Close";
+				if (_task.Navigator.CanNavigate(close))
+				{
+					_task.Navigate(close);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Called by the <see cref="UipTask"/> when this node becomes the current node.
+		/// </summary>
+		internal void EnterNode()
+		{
+			CreateServiceContainerIfNecessary();
+			Verify.IsNotNull(_container);
+
+			// Both controller and view are singletons. The container only lasts as long as the
+			// node is current (or as long as the task runs in the case of a StayOpen node).
+			if (_controllerType != null)
+			{
+				_container.RegisterType(_controllerType, null, null, ServiceLifecycle.Singleton);
+			}
+			if (_viewType != null)
+			{
+				_container.RegisterType(_viewType, null, null, ServiceLifecycle.Singleton);
+			}
+		}
+
+		/// <summary>
+		/// Called by the <see cref="UipTask"/> when this node is no longer the current node.
+		/// </summary>
+		internal void ExitNode()
+		{
+			// TODO: This does not do anything at the moment. It turns out to be more reliable to
+			// dispose of the views and controllers in CleanupNode. Keep it for now in case there
+			// is something to do as soon as the node stops being current.
+		}
+
+		/// <summary>
+		/// Cleanup the view and controller if necessary. Called for every node at
+		/// the end of the navigation process.
+		/// </summary>
+		internal void CleanupNode()
+		{
+			bool hideView = false;
+			bool removeView = false;
+			bool disposeContainer = false;
+
+			if (_task == null)
+			{
+				disposeContainer = true;
+			}
+			else 
+			{
+				if (_task.IsComplete)
+				{
+					// The task is complete -- all nodes should dispose of their container
+					disposeContainer = true;
+					removeView = true;
+					_task.ViewManager.ViewClosed -= ViewManager_ViewClosed;
+				}
+				else
+				{
+					if (_task.CurrentNode != this)
+					{
+						// At this point we know that this node is not the current view
+						if (_task.CurrentNode != null && _task.CurrentNode.IsViewModal)
+						{
+							// if the current node is modal, then do not dispose of anything
+						}
+						else
+						{
+							if (StayOpen)
+							{
+								// Not the current node, but we have been ordered to keep the
+								// view and controller. Just ask the view manager to hide the
+								// view for now.
+								hideView = true;
+							}
+							else
+							{
+								// Not the current node, and not ordered to stay open
+								disposeContainer = true;
+								removeView = true;
+							}
+						}
+					}
+				}
+			}
+
+			if (hideView)
+			{
+				_task.ViewManager.HideView(_view);
+			}
+
+			if (removeView)
+			{
+				_task.ViewManager.RemoveView(_view);
+			}
+
+			if (disposeContainer)
+			{
+				if (_container != null)
+				{
+					_container.Dispose();
+				}
+				_container = null;
+				_controller = null;
+				_view = null;
+			}
+		}
+
+		internal object GetOrCreateController()
+		{
+			if (_controller == null && _controllerType != null)
+			{
+				if (_container == null)
+				{
+					const string message = "Cannot get controller when not the current node";
+					Log.Error(message);
+					throw new InvalidOperationException(message);
+				}
+
+				object controller = _container.Locator.GetService(_controllerType);
+
+				ISupportInitialize initialize = controller as ISupportInitialize;
+				if (initialize != null)
+				{
+					initialize.BeginInit();
+				}
+
+				UipUtil.SetState(controller, _task.GetStateObject(), false);
+				UipUtil.SetNavigator(controller, _task.Navigator);
+				UipUtil.SetViewManager(controller, _task.ViewManager);
+				PropertyUtil.SetValues(controller, ControllerProperties);
+
+				if (initialize != null)
+				{
+					initialize.EndInit();
+				}
+
+				_controller = controller;
+
+				foreach (Type interfaceType in LoadControllerInterfaces())
+				{
+					// TODO: Should create a proxy if the controller also implements IDisposable.
+					// The proxy should do nothing when Dispose() is called. The reason for this
+					// is that the container has the same instance registered multiple times. When
+					// the time comes to dispose the container, we cannot be sure that the container
+					// is smart enough to recognise that the same instance exists in the container more
+					// than once. It might call Dispose() multiple times for the same object. 
+					_container.RegisterInstance(interfaceType, controller);
+				}
+			}
+			return _controller;
+		}
+
+		internal object GetOrCreateView()
+		{
+			if (_view == null && _viewType != null)
+			{
+				object controller = null;
+
+				if (_controllerType != null)
+				{
+					// If there is a controller then we want to make sure that it is created prior
+					// to creating the view.
+					controller = GetOrCreateController();
+
+					// If the view has a nested interface for the controller, register an instance of the controller
+					// for this interface with the container prior to attempting to create the view.
+					if (ControllerInterface != null)
+					{
+						object controllerProxy = ProxyFactory.CreateDuckProxy(ControllerInterface, controller);
+						_container.RegisterInstance(ControllerInterface, controllerProxy);
+					}
+				}
+
+				object view = _container.Locator.GetService(_viewType);
+
+				UipUtil.SetState(view, _task.GetStateObject(), false);
+				PropertyUtil.SetValues(view, ViewProperties);
+				if (controller != null)
+				{
+					UipUtil.SetController(view, controller, false);
+					UipUtil.SetView(controller, view, false);
+				}
+
+				if (!IsViewModal)
+				{
+					_task.ViewManager.AddView(view, controller);
+				}
+
+				_view = view;
+			}
+			return _view;
+		}
+
+		private void CreateServiceContainerIfNecessary()
+		{
+			if (_container != null)
+			{
+				return;
+			}
+			Verify.IsNotNull(_task);
+			IServiceContainer parentContainer = (IServiceContainer) _task.ServiceProvider.GetService(typeof (IServiceContainer));
+			Verify.IsNotNull(parentContainer);
+			_container = parentContainer.CreateChildContainer();
+		}
+
+		/// <summary>
+		/// Find all of the interfaces that a controller implements that is required by the view
+		/// for constructor injection.
+		/// </summary>
+		/// <returns>List of interface types</returns>
+		private IEnumerable<Type> LoadControllerInterfaces()
+		{
+			if (!_controllerInterfacesLoaded)
+			{
+				if (_viewType != null)
+				{
+					// Loop through each constructor for the view (because we do not know
+					// which constructor the service container will use). Look for any
+					// constructor parameter that requires an interface that the controller
+					// implements.
+					foreach (ConstructorInfo constructor in _viewType.GetConstructors())
+					{
+						foreach (ParameterInfo parameter in constructor.GetParameters())
+						{
+							Type parameterType = parameter.ParameterType;
+							if (!parameterType.IsInterface)
+							{
+								// only interested in parameter types that are interfaces
+								continue;
+							}
+
+							if (parameterType.IsAssignableFrom(_controllerType))
+							{
+								_controllerInterfaces.Add(parameterType);
+							}
+						}
+					}
+				}
+
+				_controllerInterfacesLoaded = true;
+			}
+			return _controllerInterfaces;
 		}
 
 		private static Type GetControllerInterfaceFromViewType(Type viewType)

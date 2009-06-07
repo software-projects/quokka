@@ -177,7 +177,7 @@ namespace Quokka.DynamicCodeGeneration
 
 	internal class ProxyStore
 	{
-		private Dictionary<TypePair, Type> m_dict = new Dictionary<TypePair, Type>();
+		private readonly Dictionary<TypePair, Type> m_dict = new Dictionary<TypePair, Type>();
 
 		public Type Find(Type interfaceType, Type innerType)
 		{

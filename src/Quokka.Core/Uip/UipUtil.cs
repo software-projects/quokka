@@ -230,7 +230,7 @@ namespace Quokka.Uip
 				value = ProxyFactory.CreateProxy(requiredType, proxyType, value);
 			}
 
-			methodInfo.Invoke(target, new object[] {value});
+			methodInfo.Invoke(target, new[] {value});
 			return true;
 		}
 	}

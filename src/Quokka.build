@@ -43,7 +43,7 @@
 		</if>
 		<if test="${property::exists('svn.revision')}">
 			<property name="version.major" value="0"/>
-			<property name="version.minor" value="3"/>
+			<property name="version.minor" value="4"/>
 			<property name="version.build" value="${svn.revision}"/>
 			<property name="version.revision" value="0"/>
 		</if>

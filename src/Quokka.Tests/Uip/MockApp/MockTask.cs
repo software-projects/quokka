@@ -2,16 +2,16 @@ namespace Quokka.Uip.MockApp
 {
 	public class MockTask : UipTask<MockState>
 	{
-		public static readonly UipNode Node1 = new UipNode();
-		public static readonly UipNode Node2 = new UipNode();
-		public static readonly UipNode Node3 = new UipNode();
-		public static readonly UipNode Node5 = new UipNode();
-		public static readonly UipNode ErrorNode = new UipNode();
-		public static readonly UipNode NoViewNode = new UipNode();
-	    public static readonly UipNode NavigateInViewConstructorNode = new UipNode();
-	    public static readonly UipNode NavigateInViewLoadEvent = new UipNode();
+		public readonly UipNode Node1 = new UipNode();
+		public readonly UipNode Node2 = new UipNode();
+		public readonly UipNode Node3 = new UipNode();
+		public readonly UipNode Node5 = new UipNode();
+		public readonly UipNode ErrorNode = new UipNode();
+		public readonly UipNode NoViewNode = new UipNode();
+	    public readonly UipNode NavigateInViewConstructorNode = new UipNode();
+	    public readonly UipNode NavigateInViewLoadEvent = new UipNode();
 
-		static MockTask()
+		public MockTask()
 		{
 			Node1.SetViewType(typeof (MockView1))
 				.SetControllerType(typeof (MockController1))

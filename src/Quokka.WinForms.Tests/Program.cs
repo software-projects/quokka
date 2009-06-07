@@ -1,5 +1,7 @@
 using System;
 using System.Windows.Forms;
+using Microsoft.Practices.ServiceLocation;
+using Quokka.Unity;
 using Quokka.WinForms.Startup;
 using Quokka.WinForms.Testing;
 
@@ -20,6 +22,8 @@ namespace Quokka.WinForms.Tests
 
 		protected override void OnSplashScreenDisplayed()
 		{
+			IServiceLocator serviceLocator = ServiceContainerFactory.CreateContainer().Locator;
+			ServiceLocator.SetLocatorProvider(() => serviceLocator);
 			MainForm = new ViewTestForm();
 		}
 	}

@@ -5,6 +5,7 @@ namespace Quokka.Diagnostics
 	/// <summary>
 	/// Provides a default implementation of the <see cref="ILogger"/> interface.
 	/// </summary>
+	[Obsolete("Quokka now uses Common.Logging library for all its logging")]
 	public static class NullLogger
 	{
 		private static readonly ILogger _instance;

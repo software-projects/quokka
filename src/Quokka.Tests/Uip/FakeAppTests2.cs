@@ -1,11 +1,22 @@
-﻿using NUnit.Framework;
+﻿using Microsoft.Practices.ServiceLocation;
+using NUnit.Framework;
 using Quokka.Uip.Fakes;
+using Quokka.Unity;
 
 namespace Quokka.Uip
 {
     [TestFixture]
     public class FakeAppTests2
     {
+    	private IServiceLocator serviceLocator;
+
+		[SetUp]
+		public void SetUp()
+		{
+			serviceLocator = ServiceContainerFactory.CreateContainer().Locator;
+			ServiceLocator.SetLocatorProvider(() => serviceLocator);
+		}
+
         // This test was created to diagnose a bug with the following characteristics:
         // 1. Controller created and transitions in its constructor, so its associated view is never created
         // 2. Next transition is back to the first node.
@@ -24,7 +35,7 @@ namespace Quokka.Uip
 
             controller2.Back();
 
-            FakeController1 controller = task.CurrentController as FakeController1;
+            FakeController1 controller = task.CurrentNode.Controller as FakeController1;
             Assert.IsNotNull(controller);
 
             // check that we were issued with a brand new controller, not the controller
@@ -34,10 +45,10 @@ namespace Quokka.Uip
 
         public class FakeTask : UipTask<FakeState>
         {
-            public static readonly UipNode Node1 = new UipNode();
-            public static readonly UipNode Node2 = new UipNode();
+            public readonly UipNode Node1 = new UipNode();
+            public readonly UipNode Node2 = new UipNode();
 
-            static FakeTask()
+            public FakeTask()
             {
                 Node1
                     .SetControllerType(typeof(FakeController1))

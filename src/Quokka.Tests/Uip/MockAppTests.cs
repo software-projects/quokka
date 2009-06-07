@@ -27,8 +27,10 @@
 #endregion
 
 using System;
+using Microsoft.Practices.ServiceLocation;
 using NUnit.Framework;
 using Quokka.Uip.MockApp;
+using Quokka.Unity;
 
 namespace Quokka.Uip
 {
@@ -36,14 +38,19 @@ namespace Quokka.Uip
     public class MockAppTests
     {
         bool taskCompleted;
+    	private IServiceLocator serviceLocator;
 
         [SetUp]
         public void SetUp() {
             taskCompleted = false;
+
+        	serviceLocator = ServiceContainerFactory.CreateContainer().Locator;
+        	ServiceLocator.SetLocatorProvider(() => serviceLocator);
         }
 
         [TearDown]
         public void TearDown() {
+        	ServiceLocator.SetLocatorProvider(null);
         }
 
 

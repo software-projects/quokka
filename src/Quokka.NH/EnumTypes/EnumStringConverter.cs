@@ -2,14 +2,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using Common.Logging;
+using Common.Logging.Simple;
 using Quokka.Attributes;
-using Quokka.Diagnostics;
 
 namespace Quokka.EnumTypes
 {
 	public static class EnumStringConverter<T>
 	{
-		private static readonly ILogger log = NullLogger.Instance; // TODO: hook this up somehow?
+		private static readonly ILog log = new NoOpLogger(); // TODO: hook this up somehow?
 		private static readonly int _maxLength;
 		private static readonly IDictionary<T, string> _enumToString;
 		private static readonly IDictionary<string, T> _stringToEnum;
@@ -80,7 +81,7 @@ namespace Quokka.EnumTypes
 			_enumToString = new Dictionary<T, string>();
 			_stringToEnum = new Dictionary<string, T>(new EqualityComparer());
 
-			_enumType = typeof(T);
+			_enumType = typeof (T);
 			if (!_enumType.IsEnum)
 			{
 				string message = "Type is not an enum: " + _enumType;
@@ -98,7 +99,7 @@ namespace Quokka.EnumTypes
 					{
 						string message =
 							String.Format("Two {0} fields have null StringValue: {1}, {2}", _enumType, _nullValue,
-										  enumValue);
+							              enumValue);
 						log.Error(message);
 						throw new ApplicationException(message);
 					}
@@ -119,7 +120,7 @@ namespace Quokka.EnumTypes
 					{
 						string message =
 							String.Format("Two {0} fields have the same StringValue: {1}, {2}", _enumType,
-										  _stringToEnum[stringValue], enumValue);
+							              _stringToEnum[stringValue], enumValue);
 						log.Error(message);
 						throw new ApplicationException(message);
 					}
@@ -134,7 +135,7 @@ namespace Quokka.EnumTypes
 			string fieldName = enumValue.ToString();
 			FieldInfo fieldInfo = _enumType.GetField(fieldName);
 			StringValueAttribute[] stringValueAttributes =
-				(StringValueAttribute[])fieldInfo.GetCustomAttributes(typeof(StringValueAttribute), false);
+				(StringValueAttribute[]) fieldInfo.GetCustomAttributes(typeof (StringValueAttribute), false);
 			if (stringValueAttributes.Length == 0)
 			{
 				// When there is no StringValue attribute, just return the string representation

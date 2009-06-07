@@ -1,8 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-
+using Microsoft.Practices.ServiceLocation;
 using NUnit.Framework;
+using Quokka.Unity;
+
+// suppress warnings about obsolete usage
+#pragma warning disable 612,618
 
 namespace Quokka.Reflection
 {
@@ -11,6 +15,15 @@ namespace Quokka.Reflection
 	[TestFixture]
     public class ObjectFactoryTests
     {
+		private IServiceLocator serviceLocator;
+
+		[SetUp]
+		public void SetUp()
+		{
+			serviceLocator = ServiceContainerFactory.CreateContainer().Locator;
+			ServiceLocator.SetLocatorProvider(() => serviceLocator );
+		}
+
         [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Create_ArgumentNull_1() {
@@ -131,3 +144,5 @@ namespace Quokka.Reflection
         #endregion
     }
 }
+// restore warnings about obsolete usage
+#pragma warning restore 612,618

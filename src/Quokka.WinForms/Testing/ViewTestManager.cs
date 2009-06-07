@@ -1,13 +1,13 @@
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using Microsoft.Practices.ServiceLocation;
+using Quokka.DynamicCodeGeneration;
+using Quokka.ServiceLocation;
+using Quokka.Uip;
+
 namespace Quokka.WinForms.Testing
 {
-	using System;
-	using System.Collections.Generic;
-	using System.ComponentModel.Design;
-	using System.Reflection;
-	using Quokka.DynamicCodeGeneration;
-	using Quokka.Reflection;
-	using Quokka.Uip;
-
 	public class ViewTestManager
 	{
 		private readonly Dictionary<Type, Type> _viewDictionary;
@@ -21,11 +21,12 @@ namespace Quokka.WinForms.Testing
 		public ViewTestManager(IUipViewManager uipViewManager, Assembly assembly)
 		{
 			_uipViewManager = uipViewManager;
-			_serviceContainer = new ServiceContainer();
+			_serviceContainer = ServiceLocator.Current.GetInstance<IServiceContainer>();
 			_viewDictionary = new Dictionary<Type, Type>();
 			_testNodes = new List<ViewTestNode>();
 
-			if (assembly == null) {
+			if (assembly == null)
+			{
 				assembly = Assembly.GetEntryAssembly();
 			}
 			List<ViewTestNode> list = LoadViewsFromAttributes(assembly);
@@ -33,7 +34,9 @@ namespace Quokka.WinForms.Testing
 			_testNodes = list.AsReadOnly();
 		}
 
-		public ViewTestManager(IUipViewManager uipViewManager) : this(uipViewManager, null) {}
+		public ViewTestManager(IUipViewManager uipViewManager) : this(uipViewManager, null)
+		{
+		}
 
 		public IEnumerable<Type> ViewTypes
 		{
@@ -62,20 +65,24 @@ namespace Quokka.WinForms.Testing
 
 		public void AddService(Type interfaceType, Type instanceType)
 		{
-			ServiceContainerUtil.AddService(_serviceContainer, interfaceType, instanceType);
+			_serviceContainer.RegisterType(interfaceType, instanceType, null, ServiceLifecycle.Singleton);
 		}
 
 		public void ShowNode(ViewTestNode node)
 		{
-			object controller = Activator.CreateInstance(node.ControllerType);
-			object proxyController = null;
+			IServiceContainer childContainer = _serviceContainer.CreateChildContainer();
+			childContainer.RegisterType(node.ControllerType, null, null, ServiceLifecycle.Singleton);
+
+			object controller = childContainer.Locator.GetService(node.ControllerType);
+
 			Type nestedType = node.ViewType.GetNestedType("IController");
 			if (nestedType != null && nestedType.IsInterface)
 			{
-				proxyController = ProxyFactory.CreateDuckProxy(nestedType, controller);
+				object proxyController = ProxyFactory.CreateDuckProxy(nestedType, controller);
+				childContainer.RegisterInstance(nestedType, proxyController);
 			}
 
-			object view = ObjectFactory.Create(node.ViewType, _serviceContainer, controller, proxyController);
+			object view = childContainer.Locator.GetService(node.ViewType);
 			UipUtil.SetController(view, controller, false);
 			_uipViewManager.BeginTransition();
 			if (_currentView != null)
@@ -93,8 +100,10 @@ namespace Quokka.WinForms.Testing
 		private static List<ViewTestNode> LoadViewsFromAttributes(Assembly assembly)
 		{
 			List<ViewTestNode> list = new List<ViewTestNode>();
-			foreach (Type type in assembly.GetTypes()) {
-				foreach (TestsViewAttribute attribute in type.GetCustomAttributes(typeof(TestsViewAttribute), false)) {
+			foreach (Type type in assembly.GetTypes())
+			{
+				foreach (TestsViewAttribute attribute in type.GetCustomAttributes(typeof (TestsViewAttribute), false))
+				{
 					ViewTestNode testNode = new ViewTestNode(attribute.ViewType, type, attribute.Comment);
 					list.Add(testNode);
 				}
@@ -107,7 +116,8 @@ namespace Quokka.WinForms.Testing
 		public void Clear()
 		{
 			_uipViewManager.BeginTransition();
-			if (_currentView != null) {
+			if (_currentView != null)
+			{
 				_uipViewManager.RemoveView(_currentView);
 				_currentView = null;
 			}

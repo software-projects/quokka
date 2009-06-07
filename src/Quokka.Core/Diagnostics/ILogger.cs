@@ -8,6 +8,7 @@ namespace Quokka.Diagnostics
 	/// <remarks>
 	/// Intentionally similiar to the log4net <c>ILog</c> interface, and the NLog <c>Logger</c> class.
 	/// </remarks>
+	[Obsolete("Quokka now uses Common.Logging library for all its logging")]
 	public interface ILogger
 	{
 		bool IsDebugEnabled { get; }
