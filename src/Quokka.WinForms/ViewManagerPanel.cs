@@ -34,6 +34,13 @@ using Quokka.Uip;
 
 namespace Quokka.WinForms
 {
+	/// <summary>
+	/// A <see cref="Panel"/> that implements <see cref="IUipViewManager"/>.
+	/// </summary>
+	/// <remarks>
+	/// This class should probably become obsolete because all the code is duplicated
+	/// in <see cref="ViewManager"/>.
+	/// </remarks>
     public partial class ViewManagerPanel : Panel, IUipViewManager 
     {
         private readonly List<UipTask> _currentTasks = new List<UipTask>();
@@ -204,7 +211,7 @@ namespace Quokka.WinForms
 
     		MessageBoxForm questionForm = new MessageBoxForm();
     		questionForm.Question = question;
-    		questionForm.ShowDialog(this);
+    		questionForm.ShowDialog(TopLevelControl);
 			if (question.SelectedAnswer != null && question.SelectedAnswer.Callback != null) {
 				question.SelectedAnswer.Callback();
 			}

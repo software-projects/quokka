@@ -123,7 +123,7 @@ namespace Quokka.Data
 				}
 				catch (Exception exception)
 				{
-					throw new QuokkaException("An error occurred while creating a new DB file: " + Environment.NewLine + exception);
+					throw new QuokkaException("An error occurred while creating a new DB file: " + exception.Message, exception);
 				}
 			}
 			finally

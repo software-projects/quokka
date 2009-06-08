@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Windows.Forms;
 
+// NOTE: Do not add any references to classes from other assemblies.
+// This class needs to load as quickly as possible during program startup.
+
 namespace Quokka.WinForms.Startup
 {
 	public partial class DefaultSplashScreen : Form, ISplashScreenView

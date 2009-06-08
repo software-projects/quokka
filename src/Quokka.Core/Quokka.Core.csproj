@@ -95,6 +95,8 @@
     <Compile Include="Uip\UipNode.cs" />
     <Compile Include="Uip\UipTask.cs" />
     <Compile Include="Uip\UipUtil.cs" />
+    <Compile Include="Uip\UipViewEventArgs.cs" />
+    <Compile Include="UI\IWorkspace.cs" />
     <Compile Include="Util\RegistryUtil.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(FormalBuild)' == 'true' ">

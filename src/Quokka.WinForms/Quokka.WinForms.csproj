@@ -86,6 +86,20 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="ViewManager.cs">
+    </Compile>
+    <Compile Include="Workspaces\IWorkspaceInfo.cs" />
+    <Compile Include="Workspaces\Workspace.cs" />
+    <Compile Include="Workspaces\TabControlWorkspace.cs" />
+    <Compile Include="Startup\DefaultSplashScreen.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Startup\DefaultSplashScreen.Designer.cs">
+      <DependentUpon>DefaultSplashScreen.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Startup\ISplashScreenView.cs" />
+    <Compile Include="Startup\SplashScreenApplication.cs" />
+    <Compile Include="Startup\SplashScreenPresenter.cs" />
     <Compile Include="Testing\SelectViewTestNodeForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -164,6 +178,9 @@
     <EmbeddedResource Include="Resources\Arrow.gif" />
     <EmbeddedResource Include="Resources\SelectedArrow.gif" />
     <EmbeddedResource Include="Resources\Shield.gif" />
+    <EmbeddedResource Include="Startup\DefaultSplashScreen.resx">
+      <DependentUpon>DefaultSplashScreen.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Testing\SelectViewTestNodeForm.resx">
       <SubType>Designer</SubType>
       <DependentUpon>SelectViewTestNodeForm.cs</DependentUpon>

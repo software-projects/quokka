@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -40,17 +40,7 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DefaultSplashScreen.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="DefaultSplashScreen.Designer.cs">
-      <DependentUpon>DefaultSplashScreen.cs</DependentUpon>
-    </Compile>
-    <Compile Include="ISplashScreenView.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SplashScreenApplication.cs" />
-    <Compile Include="SplashScreenPresenter.cs">
-    </Compile>
     <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
   </ItemGroup>
   <ItemGroup Condition=" '$(FormalBuild)' == 'true' ">
@@ -58,13 +48,7 @@
     <Compile Include="..\CommonAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="Quokka.snk" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="DefaultSplashScreen.resx">
-      <DependentUpon>DefaultSplashScreen.cs</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <DontImportPostSharp>True</DontImportPostSharp>

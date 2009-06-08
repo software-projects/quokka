@@ -293,6 +293,9 @@ namespace Quokka.Uip
 					// The task is complete -- all nodes should dispose of their container
 					disposeContainer = true;
 					removeView = true;
+
+					// The task is not re-usable, but the view manager might be. Unregister
+					// event to avoid a memory leak.
 					_task.ViewManager.ViewClosed -= ViewManager_ViewClosed;
 				}
 				else

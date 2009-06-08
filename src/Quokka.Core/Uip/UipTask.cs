@@ -55,7 +55,18 @@ namespace Quokka.Uip
 		/// <summary>
 		/// Provides services to controller and view objects created while this task is running.
 		/// </summary>
+		[Obsolete("Use ServiceContainer or ServiceLocator instead")]
 		public IServiceProvider ServiceProvider
+		{
+			get { return _serviceContainer.Locator; }
+		}
+
+		public IServiceContainer ServiceContainer
+		{
+			get { return _serviceContainer; }
+		}
+
+		public IServiceLocator Servicelocator
 		{
 			get { return _serviceContainer.Locator; }
 		}

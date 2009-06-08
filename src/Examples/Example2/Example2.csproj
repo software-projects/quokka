@@ -1,20 +1,17 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{BC3DF433-038F-4781-9A1E-865756FC91BA}</ProjectGuid>
+    <ProjectGuid>{160E4D86-AF73-42B2-B85D-165879C7CAE9}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Quokka.WinForms.Tests</RootNamespace>
-    <AssemblyName>Quokka.WinForms.Tests</AssemblyName>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <OldToolsVersion>2.0</OldToolsVersion>
-    <UpgradeBackupLocation>
-    </UpgradeBackupLocation>
+    <RootNamespace>Example2</RootNamespace>
+    <AssemblyName>Example2</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -36,10 +33,16 @@
   <ItemGroup>
     <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\CommonServiceLocator\Microsoft.Practices.ServiceLocation.dll</HintPath>
+      <HintPath>..\..\..\lib\CommonServiceLocator\Microsoft.Practices.ServiceLocation.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data" />
@@ -49,39 +52,29 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CommandLinkTestForm.cs">
+    <Compile Include="App.cs" />
+    <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="CommandLinkTestForm.Designer.cs">
-      <DependentUpon>CommandLinkTestForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controllers\CommandLinkTestController.cs" />
-    <Compile Include="Controllers\MessageBoxTestController.cs" />
-    <Compile Include="MessageBoxTestForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="MessageBoxTestForm.Designer.cs">
-      <DependentUpon>MessageBoxTestForm.cs</DependentUpon>
+    <Compile Include="MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="CommandLinkTestForm.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>CommandLinkTestForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MessageBoxTestForm.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>MessageBoxTestForm.cs</DependentUpon>
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Tasks\Simple\SimpleView.resx">
+      <DependentUpon>SimpleView.cs</DependentUpon>
+    </EmbeddedResource>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -92,26 +85,31 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="Tasks\Simple\SimpleState.cs" />
+    <Compile Include="Tasks\Simple\SimplePresenter.cs" />
+    <Compile Include="Tasks\Simple\SimpleTask.cs" />
+    <Compile Include="Tasks\Simple\SimpleView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Tasks\Simple\SimpleView.Designer.cs">
+      <DependentUpon>SimpleView.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Quokka.Core\Quokka.Core.csproj">
+    <ProjectReference Include="..\..\Quokka.Core\Quokka.Core.csproj">
       <Project>{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}</Project>
       <Name>Quokka.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Quokka.Unity\Quokka.Unity.csproj">
+    <ProjectReference Include="..\..\Quokka.Unity\Quokka.Unity.csproj">
       <Project>{52A00CC5-7821-40EC-A08A-F777301B55DB}</Project>
       <Name>Quokka.Unity</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Quokka.WinForms\Quokka.WinForms.csproj">
+    <ProjectReference Include="..\..\Quokka.WinForms\Quokka.WinForms.csproj">
       <Project>{2E9F1CF5-C91E-4B40-B5F0-273C0E2ADFB6}</Project>
       <Name>Quokka.WinForms</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup Condition=" '$(FormalBuild)' == 'true' ">
-    <!-- include NAnt-generated assembly info during a formal build -->
-    <Compile Include="..\CommonAssemblyInfo.cs" />
-  </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
