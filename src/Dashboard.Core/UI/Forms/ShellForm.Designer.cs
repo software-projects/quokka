@@ -29,7 +29,6 @@ namespace Dashboard.UI.Forms
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ShellForm));
 			this.kryptonManager = new ComponentFactory.Krypton.Toolkit.KryptonManager(this.components);
 			this.statusStrip = new System.Windows.Forms.StatusStrip();
 			this.mainPanel = new ComponentFactory.Krypton.Toolkit.KryptonPanel();
@@ -41,22 +40,22 @@ namespace Dashboard.UI.Forms
 			this.kryptonPage3 = new ComponentFactory.Krypton.Navigator.KryptonPage();
 			this.kryptonPage4 = new ComponentFactory.Krypton.Navigator.KryptonPage();
 			this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+			this.loginNameLabel = new System.Windows.Forms.ToolStripLabel();
 			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
 			this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.cutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.pasteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
 			this.selectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.logoutButton = new System.Windows.Forms.ToolStripButton();
-			this.loginNameLabel = new System.Windows.Forms.ToolStripLabel();
-			this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			((System.ComponentModel.ISupportInitialize)(this.mainPanel)).BeginInit();
 			this.mainPanel.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.kryptonSplitContainer1)).BeginInit();
@@ -177,8 +176,8 @@ namespace Dashboard.UI.Forms
 			this.kryptonNavigator1.Name = "kryptonNavigator1";
 			this.kryptonNavigator1.NavigatorMode = ComponentFactory.Krypton.Navigator.NavigatorMode.OutlookFull;
 			this.kryptonNavigator1.Pages.AddRange(new ComponentFactory.Krypton.Navigator.KryptonPage[] {
-			                                                                                           	this.kryptonPage1,
-			                                                                                           	this.kryptonPage2});
+            this.kryptonPage1,
+            this.kryptonPage2});
 			this.kryptonNavigator1.PaletteMode = ComponentFactory.Krypton.Toolkit.PaletteMode.Global;
 			this.kryptonNavigator1.SelectedIndex = 1;
 			this.kryptonNavigator1.Size = new System.Drawing.Size(299, 584);
@@ -257,8 +256,8 @@ namespace Dashboard.UI.Forms
 			this.kryptonNavigator2.Name = "kryptonNavigator2";
 			this.kryptonNavigator2.NavigatorMode = ComponentFactory.Krypton.Navigator.NavigatorMode.HeaderGroup;
 			this.kryptonNavigator2.Pages.AddRange(new ComponentFactory.Krypton.Navigator.KryptonPage[] {
-			                                                                                           	this.kryptonPage3,
-			                                                                                           	this.kryptonPage4});
+            this.kryptonPage3,
+            this.kryptonPage4});
 			this.kryptonNavigator2.PaletteMode = ComponentFactory.Krypton.Toolkit.PaletteMode.Global;
 			this.kryptonNavigator2.SelectedIndex = 0;
 			this.kryptonNavigator2.Size = new System.Drawing.Size(558, 584);
@@ -292,23 +291,30 @@ namespace Dashboard.UI.Forms
 			// 
 			this.toolStrip1.Font = new System.Drawing.Font("Segoe UI", 8.25F);
 			this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-			                                                                        	this.logoutButton,
-			                                                                        	this.loginNameLabel});
+            this.logoutButton,
+            this.loginNameLabel});
 			this.toolStrip1.Location = new System.Drawing.Point(3, 27);
 			this.toolStrip1.Name = "toolStrip1";
 			this.toolStrip1.Size = new System.Drawing.Size(862, 25);
 			this.toolStrip1.TabIndex = 1;
 			this.toolStrip1.Text = "toolStrip1";
 			// 
+			// loginNameLabel
+			// 
+			this.loginNameLabel.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+			this.loginNameLabel.Name = "loginNameLabel";
+			this.loginNameLabel.Size = new System.Drawing.Size(74, 22);
+			this.loginNameLabel.Text = "(Login Name)";
+			// 
 			// menuStrip1
 			// 
 			this.menuStrip1.Font = new System.Drawing.Font("Segoe UI", 8.25F);
 			this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-			                                                                        	this.fileToolStripMenuItem,
-			                                                                        	this.editToolStripMenuItem,
-			                                                                        	this.viewToolStripMenuItem,
-			                                                                        	this.toolsToolStripMenuItem,
-			                                                                        	this.helpToolStripMenuItem});
+            this.fileToolStripMenuItem,
+            this.editToolStripMenuItem,
+            this.viewToolStripMenuItem,
+            this.toolsToolStripMenuItem,
+            this.helpToolStripMenuItem});
 			this.menuStrip1.Location = new System.Drawing.Point(3, 3);
 			this.menuStrip1.Name = "menuStrip1";
 			this.menuStrip1.Size = new System.Drawing.Size(862, 24);
@@ -318,50 +324,28 @@ namespace Dashboard.UI.Forms
 			// fileToolStripMenuItem
 			// 
 			this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-			                                                                                           	this.exitToolStripMenuItem});
+            this.exitToolStripMenuItem});
 			this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
 			this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
 			this.fileToolStripMenuItem.Text = "&File";
 			// 
-			// editToolStripMenuItem
-			// 
-			this.editToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-			                                                                                           	this.cutToolStripMenuItem,
-			                                                                                           	this.copyToolStripMenuItem,
-			                                                                                           	this.pasteToolStripMenuItem,
-			                                                                                           	this.toolStripSeparator1,
-			                                                                                           	this.selectAllToolStripMenuItem});
-			this.editToolStripMenuItem.Name = "editToolStripMenuItem";
-			this.editToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
-			this.editToolStripMenuItem.Text = "&Edit";
-			// 
-			// viewToolStripMenuItem
-			// 
-			this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-			                                                                                           	this.refreshToolStripMenuItem});
-			this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
-			this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
-			this.viewToolStripMenuItem.Text = "&View";
-			// 
-			// toolsToolStripMenuItem
-			// 
-			this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
-			this.toolsToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
-			this.toolsToolStripMenuItem.Text = "&Tools";
-			// 
-			// helpToolStripMenuItem
-			// 
-			this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-			                                                                                           	this.aboutToolStripMenuItem});
-			this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-			this.helpToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
-			this.helpToolStripMenuItem.Text = "&Help";
-			// 
 			// exitToolStripMenuItem
 			// 
 			this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-			this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.exitToolStripMenuItem.Size = new System.Drawing.Size(99, 22);
 			this.exitToolStripMenuItem.Text = "E&xit";
+			// 
+			// editToolStripMenuItem
+			// 
+			this.editToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.cutToolStripMenuItem,
+            this.copyToolStripMenuItem,
+            this.pasteToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.selectAllToolStripMenuItem});
+			this.editToolStripMenuItem.Name = "editToolStripMenuItem";
+			this.editToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
+			this.editToolStripMenuItem.Text = "&Edit";
 			// 
 			// cutToolStripMenuItem
 			// 
@@ -387,7 +371,7 @@ namespace Dashboard.UI.Forms
 			// toolStripSeparator1
 			// 
 			this.toolStripSeparator1.Name = "toolStripSeparator1";
-			this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
+			this.toolStripSeparator1.Size = new System.Drawing.Size(164, 6);
 			// 
 			// selectAllToolStripMenuItem
 			// 
@@ -396,35 +380,50 @@ namespace Dashboard.UI.Forms
 			this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
 			this.selectAllToolStripMenuItem.Text = "Select &All";
 			// 
+			// viewToolStripMenuItem
+			// 
+			this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.refreshToolStripMenuItem});
+			this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
+			this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+			this.viewToolStripMenuItem.Text = "&View";
+			// 
+			// refreshToolStripMenuItem
+			// 
+			this.refreshToolStripMenuItem.Name = "refreshToolStripMenuItem";
+			this.refreshToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
+			this.refreshToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
+			this.refreshToolStripMenuItem.Text = "R&efresh";
+			// 
+			// toolsToolStripMenuItem
+			// 
+			this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
+			this.toolsToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
+			this.toolsToolStripMenuItem.Text = "&Tools";
+			// 
+			// helpToolStripMenuItem
+			// 
+			this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.aboutToolStripMenuItem});
+			this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+			this.helpToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
+			this.helpToolStripMenuItem.Text = "&Help";
+			// 
 			// aboutToolStripMenuItem
 			// 
 			this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-			this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.aboutToolStripMenuItem.Size = new System.Drawing.Size(113, 22);
 			this.aboutToolStripMenuItem.Text = "&About";
 			// 
 			// logoutButton
 			// 
 			this.logoutButton.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
 			this.logoutButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.logoutButton.Image = ((System.Drawing.Image)(resources.GetObject("logoutButton.Image")));
+			this.logoutButton.Image = global::Dashboard.Properties.Resources.Logout;
 			this.logoutButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.logoutButton.Name = "logoutButton";
 			this.logoutButton.Size = new System.Drawing.Size(23, 22);
 			this.logoutButton.Text = "Logout";
-			// 
-			// loginNameLabel
-			// 
-			this.loginNameLabel.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-			this.loginNameLabel.Name = "loginNameLabel";
-			this.loginNameLabel.Size = new System.Drawing.Size(74, 22);
-			this.loginNameLabel.Text = "(Login Name)";
-			// 
-			// refreshToolStripMenuItem
-			// 
-			this.refreshToolStripMenuItem.Name = "refreshToolStripMenuItem";
-			this.refreshToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
-			this.refreshToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-			this.refreshToolStripMenuItem.Text = "R&efresh";
 			// 
 			// ShellForm
 			// 
