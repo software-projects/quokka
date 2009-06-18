@@ -35,6 +35,7 @@ namespace Example3
 			this.kryptonPage1 = new ComponentFactory.Krypton.Navigator.KryptonPage();
 			this.kryptonPage2 = new ComponentFactory.Krypton.Navigator.KryptonPage();
 			this.kryptonPanel1 = new ComponentFactory.Krypton.Toolkit.KryptonPanel();
+			this.kryptonCommand1 = new ComponentFactory.Krypton.Toolkit.KryptonCommand();
 			((System.ComponentModel.ISupportInitialize)(this.kryptonPanel)).BeginInit();
 			this.kryptonPanel.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.navigator)).BeginInit();
@@ -146,6 +147,15 @@ namespace Example3
 			this.kryptonPanel1.Size = new System.Drawing.Size(472, 34);
 			this.kryptonPanel1.TabIndex = 1;
 			// 
+			// kryptonCommand1
+			// 
+			this.kryptonCommand1.ExtraText = "";
+			this.kryptonCommand1.ImageLarge = null;
+			this.kryptonCommand1.ImageSmall = null;
+			this.kryptonCommand1.Text = "kryptonCommand1";
+			this.kryptonCommand1.TextLine1 = "";
+			this.kryptonCommand1.TextLine2 = "";
+			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -174,6 +184,7 @@ namespace Example3
 		private ComponentFactory.Krypton.Navigator.KryptonPage kryptonPage1;
 		private ComponentFactory.Krypton.Navigator.KryptonPage kryptonPage2;
 		private ComponentFactory.Krypton.Toolkit.KryptonPanel kryptonPanel1;
+		private ComponentFactory.Krypton.Toolkit.KryptonCommand kryptonCommand1;
 	}
 }
 

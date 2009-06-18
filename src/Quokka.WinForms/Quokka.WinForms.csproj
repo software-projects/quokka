@@ -51,6 +51,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Common.Logging, Version=2.0.0.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Common.Logging\Common.Logging.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\CommonServiceLocator\Microsoft.Practices.ServiceLocation.dll</HintPath>
@@ -86,11 +90,18 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Regions\DeckRegion.cs" />
+    <Compile Include="Regions\RegionItem.cs" />
+    <Compile Include="Regions\RegionAdapterBase.cs" />
+    <Compile Include="Regions\RegionPane.cs" />
+    <Compile Include="Regions\SingleActiveRegion.cs" />
+    <Compile Include="Startup\BootstrapperBase.cs" />
+    <Compile Include="Startup\StartupException.cs" />
     <Compile Include="ViewManager.cs">
     </Compile>
-    <Compile Include="Workspaces\IWorkspaceInfo.cs" />
-    <Compile Include="Workspaces\Workspace.cs" />
-    <Compile Include="Workspaces\TabControlWorkspace.cs" />
+    <Compile Include="Regions\IRegionInfo.cs" />
+    <Compile Include="Regions\Region.cs" />
+    <Compile Include="Regions\TabControlRegion.cs" />
     <Compile Include="Startup\DefaultSplashScreen.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -172,6 +183,10 @@
     <ProjectReference Include="..\Quokka.Core\Quokka.Core.csproj">
       <Project>{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}</Project>
       <Name>Quokka.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Quokka.Unity\Quokka.Unity.csproj">
+      <Project>{52A00CC5-7821-40EC-A08A-F777301B55DB}</Project>
+      <Name>Quokka.Unity</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

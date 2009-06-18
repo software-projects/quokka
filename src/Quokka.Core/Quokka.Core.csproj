@@ -71,6 +71,7 @@
     <Compile Include="Reflection\PropertyCollection.cs" />
     <Compile Include="Reflection\PropertyUtil.cs" />
     <Compile Include="Reflection\TypeUtil.cs" />
+    <Compile Include="Security\MD5Crypt.cs" />
     <Compile Include="ServiceContainerUtil.cs" />
     <Compile Include="ServiceLocation\PerRequestAttribute.cs" />
     <Compile Include="ServiceLocation\RegisterTypeAttribute.cs" />
@@ -96,7 +97,11 @@
     <Compile Include="Uip\UipTask.cs" />
     <Compile Include="Uip\UipUtil.cs" />
     <Compile Include="Uip\UipViewEventArgs.cs" />
-    <Compile Include="UI\IWorkspace.cs" />
+    <Compile Include="UI\Regions\IRegion.cs" />
+    <Compile Include="UI\Regions\IRegionAdapter.cs" />
+    <Compile Include="UI\Regions\IViewsCollection.cs" />
+    <Compile Include="UI\Regions\RegionAdapterMappings.cs" />
+    <Compile Include="UI\Regions\ViewsCollection.cs" />
     <Compile Include="Util\RegistryUtil.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(FormalBuild)' == 'true' ">

@@ -13,7 +13,7 @@ namespace Example1
 		{
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(App.CreateMainForm());
+			Application.Run(new Bootstrapper().Run());
 		}
 	}
 }

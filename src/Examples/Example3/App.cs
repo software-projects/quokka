@@ -18,7 +18,7 @@ namespace Example3
 			ServiceLocator.SetLocatorProvider(() => container.Locator);
 
 			MainForm form = new MainForm();
-			form.MainWorkspace.StartTask(new SimpleTask());
+			form.MainWorkspace.Add(new SimpleTask());
 			return form;
 		}
 	}

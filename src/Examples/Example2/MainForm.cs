@@ -1,23 +1,23 @@
 ﻿using System.Windows.Forms;
-using Quokka.UI;
-using Quokka.WinForms.Workspaces;
+using Quokka.UI.Regions;
+using Quokka.WinForms.Regions;
 
 namespace Example2
 {
 	public partial class MainForm : Form
 	{
-		private readonly IWorkspace _mainWorkspace;
+		private readonly IRegion _mainRegion;
 
 		public MainForm()
 		{
 			InitializeComponent();
 			tabControl.TabPages.Clear();
-			_mainWorkspace = new TabControlWorkspace(tabControl);
+			_mainRegion = new TabControlRegion(tabControl);
 		}
 
-		public IWorkspace MainWorkspace
+		public IRegion MainRegion
 		{
-			get { return _mainWorkspace; }
+			get { return _mainRegion; }
 		}
 	}
 }

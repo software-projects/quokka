@@ -26,7 +26,7 @@ namespace Example2
 
 		protected override void OnSplashScreenDisplayed()
 		{
-			MainForm = App.CreateMainForm();
+			MainForm = new Bootstrapper().Run();
 		}
 	}
 }

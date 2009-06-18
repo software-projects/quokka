@@ -3,18 +3,19 @@ using Example2.Tasks.Simple;
 using Microsoft.Practices.ServiceLocation;
 using Quokka.ServiceLocation;
 using Quokka.Unity;
+using Quokka.WinForms.Startup;
 
 namespace Example2
 {
-	public static class App
+	public class Bootstrapper : BootstrapperBase
 	{
-		public static Form CreateMainForm()
+		protected override Form CreateShell()
 		{
 			IServiceContainer container = ServiceContainerFactory.CreateContainer();
 			ServiceLocator.SetLocatorProvider(() => container.Locator);
 
 			MainForm form = new MainForm();
-			form.MainWorkspace.StartTask(new SimpleTask());
+			form.MainRegion.Add(new SimpleTask());
 			return form;
 		}
 	}

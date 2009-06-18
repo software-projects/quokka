@@ -87,7 +87,7 @@ namespace Quokka.WinForms.Startup
 
 			if (MainForm != Presenter.SplashScreen)
 			{
-				if (!MainForm.IsHandleCreated)
+				if (MainForm != null && !MainForm.IsHandleCreated)
 				{
 					MainForm.Show();
 				}
