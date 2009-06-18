@@ -102,27 +102,27 @@
     <Compile Include="UI\Tasks\Shell\ShellTask.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Quokka.Core\Quokka.Core.csproj">
+    <ProjectReference Include="..\..\..\Quokka.Core\Quokka.Core.csproj">
       <Project>{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}</Project>
       <Name>Quokka.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Quokka.Domain\Quokka.Domain.csproj">
+    <ProjectReference Include="..\..\..\Quokka.Domain\Quokka.Domain.csproj">
       <Project>{59F8AE7F-F658-4902-A915-A871F54208DB}</Project>
       <Name>Quokka.Domain</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Quokka.Krypton\Quokka.Krypton.csproj">
+    <ProjectReference Include="..\..\..\Quokka.Krypton\Quokka.Krypton.csproj">
       <Project>{7CAFB430-325C-4C28-A2A0-E03E8D1B0EBD}</Project>
       <Name>Quokka.Krypton</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Quokka.NH\Quokka.NH.csproj">
+    <ProjectReference Include="..\..\..\Quokka.NH\Quokka.NH.csproj">
       <Project>{BA85A91F-6C8C-4E54-8CA8-0952E6556231}</Project>
       <Name>Quokka.NH</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Quokka.Unity\Quokka.Unity.csproj">
+    <ProjectReference Include="..\..\..\Quokka.Unity\Quokka.Unity.csproj">
       <Project>{52A00CC5-7821-40EC-A08A-F777301B55DB}</Project>
       <Name>Quokka.Unity</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Quokka.WinForms\Quokka.WinForms.csproj">
+    <ProjectReference Include="..\..\..\Quokka.WinForms\Quokka.WinForms.csproj">
       <Project>{2E9F1CF5-C91E-4B40-B5F0-273C0E2ADFB6}</Project>
       <Name>Quokka.WinForms</Name>
     </ProjectReference>
