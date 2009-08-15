@@ -1,4 +1,3 @@
-
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quokka.Tests", "Quokka.Tests\Quokka.Tests.csproj", "{FA1B5C87-5E8C-4B9A-8493-302C821D31F6}"
@@ -32,6 +31,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashboard", "Examples\Dashboard\Dashboard\Dashboard.csproj", "{DD65F818-DF46-461C-AFB0-58AACE721606}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashboard.Core", "Examples\Dashboard\Dashboard.Core\Dashboard.Core.csproj", "{AA9136C3-A42A-4482-A0BF-978FDEE3B276}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quokka.Castle", "Quokka.Castle\Quokka.Castle.csproj", "{36487FB8-01B3-4C16-AFFA-E4A86090E43B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -95,6 +96,10 @@ Global
 		{AA9136C3-A42A-4482-A0BF-978FDEE3B276}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA9136C3-A42A-4482-A0BF-978FDEE3B276}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA9136C3-A42A-4482-A0BF-978FDEE3B276}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36487FB8-01B3-4C16-AFFA-E4A86090E43B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36487FB8-01B3-4C16-AFFA-E4A86090E43B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36487FB8-01B3-4C16-AFFA-E4A86090E43B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36487FB8-01B3-4C16-AFFA-E4A86090E43B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
