@@ -7,6 +7,9 @@ namespace Quokka.Events
 	[TestFixture]
 	public class EventBrokerTests
 	{
+		private static int _testActionCount;
+		private TestAction _testAction;
+
 		[Test]
 		public void Creates_event_instance()
 		{
@@ -74,6 +77,32 @@ namespace Quokka.Events
 			Assert.AreEqual(42, e2Value);
 		}
 
+		[Test]
+		public void Does_not_fire_weak_references()
+		{
+			_testActionCount = 0;
+			IEventBroker eventBroker = new EventBroker();
+			int count = 0;
+			TestEvent3 e3 = eventBroker.GetEvent<TestEvent3>();
+
+			// this is a bit tricky, the GC does not want to collect 
+			// local vars in a method until it is finished, so we have
+			// to have _testAction as a member variable, not a local variable.
+			_testAction = new TestAction();
+
+			e3.Subscribe(_testAction.DoSomething);
+
+			// remove references to _testAction and then garbage collect.
+			_testAction = null;
+			GC.Collect();
+
+			// publish again and it should not fire the action
+			e3.Publish();
+
+			// tests that the count did not get increased
+			Assert.AreEqual(0, _testActionCount);
+		}
+
 		private class TestEvent1 : Event<string>
 		{
 		}
@@ -83,5 +112,13 @@ namespace Quokka.Events
 		private class TestEvent3 : Event {}
 
 		private class TestEvent4 : Event {}
+
+		private class TestAction
+		{
+			public void DoSomething()
+			{
+				_testActionCount++;
+			}
+		}
 	}
 }
