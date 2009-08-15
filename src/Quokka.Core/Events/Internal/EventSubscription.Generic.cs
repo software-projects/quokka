@@ -6,12 +6,13 @@ namespace Quokka.Events.Internal
 	/// <summary>
 	/// Implementation class for <see cref="IEventSubscription"/>
 	/// </summary>
-	public abstract class EventSubscription : EventSubscriptionBase
+	/// <typeparam name="TPayload">Event payload type.</typeparam>
+	public abstract class EventSubscription<TPayload> : EventSubscriptionBase
 	{
 		protected EventSubscription(EventBase parentEvent,
-									Action action,
-									ThreadOption threadOption,
-									ReferenceOption referenceOption)
+		                            Action<TPayload> action,
+		                            ThreadOption threadOption,
+		                            ReferenceOption referenceOption)
 			: base(parentEvent, threadOption, referenceOption)
 		{
 			Verify.ArgumentNotNull(action, "action");
@@ -21,9 +22,9 @@ namespace Quokka.Events.Internal
 		/// <summary>
 		/// Action to take when the event is published, or 
 		/// </summary>
-		public Action Action
+		public Action<TPayload> Action
 		{
-			get { return (Action)DelegateReference.Delegate; }
+			get { return (Action<TPayload>) DelegateReference.Delegate; }
 		}
 
 		/// <summary>
@@ -35,9 +36,9 @@ namespace Quokka.Events.Internal
 		/// if the event subscription is no longer current (either through unsubscription or
 		/// by a weak reference being garbage collected).
 		/// </returns>
-		public bool Publish()
+		public bool Publish(TPayload payload)
 		{
-			Action action;
+			Action<TPayload> action;
 			lock (LockObject)
 			{
 				if (!IsSubscribed)
@@ -54,10 +55,10 @@ namespace Quokka.Events.Internal
 				return false;
 			}
 
-			InvokeAction(action);
+			InvokeAction(action, payload);
 			return true;
 		}
 
-		protected abstract void InvokeAction(Action action);
+		protected abstract void InvokeAction(Action<TPayload> action, TPayload payload);
 	}
 }

@@ -6,7 +6,6 @@ namespace Quokka.Events
 	{
 		bool IsSubscribed { get; }
 		Type EventType { get; }
-		Type PayloadType { get; }
 		ThreadOption ThreadOption { get; }
 		ReferenceOption ReferenceOption { get; }
 

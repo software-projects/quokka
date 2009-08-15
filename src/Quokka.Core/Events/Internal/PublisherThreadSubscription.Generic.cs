@@ -5,11 +5,10 @@ namespace Quokka.Events.Internal
 	/// <summary>
 	/// Event subscription for publisher thread
 	/// </summary>
-	internal class PublishThreadSubscription : EventSubscription
+	/// <typeparam name="TPayload"></typeparam>
+	internal class PublishThreadSubscription<TPayload> : EventSubscription<TPayload>
 	{
-		public PublishThreadSubscription(EventBase parentEvent,
-		                                 Action action,
-		                                 ThreadOption threadOption,
+		public PublishThreadSubscription(Event<TPayload> parentEvent, Action<TPayload> action, ThreadOption threadOption,
 		                                 ReferenceOption referenceOption)
 			: base(parentEvent, action, threadOption, referenceOption)
 		{
@@ -19,9 +18,9 @@ namespace Quokka.Events.Internal
 			}
 		}
 
-		protected override void InvokeAction(Action action)
+		protected override void InvokeAction(Action<TPayload> action, TPayload payload)
 		{
-			action();
+			action(payload);
 		}
 	}
 }

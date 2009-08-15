@@ -7,14 +7,15 @@ namespace Quokka.Events.Internal
 	/// <summary>
 	/// Event subscription for background thread option.
 	/// </summary>
-	internal class BackgroundThreadSubscription : EventSubscription
+	/// <typeparam name="TPayload"></typeparam>
+	internal class BackgroundThreadSubscription<TPayload> : EventSubscription<TPayload>
 	{
 		private static readonly ILog log = LogManager.GetCurrentClassLogger();
 
 		public BackgroundThreadSubscription(EventBase parentEvent,
-											Action action,
-											ThreadOption threadOption,
-											ReferenceOption referenceOption)
+		                                    Action<TPayload> action,
+		                                    ThreadOption threadOption,
+		                                    ReferenceOption referenceOption)
 			: base(parentEvent, action, threadOption, referenceOption)
 		{
 			if (ThreadOption != ThreadOption.BackgroundThread)
@@ -23,12 +24,12 @@ namespace Quokka.Events.Internal
 			}
 		}
 
-		protected override void InvokeAction(Action action)
+		protected override void InvokeAction(Action<TPayload> action, TPayload payload)
 		{
 			BackgroundWorker worker = new BackgroundWorker();
-			worker.DoWork += delegate { action(); };
+			worker.DoWork += delegate { action(payload); };
 			worker.RunWorkerCompleted += WorkCompleted;
-			worker.RunWorkerAsync();
+			worker.RunWorkerAsync(payload);
 		}
 
 		private static void WorkCompleted(object sender, RunWorkerCompletedEventArgs e)

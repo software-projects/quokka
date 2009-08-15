@@ -8,16 +8,17 @@ namespace Quokka.Events
 	/// <summary>
 	/// An event that supports a specify type of payload
 	/// </summary>
-	public class Event : EventBase
+	/// <typeparam name="TPayload">The type of payload associated with the event.</typeparam>
+	public class Event<TPayload> : EventBase
 	{
-		private readonly List<EventSubscription> _eventSubscriptions = new List<EventSubscription>();
+		private readonly List<EventSubscription<TPayload>> _eventSubscriptions = new List<EventSubscription<TPayload>>();
 
 		/// <summary>
 		/// Subscribe to the event.
 		/// </summary>
 		/// <param name="action">Action to take when the event is published.</param>
 		/// <returns>Returns an <see cref="IEventSubscription"/> object that represents the subscription.</returns>
-		public IEventSubscription Subscribe(Action action)
+		public IEventSubscription Subscribe(Action<TPayload> action)
 		{
 			return Subscribe(action, ThreadOption.PublisherThread);
 		}
@@ -28,7 +29,7 @@ namespace Quokka.Events
 		/// <param name="action">Action to take when the event is published.</param>
 		/// <param name="threadOption">Specifies which thread the action will be performed on.</param>
 		/// <returns>Returns an <see cref="IEventSubscription"/> object that represents the subscription.</returns>
-		public IEventSubscription Subscribe(Action action, ThreadOption threadOption)
+		public IEventSubscription Subscribe(Action<TPayload> action, ThreadOption threadOption)
 		{
 			return Subscribe(action, threadOption, ReferenceOption.WeakReference);
 		}
@@ -41,11 +42,11 @@ namespace Quokka.Events
 		/// <param name="referenceOption">Specifies whether the event subscription will hold a strong or 
 		/// weak reference on the action delegate.</param>
 		/// <returns>Returns an <see cref="IEventSubscription"/> object that represents the subscription.</returns>
-		public IEventSubscription Subscribe(Action action, ThreadOption threadOption,
-											ReferenceOption referenceOption)
+		public IEventSubscription Subscribe(Action<TPayload> action, ThreadOption threadOption,
+		                                    ReferenceOption referenceOption)
 		{
 			Verify.ArgumentNotNull(action, "action");
-			EventSubscription eventSubscription = CreateEventSubscription(action, threadOption, referenceOption);
+			EventSubscription<TPayload> eventSubscription = CreateEventSubscription(action, threadOption, referenceOption);
 			lock (_eventSubscriptions)
 			{
 				_eventSubscriptions.Add(eventSubscription);
@@ -56,10 +57,11 @@ namespace Quokka.Events
 		/// <summary>
 		/// Publish the event for all subscribers. Honour the thread option requested by each subscriber.
 		/// </summary>
-		public void Publish()
+		/// <param name="payload">Event payload.</param>
+		public void Publish(TPayload payload)
 		{
 			// lock the collection and copy to an array to avoid thread contention
-			EventSubscription[] array;
+			EventSubscription<TPayload>[] array;
 			lock (_eventSubscriptions)
 			{
 				array = _eventSubscriptions.ToArray();
@@ -68,18 +70,18 @@ namespace Quokka.Events
 			// List of event subscriptions that will be removed after the publish has completed.
 			// Because the chances of there being one of these subscriptions is low, we do not
 			// actually create the list until there is one item that needs to be removed.
-			List<EventSubscription> removeItems = null;
+			List<EventSubscription<TPayload>> removeItems = null;
 
 			foreach (var eventSubscription in array)
 			{
 				// TODO: should we handle exceptions thrown during the publish here.
-				if (!eventSubscription.Publish())
+				if (!eventSubscription.Publish(payload))
 				{
 					// Tried to publish but the event subscription is no longer valid for
 					// some reason. Just remember that it has to be removed.
 					if (removeItems == null)
 					{
-						removeItems = new List<EventSubscription>();
+						removeItems = new List<EventSubscription<TPayload>>();
 					}
 					removeItems.Add(eventSubscription);
 				}
@@ -101,18 +103,18 @@ namespace Quokka.Events
 		/// <summary>
 		/// Create the right type of event subscription for the thread option
 		/// </summary>
-		private EventSubscription CreateEventSubscription(Action action, ThreadOption threadOption,
-																	ReferenceOption referenceOption)
+		private EventSubscription<TPayload> CreateEventSubscription(Action<TPayload> action, ThreadOption threadOption,
+		                                                            ReferenceOption referenceOption)
 		{
 			switch (threadOption)
 			{
 				case ThreadOption.PublisherThread:
-					return new PublishThreadSubscription(this, action, threadOption, referenceOption);
+					return new PublishThreadSubscription<TPayload>(this, action, threadOption, referenceOption);
 				case ThreadOption.UIThread:
 				case ThreadOption.UIThreadPost:
-					return new UIThreadSubscription(this, action, threadOption, referenceOption);
+					return new UIThreadSubscription<TPayload>(this, action, threadOption, referenceOption);
 				case ThreadOption.BackgroundThread:
-					return new BackgroundThreadSubscription(this, action, threadOption, referenceOption);
+					return new BackgroundThreadSubscription<TPayload>(this, action, threadOption, referenceOption);
 			}
 
 			// this should not happen.

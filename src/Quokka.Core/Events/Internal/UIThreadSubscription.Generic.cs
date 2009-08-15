@@ -6,10 +6,11 @@ namespace Quokka.Events.Internal
 	/// <summary>
 	/// Event subscription for the UI thread options.
 	/// </summary>
-	internal class UIThreadSubscription : EventSubscription
+	/// <typeparam name="TPayload"></typeparam>
+	internal class UIThreadSubscription<TPayload> : EventSubscription<TPayload>
 	{
-		public UIThreadSubscription(EventBase parentEvent, Action action, ThreadOption threadOption,
-									ReferenceOption referenceOption)
+		public UIThreadSubscription(Event<TPayload> parentEvent, Action<TPayload> action, ThreadOption threadOption,
+		                            ReferenceOption referenceOption)
 			: base(parentEvent, action, threadOption, referenceOption)
 		{
 			if (ThreadOption != ThreadOption.UIThread && ThreadOption != ThreadOption.UIThreadPost)
@@ -18,9 +19,9 @@ namespace Quokka.Events.Internal
 			}
 		}
 
-		protected override void InvokeAction(Action action )
+		protected override void InvokeAction(Action<TPayload> action, TPayload payload)
 		{
-			SendOrPostCallback callback = delegate { action(); };
+			SendOrPostCallback callback = delegate { action(payload); };
 			if (ThreadOption == ThreadOption.UIThread)
 			{
 				Event.EventBroker.UIThreadContext.Send(callback, null);

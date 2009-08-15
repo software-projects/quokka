@@ -38,7 +38,26 @@ namespace Quokka.Events
 		}
 
 		[Test]
-		public void Subscribe_and_publish_an_event()
+		public void Subscribe_and_publish_nongeneric_events()
+		{
+			int e3Count = 0;
+			int e4Count = 0;
+
+			IEventBroker eventBroker = new EventBroker();
+			TestEvent3 e3 = eventBroker.GetEvent<TestEvent3>();
+			TestEvent4 e4 = eventBroker.GetEvent<TestEvent4>();
+			Assert.AreNotSame(e3, e4);
+			e3.Subscribe(() => e3Count++);
+			e4.Subscribe(() => e4Count++);
+			e3.Publish();
+			e3.Publish();
+			e4.Publish();
+			Assert.AreEqual(2, e3Count);
+			Assert.AreEqual(1, e4Count);
+		}
+
+		[Test]
+		public void Subscribe_and_publish_generic_events()
 		{
 			string e1Value = String.Empty;
 			int e2Value = 0;
@@ -60,5 +79,9 @@ namespace Quokka.Events
 		}
 
 		private class TestEvent2 : Event<int> {}
+
+		private class TestEvent3 : Event {}
+
+		private class TestEvent4 : Event {}
 	}
 }
