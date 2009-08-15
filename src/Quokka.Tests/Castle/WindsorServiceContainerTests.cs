@@ -41,6 +41,8 @@ namespace Quokka.Castle
 
 			container.RegisterType<IInterface1, Class1>("someName", ServiceLifecycle.PerRequest);
 			container.RegisterType<IInterface2, Class2>("someOtherName", ServiceLifecycle.Singleton);
+
+			// this fails
 			container.RegisterType<IInterface2, Class2>("someName", ServiceLifecycle.Singleton);
 
 			Assert.IsTrue(container.IsTypeRegistered<IInterface1>("someName"));

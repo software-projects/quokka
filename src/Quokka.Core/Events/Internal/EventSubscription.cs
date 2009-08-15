@@ -12,12 +12,14 @@ namespace Quokka.Events.Internal
 		private readonly Event<TPayload> _event;
 		private DelegateReference _delegateReference;
 		public event EventHandler Unsubscribed;
+		private readonly object _lockObject = new object();
 
-		public EventSubscription(Event<TPayload> parentEvent, Action<TPayload> action, ThreadOption threadOption,
-		                         ReferenceOption referenceOption)
+		protected EventSubscription(Event<TPayload> parentEvent, Action<TPayload> action, ThreadOption threadOption,
+		                            ReferenceOption referenceOption)
 		{
 			Verify.ArgumentNotNull(parentEvent, "parentEvent", out _event);
 			Verify.ArgumentNotNull(action, "action");
+			IsSubscribed = true;
 			_delegateReference = new DelegateReference(action, referenceOption);
 			ThreadOption = threadOption;
 		}
@@ -64,12 +66,17 @@ namespace Quokka.Events.Internal
 		/// </returns>
 		public bool Publish(TPayload payload)
 		{
-			if (!IsSubscribed)
+			Action<TPayload> action;
+			lock (_lockObject)
 			{
-				// This event subscription has been unsubscribed, so do nothing.
-				return false;
+				if (!IsSubscribed)
+				{
+					// This event subscription has been unsubscribed, so do nothing.
+					return false;
+				}
+				action = Action;
 			}
-			Action<TPayload> action = Action;
+
 			if (action == null)
 			{
 				// Weak reference has been garbage collected
@@ -85,8 +92,11 @@ namespace Quokka.Events.Internal
 		/// </summary>
 		public void Unsubscribe()
 		{
-			_delegateReference = null;
-			IsSubscribed = false;
+			lock (_lockObject)
+			{
+				IsSubscribed = false;
+				_delegateReference = null;
+			}
 
 			if (Unsubscribed != null)
 			{
