@@ -75,6 +75,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Quokka.Unity\Quokka.Unity.csproj">
+      <Project>{52A00CC5-7821-40EC-A08A-F777301B55DB}</Project>
+      <Name>Quokka.Unity</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Dashboard.Core\Dashboard.Core.csproj">
       <Project>{AA9136C3-A42A-4482-A0BF-978FDEE3B276}</Project>
       <Name>Dashboard.Core</Name>

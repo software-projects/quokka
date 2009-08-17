@@ -184,10 +184,6 @@
       <Project>{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}</Project>
       <Name>Quokka.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Quokka.Unity\Quokka.Unity.csproj">
-      <Project>{52A00CC5-7821-40EC-A08A-F777301B55DB}</Project>
-      <Name>Quokka.Unity</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Arrow.gif" />

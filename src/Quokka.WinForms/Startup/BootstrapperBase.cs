@@ -3,7 +3,6 @@ using System.Windows.Forms;
 using Common.Logging;
 using Microsoft.Practices.ServiceLocation;
 using Quokka.ServiceLocation;
-using Quokka.Unity;
 
 namespace Quokka.WinForms.Startup
 {
@@ -85,11 +84,7 @@ namespace Quokka.WinForms.Startup
 		/// When this method is called, logging has been configured.
 		/// </para>
 		/// </remarks>
-		protected virtual IServiceContainer CreateServiceContainer()
-		{
-			// TODO: default container should probably be the quokka simple container
-			return ServiceContainerFactory.CreateContainer();
-		}
+		protected abstract IServiceContainer CreateServiceContainer();
 
 		/// <summary>
 		/// Configure services in the service container.
@@ -118,7 +113,7 @@ namespace Quokka.WinForms.Startup
 			ProgressMessage("Creating service container");
 			_container = CreateServiceContainer();
 			ProgressMessage("Service container created");
-			Microsoft.Practices.ServiceLocation.ServiceLocator.SetLocatorProvider(() => _container.Locator);
+			ServiceLocator.SetLocatorProvider(() => _container.Locator);
 			ProgressMessage("Configuring service container");
 			ConfigureServices();
 			ProgressMessage("Service container configured");
