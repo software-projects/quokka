@@ -34,7 +34,7 @@ namespace Quokka.WinForms.Regions
 			RegionItem item = _regionItems.FirstOrDefault(x => x.Item == view);
 			if (item != null)
 			{
-				throw new ArgumentException("View has already been added to the region");
+				throw new InvalidOperationException("View has already been added to the region");
 			}
 
 			// Initialise the region item and add it to the appropriate collections. If

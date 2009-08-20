@@ -57,6 +57,7 @@
     </Compile>
     <Compile Include="Controllers\CommandLinkTestController.cs" />
     <Compile Include="Controllers\MessageBoxTestController.cs" />
+    <Compile Include="KryptonTesting.cs" />
     <Compile Include="MessageBoxTestForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -97,6 +98,10 @@
     <ProjectReference Include="..\Quokka.Core\Quokka.Core.csproj">
       <Project>{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}</Project>
       <Name>Quokka.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Quokka.Krypton\Quokka.Krypton.csproj">
+      <Project>{7CAFB430-325C-4C28-A2A0-E03E8D1B0EBD}</Project>
+      <Name>Quokka.Krypton</Name>
     </ProjectReference>
     <ProjectReference Include="..\Quokka.Unity\Quokka.Unity.csproj">
       <Project>{52A00CC5-7821-40EC-A08A-F777301B55DB}</Project>
