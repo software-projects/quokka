@@ -73,6 +73,9 @@
     <Compile Include="CommandLink.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Commands\ActionCommand.cs" />
+    <Compile Include="Commands\IUICommand.cs" />
+    <Compile Include="Commands\UICommandBase.cs" />
     <Compile Include="CustomPanel.cs">
       <SubType>Component</SubType>
     </Compile>
