@@ -49,17 +49,9 @@ namespace Quokka.UI.Regions
 			}
 		}
 
-		public static void AddOrActivate<T>(this IRegion region)
+		public static void AddOrActivate<T>(this IRegion region) where T : class
 		{
-			T view = region.FindType<T>();
-			if (view == null)
-			{
-				
-			}
-			else
-			{
-				region.Activate(view);
-			}
+			region.AddOrActivate(typeof (T));
 		}
 	}
 }
