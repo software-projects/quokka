@@ -19,6 +19,21 @@ namespace Quokka.Krypton
 			_navigator.Button.CloseButtonAction = CloseButtonAction.RemovePage;
 		}
 
+		void Navigator_CloseAction(object sender, CloseActionEventArgs e)
+		{
+			if (e.Action == CloseButtonAction.RemovePage 
+				|| e.Action == CloseButtonAction.RemovePageAndDispose)
+			{
+				RegionItem item = e.Item.Tag as RegionItem;
+				if (item == null)
+				{
+					return;
+				}
+
+				RegionItemClosed(item);
+			}
+		}
+
 		protected override Control CreateHostControl()
 		{
 			return new KryptonPage();
@@ -68,11 +83,6 @@ namespace Quokka.Krypton
 		{
 			KryptonPage tabPage = (KryptonPage) item.HostControl;
 			_navigator.Pages.Remove(tabPage);
-		}
-
-		private static void Navigator_CloseAction(object sender, CloseActionEventArgs e)
-		{
-			// TODO:
 		}
 
 		private void Navigator_Selected(object sender, KryptonPageEventArgs e)

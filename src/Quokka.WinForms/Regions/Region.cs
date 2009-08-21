@@ -44,12 +44,6 @@ namespace Quokka.WinForms.Regions
 				view = ServiceLocator.Current.GetInstance(type);
 			}
 
-			Form form = view as Form;
-			if (form != null)
-			{
-				form.TopLevel = false;
-			}
-
 			// Initialise the region item and add it to the appropriate collections. If
 			// the subclass fails its initialization for any reason, we will clean up.
 			Control hostControl;
@@ -123,6 +117,15 @@ namespace Quokka.WinForms.Regions
 		protected abstract Control CreateHostControl();
 		protected abstract void OnAdd(RegionItem item);
 		protected abstract void OnRemove(RegionItem item);
+
+		/// <summary>
+		/// Called by the derived class to inform that a region item has closed.
+		/// </summary>
+		/// <param name="item"></param>
+		protected void RegionItemClosed(RegionItem item)
+		{
+			Cleanup(item);
+		}
 
 		/// <summary>
 		/// Cleanup a region item before discarding it forever

@@ -50,6 +50,12 @@ namespace Quokka.WinForms.Regions
 			}
 			else if (_clientControl != null)
 			{
+				Form form = _clientControl as Form;
+				if (form != null)
+				{
+					form.TopLevel = false;
+					form.FormBorderStyle = FormBorderStyle.None;
+				}
 				_hostControl.Controls.Add(_clientControl);
 				_clientControl.Dock = DockStyle.Fill;
 				_clientControl.Visible = true;

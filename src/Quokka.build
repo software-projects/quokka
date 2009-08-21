@@ -21,7 +21,15 @@
 
 	<property name="nunit-console.exe" value="${path::combine(nunit.bin.dir, 'nunit-console.exe')}"/>
 
-	<target name="version">
+	<target name="svn-revision">
+		<property name="svn.revision.file" value="${path::get-temp-file-name()}"/>
+		<exec program="svn" basedir="${svn.bin.dir}" commandline='info "${project::get-base-directory()}" --xml' 
+					output="${svn.revision.file}" failonerror="false"/>
+		<xmlpeek file="${svn.revision.file}" xpath="/info/entry/@revision" property="svn.revision" failonerror="false"/>
+		<delete file="${svn.revision.file}" failonerror="false"/>
+	</target>
+
+	<target name="version" depends="svn-revision">
 		<tstamp>
 			<formatter property="build.year" pattern="yyyy"/>
 			<formatter property="build.timestamp" pattern="yyyy-MM-ddTHH:mm:ss"/>
@@ -30,11 +38,6 @@
 			<formatter property="build.day.hour" pattern="ddHH"/>
 			<formatter property="build.minute.second" pattern="mmss"/>
 		</tstamp>
-
-		<property name="svn.revision.file" value="${path::get-temp-file-name()}"/>
-		<exec basedir="${svn.bin.dir}" program="svnversion" output="${svn.revision.file}"/>
-		<loadfile file="${svn.revision.file}" property="svn.revision.string"/>
-		<property name="svn.revision" failonerror="false" value="${int::parse(svn.revision.string)}"/>
 		<if test="${not property::exists('svn.revision')}">
 			<property name="version.major" value="0"/>
 			<property name="version.minor" value="0"/>
