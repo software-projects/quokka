@@ -120,6 +120,7 @@
     <Compile Include="UI\Regions\IRegionAdapter.cs" />
     <Compile Include="UI\Regions\IViewsCollection.cs" />
     <Compile Include="UI\Regions\RegionAdapterMappings.cs" />
+    <Compile Include="UI\Regions\RegionExtensions.cs" />
     <Compile Include="UI\Regions\ViewsCollection.cs" />
     <Compile Include="Util\RegistryUtil.cs" />
   </ItemGroup>

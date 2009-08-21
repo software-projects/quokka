@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
 using Common.Logging;
+using Microsoft.Practices.ServiceLocation;
 using Quokka.Diagnostics;
 using Quokka.UI.Regions;
 
@@ -35,6 +36,18 @@ namespace Quokka.WinForms.Regions
 			if (item != null)
 			{
 				throw new InvalidOperationException("View has already been added to the region");
+			}
+
+			Type type = view as Type;
+			if (type != null)
+			{
+				view = ServiceLocator.Current.GetInstance(type);
+			}
+
+			Form form = view as Form;
+			if (form != null)
+			{
+				form.TopLevel = false;
 			}
 
 			// Initialise the region item and add it to the appropriate collections. If
