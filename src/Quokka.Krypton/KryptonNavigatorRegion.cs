@@ -27,6 +27,7 @@ namespace Quokka.Krypton
 		protected override void OnAdd(RegionItem item)
 		{
 			KryptonPage tabPage = (KryptonPage) item.HostControl;
+			tabPage.Tag = item;
 			_navigator.Pages.Add(tabPage);
 			item.PropertyChanged += Item_PropertyChanged;
 		}
@@ -79,13 +80,23 @@ namespace Quokka.Krypton
 			KryptonPage tabPage = e.Item;
 			RegionItem item = (RegionItem) tabPage.Tag;
 
+			// Note that we cannot assume that item is non-null.
+			// There may be pages in the control that are not added via the region mechanism.
+
 			foreach (KryptonPage page in _navigator.Pages)
 			{
 				RegionItem it = (RegionItem) page.Tag;
-				it.IsActive = (page == _navigator.SelectedPage);
+				if (it != null)
+				{
+					it.IsActive = (page == _navigator.SelectedPage);
+				}
 			}
 
-			_navigator.Button.CloseButtonDisplay = item.CanClose ? ButtonDisplay.Logic : ButtonDisplay.ShowDisabled;
+			if (item != null)
+			{
+				_navigator.Button.CloseButtonDisplay = item.CanClose ? 
+					ButtonDisplay.Logic : ButtonDisplay.ShowDisabled;
+			}
 		}
 	}
 }
