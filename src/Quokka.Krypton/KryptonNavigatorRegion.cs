@@ -42,9 +42,11 @@ namespace Quokka.Krypton
 		protected override void OnAdd(RegionItem item)
 		{
 			KryptonPage tabPage = (KryptonPage) item.HostControl;
+			tabPage.Text = item.Text;
+			tabPage.ImageSmall = item.Image;
 			tabPage.Tag = item;
-			_navigator.Pages.Add(tabPage);
 			item.PropertyChanged += Item_PropertyChanged;
+			_navigator.Pages.Add(tabPage);
 		}
 
 		private void Item_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -63,7 +65,7 @@ namespace Quokka.Krypton
 
 			if (MatchPropertyName("IsActive", e))
 			{
-				if (item.IsActive)
+				if (item.IsActive && _navigator.SelectedPage != tabPage)
 				{
 					_navigator.SelectedPage = tabPage;
 				}
