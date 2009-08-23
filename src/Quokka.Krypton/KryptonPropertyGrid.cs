@@ -7,15 +7,19 @@ using ComponentFactory.Krypton.Toolkit;
 namespace Quokka.Krypton
 {
 	/// <summary>
-	/// Acknowledgement: KryptonPropertyGrid post by angel. http://www.componentfactory.com/forums/viewtopic.php?f=7&t=1228
+	/// Property grid that paints itself using Krypton Toolkit properties.
 	/// </summary>
+	/// <remarks>
+	/// Acknowledgement: This code adapted from code posted to the Krypton toolkit form by 'angel'.
+	/// http://www.componentfactory.com/forums/viewtopic.php?f=7&t=1228
+	/// </remarks>
 	[ToolboxBitmap(typeof (PropertyGrid))]
 	public class KryptonPropertyGrid : PropertyGrid
 	{
 		private IPalette _palette;
 		private readonly PaletteRedirect _paletteRedirect;
 
-		#region ... Properties...
+		#region Properties
 
 		private Color _gradientMiddleColor = Color.Gray;
 
@@ -34,7 +38,7 @@ namespace Quokka.Krypton
 
 		#endregion
 
-		#region ... Constructor ...
+		#region Construction
 
 		public KryptonPropertyGrid()
 		{
@@ -73,7 +77,7 @@ namespace Quokka.Krypton
 			//
 		}
 
-		#region ... Krypton ...
+		#region Krypton
 
 		//Kripton Palette Events
 		private void OnGlobalPaletteChanged(object sender, EventArgs e)
