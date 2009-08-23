@@ -43,10 +43,7 @@ namespace Quokka.UI.Regions
 				view = ServiceLocator.Current.GetInstance(type);
 				region.Add(view);
 			}
-			else
-			{
-				region.Activate(view);
-			}
+			region.Activate(view);
 		}
 
 		public static void AddOrActivate<T>(this IRegion region) where T : class
