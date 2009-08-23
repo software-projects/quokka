@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using Common.Logging;
 using Quokka.Diagnostics;
+using Quokka.DynamicCodeGeneration;
 using Quokka.ServiceLocation;
 using Quokka.UI.Regions;
 using Quokka.Uip;
@@ -56,6 +57,19 @@ namespace Quokka.WinForms.Regions
 					form.TopLevel = false;
 					form.FormBorderStyle = FormBorderStyle.None;
 				}
+
+				// Attempt to inject the IRegionInfo object into the control, either by a property
+				// named 'RegionInfo', or by a method called 'SetRegionInfo'.
+				IRegionInfoAware regionInfoAware = ProxyFactory.CreateDuckProxy<IRegionInfoAware>(_clientControl);
+				if (regionInfoAware.IsRegionInfoSupported)
+				{
+					regionInfoAware.RegionInfo = this;
+				}
+				if (regionInfoAware.IsSetRegionInfoSupported)
+				{
+					regionInfoAware.SetRegionInfo(this);
+				}
+
 				_hostControl.Controls.Add(_clientControl);
 				_clientControl.Dock = DockStyle.Fill;
 				_clientControl.Visible = true;
