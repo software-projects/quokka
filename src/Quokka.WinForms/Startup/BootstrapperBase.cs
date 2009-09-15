@@ -5,6 +5,7 @@ using Microsoft.Practices.ServiceLocation;
 using Quokka.Events;
 using Quokka.Events.Internal;
 using Quokka.ServiceLocation;
+using Quokka.Services;
 
 namespace Quokka.WinForms.Startup
 {
@@ -126,11 +127,26 @@ namespace Quokka.WinForms.Startup
 			_shell = form;
 		}
 
-		private void ConfigureDefaultServices()
+		/// <summary>
+		/// Configures default services provided by Quokka.
+		/// </summary>
+		/// <remarks>
+		/// Normally you do not have to override this method. Only override if
+		/// you especially do not want these services available to your program.
+		/// </remarks>
+		protected virtual void ConfigureDefaultServices()
 		{
 			if (!Container.IsTypeRegistered<IEventBroker>())
 			{
 				Container.RegisterType<IEventBroker, EventBrokerImpl>(ServiceLifecycle.Singleton);
+			}
+			if (!Container.IsTypeRegistered<IDateTimeProvider>())
+			{
+				Container.RegisterType<IDateTimeProvider, DateTimeProvider>(ServiceLifecycle.Singleton);
+			}
+			if (!Container.IsTypeRegistered<IDateTimeProvider>())
+			{
+				Container.RegisterType<IGuidProvider, GuidProvider>(ServiceLifecycle.Singleton);
 			}
 		}
 
