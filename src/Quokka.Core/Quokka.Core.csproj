@@ -73,10 +73,11 @@
     <Compile Include="Events\Internal\BackgroundThreadSubscription.cs" />
     <Compile Include="Events\Internal\BackgroundThreadSubscription.Generic.cs" />
     <Compile Include="Events\Internal\DelegateReference.cs" />
-    <Compile Include="Events\Internal\EventBroker.cs" />
+    <Compile Include="Events\Internal\EventBrokerImpl.cs" />
     <Compile Include="Events\Internal\EventSubscription.cs" />
     <Compile Include="Events\Internal\EventSubscription.Generic.cs" />
-    <Compile Include="Events\Internal\EventSubscriptionBase.cs" />
+    <Compile Include="Events\Internal\EventSubscriptionBase.cs">
+    </Compile>
     <Compile Include="Events\Internal\PublisherThreadSubscription.cs" />
     <Compile Include="Events\Internal\PublisherThreadSubscription.Generic.cs" />
     <Compile Include="Events\Internal\UIThreadSubscription.cs" />
