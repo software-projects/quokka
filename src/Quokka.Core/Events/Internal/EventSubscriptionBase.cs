@@ -12,6 +12,11 @@ namespace Quokka.Events.Internal
 		public event EventHandler Unsubscribed;
 		private readonly object _lockObject = new object();
 
+		void IDisposable.Dispose()
+		{
+			Unsubscribe();
+		}
+
 		protected EventSubscriptionBase(EventBase parentEvent, ThreadOption threadOption, ReferenceOption referenceOption)
 		{
 			Verify.ArgumentNotNull(parentEvent, "parentEvent", out _event);

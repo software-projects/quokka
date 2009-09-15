@@ -26,7 +26,6 @@ namespace Dashboard.UI.Tasks.Shell
 				.SetView<ShellForm>()
 				.SetPresenter<ShellPresenter>()
 				.NavigateTo("Logout", LoginNode);
-
 		}
 	}
 }

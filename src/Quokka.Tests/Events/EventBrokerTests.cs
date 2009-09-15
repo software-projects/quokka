@@ -13,7 +13,7 @@ namespace Quokka.Events
 		[Test]
 		public void Creates_event_instance()
 		{
-			IEventBroker eventBroker = new EventBroker();
+			IEventBroker eventBroker = new EventBrokerImpl();
 			TestEvent1 e = eventBroker.GetEvent<TestEvent1>();
 			Assert.IsNotNull(e);
 		}
@@ -21,7 +21,7 @@ namespace Quokka.Events
 		[Test]
 		public void Creates_only_one_instance_for_each_type()
 		{
-			IEventBroker eventBroker = new EventBroker();
+			IEventBroker eventBroker = new EventBrokerImpl();
 			TestEvent1 e1 = eventBroker.GetEvent<TestEvent1>();
 			TestEvent2 e2 = eventBroker.GetEvent<TestEvent2>();
 			TestEvent1 e3 = eventBroker.GetEvent<TestEvent1>();
@@ -32,7 +32,7 @@ namespace Quokka.Events
 		[Test]
 		public void Events_created_by_event_broker_have_EventBroker_property_set()
 		{
-			IEventBroker eventBroker = new EventBroker();
+			IEventBroker eventBroker = new EventBrokerImpl();
 			TestEvent1 e1 = eventBroker.GetEvent<TestEvent1>();
 			Assert.AreSame(e1.EventBroker, eventBroker);
 
@@ -46,7 +46,7 @@ namespace Quokka.Events
 			int e3Count = 0;
 			int e4Count = 0;
 
-			IEventBroker eventBroker = new EventBroker();
+			IEventBroker eventBroker = new EventBrokerImpl();
 			TestEvent3 e3 = eventBroker.GetEvent<TestEvent3>();
 			TestEvent4 e4 = eventBroker.GetEvent<TestEvent4>();
 			Assert.AreNotSame(e3, e4);
@@ -64,7 +64,7 @@ namespace Quokka.Events
 		{
 			string e1Value = String.Empty;
 			int e2Value = 0;
-			IEventBroker eventBroker = new EventBroker();
+			IEventBroker eventBroker = new EventBrokerImpl();
 			TestEvent1 e1 = eventBroker.GetEvent<TestEvent1>();
 			TestEvent2 e2 = eventBroker.GetEvent<TestEvent2>();
 			e1.Subscribe(i => e1Value = i);
@@ -81,7 +81,7 @@ namespace Quokka.Events
 		public void Does_not_fire_weak_references()
 		{
 			_testActionCount = 0;
-			IEventBroker eventBroker = new EventBroker();
+			IEventBroker eventBroker = new EventBrokerImpl();
 			int count = 0;
 			TestEvent3 e3 = eventBroker.GetEvent<TestEvent3>();
 

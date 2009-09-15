@@ -76,11 +76,18 @@
     <Compile Include="Commands\ActionCommand.cs" />
     <Compile Include="Commands\IUICommand.cs" />
     <Compile Include="Commands\UICommandBase.cs" />
+    <Compile Include="Controls\MainMenuListView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\MainMenuListView.Designer.cs">
+      <DependentUpon>MainMenuListView.cs</DependentUpon>
+    </Compile>
     <Compile Include="CustomPanel.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="DisplaySettings.cs">
     </Compile>
+    <Compile Include="Interfaces\IMainMenu.cs" />
     <Compile Include="MessageBoxForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -190,6 +197,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Controls\MainMenuListView.resx">
+      <DependentUpon>MainMenuListView.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\Arrow.gif" />
     <EmbeddedResource Include="Resources\SelectedArrow.gif" />
     <EmbeddedResource Include="Resources\Shield.gif" />

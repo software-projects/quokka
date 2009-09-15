@@ -1,18 +1,26 @@
 using System;
 using System.Drawing;
-using ComponentFactory.Krypton.Toolkit;
+using System.Windows.Forms;
 using Dashboard.UI.Forms.Interfaces;
 
 namespace Dashboard.UI.Forms
 {
-	public partial class LoginForm : KryptonForm, ILoginForm
+	public partial class LoginForm : UserControl, ILoginForm
 	{
 		public LoginForm()
 		{
 			InitializeComponent();
 			loginPanel.Visible = false;
 			CenterPanel();
-			SizeChanged += delegate { CenterPanel(); };
+			Load += delegate { CenterPanel(); };
+			SizeChanged += delegate
+			               	{
+								if (ParentForm != null)
+								{
+									ParentForm.AcceptButton = loginButton;
+								}
+			               		CenterPanel();
+			               	};
 			loginButton.Click += delegate { RaiseLogin(); };
 		}
 
@@ -33,7 +41,7 @@ namespace Dashboard.UI.Forms
 		public string ErrorMessage
 		{
 			get { return errorProvider.GetError(usernameTextBox); }
-			set { errorProvider.SetError(usernameTextBox, value);}
+			set { errorProvider.SetError(usernameTextBox, value); }
 		}
 
 		private void RaiseLogin()

@@ -1,10 +1,10 @@
 using System;
-using ComponentFactory.Krypton.Toolkit;
+using System.Windows.Forms;
 using Dashboard.UI.Forms.Interfaces;
 
 namespace Dashboard.UI.Forms
 {
-	public partial class ShellForm : KryptonForm, IShellForm
+	public partial class ShellForm : UserControl, IShellForm
 	{
 		public ShellForm()
 		{

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using ComponentFactory.Krypton.Toolkit;
 using Dashboard.Services;
 using Dashboard.Services.Interfaces;
 using Dashboard.UI.Forms;

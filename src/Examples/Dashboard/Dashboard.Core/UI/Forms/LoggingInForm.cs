@@ -5,7 +5,7 @@ using Dashboard.UI.Forms.Interfaces;
 
 namespace Dashboard.UI.Forms
 {
-	public partial class LoggingInForm : KryptonForm, ILoggingInForm
+	public partial class LoggingInForm : UserControl, ILoggingInForm
 	{
 		public LoggingInForm()
 		{

@@ -188,7 +188,7 @@ namespace Dashboard.UI.Forms
 			this.ClientSize = new System.Drawing.Size(527, 367);
 			this.Controls.Add(this.kryptonPanel);
 			this.Name = "LoginForm";
-			this.Text = "LoginForm";
+			this.Text = "Login";
 			((System.ComponentModel.ISupportInitialize)(this.kryptonPanel)).EndInit();
 			this.kryptonPanel.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.loginPanel.Panel)).EndInit();

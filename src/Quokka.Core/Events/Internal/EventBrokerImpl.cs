@@ -14,11 +14,11 @@ namespace Quokka.Events.Internal
 	/// the calling program should set the <see cref="UIThreadContext"/> property to the
 	/// correct value as soon as possible.
 	/// </remarks>
-	public class EventBroker : IEventBroker
+	public class EventBrokerImpl : IEventBroker
 	{
 		private readonly Dictionary<Type, EventBase> _events = new Dictionary<Type, EventBase>();
 
-		public EventBroker()
+		public EventBrokerImpl()
 		{
 			// Assume that this object was created on the UI thread. If this is not the case,
 			// then the calling program should set this property from the UI thread ASAP.

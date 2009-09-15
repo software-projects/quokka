@@ -2,6 +2,8 @@
 using System.Windows.Forms;
 using Common.Logging;
 using Microsoft.Practices.ServiceLocation;
+using Quokka.Events;
+using Quokka.Events.Internal;
 using Quokka.ServiceLocation;
 
 namespace Quokka.WinForms.Startup
@@ -117,10 +119,19 @@ namespace Quokka.WinForms.Startup
 			ProgressMessage("Configuring service container");
 			ConfigureServices();
 			ProgressMessage("Service container configured");
+			ConfigureDefaultServices();
 			ProgressMessage("Creating application shell form");
 			Form form = CreateShell();
 			ProgressMessage("Application shell form created");
 			_shell = form;
+		}
+
+		private void ConfigureDefaultServices()
+		{
+			if (!Container.IsTypeRegistered<IEventBroker>())
+			{
+				Container.RegisterType<IEventBroker, EventBrokerImpl>(ServiceLifecycle.Singleton);
+			}
 		}
 
 		private void ProgressMessage(string message)

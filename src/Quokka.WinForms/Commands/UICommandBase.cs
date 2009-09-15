@@ -28,8 +28,9 @@ namespace Quokka.WinForms.Commands
 				if (_checked != value)
 				{
 					_checked = value;
+					_checkState = _checked ? CheckState.Checked : CheckState.Unchecked;
 					RaisePropertyChanged("Checked");
-					// TODO: need to update CheckedState
+					RaisePropertyChanged("CheckState");
 				}
 			}
 		}
@@ -42,8 +43,17 @@ namespace Quokka.WinForms.Commands
 				if (_checkState != value)
 				{
 					_checkState = value;
+					bool newChecked = (_checkState == CheckState.Checked || _checkState == CheckState.Indeterminate);
+					bool checkedChanged = newChecked != _checked;
+					if (checkedChanged)
+					{
+						_checked = newChecked;
+					}
 					RaisePropertyChanged("CheckState");
-					// TODO: need to update Checked
+					if (checkedChanged)
+					{
+						RaisePropertyChanged("Checked");
+					}
 				}
 			}
 		}
