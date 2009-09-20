@@ -59,5 +59,19 @@ namespace Quokka.Krypton.Properties {
                 resourceCulture = value;
             }
         }
+        
+        internal static System.Drawing.Bitmap IDCard {
+            get {
+                object obj = ResourceManager.GetObject("IDCard", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap Warning32 {
+            get {
+                object obj = ResourceManager.GetObject("Warning32", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }
