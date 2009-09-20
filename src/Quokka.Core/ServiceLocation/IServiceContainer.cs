@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using Microsoft.Practices.ServiceLocation;
 
 namespace Quokka.ServiceLocation

@@ -29,6 +29,26 @@ namespace Quokka.Castle
 		}
 
 		[Test]
+		public void Container_supports_per_request()
+		{
+			IServiceContainer container = ServiceContainerFactory.CreateContainer();
+			container.RegisterType<IInterface1, Class1>(ServiceLifecycle.PerRequest);
+			IInterface1 i1 = container.Locator.GetInstance<IInterface1>();
+			IInterface1 i2 = container.Locator.GetInstance<IInterface1>();
+			Assert.AreNotSame(i1, i2);
+		}
+
+		[Test]
+		public void Container_supports_singleton()
+		{
+			IServiceContainer container = ServiceContainerFactory.CreateContainer();
+			container.RegisterType<IInterface1, Class1>(ServiceLifecycle.Singleton);
+			IInterface1 i1 = container.Locator.GetInstance<IInterface1>();
+			IInterface1 i2 = container.Locator.GetInstance<IInterface1>();
+			Assert.AreSame(i1, i2);
+		}
+
+		[Test]
 		public void IsTypeRegistered()
 		{
 			IServiceContainer container = ServiceContainerFactory.CreateContainer();
