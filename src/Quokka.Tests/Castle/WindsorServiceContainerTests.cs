@@ -35,28 +35,18 @@ namespace Quokka.Castle
 			container.RegisterType<IInterface1, Class1>(ServiceLifecycle.Singleton);
 			Assert.IsTrue(container.IsTypeRegistered<IInterface1>());
 			Assert.IsFalse(container.IsTypeRegistered<IInterface2>());
-			Assert.IsFalse(container.IsTypeRegistered<IInterface1>("XXX"));
-			container.RegisterType<IInterface1, Class1>("XXX", ServiceLifecycle.PerRequest);
-			Assert.IsTrue(container.IsTypeRegistered<IInterface1>("XXX"));
+
+			IServiceContainer container2 = ServiceContainerFactory.CreateContainer();
+			container2.RegisterType<IInterface1, Class1>("XXX", ServiceLifecycle.PerRequest);
+			Assert.IsTrue(container.IsTypeRegistered<IInterface1>());
 
 			container.RegisterType<IInterface1, Class1>("someName", ServiceLifecycle.PerRequest);
 			container.RegisterType<IInterface2, Class2>("someOtherName", ServiceLifecycle.Singleton);
-
-			// This fails -- cannot register two different objects with the same name even if they have
-			// different interface types. This differes to unity container.
-			//container.RegisterType<IInterface2, Class2>("someName", ServiceLifecycle.Singleton);
-
-			Assert.IsTrue(container.IsTypeRegistered<IInterface1>("someName"));
-
 			Assert.IsTrue(container.IsTypeRegistered<IInterface2>());
 
-
-			// this fails
-			//Assert.IsFalse(container.IsTypeRegistered<IInterface1>("someOtherName"));
-			
-			Assert.IsTrue(container.IsTypeRegistered<IInterface2>("someOtherName"));
-
-
+		
+			Assert.IsTrue(container.IsTypeRegistered<IInterface2>());
+			Assert.IsNotNull(container.Locator.GetInstance<IInterface2>());
 		}
 
 		[Test]

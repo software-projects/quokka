@@ -46,9 +46,9 @@ namespace Quokka.Unity
 			_container.Dispose();
 		}
 
-		protected override bool DoIsTypeRegistered(Type type, string name)
+		protected override bool DoIsTypeRegistered(Type type)
 		{
-			return ContainerExtension.IsTypeRegistered(_container, type, name);
+			return ContainerExtension.IsTypeRegistered(_container, type, null);
 		}
 
 		private static LifetimeManager CreateLifetimeManager(ServiceLifecycle lifecycle)

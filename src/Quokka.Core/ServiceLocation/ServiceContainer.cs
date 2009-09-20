@@ -79,14 +79,14 @@ namespace Quokka.ServiceLocation
 			return this;
 		}
 
-		public bool IsTypeRegistered(Type type, string name)
+		public bool IsTypeRegistered(Type type)
 		{
 			if (type == null)
 			{
 				return false;
 			}
 
-			return DoIsTypeRegistered(type, name);
+			return DoIsTypeRegistered(type);
 		}
 
 		public ServiceContainer RegisterTypesInAssembly(Assembly assembly)
@@ -140,7 +140,7 @@ namespace Quokka.ServiceLocation
 		protected abstract void DoRegisterInstance(Type from, string name, object instance);
 		protected abstract IServiceContainer DoCreateChildContainer();
 		protected abstract void DoDispose();
-		protected abstract bool DoIsTypeRegistered(Type type, string name);
+		protected abstract bool DoIsTypeRegistered(Type type);
 
 		private void ThrowIfDisposed()
 		{

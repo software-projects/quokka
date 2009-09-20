@@ -85,15 +85,10 @@ namespace Quokka.ServiceLocation
 		/// creating an instance of the object.
 		/// </summary>
 		/// <param name="type">Type registered with the container</param>
-		/// <param name="name">Name registered, or <c>null</c> if the default mapping.</param>
-		/// <returns></returns>
+		/// <returns>Returns <see langword="true"/> if the type can be resolved, <see langword="false"/> otherwise.</returns>
 		/// <remarks>
-		/// This may change in a future version. Need to investigate the behaviour of different
-		/// containers more. Probably change this to just IsTypeRegistered(Type type), as that
-		/// is all the framework needs (if that), and that is something that all containers can
-		/// probably do as a minimum. 
+		/// This method is used by the framework to register default implementations for framework interfaces.
 		/// </remarks>
-		bool IsTypeRegistered(Type type, string name);
-
+		bool IsTypeRegistered(Type type);
 	}
 }

@@ -94,22 +94,10 @@ namespace Quokka.ServiceLocation
 
 		#region IsTypeRegistered overloads
 
-		public static bool IsTypeRegistered(this IServiceContainer container, Type type)
-		{
-			Verify.ArgumentNotNull(container, "container");
-			return container.IsTypeRegistered(type, null);
-		}
-
-		public static bool IsTypeRegistered<T>(this IServiceContainer container, string name)
-		{
-			Verify.ArgumentNotNull(container, "container");
-			return container.IsTypeRegistered(typeof (T), name);
-		}
-
 		public static bool IsTypeRegistered<T>(this IServiceContainer container)
 		{
 			Verify.ArgumentNotNull(container, "container");
-			return container.IsTypeRegistered(typeof (T), null);
+			return container.IsTypeRegistered(typeof (T));
 		}
 
 		#endregion

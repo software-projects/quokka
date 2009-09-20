@@ -43,9 +43,6 @@ namespace Quokka.Unity
 			container.RegisterType<IInterface1, Class1>(ServiceLifecycle.Singleton);
 			Assert.IsTrue(container.IsTypeRegistered<IInterface1>());
 			Assert.IsFalse(container.IsTypeRegistered<IInterface2>());
-			Assert.IsFalse(container.IsTypeRegistered<IInterface1>("XXX"));
-			container.RegisterType<IInterface1, Class1>("XXX", ServiceLifecycle.PerRequest);
-			Assert.IsTrue(container.IsTypeRegistered<IInterface1>("XXX"));
 		}
 
 		/// <summary>

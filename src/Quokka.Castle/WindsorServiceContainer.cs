@@ -76,27 +76,9 @@ namespace Quokka.Castle
 			_container.Dispose();
 		}
 
-		protected override bool DoIsTypeRegistered(Type type, string name)
+		protected override bool DoIsTypeRegistered(Type type)
 		{
-			try
-			{
-				// TODO: this is not very good, as it actually creates the type
-				// Need to find out how to do this in Castle Windsor properly.
-				if (name == null)
-				{
-					_container.Resolve(type);
-				}
-				else
-				{
-					_container.Resolve(name, type);
-				}
-				return true;
-			}
-			catch (ComponentNotFoundException)
-			{
-				return false;
-			}
+			return _container.Kernel.HasComponent(type);
 		}
-
 	}
 }
