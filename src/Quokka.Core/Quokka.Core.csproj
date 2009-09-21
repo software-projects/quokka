@@ -119,6 +119,8 @@
     <Compile Include="Uip\UipViewEventArgs.cs" />
     <Compile Include="UI\Regions\IRegion.cs" />
     <Compile Include="UI\Regions\IRegionAdapter.cs" />
+    <Compile Include="UI\Regions\IRegionCollection.cs" />
+    <Compile Include="UI\Regions\IRegionManager.cs" />
     <Compile Include="UI\Regions\IViewsCollection.cs" />
     <Compile Include="UI\Regions\RegionAdapterMappings.cs" />
     <Compile Include="UI\Regions\RegionExtensions.cs" />

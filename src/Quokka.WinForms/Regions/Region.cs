@@ -17,6 +17,12 @@ namespace Quokka.WinForms.Regions
 		private readonly ViewsCollection _activeViews = new ViewsCollection();
 		private readonly List<RegionItem> _regionItems = new List<RegionItem>();
 
+		/// <summary>
+		/// This event is raised when the underlying region control is closed. It signals to the region manager
+		/// that the region is no longer functional.
+		/// </summary>
+		public event EventHandler RegionClosed;
+
 		public IViewsCollection Views
 		{
 			get { return _views; }
@@ -27,12 +33,15 @@ namespace Quokka.WinForms.Regions
 			get { return _activeViews; }
 		}
 
+		public IRegionManager RegionManager { get; internal set; }
+
 		public string Name { get; set; }
 
 		public void Add(object view)
 		{
 			Verify.ArgumentNotNull(view, "view");
-			RegionItem item = _regionItems.FirstOrDefault(x => x.Item == view);
+			object localView = view; // resharper wants a local copy because it is used in a lambda expression
+			RegionItem item = _regionItems.FirstOrDefault(x => x.Item == localView);
 			if (item != null)
 			{
 				throw new InvalidOperationException("View has already been added to the region");
@@ -125,6 +134,14 @@ namespace Quokka.WinForms.Regions
 		protected void RegionItemClosed(RegionItem item)
 		{
 			Cleanup(item);
+		}
+
+		protected void RaiseRegionClosed()
+		{
+			if (RegionClosed != null)
+			{
+				RegionClosed(this, EventArgs.Empty);
+			}
 		}
 
 		/// <summary>

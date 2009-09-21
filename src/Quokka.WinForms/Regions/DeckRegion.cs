@@ -14,6 +14,7 @@ namespace Quokka.WinForms.Regions
 		public DeckRegion(Control control)
 		{
 			Verify.ArgumentNotNull(control, "control", out _control);
+			_control.Disposed += delegate { RaiseRegionClosed(); };
 		}
 
 		protected override Control CreateHostControl()

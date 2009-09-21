@@ -49,6 +49,18 @@ namespace Quokka.Castle
 		}
 
 		[Test]
+		public void Can_register_concrete_singleton_instance()
+		{
+			IServiceContainer container = ServiceContainerFactory.CreateContainer();
+			container.RegisterType<Class1>(ServiceLifecycle.Singleton);
+			var c1 = container.Locator.GetInstance<Class1>();
+			var c2 = container.Locator.GetInstance<Class1>();
+			Assert.IsNotNull(c1);
+			Assert.IsNotNull(c2);
+			Assert.AreSame(c1, c2);
+		}
+
+		[Test]
 		public void Can_create_transient_class_instance_without_registration()
 		{
 			IServiceContainer container = ServiceContainerFactory.CreateContainer();

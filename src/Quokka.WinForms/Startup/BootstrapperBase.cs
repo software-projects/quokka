@@ -6,6 +6,8 @@ using Quokka.Events;
 using Quokka.Events.Internal;
 using Quokka.ServiceLocation;
 using Quokka.Services;
+using Quokka.UI.Regions;
+using Quokka.WinForms.Regions;
 
 namespace Quokka.WinForms.Startup
 {
@@ -144,9 +146,13 @@ namespace Quokka.WinForms.Startup
 			{
 				Container.RegisterType<IDateTimeProvider, DateTimeProvider>(ServiceLifecycle.Singleton);
 			}
-			if (!Container.IsTypeRegistered<IDateTimeProvider>())
+			if (!Container.IsTypeRegistered<IGuidProvider>())
 			{
 				Container.RegisterType<IGuidProvider, GuidProvider>(ServiceLifecycle.Singleton);
+			}
+			if (!Container.IsTypeRegistered<IRegionManager>())
+			{
+				Container.RegisterType<IRegionManager, RegionManager>(ServiceLifecycle.Singleton);
 			}
 		}
 
