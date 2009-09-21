@@ -28,9 +28,14 @@ namespace Quokka.Castle
 
 		protected override void DoRegisterType(Type from, Type to, string name, ServiceLifecycle lifecycle)
 		{
+			if (to == null)
+			{
+				to = from;
+			}
+
 			if (String.IsNullOrEmpty(name))
 			{
-				name = from.FullName;
+				name = to.FullName;
 			}
 			_container.AddComponentLifeStyle(name, from, to, MapLifecycle(lifecycle));
 		}
