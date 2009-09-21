@@ -335,17 +335,47 @@ namespace Quokka.Uip
 			if (removeView)
 			{
 				_task.ViewManager.RemoveView(_view);
+				DisposeView();
+				DisposeController();
 			}
 
 			if (disposeContainer)
 			{
-				if (_container != null)
+				DisposeView();
+				DisposeController();
+				DisposeContainer();
+			}
+		}
+
+		private void DisposeContainer()
+		{
+			DisposeOf(_container);
+			_container = null;
+		}
+
+		private void DisposeView() {
+			DisposeOf(_view);
+			_view = null;
+		}
+
+		private void DisposeController() {
+			DisposeOf(_controller);
+			_controller = null;
+		}
+
+		private static void DisposeOf(object obj)
+		{
+			IDisposable disposable = obj as IDisposable;
+			if (disposable != null)
+			{
+				try
 				{
-					_container.Dispose();
+					disposable.Dispose();
 				}
-				_container = null;
-				_controller = null;
-				_view = null;
+				catch (ObjectDisposedException)
+				{
+					// should not be thrown, but lots of objects do throw this
+				}
 			}
 		}
 
