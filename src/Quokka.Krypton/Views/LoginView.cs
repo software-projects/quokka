@@ -1,11 +1,11 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-using Dashboard.UI.Forms.Interfaces;
+using Quokka.Krypton.ViewInterfaces;
 
 namespace Quokka.Krypton.Views
 {
-	public partial class LoginForm : UserControl, ILoginForm
+	public partial class LoginForm : UserControl, ILoginView
 	{
 		public LoginForm()
 		{

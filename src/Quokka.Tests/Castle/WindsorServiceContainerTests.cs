@@ -49,6 +49,17 @@ namespace Quokka.Castle
 		}
 
 		[Test]
+		public void Can_create_transient_class_instance_without_registration()
+		{
+			IServiceContainer container = ServiceContainerFactory.CreateContainer();
+			var c1 = container.Locator.GetInstance<Class1>();
+			var c2 = container.Locator.GetInstance<Class1>();
+			Assert.IsNotNull(c1);
+			Assert.IsNotNull(c2);
+			Assert.AreNotSame(c1, c2);
+		}
+
+		[Test]
 		public void IsTypeRegistered()
 		{
 			IServiceContainer container = ServiceContainerFactory.CreateContainer();

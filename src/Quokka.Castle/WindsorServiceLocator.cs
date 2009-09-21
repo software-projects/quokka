@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Castle.MicroKernel;
+using Castle.MicroKernel.Registration;
 using Castle.Windsor;
 using Common.Logging;
 using Microsoft.Practices.ServiceLocation;
@@ -38,6 +39,17 @@ namespace Quokka.Castle
 		{
 			try
 			{
+				// Currently, Windsor Container does not support the functionality of creating
+				// concrete components without registering them first. Quokka (and Prism, for that matter)
+				// rely on being able to do this.
+				//
+				// BTW I got the idea from the following post at stack overflow:
+				// http://stackoverflow.com/questions/447193/resolving-classes-without-registering-them-using-castle-windsor
+				if (serviceType.IsClass && !container.Kernel.HasComponent(serviceType))
+				{
+					container.Kernel.Register(Component.For(serviceType).LifeStyle.Transient);
+				}
+
 				if (key != null)
 					return container.Resolve(key, serviceType);
 				return container.Resolve(serviceType);

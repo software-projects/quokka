@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Dashboard.UI.Forms.Interfaces
+namespace Quokka.Krypton.ViewInterfaces
 {
-	public interface ILoginForm
+	public interface ILoginView
 	{
 		event EventHandler Login;
 		string Username { get; set; }

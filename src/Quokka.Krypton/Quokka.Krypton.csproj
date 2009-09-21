@@ -109,7 +109,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="ViewInterfaces\ILoginForm.cs" />
+    <Compile Include="ViewInterfaces\ILoginView.cs" />
     <Compile Include="Views\LoginView.cs">
       <SubType>UserControl</SubType>
     </Compile>
