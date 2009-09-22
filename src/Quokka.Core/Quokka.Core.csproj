@@ -117,6 +117,7 @@
     <Compile Include="Uip\UipTask.cs" />
     <Compile Include="Uip\UipUtil.cs" />
     <Compile Include="Uip\UipViewEventArgs.cs" />
+    <Compile Include="UI\Binding\PropertyComparer.cs" />
     <Compile Include="UI\Regions\IRegion.cs" />
     <Compile Include="UI\Regions\IRegionAdapter.cs" />
     <Compile Include="UI\Regions\IRegionCollection.cs" />
@@ -125,6 +126,7 @@
     <Compile Include="UI\Regions\RegionAdapterMappings.cs" />
     <Compile Include="UI\Regions\RegionExtensions.cs" />
     <Compile Include="UI\Regions\ViewsCollection.cs" />
+    <Compile Include="UI\Binding\SortableBindingList.cs" />
     <Compile Include="Util\RegistryUtil.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(FormalBuild)' == 'true' ">
