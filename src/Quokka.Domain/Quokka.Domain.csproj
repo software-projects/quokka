@@ -68,8 +68,6 @@
     <Compile Include="PresentationModel\PresentationModelException.cs" />
     <Compile Include="PresentationModel\PresentationObject.cs" />
     <Compile Include="PresentationModel\PresentationObject.Generic.cs" />
-    <Compile Include="PresentationModel\Internal\PropertyComparer.cs" />
-    <Compile Include="PresentationModel\Internal\SortableBindingList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Transactions\TransactionException.cs" />
   </ItemGroup>

@@ -32,6 +32,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using Quokka.DomainModel;
 using Quokka.PresentationModel.Internal;
+using Quokka.UI.Binding;
 
 namespace Quokka.PresentationModel
 {
