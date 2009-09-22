@@ -48,6 +48,7 @@ namespace Quokka.WinForms.Regions
 				_task.ServiceContainer.RegisterInstance<IRegion>(_region);
 				_task.ServiceContainer.RegisterInstance<IRegionInfo>(this);
 				_task.TaskComplete += Task_TaskComplete;
+				UpdateRegionInfo(_task);
 			}
 			else if (_clientControl != null)
 			{
@@ -58,17 +59,7 @@ namespace Quokka.WinForms.Regions
 					form.FormBorderStyle = FormBorderStyle.None;
 				}
 
-				// Attempt to inject the IRegionInfo object into the control, either by a property
-				// named 'RegionInfo', or by a method called 'SetRegionInfo'.
-				IRegionInfoAware regionInfoAware = ProxyFactory.CreateDuckProxy<IRegionInfoAware>(_clientControl);
-				if (regionInfoAware.IsRegionInfoSupported)
-				{
-					regionInfoAware.RegionInfo = this;
-				}
-				if (regionInfoAware.IsSetRegionInfoSupported)
-				{
-					regionInfoAware.SetRegionInfo(this);
-				}
+				UpdateRegionInfo(_clientControl);
 
 				_hostControl.Controls.Add(_clientControl);
 				_clientControl.Dock = DockStyle.Fill;
@@ -80,6 +71,21 @@ namespace Quokka.WinForms.Regions
 											   item.GetType().FullName);
 				Log.Error(message);
 				throw new ArgumentException(message);
+			}
+		}
+
+		private void UpdateRegionInfo(object obj)
+		{
+			// Attempt to inject the IRegionInfo object into a control or a task, either by a property
+			// named 'RegionInfo', or by a method called 'SetRegionInfo'.
+			IRegionInfoAware regionInfoAware = ProxyFactory.CreateDuckProxy<IRegionInfoAware>(obj);
+			if (regionInfoAware.IsRegionInfoSupported)
+			{
+				regionInfoAware.RegionInfo = this;
+			}
+			if (regionInfoAware.IsSetRegionInfoSupported)
+			{
+				regionInfoAware.SetRegionInfo(this);
 			}
 		}
 
