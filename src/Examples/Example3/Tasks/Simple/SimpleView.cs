@@ -1,5 +1,4 @@
-﻿using System.Windows.Forms;
-using ComponentFactory.Krypton.Toolkit;
+﻿using ComponentFactory.Krypton.Toolkit;
 using Quokka.Diagnostics;
 
 namespace Example3.Tasks.Simple
@@ -15,6 +14,7 @@ namespace Example3.Tasks.Simple
 		{
 			Verify.ArgumentNotNull(presenter, "presenter");
 			button.Click += delegate { presenter.CreateNewTask(); };
+			modalButton.Click += delegate { presenter.CreateNewModalTask(); };
 		}
 	}
 }

@@ -70,6 +70,11 @@ namespace Quokka.WinForms.Regions
 			_regionItems.Add(item);
 			_views.Add(item.Item);
 
+			if (item.Task != null)
+			{
+				item.Task.Start(item.ViewManager);
+			}
+
 			try
 			{
 				OnAdd(item);
@@ -79,11 +84,6 @@ namespace Quokka.WinForms.Regions
 				_log.WarnFormat("Failed to add view to region", ex);
 				Cleanup(item);
 				throw;
-			}
-
-			if (item.Task != null)
-			{
-				item.Task.Start(item.ViewManager);
 			}
 		}
 

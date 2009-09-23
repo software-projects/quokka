@@ -104,6 +104,8 @@
     </Compile>
     <Compile Include="Regions\DeckRegion.cs" />
     <Compile Include="Regions\IRegionInfoAware.cs" />
+    <Compile Include="Regions\ModalRegion.cs" />
+    <Compile Include="Regions\ModalRegion.Generic.cs" />
     <Compile Include="Regions\RegionItem.cs" />
     <Compile Include="Regions\RegionAdapterBase.cs" />
     <Compile Include="Regions\RegionManager.cs" />
