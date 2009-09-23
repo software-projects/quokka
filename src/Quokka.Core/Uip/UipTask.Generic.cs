@@ -1,3 +1,4 @@
+using Quokka.Diagnostics;
 using Quokka.ServiceLocation;
 
 namespace Quokka.Uip
@@ -12,7 +13,13 @@ namespace Quokka.Uip
 		protected UipTask()
 		{
 			_serviceContainer.RegisterType<TState>(ServiceLifecycle.Singleton);
-			_state = (TState) _serviceContainer.Locator.GetInstance(typeof (TState));
+			_state = _serviceContainer.Locator.GetInstance<TState>();
+		}
+
+		protected UipTask(TState state)
+		{
+			Verify.ArgumentNotNull(state, "state", out _state);
+			_serviceContainer.RegisterInstance(_state);
 		}
 
 		#endregion

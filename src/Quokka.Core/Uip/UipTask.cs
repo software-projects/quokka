@@ -45,7 +45,10 @@ namespace Quokka.Uip
 
 			_serviceContainer = CreateServiceContainer();
 			_serviceContainer.RegisterInstance<IUipNavigator>(_navigator);
+
+			// Registers the task instance under both UipTask, and the actual type of the task
 			_serviceContainer.RegisterInstance(this);
+			_serviceContainer.RegisterInstance(GetType(), this);
 		}
 
 		#endregion
