@@ -82,6 +82,9 @@
     <Compile Include="KryptonPropertyGrid.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="KryptonUserControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="ModalForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -92,6 +95,9 @@
     <EmbeddedResource Include="Form1.resx">
       <SubType>Designer</SubType>
       <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="KryptonUserControl.resx">
+      <DependentUpon>KryptonUserControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ModalForm.resx">
       <DependentUpon>ModalForm.cs</DependentUpon>

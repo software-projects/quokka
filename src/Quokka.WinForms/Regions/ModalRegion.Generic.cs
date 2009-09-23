@@ -1,4 +1,6 @@
-﻿using System.Drawing;
+﻿using System;
+using System.ComponentModel;
+using System.Drawing;
 using System.Windows.Forms;
 using Microsoft.Practices.ServiceLocation;
 
@@ -13,7 +15,7 @@ namespace Quokka.WinForms.Regions
 		where TForm : Form
 		where TPanel : Control
 	{
-		public IWin32Window ParentWindow { get; set; }
+		public Control ParentWindow { get; set; }
 
 		protected override Control CreateHostControl()
 		{
@@ -32,15 +34,62 @@ namespace Quokka.WinForms.Regions
 
 			Form form = CreateForm();
 			form.Text = text;
-			form.ClientSize = item.HostControl.Size;
-			form.MinimumSize = item.HostControl.MinimumSize; // TODO: need to account for form borders here
 			form.Controls.Add(item.HostControl);
 			item.HostControl.Dock = DockStyle.Fill;
 			item.HostControl.Visible = true;
-			form.ShowDialog(ParentWindow);
 			form.FormClosed += FormClosed;
+			form.Tag = item;
 			item.Tag = form;
+			item.PropertyChanged += item_PropertyChanged;
 		}
+
+		private void item_PropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			RegionItem item = sender as RegionItem;
+			if (item == null)
+			{
+				// should not happen
+				return;
+			}
+			if (e.PropertyName == "IsActive" && item.IsActive)
+			{
+				Form form = item.Tag as Form;
+				if (form == null)
+				{
+					// should not happen
+					return;
+				}
+
+				Activate(form, item);
+			}
+		}
+
+		private void Activate(Form form, RegionItem item)
+		{
+			form.ClientSize = item.HostControl.Size;
+			if (item.HostControl.MinimumSize != default(Size) && item.HostControl.MinimumSize == item.HostControl.MaximumSize)
+			{
+				// the host control communicates its desire to stay the same size 
+				form.FormBorderStyle = FormBorderStyle.FixedDialog;
+			}
+			else
+			{
+				// TODO: need to account for form borders here
+				form.MinimumSize = item.HostControl.MinimumSize;
+			}
+
+			Action action = () => form.ShowDialog(ParentWindow);
+			if (ParentWindow != null && ParentWindow.IsHandleCreated)
+			{
+				ParentWindow.BeginInvoke(action);
+			}
+			else
+			{
+				// this is not ideal, as it blocks the caller
+				action();
+			}
+		}
+
 
 		protected virtual TForm CreateForm()
 		{
@@ -66,18 +115,37 @@ namespace Quokka.WinForms.Regions
 				// should not happen
 				return;
 			}
+			panel.ControlAdded -= HostControl_ControlAdded;
 
 			if (e.Control.MinimumSize != default(Size))
 			{
 				panel.Size = e.Control.MinimumSize;
 				panel.MinimumSize = e.Control.MinimumSize;
-				panel.ControlAdded -= HostControl_ControlAdded;
+			}
+			if (e.Control.MaximumSize != default(Size))
+			{
+				panel.MaximumSize = e.Control.MaximumSize;
 			}
 		}
 
 		private void FormClosed(object sender, FormClosedEventArgs e)
 		{
-			// TODO: what do we do here
+			Form form = sender as Form;
+			if (form == null)
+			{
+				// should not happen
+				return;
+			}
+
+			RegionItem item = form.Tag as RegionItem;
+			if (item == null)
+			{
+				// should not happen
+				return;
+			}
+
+			item.IsActive = false;
+			Remove(item.Item);
 		}
 
 		protected override void OnRemove(RegionItem item)
