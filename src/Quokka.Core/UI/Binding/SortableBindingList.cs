@@ -40,7 +40,7 @@ namespace Quokka.UI.Binding
 	/// </summary>
 	/// <typeparam name="T">List item type</typeparam>
 	/// <remarks>
-	/// It is strange that the <see cref="BindingList{T}"/> type does not support binding. This code is
+	/// It is strange that the <see cref="BindingList{T}"/> type does not support sorting. This code is
 	/// based on code written by Michael Weinhardt http://msdn2.microsoft.com/en-us/library/ms993124.aspx.
 	/// </remarks>
 	public class SortableBindingList<T> : BindingList<T>

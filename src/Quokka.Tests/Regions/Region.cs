@@ -159,11 +159,6 @@ namespace Quokka.WinForms.Regions
 			_views.Remove(item.Item);
 			_activeViews.Remove(item.Item);
 			item.PropertyChanged -= Item_PropertyChanged;
-
-			if (item.Task != null && item.Task.IsRunning)
-			{
-				item.Task.EndTask();
-			}
 		}
 
 		private RegionItem GetRegionItem(object view, bool throwIfNotFound)

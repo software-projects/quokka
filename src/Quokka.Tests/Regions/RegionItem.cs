@@ -162,6 +162,8 @@ namespace Quokka.WinForms.Regions
 			}
 		}
 
+
+
 		protected void OnPropertyChanged(PropertyChangedEventArgs e)
 		{
 			if (PropertyChanged != null)

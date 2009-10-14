@@ -78,6 +78,7 @@
     <Compile Include="Commands\UICommandBase.cs" />
     <Compile Include="Components\DisposableCollection.cs">
     </Compile>
+    <Compile Include="Components\DisposableCollection.Generic.cs" />
     <Compile Include="Controls\MainMenuListView.cs">
       <SubType>UserControl</SubType>
     </Compile>
