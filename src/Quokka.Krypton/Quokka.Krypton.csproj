@@ -32,6 +32,8 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <StartupObject>
     </StartupObject>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>Quokka.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -179,6 +181,7 @@
     <None Include="Resources\IDCard.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Quokka.snk" />
     <None Include="Resources\Warning32.png" />
   </ItemGroup>
   <ItemGroup>
