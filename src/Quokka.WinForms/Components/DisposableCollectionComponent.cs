@@ -13,6 +13,27 @@ namespace Quokka.WinForms.Components
 	{
 		private readonly DisposableCollection _inner = new DisposableCollection();
 
+		public DisposableCollectionComponent() : this(null)
+		{
+		}
+
+		public DisposableCollectionComponent(IContainer container)
+		{
+			if (container != null)
+			{
+				container.Add(this);
+			}
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			base.Dispose(disposing);
+			if (disposing)
+			{
+				_inner.Dispose();
+			}
+		}
+
 		public IEnumerator<IDisposable> GetEnumerator()
 		{
 			return _inner.GetEnumerator();
