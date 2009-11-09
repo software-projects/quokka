@@ -103,6 +103,35 @@ namespace Quokka.Events
 			Assert.AreEqual(0, _testActionCount);
 		}
 
+		[Test]
+		public void Does_not_fire_if_filter_returns_false()
+		{
+			IEventBroker eventBroker = new EventBrokerImpl();
+
+			int result1 = 0;
+			int result2 = 0;
+
+			IEventSubscription<int> subscription1 = eventBroker.GetEvent<TestEvent2>()
+				.Subscribe((i) => result1 = i)
+				.SetFilter((i) => i % 2 != 0); // only works for odd numbers
+
+			IEventSubscription<int> subscription2 = eventBroker.GetEvent<TestEvent2>()
+				.Subscribe((i) => result2 = i)
+				.SetFilter((i) => i%2 == 0); // only works for even numbers
+
+			// raise an event for even number
+			eventBroker.GetEvent<TestEvent2>().Publish(2);
+			Assert.AreEqual(0, result1, "subscription1 should not receive an event with an even number as a payload");
+			Assert.AreEqual(2, result2, "subscription2 should receive an event with an even number as a payload");
+
+			// raise an event that will pass the filter
+			result1 = 0;
+			result2 = 0;
+			eventBroker.GetEvent<TestEvent2>().Publish(333);
+			Assert.AreEqual(333, result1, "subscription1 should receive an event with an odd number as a payload");
+			Assert.AreEqual(0, result2, "subscription2 should not receive an event with an odd number as a payload");
+		}
+
 		private class TestEvent1 : Event<string>
 		{
 		}

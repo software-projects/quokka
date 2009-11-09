@@ -18,7 +18,7 @@ namespace Quokka.Events
 		/// </summary>
 		/// <param name="action">Action to take when the event is published.</param>
 		/// <returns>Returns an <see cref="IEventSubscription"/> object that represents the subscription.</returns>
-		public IEventSubscription Subscribe(Action<TPayload> action)
+		public IEventSubscription<TPayload> Subscribe(Action<TPayload> action)
 		{
 			return Subscribe(action, ThreadOption.PublisherThread);
 		}
@@ -29,7 +29,7 @@ namespace Quokka.Events
 		/// <param name="action">Action to take when the event is published.</param>
 		/// <param name="threadOption">Specifies which thread the action will be performed on.</param>
 		/// <returns>Returns an <see cref="IEventSubscription"/> object that represents the subscription.</returns>
-		public IEventSubscription Subscribe(Action<TPayload> action, ThreadOption threadOption)
+		public IEventSubscription<TPayload> Subscribe(Action<TPayload> action, ThreadOption threadOption)
 		{
 			return Subscribe(action, threadOption, ReferenceOption.WeakReference);
 		}
@@ -42,7 +42,7 @@ namespace Quokka.Events
 		/// <param name="referenceOption">Specifies whether the event subscription will hold a strong or 
 		/// weak reference on the action delegate.</param>
 		/// <returns>Returns an <see cref="IEventSubscription"/> object that represents the subscription.</returns>
-		public IEventSubscription Subscribe(Action<TPayload> action, ThreadOption threadOption,
+		public IEventSubscription<TPayload> Subscribe(Action<TPayload> action, ThreadOption threadOption,
 		                                    ReferenceOption referenceOption)
 		{
 			Verify.ArgumentNotNull(action, "action");

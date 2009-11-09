@@ -68,8 +68,10 @@
     <Compile Include="Events\Event.cs" />
     <Compile Include="Events\Event.Generic.cs" />
     <Compile Include="Events\EventBase.cs" />
+    <Compile Include="Events\EventSubscriptionExtensions.cs" />
     <Compile Include="Events\IEventBroker.cs" />
     <Compile Include="Events\IEventSubscription.cs" />
+    <Compile Include="Events\IEventSubscription.Generic.cs" />
     <Compile Include="Events\Internal\BackgroundThreadSubscription.cs" />
     <Compile Include="Events\Internal\BackgroundThreadSubscription.Generic.cs" />
     <Compile Include="Events\Internal\DelegateReference.cs" />
@@ -134,6 +136,11 @@
     <Compile Include="..\CommonAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Collections\DisposableCollection.cs">
+    </Compile>
+    <Compile Include="Collections\DisposableCollection.Generic.cs" />
+    <Compile Include="Collections\IDisposableCollection.cs" />
+    <Compile Include="Collections\IDisposableCollection.Generic.cs" />
     <None Include="Quokka.snk" />
   </ItemGroup>
   <PropertyGroup>

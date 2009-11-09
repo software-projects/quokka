@@ -7,8 +7,10 @@ namespace Quokka.Events.Internal
 	/// Implementation class for <see cref="IEventSubscription"/>
 	/// </summary>
 	/// <typeparam name="TPayload">Event payload type.</typeparam>
-	public abstract class EventSubscription<TPayload> : EventSubscriptionBase
+	public abstract class EventSubscription<TPayload> : EventSubscriptionBase, IEventSubscription<TPayload>
 	{
+		private DelegateReference _filterReference;
+
 		protected EventSubscription(EventBase parentEvent,
 		                            Action<TPayload> action,
 		                            ThreadOption threadOption,
@@ -25,6 +27,32 @@ namespace Quokka.Events.Internal
 		public Action<TPayload> Action
 		{
 			get { return (Action<TPayload>) DelegateReference.Delegate; }
+		}
+
+		public Func<TPayload, bool> Filter
+		{
+			get
+			{
+				Func<TPayload, bool> result = null;
+				if (_filterReference != null)
+				{
+					result = (Func<TPayload, bool>) _filterReference.Delegate;
+				}
+
+				if (result == null)
+				{
+					// no filter or it has been garbage collected
+					result = (payload) => true;
+				}
+
+				return result;
+			}
+		}
+
+		public IEventSubscription<TPayload> SetFilter(Func<TPayload, bool> filter)
+		{
+			_filterReference = filter == null ? null : new DelegateReference(filter, ReferenceOption);
+			return this;
 		}
 
 		/// <summary>
@@ -55,7 +83,12 @@ namespace Quokka.Events.Internal
 				return false;
 			}
 
-			InvokeAction(action, payload);
+			if (Filter(payload))
+			{
+				InvokeAction(action, payload);
+			}
+
+			// Returns true even if the filter did not match.
 			return true;
 		}
 

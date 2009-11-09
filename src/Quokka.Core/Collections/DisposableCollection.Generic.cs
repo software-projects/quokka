@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Common.Logging;
 
-namespace Quokka.WinForms.Components
+namespace Quokka.Collections
 {
 	/// <summary>
 	/// A collection of <see cref="IDisposable"/> objects.
@@ -20,21 +20,10 @@ namespace Quokka.WinForms.Components
 	/// </code>
 	/// </example>
 	/// </remarks>
-	public class DisposableCollection<T> : Collection<T>, IComponent
+	public class DisposableCollection<T> : Collection<T>, IDisposableCollection<T>
 		where T : IDisposable
 	{
 		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
-
-		public event EventHandler Disposed;
-
-		public DisposableCollection()
-		{
-		}
-
-		public DisposableCollection(IContainer container)
-		{
-			container.Add(this);
-		}
 
 		public void Dispose()
 		{
@@ -49,16 +38,14 @@ namespace Quokka.WinForms.Components
 					catch (ObjectDisposedException)
 					{
 						// Many objects will throw an ObjectDisposedException if they are already
-						// disposed. This is correct. An object should only throw this if another
+						// disposed. This is not correct. An object should only throw this if another
 						// method is called after disposed. Disposed can be called as many times as
 						// you like according to the CLR standard.
 						Log.WarnFormat("Object of type {0} threw ObjectDisposedException during Dispose",
-									   item.GetType().FullName);
+						               item.GetType().FullName);
 					}
 				}
 			}
 		}
-
-		public ISite Site { get; set; }
 	}
 }
