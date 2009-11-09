@@ -45,7 +45,7 @@ namespace Quokka.WinForms.Components
 
 		public bool Remove(IDisposable item)
 		{
-			_inner.Remove(item);
+			return _inner.Remove(item);
 		}
 
 		public int Count
