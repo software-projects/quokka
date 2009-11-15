@@ -445,6 +445,11 @@ namespace Quokka.Uip
 							}
 						}
 					}
+					catch (Exception ex)
+					{
+						Log.Error("Unexpected exception in transition: " + ex.Message, ex);
+						throw;
+					}
 					finally
 					{
 						ViewManager.EndTransition();
