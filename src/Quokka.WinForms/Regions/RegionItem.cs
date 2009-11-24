@@ -21,7 +21,7 @@ namespace Quokka.WinForms.Regions
 	/// </remarks>
 	public class RegionItem : IRegionInfo, INotifyPropertyChanged
 	{
-		private static readonly ILog Log;
+		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
 		private readonly object _item;
 		private readonly Control _clientControl;
 		private readonly Control _hostControl;
