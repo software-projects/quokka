@@ -69,7 +69,7 @@ namespace Quokka.Uip
 			get { return _serviceContainer; }
 		}
 
-		public IServiceLocator Servicelocator
+		public IServiceLocator ServiceLocator
 		{
 			get { return _serviceContainer.Locator; }
 		}
@@ -308,7 +308,7 @@ namespace Quokka.Uip
 
 			try
 			{
-				serviceLocator = ServiceLocator.Current;
+				serviceLocator = Microsoft.Practices.ServiceLocation.ServiceLocator.Current;
 			}
 			catch (NullReferenceException)
 			{
