@@ -43,6 +43,7 @@ namespace Quokka.Krypton
 		{
 			KryptonPage tabPage = (KryptonPage) item.HostControl;
 			tabPage.Text = item.Text;
+			tabPage.TextTitle = item.Text;
 			tabPage.ImageSmall = item.Image;
 			tabPage.Tag = item;
 			item.PropertyChanged += Item_PropertyChanged;
@@ -57,6 +58,7 @@ namespace Quokka.Krypton
 			if (MatchPropertyName("Text", e))
 			{
 				tabPage.Text = item.Text;
+				tabPage.TextTitle = item.Text;
 			}
 			if (MatchPropertyName("Image", e))
 			{

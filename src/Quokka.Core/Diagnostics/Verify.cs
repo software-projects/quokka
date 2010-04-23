@@ -42,12 +42,13 @@ namespace Quokka.Diagnostics
 	{
 		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
 
-		public static void ArgumentNotNull(object param, string paramName)
+		public static T ArgumentNotNull<T>(T param, string paramName) where T : class
 		{
 			if (param == null)
 			{
 				throw new ArgumentNullException(paramName);
 			}
+			return param;
 		}
 
 		public static void ArgumentNotNull<T>(T param, string paramName, out T copy)
