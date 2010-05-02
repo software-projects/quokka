@@ -12,7 +12,7 @@ namespace Quokka.Data.Internal
 	/// <remarks>
 	/// The <see cref="DataRecordConverterTypeBuilder"/> creates dynamic types that derive from this class.
 	/// </remarks>
-	internal abstract class DataRecordConverter
+	public abstract class DataRecordConverter
 	{
 		private static readonly Dictionary<DataRecordConverterSpec, Type> ConverterTypes = new Dictionary<DataRecordConverterSpec, Type>();
 
