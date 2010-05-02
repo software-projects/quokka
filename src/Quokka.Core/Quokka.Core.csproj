@@ -60,7 +60,7 @@
     <Compile Include="Diagnostics\NullLogger.cs" />
     <Compile Include="Diagnostics\Verify.cs" />
     <Compile Include="DynamicCodeGeneration\AbstractProxyBuilder.cs" />
-    <Compile Include="DynamicCodeGeneration\DynamicAssembly.cs" />
+    <Compile Include="DynamicCodeGeneration\OldDynamicAssembly.cs" />
     <Compile Include="DynamicCodeGeneration\MemberMapping.cs" />
     <Compile Include="DynamicCodeGeneration\NavigatorProxyBuilder.cs" />
     <Compile Include="DynamicCodeGeneration\ProxyFactory.cs" />
@@ -141,6 +141,22 @@
     <Compile Include="Collections\DisposableCollection.Generic.cs" />
     <Compile Include="Collections\IDisposableCollection.cs" />
     <Compile Include="Collections\IDisposableCollection.Generic.cs" />
+    <Compile Include="Data\IgnoreParameterAttribute.cs" />
+    <Compile Include="Data\Internal\DataConversionKey.cs" />
+    <Compile Include="Data\Internal\DataRecordConverter.cs" />
+    <Compile Include="Data\Internal\DataRecordConverterMethod.cs" />
+    <Compile Include="Data\Internal\DataRecordConverterTypeBuilder.cs" />
+    <Compile Include="Data\Internal\DataRecordFieldInfo.cs" />
+    <Compile Include="Data\Internal\DataParameterBuilder.cs" />
+    <Compile Include="Data\Internal\DataParameterTypeMapping.cs" />
+    <Compile Include="Data\Internal\DataParameterInfo.cs" />
+    <Compile Include="Data\Internal\NameDictionary.cs" />
+    <Compile Include="Data\Internal\DataRecordConverterSpec.cs" />
+    <Compile Include="Data\Internal\SqlQueryReader.cs" />
+    <Compile Include="Data\ISqlQueryReader.cs" />
+    <Compile Include="Data\ParameterAttribute.cs" />
+    <Compile Include="Data\SqlQuery.cs" />
+    <Compile Include="DynamicCodeGeneration\DynamicAssembly2.cs" />
     <None Include="Quokka.snk" />
   </ItemGroup>
   <PropertyGroup>
