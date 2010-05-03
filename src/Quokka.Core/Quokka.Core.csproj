@@ -152,6 +152,7 @@
     <Compile Include="Data\Internal\DataParameterInfo.cs" />
     <Compile Include="Data\Internal\NameDictionary.cs" />
     <Compile Include="Data\Internal\DataRecordConverterSpec.cs" />
+    <Compile Include="Data\Internal\SqlCommandText.cs" />
     <Compile Include="Data\Internal\SqlQueryReader.cs" />
     <Compile Include="Data\ISqlQueryReader.cs" />
     <Compile Include="Data\ParameterAttribute.cs" />
