@@ -122,10 +122,18 @@ namespace Quokka.WinForms.Startup
 		{
 			if (!_splashScreen.IsDisposed && !_fadingAway)
 			{
-				// Make it start going away.
-				_splashScreen.Activate();
-				_opacityIncrement = -_opacityDecrement/2;
-				_fadingAway = true;
+				if (SystemInformation.TerminalServerSession)
+				{
+					// If in a terminal server session, just close the screen
+					CloseScreen();
+				}
+				else
+				{
+					// Make it start going away.
+					_splashScreen.Activate();
+					_opacityIncrement = -_opacityDecrement / 2;
+					_fadingAway = true;
+				}
 			}
 		}
 
@@ -187,6 +195,12 @@ namespace Quokka.WinForms.Startup
 			}
 		}
 
+		private void CloseScreen()
+		{
+			_timer.Stop();
+			_splashScreen.Close();
+		}
+
 		#endregion
 
 		#region Event handlers
@@ -201,15 +215,18 @@ namespace Quokka.WinForms.Startup
 					_splashScreen.Opacity += _opacityIncrement;
 				}
 			}
+			else if (SystemInformation.TerminalServerSession)
+			{
+				// No fancy opacity tricks inside a terminal server session
+				CloseScreen();
+			}
+			else if (_splashScreen.Opacity > 0)
+			{
+				_splashScreen.Opacity += _opacityIncrement;
+			}
 			else
 			{
-				if (_splashScreen.Opacity > 0)
-					_splashScreen.Opacity += _opacityIncrement;
-				else
-				{
-					_timer.Stop();
-					_splashScreen.Close();
-				}
+				CloseScreen();
 			}
 
 			if (_showingDelay > 0)
