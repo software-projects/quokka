@@ -18,6 +18,7 @@ namespace Quokka.Data.Internal
 
 		public static readonly MethodInfo GetBoolean;
 		public static readonly MethodInfo GetByte;
+		public static readonly MethodInfo GetBytes;
 		public static readonly MethodInfo GetChar;
 		public static readonly MethodInfo GetDateTime;
 		public static readonly MethodInfo GetDecimal;
@@ -93,6 +94,11 @@ namespace Quokka.Data.Internal
 				case "GetByte":
 					GetByte = method;
 					AddConversion(typeof(byte), method);
+					break;
+
+				case "GetBytes":
+					GetBytes = method;
+					AddConversion(typeof(byte[]), typeof(byte[]), method);
 					break;
 
 				case "GetNullableByte":
@@ -253,7 +259,9 @@ namespace Quokka.Data.Internal
 			}
 
 			if (method == null)
+			{
 				return null;
+			}
 
 			MethodInfo genericMethod = method.MakeGenericMethod(propertyType);
 			AddConversion(dataRecordType, propertyType, genericMethod);
@@ -281,7 +289,9 @@ namespace Quokka.Data.Internal
 			}
 
 			if (method == null)
+			{
 				return null;
+			}
 
 			MethodInfo genericMethod = method.MakeGenericMethod(propertyUnderlyingType);
 			AddConversion(dataRecordType, propertyType, genericMethod);

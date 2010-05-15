@@ -270,6 +270,15 @@ namespace Quokka.Data.Internal
 			return _dataReader.GetString(index);
 		}
 
+		protected byte[] GetBytes(int index)
+		{
+			if (_dataReader.IsDBNull(index))
+			{
+				return null;
+			}
+			return (byte[])_dataReader.GetValue(index);
+		}
+
 		protected T GetEnumFromString<T>(int index)
 		{
 			if (_dataReader.IsDBNull(index))
