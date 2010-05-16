@@ -71,15 +71,18 @@ namespace Quokka.Data.Internal
 
 			foreach (PropertyInfo property in properties)
 			{
-				DataRecordFieldInfo field;
-				if (dataRecordMap.TryGetValue(property.Name, out field))
+				if (property.CanWrite)
 				{
-					_mapPropertyToField.Add(property, field);
-				}
-				else
-				{
-					_errors.Add(string.Format("Query result does not have a column named '{0}'",
-					                          property.Name));
+					DataRecordFieldInfo field;
+					if (dataRecordMap.TryGetValue(property.Name, out field))
+					{
+						_mapPropertyToField.Add(property, field);
+					}
+					else
+					{
+						_errors.Add(string.Format("Query result does not have a column named '{0}'",
+						                          property.Name));
+					}
 				}
 			}
 		}
