@@ -114,6 +114,7 @@
     <Compile Include="Regions\SingleActiveRegion.cs" />
     <Compile Include="Startup\BootstrapperBase.cs" />
     <Compile Include="Startup\StartupException.cs" />
+    <Compile Include="ViewDeck.cs" />
     <Compile Include="ViewManager.cs">
     </Compile>
     <Compile Include="Regions\IRegionInfo.cs" />

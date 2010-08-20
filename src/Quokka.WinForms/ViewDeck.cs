@@ -1,33 +1,7 @@
-﻿#region Copyright notice
-//
-// Authors: 
-//  John Jeffery <john@jeffery.id.au>
-//
-// Copyright (C) 2006 John Jeffery. All rights reserved.
-//
-// Permission is hereby granted, free of charge, to any person obtaining
-// a copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so, subject to
-// the following conditions:
-// 
-// The above copyright notice and this permission notice shall be
-// included in all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-//
-#endregion
-
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 using Quokka.Diagnostics;
 using Quokka.UI.Tasks;
@@ -39,10 +13,9 @@ namespace Quokka.WinForms
 	/// Handles views inside a Windows Forms <see cref="Control"/>
 	/// </summary>
 	/// <remarks>
-	/// The <see cref="ViewManagerPanel"/> class duplicates a lot of this code, and should probably
-	/// be obsolete now.
+	/// Views are arranged in a 'deck' view, so that only one is visible at a time.
 	/// </remarks>
-	public class ViewManager : IUipViewManager, IViewDeck
+	public class ViewDeck : IViewDeck
 	{
 		private readonly Control _control;
 		private readonly List<object> _currentTasks = new List<object>();
@@ -52,9 +25,9 @@ namespace Quokka.WinForms
 
 		public event EventHandler AllTasksComplete;
 
-		public ViewManager(Control control)
+		public ViewDeck(Control control)
 		{
-			Verify.ArgumentNotNull(control, "control", out _control);
+			_control = Verify.ArgumentNotNull(control, "control");
 		}
 
 		public void Clear()
@@ -77,31 +50,7 @@ namespace Quokka.WinForms
 
 		#region IUipViewManager Members
 
-		public event EventHandler<UipViewEventArgs> ViewClosed;
-
-		event EventHandler<ViewClosedEventArgs> IViewDeck.ViewClosed
-		{
-			add
-			{
-				_viewDeckViewClosed += value;
-			}
-			remove
-			{
-				_viewDeckViewClosed -= value;
-			}
-		}
-
-		private event EventHandler<ViewClosedEventArgs> _viewDeckViewClosed;
-
-		public void BeginTask(UipTask task)
-		{
-			BeginTask((object)task);
-		}
-
-		public void EndTask(UipTask task)
-		{
-			EndTask((object)task);
-		}
+		public event EventHandler<ViewClosedEventArgs> ViewClosed;
 
 		public void BeginTask(object task)
 		{
@@ -146,11 +95,6 @@ namespace Quokka.WinForms
 
 		public void AddView(object view)
 		{
-			AddView(view, null);
-		}
-
-		public void AddView(object view, object controller)
-		{
 			if (view == null)
 				return;
 
@@ -168,15 +112,6 @@ namespace Quokka.WinForms
 			control.Dock = DockStyle.Fill;
 			control.Visible = false;
 			_control.Controls.Add(control);
-
-			// This gives a chance for all of the controls within the view control
-			// to get a look at the controller. To get the controller, the contained
-			// control must implement a method called "SetController", which accepts
-			// a compatible type. (Could be an embedded "IController" interface.
-			if (controller != null)
-			{
-				WinFormsUipUtil.SetController(control, controller);
-			}
 		}
 
 		private void View_Closed(object sender, EventArgs e)
@@ -187,9 +122,8 @@ namespace Quokka.WinForms
 				_modalForms.Remove(form);
 			}
 
-			// two events for backwards compatibility
-			OnViewClosed(new UipViewEventArgs(sender));
-			OnViewClosed(new ViewClosedEventArgs(sender));
+			ViewClosedEventArgs eventArgs = new ViewClosedEventArgs(sender);
+			OnViewClosed(eventArgs);
 		}
 
 		public void RemoveView(object view)
@@ -250,21 +184,13 @@ namespace Quokka.WinForms
 
 		public void ShowModalView(object view)
 		{
-			ShowModalView(view, null);
-		}
-
-		public void ShowModalView(object view, object controller)
-		{
 			Form form = view as Form;
 			if (form == null)
 			{
 				throw new ArgumentException("Modal views must inherit from System.Windows.Forms.Form");
 			}
 
-			if (controller != null)
-			{
-				WinFormsUipUtil.SetController(form, controller);
-			}
+
 			_modalForms.Add(form);
 			form.Closed += View_Closed;
 			form.ShowDialog(_control.TopLevelControl);
@@ -299,19 +225,11 @@ namespace Quokka.WinForms
 			}
 		}
 
-		protected virtual void OnViewClosed(UipViewEventArgs e)
+		protected virtual void OnViewClosed(ViewClosedEventArgs e)
 		{
 			if (ViewClosed != null)
 			{
 				ViewClosed(this, e);
-			}
-		}
-
-		protected virtual void OnViewClosed(ViewClosedEventArgs e)
-		{
-			if (_viewDeckViewClosed != null)
-			{
-				_viewDeckViewClosed(this, e);
 			}
 		}
 	}
