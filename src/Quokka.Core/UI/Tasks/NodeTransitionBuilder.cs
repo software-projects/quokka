@@ -8,15 +8,13 @@ namespace Quokka.UI.Tasks
 	/// </summary>
 	internal class NodeTransitionBuilder
 	{
-		public NodeTransitionBuilder(Converter<object, NavigateCommand> converter, INodeBuilder nextNode)
+		public NodeTransitionBuilder(Converter<object, INavigateCommand> converter, INodeBuilder nextNode)
 		{
 			Converter = Verify.ArgumentNotNull(converter, "converter");
 			NextNode = nextNode;
 		}
 
-		public Converter<object, NavigateCommand> Converter { get; private set; }
+		public Converter<object, INavigateCommand> Converter { get; private set; }
 		public INodeBuilder NextNode { get; private set; }
-
 	}
-
 }

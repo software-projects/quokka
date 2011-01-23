@@ -4,6 +4,9 @@ using System.Text;
 
 namespace Quokka.UI.Tasks
 {
+	/// <summary>
+	/// Used for initializing <see cref="UITask"/> instances.
+	/// </summary>
 	internal class TaskBuilder
 	{
 		private readonly Type _taskType;
@@ -24,34 +27,6 @@ namespace Quokka.UI.Tasks
 		public IList<NodeBuilder> Nodes
 		{
 			get { return _nodes.AsReadOnly(); }
-		}
-
-		public List<UINode> CreateNodesFor(UITask task)
-		{
-			Dictionary<NodeBuilder, UINode> dict = new Dictionary<NodeBuilder, UINode>();
-			List<UINode> nodes = new List<UINode>();
-
-			// First we need to create each of the nodes, and provide a mapping from node builder to node.
-			// This is necessary because we need to resolve inter-node references.
-			foreach (var nodeBuilder in Nodes)
-			{
-				var node = new UINode();
-				nodes.Add(node);
-				dict.Add(nodeBuilder, node);
-			}
-
-			foreach (var nodeBuilder in Nodes)
-			{
-				var node = dict[nodeBuilder];
-				node.Task = task;
-				node.ViewType = nodeBuilder.ViewType;
-				node.PresenterType = nodeBuilder.PresenterType;
-				node.Options = nodeBuilder.Options;
-			}
-
-			// TODO: need to setup the transitions.
-
-			return nodes;
 		}
 
 		public IList<string> Errors

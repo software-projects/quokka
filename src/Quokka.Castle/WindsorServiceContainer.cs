@@ -1,6 +1,7 @@
 ﻿using System;
 using Castle.Core;
 using Castle.MicroKernel;
+using Castle.MicroKernel.Registration;
 using Castle.Windsor;
 using Common.Logging;
 using Microsoft.Practices.ServiceLocation;
@@ -57,15 +58,27 @@ namespace Quokka.Castle
 		{
 			if (String.IsNullOrEmpty(name))
 			{
-				_container.Kernel.AddComponentInstance(type.FullName, type, instance);
+				_container.Register(
+					Component.For(type)
+						.Named(type.FullName)
+						.Instance(instance)
+					);
 			}
 			else if (type == null)
 			{
-				_container.Kernel.AddComponentInstance(name, instance);
+				_container.Register(
+					Component.For<object>()
+						.Named(name)
+						.Instance(instance)
+					);
 			}
 			else
 			{
-				_container.Kernel.AddComponentInstance(name, type, instance);
+				_container.Register(
+					Component.For(type)
+						.Named(name)
+						.Instance(instance)
+					);
 			}
 		}
 

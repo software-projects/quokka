@@ -99,15 +99,12 @@
     <Compile Include="Castle\WindsorServiceContainerTests.cs" />
     <Compile Include="Data\SqlExpressUtilTests.cs" />
     <Compile Include="Diagnostics\VerifyTests.cs" />
-    <Compile Include="DomainModel\DomainObjectTests.cs" />
     <Compile Include="DynamicCodeGeneration\CodeBuilderTestBase.cs" />
     <Compile Include="DynamicCodeGeneration\DuckProxyTests.cs" />
     <Compile Include="DynamicCodeGeneration\MemberMappingTests.cs" />
     <Compile Include="DynamicCodeGeneration\NavigatorProxyBuilderErrorTests.cs" />
     <Compile Include="DynamicCodeGeneration\NavigatorProxyTests.cs" />
-    <Compile Include="EnumTypes\EnumStringConverterTests.cs" />
     <Compile Include="Events\EventBrokerTests.cs" />
-    <Compile Include="PresentationModel\NotifyChangedTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QuokkaContainerTests.cs" />
     <Compile Include="Reflection\ObjectFactoryTests.cs" />
@@ -126,7 +123,9 @@
     <Compile Include="Uip\MockApp\MockViewManager.cs" />
     <Compile Include="Uip\MockApp\MockViews.cs" />
     <Compile Include="Uip\UipUtils_SetControllerTests.cs" />
-    <Compile Include="Unity\UnityServiceContainerTests.cs" />
+    <Compile Include="UI\Fakes\FakeViewDeck.cs" />
+    <Compile Include="UI\TestApp1\Presenter1.cs" />
+    <Compile Include="UI\UITaskTests.cs" />
     <Compile Include="Util\RegistryUtilTests.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -137,18 +136,6 @@
     <ProjectReference Include="..\Quokka.Core\Quokka.Core.csproj">
       <Project>{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}</Project>
       <Name>Quokka.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Quokka.Domain\Quokka.Domain.csproj">
-      <Project>{59F8AE7F-F658-4902-A915-A871F54208DB}</Project>
-      <Name>Quokka.Domain</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Quokka.NH\Quokka.NH.csproj">
-      <Project>{BA85A91F-6C8C-4E54-8CA8-0952E6556231}</Project>
-      <Name>Quokka.NH</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Quokka.Unity\Quokka.Unity.csproj">
-      <Project>{52A00CC5-7821-40EC-A08A-F777301B55DB}</Project>
-      <Name>Quokka.Unity</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -171,6 +158,11 @@
   <ItemGroup Condition=" '$(FormalBuild)' == 'true' ">
     <!-- include NAnt-generated assembly info during a formal build -->
     <Compile Include="..\CommonAssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="DomainModel\" />
+    <Folder Include="EnumTypes\" />
+    <Folder Include="PresentationModel\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

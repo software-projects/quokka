@@ -1,7 +1,7 @@
 ﻿using Microsoft.Practices.ServiceLocation;
 using NUnit.Framework;
 using Quokka.Uip.Fakes;
-using Quokka.Unity;
+using Quokka.Castle;
 
 namespace Quokka.Uip
 {

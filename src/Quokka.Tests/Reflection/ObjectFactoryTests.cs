@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.Practices.ServiceLocation;
 using NUnit.Framework;
-using Quokka.Unity;
+using Quokka.Castle;
 
 // suppress warnings about obsolete usage
 #pragma warning disable 612,618

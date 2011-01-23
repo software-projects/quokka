@@ -7,6 +7,7 @@ using Quokka.Diagnostics;
 using Quokka.DynamicCodeGeneration;
 using Quokka.ServiceLocation;
 using Quokka.UI.Regions;
+using Quokka.UI.Tasks;
 using Quokka.Uip;
 
 namespace Quokka.WinForms.Regions
@@ -25,7 +26,7 @@ namespace Quokka.WinForms.Regions
 		private readonly object _item;
 		private readonly Control _clientControl;
 		private readonly Control _hostControl;
-		private readonly UipTask _task;
+		private readonly IUITask _task;
 		private readonly ViewManager _viewManager;
 		private readonly Region _region;
 		private bool _isActive;
@@ -40,7 +41,7 @@ namespace Quokka.WinForms.Regions
 			Verify.ArgumentNotNull(hostControl, "hostControl", out _hostControl);
 			_hostControl.Tag = this;
 			_clientControl = item as Control;
-			_task = item as UipTask;
+			_task = item as IUITask;
 
 			if (_task != null)
 			{
@@ -136,7 +137,7 @@ namespace Quokka.WinForms.Regions
 		/// <summary>
 		/// The UI task (if any) associated with the item 
 		/// </summary>
-		public UipTask Task
+		public IUITask Task
 		{
 			get { return _task; }
 		}

@@ -158,7 +158,9 @@
     <Compile Include="Data\ParameterAttribute.cs" />
     <Compile Include="Data\SqlQuery.cs" />
     <Compile Include="DynamicCodeGeneration\DynamicAssembly2.cs" />
+    <Compile Include="UI\Tasks\INavigateCommand.cs" />
     <Compile Include="UI\Tasks\INodeBuilder.cs" />
+    <Compile Include="UI\Tasks\IUITask.cs" />
     <Compile Include="UI\Tasks\IViewDeck.cs" />
     <Compile Include="UI\Tasks\NavigateCommand.cs" />
     <Compile Include="UI\Tasks\NodeBuilder.cs" />
@@ -166,15 +168,15 @@
     <Compile Include="UI\Tasks\Presenter.cs" />
     <Compile Include="UI\Tasks\PresenterBase.cs" />
     <Compile Include="UI\Tasks\TaskBuilder.cs" />
-    <Compile Include="UI\Tasks\TaskTemplateStorage.cs" />
+    <Compile Include="UI\Tasks\TaskBuilderStorage.cs" />
     <Compile Include="UI\Tasks\UINode.cs" />
     <Compile Include="UI\Tasks\UINodeOptions.cs" />
-    <Compile Include="UI\Tasks\TaskTemplate.cs" />
     <Compile Include="UI\Tasks\UITask.cs" />
     <Compile Include="UI\Tasks\UITaskException.cs" />
     <Compile Include="UI\Tasks\ViewClosedEventArgs.cs" />
     <Compile Include="Util\DisposeUtils.cs" />
     <None Include="Quokka.snk" />
+    <Compile Include="UI\Tasks\INodeBuilder.Generic.cs" />
   </ItemGroup>
   <PropertyGroup>
     <DontImportPostSharp>True</DontImportPostSharp>

@@ -8,10 +8,11 @@ using Quokka.Diagnostics;
 using Quokka.DynamicCodeGeneration;
 using Quokka.Reflection;
 using Quokka.ServiceLocation;
+using Quokka.UI.Tasks;
 
 namespace Quokka.Uip
 {
-	public abstract class UipTask
+	public abstract class UipTask : IUITask
 	{
 		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
 		private static readonly List<UipTask> _runningTasks = new List<UipTask>();
@@ -230,6 +231,12 @@ namespace Quokka.Uip
 			}
 
 			return null;
+		}
+
+		void IUITask.Start(IViewDeck viewDeck)
+		{
+			var viewManager = (IUipViewManager) viewDeck;
+			Start(viewManager);
 		}
 
 		/// <summary>

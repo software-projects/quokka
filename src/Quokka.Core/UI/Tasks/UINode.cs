@@ -1,81 +1,126 @@
 ﻿using System;
+using System.Linq;
 using Quokka.Diagnostics;
 using Quokka.ServiceLocation;
-using Quokka.Uip;
 using Quokka.Util;
 
 namespace Quokka.UI.Tasks
 {
 	/// <summary>
-	/// Represents a single node in the <see cref="UITask"/> transition graph.
+	/// 	Represents a single node in the <see cref = "UITask" /> transition graph.
 	/// </summary>
 	/// <remarks>
-	/// A <see cref="UINode"/> can specify a presenter with or without
-	/// specifying a view, and can specify a view node with or without specifying
-	/// a presenter. A <see cref="UINode"/> does need to have either a 
-	/// view or a presenter, however.
-	/// </para>
+	/// 	<para>
+	/// 		A <see cref = "UINode" /> can specify a presenter with or without
+	/// 		specifying a view, and can specify a view node with or without specifying
+	/// 		a presenter. A <see cref = "UINode" /> does need to have either a 
+	/// 		view or a presenter, however.
+	/// 	</para>
 	/// </remarks>
 	public sealed class UINode
 	{
-		/// <summary>
-		/// The <see cref="UITask"/> that this node belongs to.
-		/// </summary>
-		public UITask Task { get; internal set; }
+		internal UINode(UITask task, NodeBuilder nodeBuilder)
+		{
+			Task = Verify.ArgumentNotNull(task, "task");
+			NodeBuilder = Verify.ArgumentNotNull(nodeBuilder, "nodeBuilder");
+		}
 
 		/// <summary>
-		/// The type of presenter associated with this node. 
+		/// 	The <see cref = "UITask" /> that this node belongs to.
+		/// </summary>
+		public UITask Task { get; private set; }
+
+		/// <summary>
+		/// 	The <see cref = "NodeBuilder" /> used to create this node.
+		/// </summary>
+		internal NodeBuilder NodeBuilder { get; private set; }
+
+		/// <summary>
+		/// 	The type of presenter associated with this node.
 		/// </summary>
 		/// <remarks>
-		/// <para>
-		/// This type will usually be a subtype of <see cref="Presenter"/> 
-		/// or <see cref="Presenter{TView}"/>, but it does not need to be.		
-		/// </para>
+		/// 	<para>
+		/// 		This type will usually be a subtype of <see cref = "Presenter" /> 
+		/// 		or <see cref = "Presenter{TView}" />, but it does not need to be.		
+		/// 	</para>
 		/// </remarks>
-		public Type PresenterType { get; internal set; }
+		public Type PresenterType
+		{
+			get { return NodeBuilder.PresenterType; }
+		}
 
 		/// <summary>
-		/// The type of view specified for this node. If the view type was
-		/// not explicitly specified via <see cref="INodeBuilder.SetView{TView}"/>,
-		/// then this property will be <c>null</c>, and the view type will be
-		/// determined from <see cref="PresenterViewType"/>.
+		/// 	The type of the view. This is the type that will be requested from the container, and may
+		/// 	or may not be an interface type.
 		/// </summary>
-		public Type ViewType { get; internal set; }
+		public Type ViewType
+		{
+			get { return NodeBuilder.ViewType; }
+		}
 
 		/// <summary>
-		/// If the presenter is a subtype of <see cref="Presenter{TView}"/>,
-		/// then this type is the type passed as the generic parameter <c>TView</c>.
+		/// 	The type of view specified for this node. If the view type was
+		/// 	not explicitly specified via <see cref = "INodeBuilder.SetView{TView}" />,
+		/// 	then this property will be <c>null</c>, and the view type will be
+		/// 	determined from <see cref = "InferredViewType" />.
 		/// </summary>
-		public Type PresenterViewType { get; internal set; }
+		public Type DeclaredViewType
+		{
+			get { return NodeBuilder.DeclaredViewType; }
+		}
 
 		/// <summary>
-		/// Options for this node.
+		/// 	If the presenter is a subtype of <see cref = "Presenter{TView}" />,
+		/// 	then this type is the type passed as the generic parameter <c>TView</c>.
 		/// </summary>
-		public UINodeOptions Options { get; internal set; }
+		public Type InferredViewType
+		{
+			get { return NodeBuilder.InferredViewType; }
+		}
 
 		/// <summary>
-		/// The view object for this node, or <c>null</c>
+		/// 	Options for this node.
+		/// </summary>
+		public UINodeOptions Options
+		{
+			get { return NodeBuilder.Options; }
+		}
+
+		/// <summary>
+		/// 	The view object for this node, or <c>null</c>
 		/// </summary>
 		public object View { get; internal set; }
 
 		/// <summary>
-		/// The current presenter object for this node, or <c>null</c>.
+		/// 	The current presenter object for this node, or <c>null</c>.
 		/// </summary>
 		public object Presenter { get; internal set; }
 
 		public bool IsViewModal { get; internal set; }
 
-		public bool StayOpen { get; internal set; }
+		/// <summary>
+		/// 	Should the view stay open when the node is not the current node.
+		/// </summary>
+		public bool StayOpen
+		{
+			get { return (Options & UINodeOptions.StayOpen) != 0; }
+		}
 
+		/// <summary>
+		/// 	The service container for the node.
+		/// </summary>
 		public IServiceContainer Container { get; internal set; }
 
+		/// <summary>
+		/// 	The view deck for the node
+		/// </summary>
 		public IViewDeck ViewDeck { get; private set; }
 
 		// TODO: probably better to have an event for this
 		internal void TaskStarting()
 		{
 			ViewDeck = Task.ViewDeck;
-			ViewDeck.ViewClosed += ViewDeck_ViewClosed;
+			ViewDeck.ViewClosed += ViewDeckViewClosed;
 		}
 
 		// TODO: probably better to have as an event for the task?
@@ -93,51 +138,44 @@ namespace Quokka.UI.Tasks
 				// a node whose container is not fully initialised.
 				IServiceContainer nodeContainer = parentContainer.CreateChildContainer();
 
-				// Both controller and view are singletons. The container only lasts as long as the
-				// node is current (or as long as the task runs in the case of a StayOpen node).
-				if (PresenterType != null && !PresenterType.IsInterface)
+				nodeContainer.RegisterInstance(this);
+				nodeContainer.RegisterType<INavigateCommand, NavigateCommand>(ServiceLifecycle.PerRequest);
+
+				// If the presenter is a concrete type and has not been registered yet, then register it
+				// with the container.
+				if (PresenterType != null && !PresenterType.IsInterface && !nodeContainer.IsTypeRegistered(PresenterType))
 				{
-					nodeContainer.RegisterType(PresenterType, null, null, ServiceLifecycle.Singleton);
+					nodeContainer.RegisterType(PresenterType, null, null, ServiceLifecycle.PerRequest);
 				}
-				if (ViewType == null)
+
+				// If the view type has not been declared
+				if (DeclaredViewType == null)
 				{
-					if (PresenterViewType != null && !PresenterViewType.IsInterface)
+					// If the inferred type is a concrete type and has not been registered, then register it
+					if (InferredViewType != null && !InferredViewType.IsInterface && !nodeContainer.IsTypeRegistered(InferredViewType))
 					{
-						nodeContainer.RegisterType(PresenterViewType, ServiceLifecycle.Singleton);
+						nodeContainer.RegisterType(InferredViewType, ServiceLifecycle.Singleton);
 					}
 				}
 				else
 				{
-					if (!ViewType.IsInterface)
+					if (!DeclaredViewType.IsInterface)
 					{
-						if (PresenterViewType != null && PresenterViewType.IsInterface)
+						if (InferredViewType != null && InferredViewType.IsInterface)
 						{
 							// The view type is concrete, and the presenter type is an interface
-							nodeContainer.RegisterType(PresenterViewType, ViewType, ServiceLifecycle.Singleton);
+							nodeContainer.RegisterType(InferredViewType, DeclaredViewType, ServiceLifecycle.PerRequest);
 						}
 						else
 						{
 							// Use the concrete view type by itself.
-							nodeContainer.RegisterType(ViewType, ServiceLifecycle.Singleton);
+							nodeContainer.RegisterType(DeclaredViewType, ServiceLifecycle.PerRequest);
 						}
 					}
 				}
 
 				// node container is now initialised, assign to the member variable
 				Container = nodeContainer;
-			}
-		}
-
-		internal void CreatePresenterAndView()
-		{
-			if (Presenter == null && PresenterType != null)
-			{
-				Presenter = Container.Locator.GetInstance(PresenterType);
-			}
-
-			if (View == null && ViewType != null)
-			{
-				
 			}
 		}
 
@@ -157,12 +195,26 @@ namespace Quokka.UI.Tasks
 
 			Presenter = Container.Locator.GetInstance(PresenterType);
 
-			// The presenter might have created the view through a construction injection or property injection
-			var p = Presenter as PresenterBase;
-			if (p != null && View == null)
+			foreach (var nodeTransitionBuilder in NodeBuilder.PresenterTransitions)
 			{
-				// The view was created when the presenter was created
-				View = p.ViewObject;
+				var navigateCommand = nodeTransitionBuilder.Converter(Presenter) as NavigateCommand;
+				if (navigateCommand == null)
+				{
+					throw new QuokkaException("Expected object of type NavigateCommand");
+				}
+				NodeTransitionBuilder builder = nodeTransitionBuilder;
+				var nextNode = (from n in Task.Nodes
+				                where n.NodeBuilder == builder.NextNode
+				                select n).FirstOrDefault();
+
+				navigateCommand.FromNode = this;
+				navigateCommand.ToNode = nextNode;
+				navigateCommand.Navigating += Task.Navigating;
+			}
+
+			foreach (var presenterInitialization in NodeBuilder.PresenterInitializations)
+			{
+				presenterInitialization(Presenter);
 			}
 		}
 
@@ -174,13 +226,37 @@ namespace Quokka.UI.Tasks
 				return;
 			}
 
-			if (ViewType == null && PresenterViewType == null)
+			if (DeclaredViewType == null && InferredViewType == null)
 			{
 				// don't have a view for this node
 				return;
 			}
 
-			View = ViewType != null ? Container.Locator.GetInstance(ViewType) : Container.Locator.GetInstance(PresenterViewType);
+			View = DeclaredViewType != null
+			       	? Container.Locator.GetInstance(DeclaredViewType)
+			       	: Container.Locator.GetInstance(InferredViewType);
+
+			foreach (var nodeTransitionBuilder in NodeBuilder.ViewTransitions)
+			{
+				var navigateCommand = nodeTransitionBuilder.Converter(View) as NavigateCommand;
+				if (navigateCommand == null)
+				{
+					throw new QuokkaException("Expected object of type NavigateCommand");
+				}
+				NodeTransitionBuilder builder = nodeTransitionBuilder;
+				var nextNode = (from n in Task.Nodes
+								where n.NodeBuilder == builder.NextNode
+								select n).FirstOrDefault();
+
+				navigateCommand.FromNode = this;
+				navigateCommand.ToNode = nextNode;
+				navigateCommand.Navigating += Task.Navigating;
+			}
+
+			foreach (var viewInitialization in NodeBuilder.ViewInitializations)
+			{
+				viewInitialization(View);
+			}
 
 			var p = Presenter as PresenterBase;
 			if (p != null && p.ViewObject == null)
@@ -189,7 +265,6 @@ namespace Quokka.UI.Tasks
 				p.ViewObject = View;
 			}
 		}
-
 
 		// TODO: probably better to have an event for this
 		internal void CleanupNode()
@@ -214,7 +289,7 @@ namespace Quokka.UI.Tasks
 					// event to avoid a memory leak.
 					if (ViewDeck != null)
 					{
-						ViewDeck.ViewClosed -= ViewDeck_ViewClosed;
+						ViewDeck.ViewClosed -= ViewDeckViewClosed;
 					}
 				}
 				else
@@ -248,7 +323,7 @@ namespace Quokka.UI.Tasks
 
 			if (hideView || removeView)
 			{
-				if (ViewDeck != null)
+				if (ViewDeck != null && View != null)
 				{
 					ViewDeck.HideView(View);
 				}
@@ -299,7 +374,7 @@ namespace Quokka.UI.Tasks
 			}
 		}
 
-		private void ViewDeck_ViewClosed(object sender, ViewClosedEventArgs e)
+		private void ViewDeckViewClosed(object sender, ViewClosedEventArgs e)
 		{
 			if (e.View != View)
 			{

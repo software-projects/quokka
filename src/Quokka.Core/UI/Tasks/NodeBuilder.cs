@@ -4,6 +4,9 @@ using Quokka.Diagnostics;
 
 namespace Quokka.UI.Tasks
 {
+	/// <summary>
+	/// Implements the <see cref="INodeBuilder"/> and <see cref="INodeBuilder{T}"/> interfaces.
+	/// </summary>
 	internal class NodeBuilder : INodeBuilder
 	{
 		public TaskBuilder Task { get; private set; }
@@ -56,11 +59,6 @@ namespace Quokka.UI.Tasks
 			}
 
 
-		}
-
-		public UINode CreateNode()
-		{
-			throw new NotImplementedException();
 		}
 
 		public Type ViewType
@@ -129,12 +127,12 @@ namespace Quokka.UI.Tasks
 
 			internal GenericNodeBuilder(NodeBuilder nodeBuilder)
 			{
-				Verify.ArgumentNotNull(nodeBuilder, "nodeBuilder");
+				InnerNodeBuilder = Verify.ArgumentNotNull(nodeBuilder, "nodeBuilder");
 			}
 
-			public INodeBuilder<T> NavigateTo(Converter<T, NavigateCommand> converter, INodeBuilder node)
+			public INodeBuilder<T> NavigateTo(Converter<T, INavigateCommand> converter, INodeBuilder node)
 			{
-				Converter<object, NavigateCommand> c = obj => converter((T)obj);
+				Converter<object, INavigateCommand> c = obj => converter((T)obj);
 				var transition = new NodeTransitionBuilder(c, node);
 				AssignTransition(transition);
 				return this;
@@ -157,7 +155,8 @@ namespace Quokka.UI.Tasks
 
 			public INodeBuilder<T> With(Action<T> action)
 			{
-				// TODO
+				Action<object> initialization = obj => action((T) obj);
+				AssignInitialization(initialization);
 				return this;
 			}
 

@@ -4,11 +4,10 @@ using Common.Logging;
 using Microsoft.Practices.ServiceLocation;
 using Quokka.Diagnostics;
 using Quokka.ServiceLocation;
-using Quokka.Uip;
 
 namespace Quokka.UI.Tasks
 {
-	public abstract class UITask
+	public abstract class UITask : IUITask
 	{
 		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
 		private IList<UINode> _nodes;
@@ -16,7 +15,7 @@ namespace Quokka.UI.Tasks
 		private bool _canCreateNode;
 		private UINode _nextNode;
 		private IViewDeck _viewDeck;
-		protected readonly IServiceContainer _serviceContainer;
+		private readonly IServiceContainer _serviceContainer;
 		private bool _inNavigateMethod;
 		private bool _endTaskRequested;
 		private bool _raiseTaskComplete;
@@ -30,7 +29,7 @@ namespace Quokka.UI.Tasks
 
 			_serviceContainer = CreateServiceContainer();
 
-			// Registers the task instance under both UipTask, and the actual type of the task
+			// Registers the task instance under both UITask, and the actual type of the task
 			_serviceContainer.RegisterInstance(this);
 			_serviceContainer.RegisterInstance(GetType(), this);
 		}
@@ -114,6 +113,12 @@ namespace Quokka.UI.Tasks
 				throw new InvalidOperationException(message);
 			}
 
+			// If the nodes have not been built yet, then build them
+			if (_nodes == null)
+			{
+				BuildNodes();
+			}
+
 			// throw an exception if the task is not valid
 			_taskBuilder.AssertValid();
 
@@ -127,6 +132,8 @@ namespace Quokka.UI.Tasks
 			_viewDeck = viewDeck;
 			_serviceContainer.RegisterInstance(_viewDeck);
 
+			CreateState();
+
 			// Now that the task has a view deck, we can inform the nodes and let them initialize.
 			foreach (var node in Nodes)
 			{
@@ -134,6 +141,18 @@ namespace Quokka.UI.Tasks
 			}
 
 			Navigate(Nodes[0]);
+		}
+
+		/// <summary>
+		/// End the task.
+		/// </summary>
+		/// <remarks>
+		/// TODO: Need to determine whether this method is needed.
+		/// </remarks>
+		public void EndTask()
+		{
+			_endTaskRequested = true;
+			Navigate(null);
 		}
 
 		#endregion
@@ -170,9 +189,16 @@ namespace Quokka.UI.Tasks
 
 		protected abstract void CreateNodes();
 
+		protected virtual void CreateState() {}
+
 		#endregion
 
 		#region Protected methods
+
+		protected void RegisterInstance<T>(T instance)
+		{
+			ServiceContainer.RegisterInstance(typeof (T), instance);
+		}
 
 		protected INodeBuilder CreateNode()
 		{
@@ -181,7 +207,7 @@ namespace Quokka.UI.Tasks
 
 		protected INodeBuilder CreateNode(string nodeName)
 		{
-			if (_canCreateNode)
+			if (!_canCreateNode)
 			{
 				throw new InvalidOperationException(
 					"Cannot call CreateNode() at this point. Call CreateNode() in the CreateNodes() method only.");
@@ -197,41 +223,40 @@ namespace Quokka.UI.Tasks
 		private void BuildNodes()
 		{
 			// find the task template for this task type
-			_taskBuilder = TaskTemplateStorage.FindForType(GetType()) ?? CreateTaskBuilder();
+			_taskBuilder = TaskBuilderStorage.FindForType(GetType());
+			if (_taskBuilder == null)
+			{
+				_taskBuilder = new TaskBuilder(GetType());
+				_canCreateNode = true;
+				try
+				{
+					CreateNodes();
+				}
+				finally
+				{
+					_canCreateNode = false;
+				}
+				if (_taskBuilder.IsValid)
+				{
+					TaskBuilderStorage.Add(_taskBuilder);
+				}
+			}
 
 			var nodes = new List<UINode>();
 
 			foreach (var nodeBuilder in _taskBuilder.Nodes)
 			{
-				UINode node = nodeBuilder.CreateNode();
-				node.Task = this;
+				UINode node = new UINode(this, nodeBuilder);
 				nodes.Add(node);
 			}
 			_nodes = nodes;
 		}
 
-		private TaskBuilder CreateTaskBuilder()
-		{
-			var taskBuilder = new TaskBuilder(GetType());
-			_canCreateNode = true;
-			try
-			{
-				CreateNodes();
-			}
-			finally
-			{
-				_canCreateNode = false;
-			}
-			taskBuilder.Validate();
-			TaskTemplateStorage.Add(taskBuilder);
-			return taskBuilder;
-		}
-
 		/// <summary>
-		/// Create a service container that is a child container of the global container.
+		/// 	Create a service container that is a child container of the global container.
 		/// </summary>
 		/// <returns>
-		/// An <see cref="IServiceContainer"/>.
+		/// 	An <see cref = "IServiceContainer" />.
 		/// </returns>
 		private static IServiceContainer CreateServiceContainer()
 		{
@@ -263,6 +288,33 @@ namespace Quokka.UI.Tasks
 			}
 		}
 
+		internal void Navigating(object sender, EventArgs e)
+		{
+			var navigateCommand = (NavigateCommand) sender;
+
+			if (IsComplete)
+			{
+				string message = string.Format("Attempt to navigate from {0} to {1} when task has already completed",
+				                               navigateCommand.FromNode,
+				                               navigateCommand.ToNode);
+				Log.Error(message);
+				throw new UITaskException(message);
+			}
+
+			if (navigateCommand.FromNode != CurrentNode)
+			{
+				Log.WarnFormat("Attempt to navigate from {0} to {1} when the current node is {2}",
+				               navigateCommand.FromNode,
+				               navigateCommand.ToNode,
+				               CurrentNode);
+				return;
+			}
+
+			UINode nextNode = navigateCommand.ToNode;
+			Navigate(nextNode);
+
+		}
+
 		internal void Navigate(UINode nextNode)
 		{
 			if (IsComplete)
@@ -273,6 +325,11 @@ namespace Quokka.UI.Tasks
 			}
 
 			_nextNode = nextNode;
+
+			if (nextNode == null)
+			{
+				_endTaskRequested = true;
+			}
 
 			if (_inNavigateMethod)
 			{
@@ -299,11 +356,11 @@ namespace Quokka.UI.Tasks
 
 		private void NavigateHelper()
 		{
-			bool showModalView = false;
 			_inNavigateMethod = true;
 			try
 			{
 				var nextNode = _nextNode;
+				_nextNode = null;
 
 				if (nextNode != null)
 				{
@@ -335,7 +392,6 @@ namespace Quokka.UI.Tasks
 									// within the modal view. For this reason set a variable
 									// to remind us to show the modal view before leaving this
 									// method.
-									showModalView = true;
 								}
 								else
 								{
@@ -351,6 +407,7 @@ namespace Quokka.UI.Tasks
 					catch (Exception ex)
 					{
 						Log.Error("Unexpected error in transition: " + ex.Message, ex);
+						throw;
 					}
 					finally
 					{
@@ -397,10 +454,16 @@ namespace Quokka.UI.Tasks
 				// Tell the node that it is now the current node.
 				CurrentNode.EnterNode();
 
+				bool presenterCreated = false;
+
 				// Create the presenter for the new current node. It is possible for
 				// a presenter to request navigation inside its constructor, and if this happens
 				// the _nextNode variable will be set, and we will continue through this loop again.
-				CurrentNode.CreatePresenter();
+				if (CurrentNode.Presenter == null && CurrentNode.PresenterType != null)
+				{
+					CurrentNode.CreatePresenter();
+					presenterCreated = true;
+				}
 
 				//
 				if (_nextNode != null)
@@ -410,12 +473,44 @@ namespace Quokka.UI.Tasks
 					return;
 				}
 
+				bool viewCreated = false;
+
 				// Create the view for the new current node. It is possible for a view to
 				// request navigation inside its constructor, and if this happens the navigateValue
 				// variable will be set, and we will continue through this loop again.
-				CurrentNode.CreateView();
-			}
+				if (CurrentNode.View == null && (CurrentNode.DeclaredViewType != null || CurrentNode.InferredViewType != null))
+				{
+					var p = CurrentNode.Presenter as PresenterBase;
+					if (p != null && p.ViewObject != null)
+					{
+						// The presenter has created its own view
+						CurrentNode.View = p.ViewObject;
+					}
+					else
+					{
+						CurrentNode.CreateView();
+						if (p != null)
+						{
+							p.ViewObject = CurrentNode.View;
+						}
+					}
+					viewCreated = true;
+				}
 
+				if (viewCreated)
+				{
+					ViewDeck.AddView(CurrentNode.View);
+				}
+
+				if (presenterCreated)
+				{
+					var p = CurrentNode.Presenter as PresenterBase;
+					if (p != null)
+					{
+						p.PresenterInitialized();
+					}
+				}
+			}
 		}
 
 		private void RaiseEvents()

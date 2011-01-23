@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Windows.Forms;
 using Common.Logging;
 using Microsoft.Practices.ServiceLocation;
@@ -153,6 +154,13 @@ namespace Quokka.WinForms.Startup
 			if (!Container.IsTypeRegistered<IRegionManager>())
 			{
 				Container.RegisterType<IRegionManager, RegionManager>(ServiceLifecycle.Singleton);
+			}
+			if (!Container.IsTypeRegistered<SynchronizationContext>())
+			{
+				if (SynchronizationContext.Current != null)
+				{
+					Container.RegisterInstance(SynchronizationContext.Current);
+				}
 			}
 		}
 

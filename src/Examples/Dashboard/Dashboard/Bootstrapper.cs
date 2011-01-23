@@ -1,12 +1,13 @@
 ﻿using System;
+using System.Reflection;
 using System.Windows.Forms;
 using ComponentFactory.Krypton.Toolkit;
 using Dashboard.Services;
 using Dashboard.Services.Interfaces;
 using Dashboard.UI.Forms;
-using Dashboard.UI.Tasks.Shell;
+using Dashboard.UI.Tasks;
 using Quokka.ServiceLocation;
-using Quokka.Unity;
+using Quokka.Castle;
 using Quokka.WinForms.Startup;
 
 namespace Dashboard
@@ -19,8 +20,7 @@ namespace Dashboard
 
 			// TODO: this can go in module initialization
 			ShellTask task = new ShellTask();
-			mainForm.MainRegion.Add(task);
-			mainForm.MainRegion.Activate(task);
+			task.Start(mainForm.ViewDeck);
 			return mainForm;
 		}
 
@@ -31,7 +31,7 @@ namespace Dashboard
 
 		protected override void ConfigureServices()
 		{
-			Container.RegisterType<ILoginService, LoginService>(ServiceLifecycle.Singleton);
+			Container.RegisterTypesInAssembly(Assembly.GetExecutingAssembly());
 		}
 	}
 }
