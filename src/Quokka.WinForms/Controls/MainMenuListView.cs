@@ -12,7 +12,7 @@ namespace Quokka.WinForms.Controls
 {
 	public partial class MainMenuListView : UserControl, IMainMenu
 	{
-		private readonly List<IUICommand> _commands = new List<IUICommand>();
+		private readonly List<IImageCommand> _commands = new List<IImageCommand>();
 		private static readonly ILog log = LogManager.GetCurrentClassLogger();
 		private readonly Dictionary<Image, int> _imageIndexes = new Dictionary<Image, int>();
 
@@ -22,7 +22,7 @@ namespace Quokka.WinForms.Controls
 			listView.Dock = DockStyle.Fill;
 		}
 
-		public void Add(IUICommand command, string groupName)
+		public void Add(IImageCommand command, string groupName)
 		{
 			if (InvokeRequired)
 			{
@@ -51,7 +51,7 @@ namespace Quokka.WinForms.Controls
 			listView.Items.Add(item);
 		}
 
-		public void Remove(IUICommand command)
+		public void Remove(IImageCommand command)
 		{
 			if (InvokeRequired)
 			{
@@ -70,7 +70,7 @@ namespace Quokka.WinForms.Controls
 
 		private void Update(ListViewItem item)
 		{
-			IUICommand command = item.Tag as IUICommand;
+			IImageCommand command = item.Tag as IImageCommand;
 			if (command == null)
 			{
 				log.Error("List view item does not have an associated command");
@@ -83,7 +83,7 @@ namespace Quokka.WinForms.Controls
 
 		private void CommandPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
-			IUICommand command = sender as IUICommand;
+			IImageCommand command = sender as IImageCommand;
 			if (command == null)
 			{
 				// this should not happen
@@ -98,11 +98,11 @@ namespace Quokka.WinForms.Controls
 			}
 		}
 
-		private ListViewItem FindByCommand(IUICommand command)
+		private ListViewItem FindByCommand(IImageCommand command)
 		{
 			foreach (ListViewItem item in listView.Items)
 			{
-				IUICommand itemCommand = item.Tag as IUICommand;
+				IImageCommand itemCommand = item.Tag as IImageCommand;
 				if (itemCommand == command)
 				{
 					return item;
@@ -135,7 +135,7 @@ namespace Quokka.WinForms.Controls
 			if (listView.SelectedItems.Count > 0)
 			{
 				ListViewItem item = listView.SelectedItems[0];
-				IUICommand command = item.Tag as IUICommand;
+				IImageCommand command = item.Tag as IImageCommand;
 				if (command != null)
 				{
 					command.Execute();

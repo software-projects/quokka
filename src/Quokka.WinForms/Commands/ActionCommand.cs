@@ -2,7 +2,7 @@
 
 namespace Quokka.WinForms.Commands
 {
-	public class ActionCommand : UICommandBase
+	public class ActionCommand : ImageCommandBase
 	{
 		private Action _action;
 

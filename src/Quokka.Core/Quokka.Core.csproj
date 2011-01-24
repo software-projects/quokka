@@ -158,6 +158,7 @@
     <Compile Include="Data\ParameterAttribute.cs" />
     <Compile Include="Data\SqlQuery.cs" />
     <Compile Include="DynamicCodeGeneration\DynamicAssembly2.cs" />
+    <Compile Include="UI\Commands\IUICommand.cs" />
     <Compile Include="UI\Tasks\INavigateCommand.cs" />
     <Compile Include="UI\Tasks\INodeBuilder.cs" />
     <Compile Include="UI\Tasks\IUITask.cs" />

@@ -6,9 +6,9 @@ using System.Windows.Forms;
 namespace Quokka.WinForms.Commands
 {
 	/// <summary>
-	/// Default implementation of <see cref="IUICommand"/>
+	/// Default implementation of <see cref="IImageCommand"/>
 	/// </summary>
-	public abstract class UICommandBase : IUICommand
+	public abstract class ImageCommandBase : IImageCommand
 	{
 		private bool _checked;
 		private CheckState _checkState;

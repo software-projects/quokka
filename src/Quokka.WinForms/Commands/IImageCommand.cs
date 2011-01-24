@@ -11,7 +11,7 @@ namespace Quokka.WinForms.Commands
 	/// Acknowledgement to Component Factory Krypton Toolkit for the 
 	/// basic idea. Implementation differs slightly.
 	/// </remarks>
-	public interface IUICommand : INotifyPropertyChanged
+	public interface IImageCommand : INotifyPropertyChanged
 	{
 		bool Checked { get; set; }
 		CheckState CheckState { get; set; }

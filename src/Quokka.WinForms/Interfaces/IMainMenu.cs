@@ -7,7 +7,7 @@ namespace Quokka.WinForms.Interfaces
 	/// </summary>
 	public interface IMainMenu
 	{
-		void Add(IUICommand command, string group);
-		void Remove(IUICommand command);
+		void Add(IImageCommand command, string group);
+		void Remove(IImageCommand command);
 	}
 }

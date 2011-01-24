@@ -1,8 +1,9 @@
-using System;
 using System.Drawing;
 using System.Windows.Forms;
 using Dashboard.UI.Views.Interfaces;
 using Quokka.ServiceLocation;
+using Quokka.UI.Commands;
+using Quokka.WinForms.Commands;
 
 namespace Dashboard.UI.Views
 {
@@ -23,10 +24,10 @@ namespace Dashboard.UI.Views
 								}
 			               		CenterPanel();
 			               	};
-			loginButton.Click += delegate { RaiseLogin(); };
+			LoginCommand = new UICommand(loginButton);
 		}
 
-		public event EventHandler Login;
+		public IUICommand LoginCommand { get; private set; }
 
 		public string Username
 		{
@@ -44,14 +45,6 @@ namespace Dashboard.UI.Views
 		{
 			get { return errorProvider.GetError(usernameTextBox); }
 			set { errorProvider.SetError(usernameTextBox, value); }
-		}
-
-		private void RaiseLogin()
-		{
-			if (Login != null)
-			{
-				Login(this, EventArgs.Empty);
-			}
 		}
 
 		// Center the login panel in the form

@@ -27,7 +27,7 @@ namespace Dashboard.UI.Presenters
 				View.ErrorMessage = "Invalid username or password";
 			}
 
-			View.Login += delegate { AttemptLogin(); };			
+			View.LoginCommand.Execute += delegate { AttemptLogin(); };			
 		}
 
 
