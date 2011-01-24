@@ -28,6 +28,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Windows.Forms;
 using Quokka.Diagnostics;
 using Quokka.UI.Tasks;
@@ -38,10 +39,6 @@ namespace Quokka.WinForms
 	/// <summary>
 	/// Handles views inside a Windows Forms <see cref="Control"/>
 	/// </summary>
-	/// <remarks>
-	/// The <see cref="ViewManagerPanel"/> class duplicates a lot of this code, and should probably
-	/// be obsolete now.
-	/// </remarks>
 	public class ViewManager : IUipViewManager, IViewDeck
 	{
 		private readonly Control _control;
@@ -120,28 +117,36 @@ namespace Quokka.WinForms
 			}
 		}
 
+		private int _transitionReferenceCount;
+
 		public void BeginTransition()
 		{
-			_control.SuspendLayout();
-			Win32.SetWindowRedraw(_control, false);
-			Cursor.Current = Cursors.WaitCursor;
+			if (Interlocked.Increment(ref _transitionReferenceCount) == 1)
+			{
+				_control.SuspendLayout();
+				Win32.SetWindowRedraw(_control, false);
+				Cursor.Current = Cursors.WaitCursor;
+			}
 		}
 
 		public void EndTransition()
 		{
-			if (_currentVisibleView == null && _visibleViews.Count > 0)
+			if (Interlocked.Decrement(ref _transitionReferenceCount) == 0)
 			{
-				// At the end of the transition, no view is visible but there
-				// are one or more views that are not visible because they were
-				// hidden in order to display another view, but they were never
-				// commanded to be hidden. Show them in reverse order.
-				ShowView(_visibleViews[_visibleViews.Count - 1]);
-			}
+				if (_currentVisibleView == null && _visibleViews.Count > 0)
+				{
+					// At the end of the transition, no view is visible but there
+					// are one or more views that are not visible because they were
+					// hidden in order to display another view, but they were never
+					// commanded to be hidden. Show them in reverse order.
+					ShowView(_visibleViews[_visibleViews.Count - 1]);
+				}
 
-			Cursor.Current = Cursors.Default;
-			Win32.SetWindowRedraw(_control, true);
-			_control.Invalidate(true);
-			_control.ResumeLayout();
+				Cursor.Current = Cursors.Default;
+				Win32.SetWindowRedraw(_control, true);
+				_control.Invalidate(true);
+				_control.ResumeLayout();
+			}
 		}
 
 		public void AddView(object view)

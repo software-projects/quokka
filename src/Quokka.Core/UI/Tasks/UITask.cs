@@ -200,12 +200,12 @@ namespace Quokka.UI.Tasks
 			ServiceContainer.RegisterInstance(typeof (T), instance);
 		}
 
-		protected INodeBuilder CreateNode()
+		protected IAnyNodeBuilder CreateNode()
 		{
 			return CreateNode(null);
 		}
 
-		protected INodeBuilder CreateNode(string nodeName)
+		protected IAnyNodeBuilder CreateNode(string nodeName)
 		{
 			if (!_canCreateNode)
 			{
@@ -509,6 +509,11 @@ namespace Quokka.UI.Tasks
 					{
 						p.PresenterInitialized();
 					}
+				}
+
+				if (CurrentNode.NestedTask == null && CurrentNode.NestedTaskType != null)
+				{
+					CurrentNode.CreateNestedTask();
 				}
 			}
 		}

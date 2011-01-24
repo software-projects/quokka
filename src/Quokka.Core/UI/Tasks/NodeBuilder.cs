@@ -5,21 +5,25 @@ using Quokka.Diagnostics;
 namespace Quokka.UI.Tasks
 {
 	/// <summary>
-	/// Implements the <see cref="INodeBuilder"/> and <see cref="INodeBuilder{T}"/> interfaces.
+	///		Internal class used for building nodes in a <see cref="UITask"/>.
 	/// </summary>
-	internal class NodeBuilder : INodeBuilder
+	internal class NodeBuilder : IAnyNodeBuilder
 	{
 		public TaskBuilder Task { get; private set; }
 		public string Name { get; private set; }
 		public Type PresenterType { get; protected set; }
 		public Type DeclaredViewType { get; protected set; }
 		public Type InferredViewType { get; protected set; }
+		public Type NestedTaskType { get; protected set; }
 		public UINodeOptions Options { get; protected set; }
+		public INodeBuilder NestedTaskNextNode { get; protected set; }
 
 		public IList<Action<object>> ViewInitializations = new List<Action<object>>();
 		public IList<Action<object>> PresenterInitializations = new List<Action<object>>();
+		public IList<Action<object>> NestedTaskInitializations = new List<Action<object>>();
 		public IList<NodeTransitionBuilder> ViewTransitions = new List<NodeTransitionBuilder>();
 		public IList<NodeTransitionBuilder> PresenterTransitions = new List<NodeTransitionBuilder>();
+		public IList<NodeTransitionBuilder> NestedTaskTransitions = new List<NodeTransitionBuilder>();
 
 		private bool _isValidated;
 
@@ -42,9 +46,9 @@ namespace Quokka.UI.Tasks
 				Name = InferName();
 			}
 
-			if (PresenterType == null && DeclaredViewType == null)
+			if (PresenterType == null && DeclaredViewType == null && NestedTaskType == null)
 			{
-				AddError("No presenter or view defined");
+				AddError("No presenter, view or nested task defined");
 				return;
 			}
 
@@ -57,8 +61,6 @@ namespace Quokka.UI.Tasks
 				AddError(message);
 				return;
 			}
-
-
 		}
 
 		public Type ViewType
@@ -66,31 +68,42 @@ namespace Quokka.UI.Tasks
 			get { return DeclaredViewType ?? InferredViewType; }
 		}
 
-		public INodeBuilder<TPresenter> SetPresenter<TPresenter>()
+		public IPresenterNodeBuilder<TPresenter> SetPresenter<TPresenter>()
 		{
-			if (PresenterType != null)
+			if (PresenterType != null && PresenterType != typeof(TPresenter))
 			{
-				throw new InvalidOperationException("SetPresenter<> can only be called once for a node");
+				AddError("SetPresenter<> can only be called once for a node");
 			}
-			PresenterType = typeof(TPresenter);
-			InferredViewType = InferViewType(PresenterType);
+			else
+			{
+				PresenterType = typeof (TPresenter);
+				InferredViewType = InferViewType(PresenterType);
+			}
 			return new PresenterNodeBuilder<TPresenter>(this);
 		}
 
-		public INodeBuilder<TView> SetView<TView>()
+		public IViewNodeBuilder<TView> SetView<TView>()
 		{
-			if (DeclaredViewType != null)
+			if (DeclaredViewType != null && DeclaredViewType != typeof(TView))
 			{
-				throw new InvalidOperationException("SetView<> can only be called once for a node");
+				AddError("SetView<> can only be called once for a node");
 			}
-			DeclaredViewType = typeof(TView);
+			else
+			{
+				DeclaredViewType = typeof (TView);
+			}
 			return new ViewNodeBuilder<TView>(this);
 		}
 
-		public INodeBuilder StayOpen()
+		public ITaskNodeBuilder<TNestedTask> SetNestedTask<TNestedTask>() where TNestedTask : UITask
+		{
+			NestedTaskType = typeof (TNestedTask);
+			return new NestedTaskNodeBuilder<TNestedTask>(this);
+		}
+
+		private void StayOpen()
 		{
 			Options |= UINodeOptions.StayOpen;
-			return this;
 		}
 
 		private static Type InferViewType(Type presenterType)
@@ -121,76 +134,115 @@ namespace Quokka.UI.Tasks
 			Task.AddError(this, reason);
 		}
 
-		internal abstract class GenericNodeBuilder<T> : INodeBuilder<T>
+
+		internal class ViewNodeBuilder<TView> : IViewNodeBuilder<TView>
 		{
 			protected readonly NodeBuilder InnerNodeBuilder;
 
-			internal GenericNodeBuilder(NodeBuilder nodeBuilder)
+			public ViewNodeBuilder(NodeBuilder nodeBuilder)
 			{
 				InnerNodeBuilder = Verify.ArgumentNotNull(nodeBuilder, "nodeBuilder");
 			}
 
-			public INodeBuilder<T> NavigateTo(Converter<T, INavigateCommand> converter, INodeBuilder node)
+			public IViewNodeBuilder<TView> NavigateTo(Converter<TView, INavigateCommand> converter, INodeBuilder node)
 			{
-				Converter<object, INavigateCommand> c = obj => converter((T)obj);
+				Verify.ArgumentNotNull(converter, "converter");
+				Converter<object, INavigateCommand> c = obj => converter((TView)obj);
 				var transition = new NodeTransitionBuilder(c, node);
-				AssignTransition(transition);
+				InnerNodeBuilder.ViewTransitions.Add(transition);
 				return this;
 			}
 
-			public INodeBuilder<TPresenter> SetPresenter<TPresenter>()
+			public IViewNodeBuilder<TView> With(Action<TView> action)
+			{
+				Verify.ArgumentNotNull(action, "action");
+				Action<object> initialization = obj => action((TView)obj);
+				InnerNodeBuilder.ViewInitializations.Add(initialization);
+				return this;
+			}
+
+			public IPresenterNodeBuilder<TPresenter> SetPresenter<TPresenter>()
 			{
 				return InnerNodeBuilder.SetPresenter<TPresenter>();
 			}
 
-			public INodeBuilder<TView> SetView<TView>()
+			public IViewNodeBuilder<TView> StayOpen()
+			{
+				InnerNodeBuilder.StayOpen();
+				return this;
+			}
+		}
+
+		internal class PresenterNodeBuilder<TPresenter> : IPresenterNodeBuilder<TPresenter>
+		{
+			protected readonly NodeBuilder InnerNodeBuilder;
+
+			public PresenterNodeBuilder(NodeBuilder nodeBuilder)
+			{
+				InnerNodeBuilder = Verify.ArgumentNotNull(nodeBuilder, "nodeBuilder");
+			}
+
+			public IPresenterNodeBuilder<TPresenter> NavigateTo(Converter<TPresenter, INavigateCommand> converter, INodeBuilder node)
+			{
+				Verify.ArgumentNotNull(converter, "converter");
+				Converter<object, INavigateCommand> c = obj => converter((TPresenter)obj);
+				var transition = new NodeTransitionBuilder(c, node);
+				InnerNodeBuilder.PresenterTransitions.Add(transition);
+				return this;
+			}
+
+			public IPresenterNodeBuilder<TPresenter> With(Action<TPresenter> action)
+			{
+				Verify.ArgumentNotNull(action, "action");
+				Action<object> initialization = obj => action((TPresenter)obj);
+				InnerNodeBuilder.PresenterInitializations.Add(initialization);
+				return this;
+			}
+
+			public IViewNodeBuilder<TView> SetView<TView>()
 			{
 				return InnerNodeBuilder.SetView<TView>();
 			}
 
-			public INodeBuilder StayOpen()
+			public IPresenterNodeBuilder<TPresenter> StayOpen()
 			{
-				return InnerNodeBuilder.StayOpen();
+				InnerNodeBuilder.StayOpen();
+				return this;
+			}
+		}
+
+		internal class NestedTaskNodeBuilder<TNestedTask> : ITaskNodeBuilder<TNestedTask> where TNestedTask : UITask
+		{
+			protected readonly NodeBuilder InnerNodeBuilder;
+
+			public NestedTaskNodeBuilder(NodeBuilder nodeBuilder)
+			{
+				InnerNodeBuilder = Verify.ArgumentNotNull(nodeBuilder, "nodeBuilder");
 			}
 
-			public INodeBuilder<T> With(Action<T> action)
+			public ITaskNodeBuilder<TNestedTask> NavigateTo(Converter<TNestedTask, INavigateCommand> converter, INodeBuilder node)
 			{
-				Action<object> initialization = obj => action((T) obj);
-				AssignInitialization(initialization);
+				Verify.ArgumentNotNull(converter, "converter");
+				Converter<object, INavigateCommand> c = obj => converter((TNestedTask)obj);
+				var transition = new NodeTransitionBuilder(c, node);
+				InnerNodeBuilder.NestedTaskTransitions.Add(transition);
 				return this;
 			}
 
-			protected abstract void AssignTransition(NodeTransitionBuilder transition);
-			protected abstract void AssignInitialization(Action<object> initialization);
-		}
-
-		internal class ViewNodeBuilder<T> : GenericNodeBuilder<T>
-		{
-			public ViewNodeBuilder(NodeBuilder nodeBuilder) : base(nodeBuilder) { }
-
-			protected override void AssignTransition(NodeTransitionBuilder transition)
+			public ITaskNodeBuilder<TNestedTask> NavigateTo(INodeBuilder node)
 			{
-				InnerNodeBuilder.ViewTransitions.Add(transition);
+				Verify.ArgumentNotNull(node, "node");
+				InnerNodeBuilder.NestedTaskNextNode = node;
+				return this;
 			}
 
-			protected override void AssignInitialization(Action<object> initialization)
-			{
-				InnerNodeBuilder.ViewInitializations.Add(initialization);
-			}
-		}
 
-		internal class PresenterNodeBuilder<T> : GenericNodeBuilder<T>
-		{
-			public PresenterNodeBuilder(NodeBuilder nodeBuilder) : base(nodeBuilder) { }
-
-			protected override void AssignTransition(NodeTransitionBuilder transition)
+			public ITaskNodeBuilder<TNestedTask> With(Action<TNestedTask> action)
 			{
-				InnerNodeBuilder.PresenterTransitions.Add(transition);
-			}
-
-			protected override void AssignInitialization(Action<object> initialization)
-			{
-				InnerNodeBuilder.PresenterInitializations.Add(initialization);
+				Verify.ArgumentNotNull(action, "action");
+				Action<object> initialization = obj => action((TNestedTask)obj);
+				InnerNodeBuilder.NestedTaskInitializations.Add(initialization);
+				return this;
 			}
 		}
 	}

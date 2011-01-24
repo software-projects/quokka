@@ -78,6 +78,11 @@ namespace Quokka.UI.Tasks
 			get { return NodeBuilder.InferredViewType; }
 		}
 
+		public Type NestedTaskType
+		{
+			get { return NodeBuilder.NestedTaskType; }
+		}
+
 		/// <summary>
 		/// 	Options for this node.
 		/// </summary>
@@ -95,6 +100,8 @@ namespace Quokka.UI.Tasks
 		/// 	The current presenter object for this node, or <c>null</c>.
 		/// </summary>
 		public object Presenter { get; internal set; }
+
+		public UITask NestedTask { get; internal set; }
 
 		public bool IsViewModal { get; internal set; }
 
@@ -154,7 +161,7 @@ namespace Quokka.UI.Tasks
 					// If the inferred type is a concrete type and has not been registered, then register it
 					if (InferredViewType != null && !InferredViewType.IsInterface && !nodeContainer.IsTypeRegistered(InferredViewType))
 					{
-						nodeContainer.RegisterType(InferredViewType, ServiceLifecycle.Singleton);
+						nodeContainer.RegisterType(InferredViewType, ServiceLifecycle.PerRequest);
 					}
 				}
 				else
@@ -172,6 +179,11 @@ namespace Quokka.UI.Tasks
 							nodeContainer.RegisterType(DeclaredViewType, ServiceLifecycle.PerRequest);
 						}
 					}
+				}
+
+				if (NestedTaskType != null)
+				{
+					nodeContainer.RegisterType(NestedTaskType, ServiceLifecycle.PerRequest);
 				}
 
 				// node container is now initialised, assign to the member variable
@@ -266,11 +278,36 @@ namespace Quokka.UI.Tasks
 			}
 		}
 
+		internal void CreateNestedTask()
+		{
+			var task = (UITask)Container.Locator.GetInstance(NestedTaskType);
+			task.TaskComplete += NestedTaskComplete;
+			task.Start(ViewDeck);
+			NestedTask = task;
+		}
+
+		private void NestedTaskComplete(object sender, EventArgs e)
+		{
+			var task = (UITask)sender;
+			task.TaskComplete -= NestedTaskComplete;
+			if (NodeBuilder.NestedTaskNextNode != null)
+			{
+				var nextNode = (from n in Task.Nodes
+								where n.NodeBuilder == NodeBuilder.NestedTaskNextNode
+								select n).FirstOrDefault();
+				if (nextNode != null)
+				{
+					Task.Navigate(nextNode);
+				}
+			}
+		}
+
 		// TODO: probably better to have an event for this
 		internal void CleanupNode()
 		{
 			bool hideView = false;
 			bool removeView = false;
+			bool removeNestedTask = false;
 			bool disposeContainer = false;
 
 			if (Task == null)
@@ -284,6 +321,7 @@ namespace Quokka.UI.Tasks
 					// The task is complete -- all nodes should dispose of their container
 					disposeContainer = true;
 					removeView = true;
+					removeNestedTask = true;
 
 					// The task is not re-usable, but the view manager might be. Unregister
 					// event to avoid a memory leak.
@@ -315,6 +353,7 @@ namespace Quokka.UI.Tasks
 								// Not the current node, and not ordered to stay open
 								disposeContainer = true;
 								removeView = true;
+								removeNestedTask = true;
 							}
 						}
 					}
@@ -335,10 +374,16 @@ namespace Quokka.UI.Tasks
 				DisposePresenter();
 			}
 
+			if (removeNestedTask)
+			{
+				DisposeNestedTask();
+			}
+
 			if (disposeContainer)
 			{
 				DisposeView();
 				DisposePresenter();
+				DisposeNestedTask();
 				DisposeContainer();
 			}
 		}
@@ -362,6 +407,19 @@ namespace Quokka.UI.Tasks
 			{
 				DisposeUtils.DisposeOf(Presenter);
 				Presenter = null;
+			}
+		}
+
+		private void DisposeNestedTask()
+		{
+			if (NestedTask != null)
+			{
+				if (NestedTask.IsRunning)
+				{
+					NestedTask.EndTask();
+				}
+				DisposeUtils.DisposeOf(NestedTask);
+				NestedTask = null;
 			}
 		}
 

@@ -106,8 +106,10 @@
     <Compile Include="Uip\MockApp\MockViewManager.cs" />
     <Compile Include="Uip\MockApp\MockViews.cs" />
     <Compile Include="Uip\UipUtils_SetControllerTests.cs" />
+    <Compile Include="UI\Fakes\FakeCommand.cs" />
     <Compile Include="UI\Fakes\FakeViewDeck.cs" />
     <Compile Include="UI\TestApp1\Presenter1.cs" />
+    <Compile Include="UI\TestApp2\TestApp2.cs" />
     <Compile Include="UI\UITaskTests.cs" />
     <Compile Include="Util\RegistryUtilTests.cs" />
     <Compile Include="WinForms\Commands\UICommandTests.cs" />

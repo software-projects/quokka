@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using NUnit.Framework;
 using Quokka.UI.Tasks;
 
@@ -11,8 +12,8 @@ namespace Quokka.UI.Fakes
 	{
 		private readonly HashSet<UITask> _tasks = new HashSet<UITask>();
 		private readonly HashSet<object> _views = new HashSet<object>();
-		private bool _inTransition;
 		private object _visibleView;
+		private int _transitionReferenceCount;
 
 		public object VisibleView
 		{
@@ -44,14 +45,18 @@ namespace Quokka.UI.Fakes
 
 		public void BeginTransition()
 		{
-			Assert.IsFalse(_inTransition);
-			_inTransition = true;
+			if (Interlocked.Increment(ref _transitionReferenceCount) <= 0)
+			{
+				Assert.Fail("transition reference count = " + _transitionReferenceCount);
+			}
 		}
 
 		public void EndTransition()
 		{
-			Assert.IsTrue(_inTransition);
-			_inTransition = false;
+			if (Interlocked.Decrement(ref _transitionReferenceCount) < 0)
+			{
+				Assert.Fail("transition reference count = " + _transitionReferenceCount);
+			}
 		}
 
 		public void AddView(object view)
@@ -68,7 +73,7 @@ namespace Quokka.UI.Fakes
 
 		public void ShowView(object view)
 		{
-			Assert.IsTrue(_inTransition);
+			Assert.IsTrue(_transitionReferenceCount > 0);
 			Assert.IsNotNull(view);
 			Assert.IsTrue(_views.Contains(view), "View has not been added to the view deck");
 			_visibleView = view;
@@ -82,7 +87,6 @@ namespace Quokka.UI.Fakes
 
 		public void HideView(object view)
 		{
-			//Assert.IsTrue(_inTransition);
 			Assert.IsNotNull(view);
 			if (view == _visibleView)
 			{

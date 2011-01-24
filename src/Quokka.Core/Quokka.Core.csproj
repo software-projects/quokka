@@ -159,10 +159,14 @@
     <Compile Include="Data\SqlQuery.cs" />
     <Compile Include="DynamicCodeGeneration\DynamicAssembly2.cs" />
     <Compile Include="UI\Commands\IUICommand.cs" />
+    <Compile Include="UI\Tasks\IAnyNodeBuilder.cs" />
     <Compile Include="UI\Tasks\INavigateCommand.cs" />
     <Compile Include="UI\Tasks\INodeBuilder.cs" />
+    <Compile Include="UI\Tasks\IPresenterNodeBuilder.cs" />
+    <Compile Include="UI\Tasks\ITaskNodeBuilder.cs" />
     <Compile Include="UI\Tasks\IUITask.cs" />
     <Compile Include="UI\Tasks\IViewDeck.cs" />
+    <Compile Include="UI\Tasks\IViewNodeBuilder.cs" />
     <Compile Include="UI\Tasks\NavigateCommand.cs" />
     <Compile Include="UI\Tasks\NodeBuilder.cs" />
     <Compile Include="UI\Tasks\NodeTransitionBuilder.cs" />

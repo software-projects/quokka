@@ -1,3 +1,5 @@
+using Quokka.Uip;
+
 namespace Quokka.WinForms.Testing
 {
 	using System.Windows.Forms;
@@ -6,13 +8,16 @@ namespace Quokka.WinForms.Testing
 	{
 		private readonly DisplaySettings _displaySettings;
 		private readonly ViewTestManager _viewTestManager;
+		private readonly IUipViewManager _viewManager;
 		private ViewTestNode _currentNode;
 
 		public ViewTestForm()
 		{
 			InitializeComponent();
 			_displaySettings = new DisplaySettings(this);
-			_viewTestManager = new ViewTestManager(viewManagerPanel);
+			_viewManager = new ViewManager(viewManagerPanel);
+			viewManagerPanel.Dock = DockStyle.Fill;
+			_viewTestManager = new ViewTestManager(_viewManager);
 		}
 
 		private void ShowNode(ViewTestNode node)
