@@ -3,7 +3,7 @@
 // Authors: 
 //  John Jeffery <john@jeffery.id.au>
 //
-// Copyright (C) 2006 John Jeffery. All rights reserved.
+// Copyright (C) 2006-2011 John Jeffery. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -30,6 +30,7 @@ namespace Quokka.Uip
 {
 	using System;
 
+	[Obsolete("This will be removed from Quokka in a future release")]
 	public interface IProgressReport
 	{
 		/// <summary>
@@ -102,6 +103,7 @@ namespace Quokka.Uip
     /// Controller interface used for operations which take a long
     /// time and need to provide feedback to the user.
     /// </summary>
+    [Obsolete("This will be removed from Quokka in a future release")]
     public interface IInProgressController
     {
         /// <summary>

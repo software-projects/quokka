@@ -1,4 +1,34 @@
-﻿using System;
+﻿#region Copyright notice
+
+//
+// Authors: 
+//  John Jeffery <john@jeffery.id.au>
+//
+// Copyright (C) 2006-2011 John Jeffery. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+// 
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,9 +37,9 @@ using System.Reflection;
 namespace Quokka.Data.Internal
 {
 	/// <summary>
-	/// This helper class is responsible for identifying which method of <see cref="DataRecordConverter"/>
-	/// can be used to convert from one type in the <see cref="IDataRecord"/> to a (possibly different) type
-	/// in the record returned by the <see cref="SqlQuery{T}"/> class.
+	/// 	This helper class is responsible for identifying which method of <see cref = "DataRecordConverter" />
+	/// 	can be used to convert from one type in the <see cref = "IDataRecord" /> to a (possibly different) type
+	/// 	in the record returned by the <see cref = "SqlQuery{T}" /> class.
 	/// </summary>
 	internal static class DataRecordConverterMethod
 	{
@@ -49,157 +79,157 @@ namespace Quokka.Data.Internal
 
 		static DataRecordConverterMethod()
 		{
-			Type type = typeof(DataRecordConverter);
+			Type type = typeof (DataRecordConverter);
 
 			foreach (MethodInfo method in type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance))
 			{
 				switch (method.Name)
 				{
-					// The GetEnumXXXX methods are generic, and are not added to the conversion dictionary until
-					// necessary
-				case "GetEnumFromString":
-					GetEnumFromString = method;
-					break;
+						// The GetEnumXXXX methods are generic, and are not added to the conversion dictionary until
+						// necessary
+					case "GetEnumFromString":
+						GetEnumFromString = method;
+						break;
 
-				case "GetNullableEnumFromString":
-					GetNullableEnumFromString = method;
-					break;
+					case "GetNullableEnumFromString":
+						GetNullableEnumFromString = method;
+						break;
 
-				case "GetEnumFromInt32":
-					GetEnumFromInt32 = method;
-					break;
+					case "GetEnumFromInt32":
+						GetEnumFromInt32 = method;
+						break;
 
-				case "GetNullableEnumFromInt32":
-					GetNullableEnumFromInt32 = method;
-					break;
+					case "GetNullableEnumFromInt32":
+						GetNullableEnumFromInt32 = method;
+						break;
 
-				case "GetEnumFromInteger":
-					GetEnumFromInteger = method;
-					break;
+					case "GetEnumFromInteger":
+						GetEnumFromInteger = method;
+						break;
 
-				case "GetNullableEnumFromInteger":
-					GetNullableEnumFromInteger = method;
-					break;
+					case "GetNullableEnumFromInteger":
+						GetNullableEnumFromInteger = method;
+						break;
 
-				case "GetBoolean":
-					GetBoolean = method;
-					AddConversion(typeof(bool), method);
-					break;
+					case "GetBoolean":
+						GetBoolean = method;
+						AddConversion(typeof (bool), method);
+						break;
 
-				case "GetNullableBoolean":
-					GetNullableBoolean = method;
-					AddConversion(typeof(bool), typeof(bool?), method);
-					break;
+					case "GetNullableBoolean":
+						GetNullableBoolean = method;
+						AddConversion(typeof (bool), typeof (bool?), method);
+						break;
 
-				case "GetByte":
-					GetByte = method;
-					AddConversion(typeof(byte), method);
-					break;
+					case "GetByte":
+						GetByte = method;
+						AddConversion(typeof (byte), method);
+						break;
 
-				case "GetBytes":
-					GetBytes = method;
-					AddConversion(typeof(byte[]), typeof(byte[]), method);
-					break;
+					case "GetBytes":
+						GetBytes = method;
+						AddConversion(typeof (byte[]), typeof (byte[]), method);
+						break;
 
-				case "GetNullableByte":
-					GetNullableByte = method;
-					AddConversion(typeof(byte), typeof(byte?), method);
-					break;
+					case "GetNullableByte":
+						GetNullableByte = method;
+						AddConversion(typeof (byte), typeof (byte?), method);
+						break;
 
-				case "GetChar":
-					GetChar = method;
-					AddConversion(typeof(char), method);
-					break;
+					case "GetChar":
+						GetChar = method;
+						AddConversion(typeof (char), method);
+						break;
 
-				case "GetNullableChar":
-					GetNullableChar = method;
-					AddConversion(typeof(char), typeof(char?), method);
-					break;
+					case "GetNullableChar":
+						GetNullableChar = method;
+						AddConversion(typeof (char), typeof (char?), method);
+						break;
 
-				case "GetDateTime":
-					GetDateTime = method;
-					AddConversion(typeof(DateTime), method);
-					break;
+					case "GetDateTime":
+						GetDateTime = method;
+						AddConversion(typeof (DateTime), method);
+						break;
 
-				case "GetNullableDateTime":
-					GetNullableDateTime = method;
-					AddConversion(typeof(DateTime), typeof(DateTime?), method);
-					break;
+					case "GetNullableDateTime":
+						GetNullableDateTime = method;
+						AddConversion(typeof (DateTime), typeof (DateTime?), method);
+						break;
 
-				case "GetDecimal":
-					GetDecimal = method;
-					AddConversion(typeof(decimal), method);
-					break;
+					case "GetDecimal":
+						GetDecimal = method;
+						AddConversion(typeof (decimal), method);
+						break;
 
-				case "GetNullableDecimal":
-					GetNullableDecimal = method;
-					AddConversion(typeof(decimal), typeof(decimal?), method);
-					break;
+					case "GetNullableDecimal":
+						GetNullableDecimal = method;
+						AddConversion(typeof (decimal), typeof (decimal?), method);
+						break;
 
-				case "GetDouble":
-					GetDouble = method;
-					AddConversion(typeof(double), method);
-					break;
+					case "GetDouble":
+						GetDouble = method;
+						AddConversion(typeof (double), method);
+						break;
 
-				case "GetNullableDouble":
-					GetNullableDouble = method;
-					AddConversion(typeof(double), typeof(double?), method);
-					break;
+					case "GetNullableDouble":
+						GetNullableDouble = method;
+						AddConversion(typeof (double), typeof (double?), method);
+						break;
 
-				case "GetFloat":
-					GetFloat = method;
-					AddConversion(typeof(float), method);
-					break;
+					case "GetFloat":
+						GetFloat = method;
+						AddConversion(typeof (float), method);
+						break;
 
-				case "GetNullableFloat":
-					GetNullableFloat = method;
-					AddConversion(typeof(float), typeof(float?), method);
-					break;
+					case "GetNullableFloat":
+						GetNullableFloat = method;
+						AddConversion(typeof (float), typeof (float?), method);
+						break;
 
-				case "GetGuid":
-					GetGuid = method;
-					AddConversion(typeof(Guid), method);
-					break;
+					case "GetGuid":
+						GetGuid = method;
+						AddConversion(typeof (Guid), method);
+						break;
 
-				case "GetNullableGuid":
-					GetNullableGuid = method;
-					AddConversion(typeof(Guid), typeof(Guid?), method);
-					break;
+					case "GetNullableGuid":
+						GetNullableGuid = method;
+						AddConversion(typeof (Guid), typeof (Guid?), method);
+						break;
 
-				case "GetInt16":
-					GetInt16 = method;
-					AddConversion(typeof(short), method);
-					break;
+					case "GetInt16":
+						GetInt16 = method;
+						AddConversion(typeof (short), method);
+						break;
 
-				case "GetNullableInt16":
-					GetNullableInt16 = method;
-					AddConversion(typeof(short), typeof(short?), method);
-					break;
+					case "GetNullableInt16":
+						GetNullableInt16 = method;
+						AddConversion(typeof (short), typeof (short?), method);
+						break;
 
-				case "GetInt32":
-					GetInt32 = method;
-					AddConversion(typeof(int), method);
-					break;
+					case "GetInt32":
+						GetInt32 = method;
+						AddConversion(typeof (int), method);
+						break;
 
-				case "GetNullableInt32":
-					GetNullableInt32 = method;
-					AddConversion(typeof(int), typeof(int?), method);
-					break;
+					case "GetNullableInt32":
+						GetNullableInt32 = method;
+						AddConversion(typeof (int), typeof (int?), method);
+						break;
 
-				case "GetInt64":
-					GetInt64 = method;
-					AddConversion(typeof(long), method);
-					break;
+					case "GetInt64":
+						GetInt64 = method;
+						AddConversion(typeof (long), method);
+						break;
 
-				case "GetNullableInt64":
-					GetNullableInt64 = method;
-					AddConversion(typeof(long), typeof(long?), method);
-					break;
+					case "GetNullableInt64":
+						GetNullableInt64 = method;
+						AddConversion(typeof (long), typeof (long?), method);
+						break;
 
-				case "GetString":
-					GetString = method;
-					AddConversion(typeof(string), method);
-					break;
+					case "GetString":
+						GetString = method;
+						AddConversion(typeof (string), method);
+						break;
 				}
 			}
 		}
@@ -225,7 +255,7 @@ namespace Quokka.Data.Internal
 			}
 
 			if (propertyType.IsGenericType
-			    && propertyType.GetGenericTypeDefinition().Equals(typeof(Nullable<>)))
+			    && propertyType.GetGenericTypeDefinition().Equals(typeof (Nullable<>)))
 			{
 				NullableConverter nc = new NullableConverter(propertyType);
 				if (nc.UnderlyingType.IsEnum)
@@ -242,18 +272,18 @@ namespace Quokka.Data.Internal
 		{
 			MethodInfo method = null;
 
-			if (dataRecordType == typeof(string))
+			if (dataRecordType == typeof (string))
 			{
 				method = GetEnumFromString;
 			}
-			else if (dataRecordType == typeof(int))
+			else if (dataRecordType == typeof (int))
 			{
 				method = GetEnumFromInt32;
 			}
-			else if (dataRecordType == typeof(byte)
-			         || dataRecordType == typeof(char)
-			         || dataRecordType == typeof(short)
-			         || dataRecordType == typeof(long))
+			else if (dataRecordType == typeof (byte)
+			         || dataRecordType == typeof (char)
+			         || dataRecordType == typeof (short)
+			         || dataRecordType == typeof (long))
 			{
 				method = GetEnumFromInteger;
 			}
@@ -272,18 +302,18 @@ namespace Quokka.Data.Internal
 		{
 			MethodInfo method = null;
 
-			if (dataRecordType == typeof(string))
+			if (dataRecordType == typeof (string))
 			{
 				method = GetNullableEnumFromString;
 			}
-			else if (dataRecordType == typeof(int))
+			else if (dataRecordType == typeof (int))
 			{
 				method = GetNullableEnumFromInt32;
 			}
-			else if (dataRecordType == typeof(byte)
-			         || dataRecordType == typeof(char)
-			         || dataRecordType == typeof(short)
-			         || dataRecordType == typeof(long))
+			else if (dataRecordType == typeof (byte)
+			         || dataRecordType == typeof (char)
+			         || dataRecordType == typeof (short)
+			         || dataRecordType == typeof (long))
 			{
 				method = GetNullableEnumFromInteger;
 			}

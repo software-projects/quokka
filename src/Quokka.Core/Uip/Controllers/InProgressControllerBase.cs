@@ -3,7 +3,7 @@
 // Authors: 
 //  John Jeffery <john@jeffery.id.au>
 //
-// Copyright (C) 2006 John Jeffery. All rights reserved.
+// Copyright (C) 2006-2011 John Jeffery. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -39,7 +39,8 @@ namespace Quokka.Uip.Controllers
     /// from scratch. The base class has to implement <see cref="DoWork"/> and <see cref="FinishedWork"/>, as they
     /// are defined as abstract methods in this class.
     /// </remarks>
-    public abstract class InProgressControllerBase : IInProgressController
+	[Obsolete("This will be removed from Quokka in a future release")]
+	public abstract class InProgressControllerBase : IInProgressController
     {
         private string progressSummary;
         private string progressDetail;

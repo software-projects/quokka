@@ -60,7 +60,6 @@
     <Compile Include="Diagnostics\NullLogger.cs" />
     <Compile Include="Diagnostics\Verify.cs" />
     <Compile Include="DynamicCodeGeneration\AbstractProxyBuilder.cs" />
-    <Compile Include="DynamicCodeGeneration\OldDynamicAssembly.cs" />
     <Compile Include="DynamicCodeGeneration\MemberMapping.cs" />
     <Compile Include="DynamicCodeGeneration\NavigatorProxyBuilder.cs" />
     <Compile Include="DynamicCodeGeneration\ProxyFactory.cs" />
@@ -157,13 +156,14 @@
     <Compile Include="Data\ISqlQueryReader.cs" />
     <Compile Include="Data\ParameterAttribute.cs" />
     <Compile Include="Data\SqlQuery.cs" />
-    <Compile Include="DynamicCodeGeneration\DynamicAssembly2.cs" />
+    <Compile Include="DynamicCodeGeneration\DynamicAssembly.cs" />
     <Compile Include="UI\Commands\IUICommand.cs" />
+    <Compile Include="UI\Tasks\ErrorCondition.cs" />
     <Compile Include="UI\Tasks\IAnyNodeBuilder.cs" />
     <Compile Include="UI\Tasks\INavigateCommand.cs" />
     <Compile Include="UI\Tasks\INodeBuilder.cs" />
     <Compile Include="UI\Tasks\IPresenterNodeBuilder.cs" />
-    <Compile Include="UI\Tasks\ITaskNodeBuilder.cs" />
+    <Compile Include="UI\Tasks\INestedTaskNodeBuilder.cs" />
     <Compile Include="UI\Tasks\IUITask.cs" />
     <Compile Include="UI\Tasks\IViewDeck.cs" />
     <Compile Include="UI\Tasks\IViewNodeBuilder.cs" />
@@ -171,6 +171,7 @@
     <Compile Include="UI\Tasks\NodeBuilder.cs" />
     <Compile Include="UI\Tasks\NodeTransitionBuilder.cs" />
     <Compile Include="UI\Tasks\Presenter.cs" />
+    <Compile Include="UI\Tasks\Presenter.Generic.cs" />
     <Compile Include="UI\Tasks\PresenterBase.cs" />
     <Compile Include="UI\Tasks\TaskBuilder.cs" />
     <Compile Include="UI\Tasks\TaskBuilderStorage.cs" />
@@ -181,7 +182,9 @@
     <Compile Include="UI\Tasks\ViewClosedEventArgs.cs" />
     <Compile Include="Util\DisposeUtils.cs" />
     <None Include="Quokka.snk" />
-    <Compile Include="UI\Tasks\INodeBuilder.Generic.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="TODO.txt" />
   </ItemGroup>
   <PropertyGroup>
     <DontImportPostSharp>True</DontImportPostSharp>

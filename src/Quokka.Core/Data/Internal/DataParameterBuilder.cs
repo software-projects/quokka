@@ -1,4 +1,34 @@
-﻿using System;
+﻿#region Copyright notice
+
+//
+// Authors: 
+//  John Jeffery <john@jeffery.id.au>
+//
+// Copyright (C) 2006-2011 John Jeffery. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+// 
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
@@ -9,18 +39,20 @@ using Quokka.Diagnostics;
 namespace Quokka.Data.Internal
 {
 	/// <summary>
-	/// This class is responsible for populating an <see cref="IDbCommand"/> object with the
-	/// necessary <see cref="IDataParameter"/> parameter objects that match the property values
-	/// in an <see cref="SqlQuery{T}"/> object.
+	/// 	This class is responsible for populating an <see cref = "IDbCommand" /> object with the
+	/// 	necessary <see cref = "IDataParameter" /> parameter objects that match the property values
+	/// 	in an <see cref = "SqlQuery{T}" /> object.
 	/// </summary>
 	/// <remarks>
-	/// The current implementation uses the System.Reflection namespace to query the property values
-	/// in the <see cref="SqlQuery{T}"/> object. A future implementation may improve performance by
-	/// generating dynamic code using the System.Reflection.Emit namespace.
+	/// 	The current implementation uses the System.Reflection namespace to query the property values
+	/// 	in the <see cref = "SqlQuery{T}" /> object. A future implementation may improve performance by
+	/// 	generating dynamic code using the System.Reflection.Emit namespace.
 	/// </remarks>
 	internal class DataParameterBuilder
 	{
-		private static readonly Dictionary<Type, DataParameterBuilder> Instances = new Dictionary<Type, DataParameterBuilder>();
+		private static readonly Dictionary<Type, DataParameterBuilder> Instances =
+			new Dictionary<Type, DataParameterBuilder>();
+
 		private static readonly Regex ParameterNameRegex = new Regex(@"^[a-z_][a-z0-9_]*$", RegexOptions.IgnoreCase);
 		private readonly List<string> _errors = new List<string>();
 		private readonly Dictionary<string, DataParameterInfo> _namedParameters;
@@ -196,15 +228,15 @@ namespace Quokka.Data.Internal
 		}
 
 		/// <summary>
-		/// Gets the <see cref="ParameterAttribute"/> associated with a property, and if there
-		/// is none a default attribute is constructed.
+		/// 	Gets the <see cref = "ParameterAttribute" /> associated with a property, and if there
+		/// 	is none a default attribute is constructed.
 		/// </summary>
 		private static ParameterAttribute GetParameterAttribute(PropertyInfo property)
 		{
-			object[] attributes = property.GetCustomAttributes(typeof(ParameterAttribute), true);
+			object[] attributes = property.GetCustomAttributes(typeof (ParameterAttribute), true);
 			if (attributes != null && attributes.Length > 0)
 			{
-				return (ParameterAttribute)attributes[0];
+				return (ParameterAttribute) attributes[0];
 			}
 			return new ParameterAttribute(property.Name);
 		}

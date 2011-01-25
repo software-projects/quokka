@@ -1,4 +1,32 @@
-﻿using System;
+﻿#region Copyright notice
+//
+// Authors: 
+//  John Jeffery <john@jeffery.id.au>
+//
+// Copyright (C) 2006-2011 John Jeffery. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+// 
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+#endregion
+
+using System;
 using Quokka.Collections;
 using Quokka.Events;
 
@@ -8,6 +36,10 @@ namespace Quokka.UI.Tasks
 	/// 	Base class for the <see cref = "Presenter" /> and <see cref = "Presenter{T}" /> classes, providing
 	/// 	common functionality.
 	/// </summary>
+	/// <remarks>
+	///		Do not use this class as a base class for your presenters. Use <see cref="Presenter{T}"/> instead.
+	///		In some cases you might use <see cref="Presenter"/>, but this will not be often.
+	/// </remarks>
 	public abstract class PresenterBase : IDisposable
 	{
 		public Type ViewType { get; protected set; }
@@ -46,9 +78,9 @@ namespace Quokka.UI.Tasks
 			GC.SuppressFinalize(this);
 		}
 
-		internal void PresenterInitialized()
+		internal void PerformPresenterInitialization()
 		{
-			OnViewCreated();
+			InitializePresenter();
 		}
 
 		internal object ViewObject { get; set; }
@@ -63,14 +95,24 @@ namespace Quokka.UI.Tasks
 		}
 
 		/// <summary>
-		/// 	This method is called after the presenter has been constructed, and all of the properties have been assigned.
+		/// 	Override this method to perform initialization of the presenter. Itis called by the framework after 
+		///		the presenter has been constructed, all of the properties have been assigned, and the view has been 
+		///		created and assigned to the presenter.
 		/// </summary>
 		/// <remarks>
-		/// 	Do not perform initialization on the view in the presenter's constructor, as it will not have been assigned yet.
-		/// 	Perform initialization of the view in this method instead.
+		/// 	Do not perform any initialization that concerns the view in the presenter's constructor, as it will 
+		///		not have been assigned yet. Perform initialization of the view in this method instead.
 		/// </remarks>
+		protected virtual void InitializePresenter()
+		{
+			// For backwards compatibility in Jared's code. Will be removed soon.
+			OnViewCreated();
+		}
+
+		[Obsolete("Use InitializePresenter method instead")]
 		protected virtual void OnViewCreated()
 		{
+			
 		}
 	}
 }

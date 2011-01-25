@@ -23,7 +23,7 @@ namespace Quokka.UI.Tasks
 		public IList<Action<object>> NestedTaskInitializations = new List<Action<object>>();
 		public IList<NodeTransitionBuilder> ViewTransitions = new List<NodeTransitionBuilder>();
 		public IList<NodeTransitionBuilder> PresenterTransitions = new List<NodeTransitionBuilder>();
-		public IList<NodeTransitionBuilder> NestedTaskTransitions = new List<NodeTransitionBuilder>();
+		public IList<ConditionalNodeTransitionBuilder> NestedTaskTransitions = new List<ConditionalNodeTransitionBuilder>();
 
 		private bool _isValidated;
 
@@ -95,10 +95,10 @@ namespace Quokka.UI.Tasks
 			return new ViewNodeBuilder<TView>(this);
 		}
 
-		public ITaskNodeBuilder<TNestedTask> SetNestedTask<TNestedTask>() where TNestedTask : UITask
+		public INestedTaskNodeBuilder<TNestedTask> SetNestedTask<TNestedTask>() where TNestedTask : UITask
 		{
 			NestedTaskType = typeof (TNestedTask);
-			return new NestedTaskNodeBuilder<TNestedTask>(this);
+			return new NestedNestedTaskNodeBuilder<TNestedTask>(this);
 		}
 
 		private void StayOpen()
@@ -211,25 +211,25 @@ namespace Quokka.UI.Tasks
 			}
 		}
 
-		internal class NestedTaskNodeBuilder<TNestedTask> : ITaskNodeBuilder<TNestedTask> where TNestedTask : UITask
+		internal class NestedNestedTaskNodeBuilder<TNestedTask> : INestedTaskNodeBuilder<TNestedTask> where TNestedTask : UITask
 		{
 			protected readonly NodeBuilder InnerNodeBuilder;
 
-			public NestedTaskNodeBuilder(NodeBuilder nodeBuilder)
+			public NestedNestedTaskNodeBuilder(NodeBuilder nodeBuilder)
 			{
 				InnerNodeBuilder = Verify.ArgumentNotNull(nodeBuilder, "nodeBuilder");
 			}
 
-			public ITaskNodeBuilder<TNestedTask> NavigateTo(Converter<TNestedTask, INavigateCommand> converter, INodeBuilder node)
+			public INestedTaskNodeBuilder<TNestedTask> NavigateTo(Converter<TNestedTask, bool> converter, INodeBuilder node)
 			{
 				Verify.ArgumentNotNull(converter, "converter");
-				Converter<object, INavigateCommand> c = obj => converter((TNestedTask)obj);
-				var transition = new NodeTransitionBuilder(c, node);
+				Converter<object, bool> c = obj => converter((TNestedTask)obj);
+				var transition = new ConditionalNodeTransitionBuilder(c, node);
 				InnerNodeBuilder.NestedTaskTransitions.Add(transition);
 				return this;
 			}
 
-			public ITaskNodeBuilder<TNestedTask> NavigateTo(INodeBuilder node)
+			public INestedTaskNodeBuilder<TNestedTask> NavigateTo(INodeBuilder node)
 			{
 				Verify.ArgumentNotNull(node, "node");
 				InnerNodeBuilder.NestedTaskNextNode = node;
@@ -237,7 +237,7 @@ namespace Quokka.UI.Tasks
 			}
 
 
-			public ITaskNodeBuilder<TNestedTask> With(Action<TNestedTask> action)
+			public INestedTaskNodeBuilder<TNestedTask> With(Action<TNestedTask> action)
 			{
 				Verify.ArgumentNotNull(action, "action");
 				Action<object> initialization = obj => action((TNestedTask)obj);

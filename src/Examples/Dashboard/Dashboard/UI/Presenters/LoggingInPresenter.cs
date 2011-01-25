@@ -26,7 +26,7 @@ namespace Dashboard.UI.Presenters
 			_backgroundWorker.RunWorkerCompleted += delegate { WorkCompleted(); };
 		}
 
-		protected override void OnViewCreated()
+		protected override void InitializePresenter()
 		{
 			View.Load += delegate { ViewLoaded(); };
 		}

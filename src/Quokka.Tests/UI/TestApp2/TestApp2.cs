@@ -68,7 +68,6 @@ namespace Quokka.UI.TestApp2
 
 			node2
 				.SetNestedTask<NestedTask2>()
-				.NavigateTo(t => t.Failed, node5)
 				.NavigateTo(node5);
 
 			node5
@@ -79,8 +78,6 @@ namespace Quokka.UI.TestApp2
 
 	public class NestedTask2 : UITask
 	{
-		public INavigateCommand Failed { get; set; }
-
 		protected override void CreateNodes()
 		{
 			var node3 = CreateNode("Node3");
@@ -121,7 +118,7 @@ namespace Quokka.UI.TestApp2
 	{
 		public INavigateCommand Next { get; set; }
 
-		protected override void OnViewCreated()
+		protected override void InitializePresenter()
 		{
 			View.NextCommand.Execute += (sender, args) => Next.Navigate();
 		}

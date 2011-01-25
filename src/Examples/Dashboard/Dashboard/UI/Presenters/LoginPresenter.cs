@@ -1,33 +1,26 @@
 ﻿using System;
 using Dashboard.UI.TaskStates;
 using Dashboard.UI.Views.Interfaces;
-using Quokka.Diagnostics;
 using Quokka.UI.Tasks;
 
 namespace Dashboard.UI.Presenters
 {
 	public class LoginPresenter : Presenter<ILoginView>
 	{
-		private readonly LoginState _state;
-
 		public INavigateCommand Next { get; set; }
+		public LoginState LoginState { get; set; }
 
 
-		public LoginPresenter(LoginState state)
+		protected override void InitializePresenter()
 		{
-			Verify.ArgumentNotNull(state, "state", out _state);
-		}
-
-		protected override void OnViewCreated()
-		{
-			if (!String.IsNullOrEmpty(_state.UserName))
+			if (!String.IsNullOrEmpty(LoginState.UserName))
 			{
-				View.Username = _state.UserName;
+				View.Username = LoginState.UserName;
 				View.Password = string.Empty;
 				View.ErrorMessage = "Invalid username or password";
 			}
 
-			View.LoginCommand.Execute += delegate { AttemptLogin(); };			
+			View.LoginCommand.Execute += delegate { AttemptLogin(); };
 		}
 
 
@@ -41,8 +34,8 @@ namespace Dashboard.UI.Presenters
 				return;
 			}
 
-			_state.UserName = username;
-			_state.Password = password;
+			LoginState.UserName = username;
+			LoginState.Password = password;
 			Next.Navigate();
 		}
 	}

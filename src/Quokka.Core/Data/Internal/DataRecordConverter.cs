@@ -1,22 +1,51 @@
-﻿using System;
+﻿#region Copyright notice
+
+//
+// Authors: 
+//  John Jeffery <john@jeffery.id.au>
+//
+// Copyright (C) 2006-2011 John Jeffery. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+// 
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Data;
-using Quokka.DynamicCodeGeneration;
 
 namespace Quokka.Data.Internal
 {
 	/// <summary>
-	/// Base class for types that convert data from an <see cref="IDataRecord"/> instance into
-	/// a record instance whose class type is defined as the generic parameter T to the <see cref="SqlQuery{T}"/> class.
+	/// 	Base class for types that convert data from an <see cref = "IDataRecord" /> instance into
+	/// 	a record instance whose class type is defined as the generic parameter T to the <see cref = "SqlQuery{T}" /> class.
 	/// </summary>
 	/// <remarks>
-	/// The <see cref="DataRecordConverterTypeBuilder"/> creates dynamic types that derive from this class.
+	/// 	The <see cref = "DataRecordConverterTypeBuilder" /> creates dynamic types that derive from this class.
 	/// </remarks>
 	public abstract class DataRecordConverter
 	{
-		private static readonly Dictionary<DataRecordConverterSpec, Type> ConverterTypes = new Dictionary<DataRecordConverterSpec, Type>();
+		private static readonly Dictionary<DataRecordConverterSpec, Type> ConverterTypes =
+			new Dictionary<DataRecordConverterSpec, Type>();
 
-		private static DynamicAssembly _dynamicAssembly;
 		private readonly IDataReader _dataReader;
 
 		protected DataRecordConverter(IDataReader dataReader)
@@ -37,16 +66,12 @@ namespace Quokka.Data.Internal
 			{
 				// TODO: make this thread-safe
 				var builder = new DataRecordConverterTypeBuilder(key);
-				if (_dynamicAssembly == null)
-				{
-					_dynamicAssembly = new DynamicAssembly();
-				}
 				type = builder.BuildConverter();
 				ConverterTypes.Add(key, type);
 			}
 
 			object obj = Activator.CreateInstance(type, dataRecord);
-			return (DataRecordConverter)obj;
+			return (DataRecordConverter) obj;
 		}
 
 		protected abstract void DoCopy(object record);
@@ -276,7 +301,7 @@ namespace Quokka.Data.Internal
 			{
 				return null;
 			}
-			return (byte[])_dataReader.GetValue(index);
+			return (byte[]) _dataReader.GetValue(index);
 		}
 
 		protected T GetEnumFromString<T>(int index)
@@ -293,7 +318,7 @@ namespace Quokka.Data.Internal
 			}
 
 			// TODO: could use an enum/string mapper class to convert based on [Description] attribute.
-			return (T)Enum.Parse(typeof(T), text);
+			return (T) Enum.Parse(typeof (T), text);
 		}
 
 		protected T? GetNullableEnumFromString<T>(int index) where T : struct
@@ -310,7 +335,7 @@ namespace Quokka.Data.Internal
 			}
 
 			// TODO: could use an enum/string mapper class to convert based on [Description] attribute.
-			return (T)Enum.Parse(typeof(T), text);
+			return (T) Enum.Parse(typeof (T), text);
 		}
 
 		protected T GetEnumFromInt32<T>(int index)
@@ -321,7 +346,7 @@ namespace Quokka.Data.Internal
 			}
 
 			int intValue = _dataReader.GetInt32(index);
-			return (T)Enum.ToObject(typeof(T), intValue);
+			return (T) Enum.ToObject(typeof (T), intValue);
 		}
 
 		protected T? GetNullableEnumFromInt32<T>(int index) where T : struct
@@ -332,7 +357,7 @@ namespace Quokka.Data.Internal
 			}
 
 			int intValue = _dataReader.GetInt32(index);
-			return (T)Enum.ToObject(typeof(T), intValue);
+			return (T) Enum.ToObject(typeof (T), intValue);
 		}
 
 		protected T GetEnumFromNumber<T>(int index)
@@ -343,7 +368,7 @@ namespace Quokka.Data.Internal
 			}
 
 			object numValue = _dataReader.GetValue(index);
-			return (T)Enum.ToObject(typeof(T), numValue);
+			return (T) Enum.ToObject(typeof (T), numValue);
 		}
 
 		protected T? GetNullableEnumFromNumber<T>(int index) where T : struct
@@ -354,7 +379,7 @@ namespace Quokka.Data.Internal
 			}
 
 			object numValue = _dataReader.GetValue(index);
-			return (T)Enum.ToObject(typeof(T), numValue);
+			return (T) Enum.ToObject(typeof (T), numValue);
 		}
 
 		#endregion

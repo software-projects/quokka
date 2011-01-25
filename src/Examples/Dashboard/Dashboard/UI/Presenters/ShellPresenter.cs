@@ -15,7 +15,7 @@ namespace Dashboard.UI.Presenters
 			_state = Verify.ArgumentNotNull(state, "state");
 		}
 
-		protected override void OnViewCreated()
+		protected override void InitializePresenter()
 		{
 			View.Username = _state.User.FullName;
 			View.Logout += delegate { Logout(); };

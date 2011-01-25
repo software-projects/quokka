@@ -1,4 +1,4 @@
-#region Copyright notice
+﻿#region Copyright notice
 //
 // Authors: 
 //  John Jeffery <john@jeffery.id.au>
@@ -26,21 +26,30 @@
 //
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Quokka.Uip.MockApp
+namespace Quokka.UI.Tasks
 {
-    public class MockState
-    {
-        private string stringField;
+	/// <summary>
+	/// 	Base class for a presenter. The generic argument specifies the view interface or class.
+	/// </summary>
+	/// <typeparam name = "TView">
+	/// 	The type of view that this presenter interacts with. It is recommended that this should be an
+	/// 	interface to permit mocked unit-testing, but it is possible to specify a concrete class.
+	/// </typeparam>
+	public abstract class Presenter<TView> : PresenterBase where TView : class
+	{
+		protected Presenter()
+		{
+			ViewType = typeof(TView);
+		}
 
-        public string StringProperty {
-            get { return stringField; }
-            set { stringField = value; }
-        }
-
-        public bool SetByController3;
-    }
+		/// <summary>
+		/// 	The view object associated with this presenter. The <see cref = "UITask" /> will assign the
+		/// 	view to the presenter immediately after constructing the presenter.
+		/// </summary>
+		public TView View
+		{
+			get { return (TView)ViewObject; }
+			set { ViewObject = value; }
+		}
+	}
 }

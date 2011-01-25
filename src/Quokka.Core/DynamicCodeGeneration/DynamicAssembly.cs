@@ -1,4 +1,34 @@
-﻿using System;
+﻿#region Copyright notice
+
+//
+// Authors: 
+//  John Jeffery <john@jeffery.id.au>
+//
+// Copyright (C) 2006-2011 John Jeffery. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+// 
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+
+#endregion
+
+using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -7,8 +37,8 @@ using System.Threading;
 namespace Quokka.DynamicCodeGeneration
 {
 	/// <summary>
-	/// Provides a central reference to an assembly that is created dynamically during program execution.
-	/// A <see cref="DynamicAssembly"/> is not normally written to disk, but it can be for testing purposes.
+	/// 	Provides a central reference to an assembly that is created dynamically during program execution.
+	/// 	A <see cref = "DynamicAssembly" /> is not normally written to disk, but it can be for testing purposes.
 	/// </summary>
 	public class DynamicAssembly
 	{
@@ -21,25 +51,24 @@ namespace Quokka.DynamicCodeGeneration
 		private readonly bool _canSave;
 		private int _classCount;
 
-		private static DynamicAssembly _instance;
+		private static volatile DynamicAssembly _instance;
 		private static readonly object LockObject = new object();
 
 		public static DynamicAssembly Instance
 		{
 			get
 			{
-				if (_instance != null)
+				if (_instance == null)
 				{
-					return _instance;
-				}
-
-				lock (LockObject)
-				{
-					if (_instance == null)
+					lock (LockObject)
 					{
-						_instance = new DynamicAssembly();
+						if (_instance == null)
+						{
+							_instance = new DynamicAssembly();
+						}
 					}
 				}
+
 				return _instance;
 			}
 		}
@@ -61,9 +90,9 @@ namespace Quokka.DynamicCodeGeneration
 
 				// Add a debuggable attribute to the assembly saying to disable optimizations
 				// See http://blogs.msdn.com/rmbyers/archive/2005/06/26/432922.aspx
-				Type daType = typeof(DebuggableAttribute);
-				ConstructorInfo daCtor = daType.GetConstructor(new[] { typeof(bool), typeof(bool) });
-				var daBuilder = new CustomAttributeBuilder(daCtor, new object[] { true, true });
+				Type daType = typeof (DebuggableAttribute);
+				ConstructorInfo daCtor = daType.GetConstructor(new[] {typeof (bool), typeof (bool)});
+				var daBuilder = new CustomAttributeBuilder(daCtor, new object[] {true, true});
 				_assemblyBuilder.SetCustomAttribute(daBuilder);
 
 				_moduleBuilder = _assemblyBuilder.DefineDynamicModule(moduleName);
@@ -77,12 +106,12 @@ namespace Quokka.DynamicCodeGeneration
 		}
 
 		/// <summary>
-		/// If set to <c>true</c>, then any <see cref="DynamicAssembly"/> objects created will be able to be saved to disk.
-		/// If set to <c>false</c>, then <see cref="DynamicAssembly"/> objects cannot be saved to disk.
+		/// 	If set to <c>true</c>, then any <see cref = "DynamicAssembly" /> objects created will be able to be saved to disk.
+		/// 	If set to <c>false</c>, then <see cref = "DynamicAssembly" /> objects cannot be saved to disk.
 		/// </summary>
 		/// <remarks>
-		/// The main reason for wanting to save a <see cref="DynamicAssembly"/> object to disk is so that it can
-		/// be verified by the PEVerify utility as part of unit testing.
+		/// 	The main reason for wanting to save a <see cref = "DynamicAssembly" /> object to disk is so that it can
+		/// 	be verified by the PEVerify utility as part of unit testing.
 		/// </remarks>
 		public static bool CreateFiles { get; set; }
 
