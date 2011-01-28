@@ -6,7 +6,10 @@ namespace Quokka.UI.Tasks
 	///<summary>
 	///	Used for reporting error conditions that occur during processing of a task.
 	///</summary>
-	public class ErrorCondition
+	/// <remarks>
+	/// This is just an idea at the moment. Not currently used.
+	/// </remarks>
+	internal class ErrorCondition
 	{
 		public ErrorCondition()
 		{

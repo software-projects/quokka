@@ -405,6 +405,7 @@ namespace Quokka.UI.Tasks
 						{
 							DoNavigate(nextNode);
 							nextNode = _nextNode;
+							_nextNode = null;
 						} while (nextNode != null);
 
 						if (!_endTaskRequested && CurrentNode != null)

@@ -151,6 +151,11 @@ namespace Quokka.UI.Tasks
 		/// </summary>
 		public IViewDeck ViewDeck { get; private set; }
 
+		public string Name
+		{
+			get { return NodeBuilder.Name; }
+		}
+
 		// TODO: probably better to have an event for this
 		internal void TaskStarting()
 		{

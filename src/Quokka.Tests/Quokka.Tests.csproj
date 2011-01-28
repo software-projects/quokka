@@ -110,6 +110,7 @@
     <Compile Include="UI\Fakes\FakeViewDeck.cs" />
     <Compile Include="UI\TestApp1\Presenter1.cs" />
     <Compile Include="UI\TestApp2\TestApp2.cs" />
+    <Compile Include="UI\TestApp3\TestApp3.cs" />
     <Compile Include="UI\UITaskTests.cs" />
     <Compile Include="Util\RegistryUtilTests.cs" />
     <Compile Include="WinForms\Commands\UICommandTests.cs" />
