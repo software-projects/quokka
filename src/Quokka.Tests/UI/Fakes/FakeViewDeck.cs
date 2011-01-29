@@ -99,6 +99,11 @@ namespace Quokka.UI.Fakes
 			throw new NotImplementedException();
 		}
 
+		public IModalWindow CreateModalWindow()
+		{
+			throw new NotImplementedException();
+		}
+
 		#endregion
 
 		protected void OnViewClosed(object view)

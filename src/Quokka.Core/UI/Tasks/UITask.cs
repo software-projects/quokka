@@ -185,18 +185,6 @@ namespace Quokka.UI.Tasks
 
 		#endregion
 
-		#region Internal methods
-
-		internal void PopNode()
-		{
-			// TODO: navigate to the previous node. Implies that we keep a stack of nodes. 
-			// Normally would not want the stack to go too far. We only want a stack of nodes
-			// to backtrack modals.
-			throw new NotImplementedException();
-		}
-
-		#endregion
-
 		#region Protected overrides
 
 		protected virtual void OnTaskStarted(EventArgs e)
@@ -385,6 +373,7 @@ namespace Quokka.UI.Tasks
 		private void NavigateHelper()
 		{
 			_inNavigateMethod = true;
+			bool showModalView = false;
 			try
 			{
 				var nextNode = _nextNode;
@@ -421,6 +410,7 @@ namespace Quokka.UI.Tasks
 									// within the modal view. For this reason set a variable
 									// to remind us to show the modal view before leaving this
 									// method.
+									showModalView = true;
 								}
 								else
 								{
@@ -429,6 +419,13 @@ namespace Quokka.UI.Tasks
 									// This is a bit pathalogical, but possible. If it should happen, the
 									// view will be cleaned up in the Navigate method.
 									ViewDeck.ShowView(CurrentNode.View);
+								}
+							}
+							else if (CurrentNode.NestedTask != null)
+							{
+								if (CurrentNode.IsViewModal)
+								{
+									showModalView = true;
 								}
 							}
 						}
@@ -463,6 +460,12 @@ namespace Quokka.UI.Tasks
 			finally
 			{
 				_inNavigateMethod = false;
+			}
+
+			if (showModalView && CurrentNode != null)
+			{
+				CurrentNode.ViewDeck.ShowView(CurrentNode.View);
+				CurrentNode.ModalWindow.ShowModal();
 			}
 		}
 
@@ -528,7 +531,7 @@ namespace Quokka.UI.Tasks
 
 				if (viewCreated)
 				{
-					ViewDeck.AddView(CurrentNode.View);
+					CurrentNode.ViewDeck.AddView(CurrentNode.View);
 				}
 
 				if (presenterCreated)

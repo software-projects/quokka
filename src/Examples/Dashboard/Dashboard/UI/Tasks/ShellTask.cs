@@ -7,34 +7,35 @@ namespace Dashboard.UI.Tasks
 {
 	public class ShellTask : UITask
 	{
-		public readonly LoginState LoginState = new LoginState();
-		public readonly UserState UserState = new UserState();
+		public UserState UserState { get; set; }
 
 		protected override void CreateState()
 		{
-			RegisterInstance(LoginState);
 			RegisterInstance(UserState);
 		}
 
 		protected override void CreateNodes()
 		{
-			var loginNode = CreateNode();
-			var loggingInNode = CreateNode();
 			var shellNode = CreateNode();
-
-			loginNode
-				.SetPresenter<LoginPresenter>()
-				.NavigateTo(p => p.Next, loggingInNode);
-
-			loggingInNode
-				.SetPresenter<LoggingInPresenter>()
-				.NavigateTo(p => p.Success, shellNode)
-				.NavigateTo(p => p.Fail, loginNode);
+			var confirmLogoutNode = CreateNode();
+			var doSomethingNode = CreateNode();
 
 			shellNode
 				.SetView<ShellView>()
 				.SetPresenter<ShellPresenter>()
-				.NavigateTo(p => p.NavigateLogout, loginNode);
+				.NavigateTo(p => p.LogoutCommand, confirmLogoutNode)
+				.NavigateTo(p => p.DoSomethingCommand, doSomethingNode);
+
+			doSomethingNode
+				.SetNestedTask<DoSomethingTask>()
+				.NavigateTo(shellNode)
+				.ShowModal();
+
+			confirmLogoutNode
+				.SetView<ConfirmLogoutView>()
+				.NavigateTo(v => v.LogoutCommand, null)
+				.NavigateTo(v => v.CancelCommand, shellNode)
+				.ShowModal();
 		}
 	}
 }

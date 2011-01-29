@@ -94,5 +94,15 @@ namespace Quokka.UI.Tasks
 		/// 	nodes within the <see cref = "UITask" />.
 		/// </returns>
 		IViewNodeBuilder<TView> StayOpen();
+
+		/// <summary>
+		/// 	Specify that this node's view should be displayed in a modal window.
+		/// </summary>
+		/// <returns>
+		/// 	Returns an <see cref = "IViewNodeBuilder{T}" /> object, which can be used
+		/// 	for further defining properties for the node, and configuring navigations to other
+		/// 	nodes within the <see cref = "UITask" />.
+		/// </returns>
+		IViewNodeBuilder<TView> ShowModal();
 	}
 }

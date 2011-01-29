@@ -13,7 +13,7 @@ using Quokka.WinForms.Regions;
 namespace Quokka.WinForms.Startup
 {
 	/// <summary>
-	/// Base class for application 'bootstrapper' classes
+	/// 	Base class for application 'bootstrapper' classes
 	/// </summary>
 	public abstract class BootstrapperBase
 	{
@@ -23,7 +23,7 @@ namespace Quokka.WinForms.Startup
 		private string _progressMessage = String.Empty;
 
 		/// <summary>
-		/// Shell form created during <see cref="Run"/>
+		/// 	Shell form created during <see cref = "Run" />
 		/// </summary>
 		public Form Shell
 		{
@@ -31,7 +31,7 @@ namespace Quokka.WinForms.Startup
 		}
 
 		/// <summary>
-		/// Runs the bootstrapper, creating application artifacts in the correct order.
+		/// 	Runs the bootstrapper, creating application artifacts in the correct order.
 		/// </summary>
 		public Form Run()
 		{
@@ -67,10 +67,10 @@ namespace Quokka.WinForms.Startup
 		}
 
 		/// <summary>
-		/// Called before all other initialization. Override to configure program logging.
+		/// 	Called before all other initialization. Override to configure program logging.
 		/// </summary>
 		/// <remarks>
-		/// All logging is via the Common.Logging package.
+		/// 	All logging is via the Common.Logging package.
 		/// </remarks>
 		protected virtual void ConfigureLogging()
 		{
@@ -78,32 +78,32 @@ namespace Quokka.WinForms.Startup
 		}
 
 		/// <summary>
-		/// Create a <see cref="IServiceContainer"/>.
+		/// 	Create a <see cref = "IServiceContainer" />.
 		/// </summary>
 		/// <returns>A service container.</returns>
 		/// <remarks>
-		/// <para>
-		/// Override this method to create your own service container object. The default creates
-		/// a simple container based on Unity (but this might change in future implementations).
-		/// </para>
-		/// <para>
-		/// When this method is called, logging has been configured.
-		/// </para>
+		/// 	<para>
+		/// 		Override this method to create your own service container object. The default creates
+		/// 		a simple container based on Unity (but this might change in future implementations).
+		/// 	</para>
+		/// 	<para>
+		/// 		When this method is called, logging has been configured.
+		/// 	</para>
 		/// </remarks>
 		protected abstract IServiceContainer CreateServiceContainer();
 
 		/// <summary>
-		/// Configure services in the service container.
+		/// 	Configure services in the service container.
 		/// </summary>
 		/// <remarks>
-		/// <para>
-		/// Override this method to configure services in the service container. The service container
-		/// is available through the <see cref="Container"/> property.
-		/// </para>
-		/// <para>
-		/// When this method is caled, logging has been configured and the service container has
-		/// been created.
-		/// </para>
+		/// 	<para>
+		/// 		Override this method to configure services in the service container. The service container
+		/// 		is available through the <see cref = "Container" /> property.
+		/// 	</para>
+		/// 	<para>
+		/// 		When this method is caled, logging has been configured and the service container has
+		/// 		been created.
+		/// 	</para>
 		/// </remarks>
 		protected virtual void ConfigureServices()
 		{
@@ -131,11 +131,11 @@ namespace Quokka.WinForms.Startup
 		}
 
 		/// <summary>
-		/// Configures default services provided by Quokka.
+		/// 	Configures default services provided by Quokka.
 		/// </summary>
 		/// <remarks>
-		/// Normally you do not have to override this method. Only override if
-		/// you especially do not want these services available to your program.
+		/// 	Normally you do not have to override this method. Only override if
+		/// 	you especially do not want these services available to your program.
 		/// </remarks>
 		protected virtual void ConfigureDefaultServices()
 		{
@@ -161,6 +161,11 @@ namespace Quokka.WinForms.Startup
 				{
 					Container.RegisterInstance(SynchronizationContext.Current);
 				}
+			}
+
+			if (!Container.IsTypeRegistered<IModalWindowFactory>())
+			{
+				Container.RegisterType<IModalWindowFactory, ModalWindowFactory>(ServiceLifecycle.Singleton);
 			}
 		}
 

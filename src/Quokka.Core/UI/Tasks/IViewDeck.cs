@@ -1,4 +1,5 @@
 ﻿#region Copyright notice
+
 //
 // Authors: 
 //  John Jeffery <john@jeffery.id.au>
@@ -24,6 +25,7 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
+
 #endregion
 
 using System;
@@ -31,74 +33,103 @@ using System;
 namespace Quokka.UI.Tasks
 {
 	/// <summary>
-	/// This interface describes a collection of views, where only one view is visible at at time.
-	/// Because only one view is visible at a time, the concept is a 'deck' of views, where only the
-	/// view at the top of the deck is visible.
+	/// 	This interface describes a collection of views, where only one view is visible at at time.
+	/// 	Because only one view is visible at a time, the concept is a 'deck' of views, where only the
+	/// 	view at the top of the deck is visible.
 	/// </summary>
 	public interface IViewDeck
 	{
 		/// <summary>
-		/// This event is raised whenever one of the views in the deck is closed.
+		/// 	This event is raised whenever one of the views in the deck is closed.
 		/// </summary>
 		event EventHandler<ViewClosedEventArgs> ViewClosed;
 
 		/// <summary>
-		/// Called whenever a new task is going to make use of the view deck.
+		/// 	Called whenever a new task is going to make use of the view deck.
 		/// </summary>
-		/// <param name="task">The task that will use the view deck.</param>
+		/// <param name = "task">The task that will use the view deck.</param>
 		void BeginTask(object task);
 
 		/// <summary>
-		/// Called whenever a task is no longer going to use the view deck.
+		/// 	Called whenever a task is no longer going to use the view deck.
 		/// </summary>
-		/// <param name="task">The task that is no longer going to use the view deck.</param>
+		/// <param name = "task">The task that is no longer going to use the view deck.</param>
 		void EndTask(object task);
 
 		/// <summary>
-		/// Instructs the view deck to cease painting itself.
+		/// 	Instructs the view deck to cease painting itself.
 		/// </summary>
 		/// <remarks>
-		/// This is intended as a hint to the view deck to remove flicker when transitioning
-		/// from one view to another.
+		/// 	This is intended as a hint to the view deck to remove flicker when transitioning
+		/// 	from one view to another.
 		/// </remarks>
 		void BeginTransition();
 
 		/// <summary>
-		/// Instructs the view to start repainting itself again.
+		/// 	Instructs the view to start repainting itself again.
 		/// </summary>
 		/// <remarks>
-		/// This method will be called shortly after a call to <see cref="BeginTransition"/>.
+		/// 	This method will be called shortly after a call to <see cref = "BeginTransition" />.
 		/// </remarks>
 		void EndTransition();
 
 		/// <summary>
-		/// Adds a view to the view deck, but does not necessarily cause it to be displayed.
+		/// 	Adds a view to the view deck, but does not necessarily cause it to be displayed.
 		/// </summary>
-		/// <param name="view">The view to add to the view deck.</param>
+		/// <param name = "view">The view to add to the view deck.</param>
 		void AddView(object view);
 
 		/// <summary>
-		/// Removes the view from the view deck.
+		/// 	Removes the view from the view deck.
 		/// </summary>
-		/// <param name="view">The view to remove from the view deck.</param>
+		/// <param name = "view">The view to remove from the view deck.</param>
 		void RemoveView(object view);
 
 		/// <summary>
-		/// Causes the view to be visible. Only one view in the view deck is visible at a time.
+		/// 	Causes the view to be visible. Only one view in the view deck is visible at a time.
 		/// </summary>
-		/// <param name="view">The view to be visible.</param>
+		/// <param name = "view">The view to be visible.</param>
 		void ShowView(object view);
 
 		/// <summary>
-		/// Causes the view to be invisible.
+		/// 	Causes the view to be invisible.
 		/// </summary>
-		/// <param name="view">The view that should become invisible.</param>
+		/// <param name = "view">The view that should become invisible.</param>
 		void HideView(object view);
 
 		/// <summary>
-		/// TODO
+		/// 	Creates a <see cref = "IModalWindow" /> object, which can be used to host
+		/// 	views.
 		/// </summary>
-		/// <param name="view"></param>
-		void ShowModalView(object view);
+		/// <returns>
+		/// 	An object that implements the <see cref = "IModalWindow" /> interface.
+		/// </returns>
+		/// <remarks>
+		/// 	The modal window returned is not yet visible. When its <see cref = "IModalWindow.ShowModal" /> method
+		/// 	is called, it will be displayed modally, and the window that the view deck is a child of will be
+		/// 	disabled for the duration that the modal window is displayed.
+		/// </remarks>
+		IModalWindow CreateModalWindow();
+	}
+
+	/// <summary>
+	/// 	Objects that implement this interface are able to display views in a modal window.
+	/// </summary>
+	public interface IModalWindow : IDisposable
+	{
+		/// <summary>
+		/// 	Occurs when the window is closed
+		/// </summary>
+		event EventHandler Closed;
+
+		/// <summary>
+		/// 	The view deck, in which one view at a time is displayed.
+		/// </summary>
+		IViewDeck ViewDeck { get; }
+
+		/// <summary>
+		/// 	Displays the window as a modal.
+		/// </summary>
+		void ShowModal();
 	}
 }

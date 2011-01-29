@@ -106,6 +106,11 @@ namespace Quokka.UI.Tasks
 			Options |= UINodeOptions.StayOpen;
 		}
 
+		private void ShowModal()
+		{
+			Options |= UINodeOptions.ShowModal;
+		}
+
 		private static Type InferViewType(Type presenterType)
 		{
 			if (presenterType == null || presenterType == typeof(object))
@@ -171,6 +176,12 @@ namespace Quokka.UI.Tasks
 				InnerNodeBuilder.StayOpen();
 				return this;
 			}
+
+			public IViewNodeBuilder<TView> ShowModal()
+			{
+				InnerNodeBuilder.ShowModal();
+				return this;
+			}
 		}
 
 		internal class PresenterNodeBuilder<TPresenter> : IPresenterNodeBuilder<TPresenter>
@@ -209,6 +220,12 @@ namespace Quokka.UI.Tasks
 				InnerNodeBuilder.StayOpen();
 				return this;
 			}
+
+			public IPresenterNodeBuilder<TPresenter> ShowModal()
+			{
+				InnerNodeBuilder.ShowModal();
+				return this;
+			}
 		}
 
 		internal class NestedNestedTaskNodeBuilder<TNestedTask> : INestedTaskNodeBuilder<TNestedTask> where TNestedTask : UITask
@@ -236,12 +253,17 @@ namespace Quokka.UI.Tasks
 				return this;
 			}
 
-
 			public INestedTaskNodeBuilder<TNestedTask> With(Action<TNestedTask> action)
 			{
 				Verify.ArgumentNotNull(action, "action");
 				Action<object> initialization = obj => action((TNestedTask)obj);
 				InnerNodeBuilder.NestedTaskInitializations.Add(initialization);
+				return this;
+			}
+
+			public INestedTaskNodeBuilder<TNestedTask> ShowModal()
+			{
+				InnerNodeBuilder.ShowModal();
 				return this;
 			}
 		}

@@ -78,5 +78,15 @@ namespace Quokka.UI.Tasks
 		/// 	nodes within the <see cref = "UITask" />.
 		/// </returns>
 		INestedTaskNodeBuilder<TNestedTask> With(Action<TNestedTask> action);
+
+		/// <summary>
+		/// 	Specify that the nested task should be displayed in a modal window.
+		/// </summary>
+		/// <returns>
+		/// 	Returns an <see cref = "INestedTaskNodeBuilder{T}" /> object, which can be used
+		/// 	for further defining properties for the nested task, and configuring navigations to other
+		/// 	nodes within the <see cref = "UITask" />.
+		/// </returns>
+		INestedTaskNodeBuilder<TNestedTask> ShowModal();
 	}
 }

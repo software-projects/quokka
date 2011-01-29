@@ -1,30 +1,20 @@
 ﻿using Dashboard.UI.TaskStates;
 using Dashboard.UI.Views.Interfaces;
-using Quokka.Diagnostics;
 using Quokka.UI.Tasks;
 
 namespace Dashboard.UI.Presenters
 {
 	public class ShellPresenter : Presenter<IShellView>
 	{
-		private readonly UserState _state;
-		public INavigateCommand NavigateLogout { get; set; }
-
-		public ShellPresenter(UserState state)
-		{
-			_state = Verify.ArgumentNotNull(state, "state");
-		}
+		public UserState UserState { get; set; }
+		public INavigateCommand LogoutCommand { get; set; }
+		public INavigateCommand DoSomethingCommand { get; set; }
 
 		protected override void InitializePresenter()
 		{
-			View.Username = _state.User.FullName;
-			View.Logout += delegate { Logout(); };
-		}
-
-		private void Logout()
-		{
-			_state.User = null;
-			NavigateLogout.Navigate();
+			View.Username = UserState.User.FullName;
+			View.Logout += (sender, args) => LogoutCommand.Navigate();
+			View.DoSomething += (sender, args) => DoSomethingCommand.Navigate();
 		}
 	}
 }

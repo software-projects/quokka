@@ -29,6 +29,7 @@ namespace Dashboard.UI.Views
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ShellView));
 			this.kryptonManager = new ComponentFactory.Krypton.Toolkit.KryptonManager(this.components);
 			this.statusStrip = new System.Windows.Forms.StatusStrip();
 			this.mainPanel = new ComponentFactory.Krypton.Toolkit.KryptonPanel();
@@ -56,6 +57,7 @@ namespace Dashboard.UI.Views
 			this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.modalButton = new System.Windows.Forms.ToolStripButton();
 			((System.ComponentModel.ISupportInitialize)(this.mainPanel)).BeginInit();
 			this.mainPanel.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.kryptonSplitContainer1)).BeginInit();
@@ -77,7 +79,7 @@ namespace Dashboard.UI.Views
 			// 
 			// statusStrip
 			// 
-			this.statusStrip.Font = new System.Drawing.Font("Segoe UI", 8.25F);
+			this.statusStrip.Font = new System.Drawing.Font("Segoe UI", 9F);
 			this.statusStrip.Location = new System.Drawing.Point(0, 699);
 			this.statusStrip.Name = "statusStrip";
 			this.statusStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.ManagerRenderMode;
@@ -94,33 +96,24 @@ namespace Dashboard.UI.Views
 			this.mainPanel.Location = new System.Drawing.Point(0, 0);
 			this.mainPanel.Name = "mainPanel";
 			this.mainPanel.Padding = new System.Windows.Forms.Padding(3);
-			this.mainPanel.PaletteMode = ComponentFactory.Krypton.Toolkit.PaletteMode.Global;
-			this.mainPanel.PanelBackStyle = ComponentFactory.Krypton.Toolkit.PaletteBackStyle.PanelClient;
 			this.mainPanel.Size = new System.Drawing.Size(937, 699);
 			this.mainPanel.TabIndex = 1;
 			// 
 			// kryptonSplitContainer1
 			// 
-			this.kryptonSplitContainer1.ContainerBackStyle = ComponentFactory.Krypton.Toolkit.PaletteBackStyle.PanelClient;
 			this.kryptonSplitContainer1.Cursor = System.Windows.Forms.Cursors.Default;
 			this.kryptonSplitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.kryptonSplitContainer1.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
 			this.kryptonSplitContainer1.Location = new System.Drawing.Point(3, 52);
 			this.kryptonSplitContainer1.Name = "kryptonSplitContainer1";
-			this.kryptonSplitContainer1.PaletteMode = ComponentFactory.Krypton.Toolkit.PaletteMode.Global;
 			// 
 			// kryptonSplitContainer1.Panel1
 			// 
 			this.kryptonSplitContainer1.Panel1.Controls.Add(this.kryptonNavigator1);
-			this.kryptonSplitContainer1.Panel1.PaletteMode = ComponentFactory.Krypton.Toolkit.PaletteMode.Global;
-			this.kryptonSplitContainer1.Panel1.PanelBackStyle = ComponentFactory.Krypton.Toolkit.PaletteBackStyle.PanelClient;
 			// 
 			// kryptonSplitContainer1.Panel2
 			// 
 			this.kryptonSplitContainer1.Panel2.Controls.Add(this.kryptonNavigator2);
-			this.kryptonSplitContainer1.Panel2.PaletteMode = ComponentFactory.Krypton.Toolkit.PaletteMode.Global;
-			this.kryptonSplitContainer1.Panel2.PanelBackStyle = ComponentFactory.Krypton.Toolkit.PaletteBackStyle.PanelClient;
-			this.kryptonSplitContainer1.SeparatorStyle = ComponentFactory.Krypton.Toolkit.SeparatorStyle.LowProfile;
 			this.kryptonSplitContainer1.Size = new System.Drawing.Size(931, 644);
 			this.kryptonSplitContainer1.SplitterDistance = 299;
 			this.kryptonSplitContainer1.TabIndex = 0;
@@ -128,60 +121,16 @@ namespace Dashboard.UI.Views
 			// kryptonNavigator1
 			// 
 			this.kryptonNavigator1.Button.ButtonDisplayLogic = ComponentFactory.Krypton.Navigator.ButtonDisplayLogic.None;
-			// 
-			// 
-			// 
-			this.kryptonNavigator1.Button.CloseButton.Edge = ComponentFactory.Krypton.Toolkit.PaletteRelativeEdgeAlign.Inherit;
-			this.kryptonNavigator1.Button.CloseButton.ExtraText = "";
-			this.kryptonNavigator1.Button.CloseButton.Image = null;
-			this.kryptonNavigator1.Button.CloseButton.Orientation = ComponentFactory.Krypton.Toolkit.PaletteButtonOrientation.Inherit;
-			this.kryptonNavigator1.Button.CloseButton.Text = "";
-			this.kryptonNavigator1.Button.CloseButton.UniqueName = "860F8673EF4A405B860F8673EF4A405B";
 			this.kryptonNavigator1.Button.CloseButtonDisplay = ComponentFactory.Krypton.Navigator.ButtonDisplay.Hide;
-			// 
-			// 
-			// 
-			this.kryptonNavigator1.Button.ContextButton.Edge = ComponentFactory.Krypton.Toolkit.PaletteRelativeEdgeAlign.Inherit;
-			this.kryptonNavigator1.Button.ContextButton.ExtraText = "";
-			this.kryptonNavigator1.Button.ContextButton.Image = null;
-			this.kryptonNavigator1.Button.ContextButton.Orientation = ComponentFactory.Krypton.Toolkit.PaletteButtonOrientation.Inherit;
-			this.kryptonNavigator1.Button.ContextButton.Text = "";
-			this.kryptonNavigator1.Button.ContextButton.UniqueName = "40F4E6F4EFF04B5E40F4E6F4EFF04B5E";
-			// 
-			// 
-			// 
-			this.kryptonNavigator1.Button.NextButton.Edge = ComponentFactory.Krypton.Toolkit.PaletteRelativeEdgeAlign.Inherit;
-			this.kryptonNavigator1.Button.NextButton.ExtraText = "";
-			this.kryptonNavigator1.Button.NextButton.Image = null;
-			this.kryptonNavigator1.Button.NextButton.Orientation = ComponentFactory.Krypton.Toolkit.PaletteButtonOrientation.Inherit;
-			this.kryptonNavigator1.Button.NextButton.Text = "";
-			this.kryptonNavigator1.Button.NextButton.UniqueName = "FC5256AC96AC4676FC5256AC96AC4676";
-			// 
-			// 
-			// 
-			this.kryptonNavigator1.Button.PreviousButton.Edge = ComponentFactory.Krypton.Toolkit.PaletteRelativeEdgeAlign.Inherit;
-			this.kryptonNavigator1.Button.PreviousButton.ExtraText = "";
-			this.kryptonNavigator1.Button.PreviousButton.Image = null;
-			this.kryptonNavigator1.Button.PreviousButton.Orientation = ComponentFactory.Krypton.Toolkit.PaletteButtonOrientation.Inherit;
-			this.kryptonNavigator1.Button.PreviousButton.Text = "";
-			this.kryptonNavigator1.Button.PreviousButton.UniqueName = "C32743DA3DF8430BC32743DA3DF8430B";
 			this.kryptonNavigator1.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.kryptonNavigator1.Header.HeaderValuesPrimary.Description = "";
-			this.kryptonNavigator1.Header.HeaderValuesPrimary.Heading = "(Empty)";
-			this.kryptonNavigator1.Header.HeaderValuesPrimary.Image = null;
-			this.kryptonNavigator1.Header.HeaderValuesSecondary.Description = "";
-			this.kryptonNavigator1.Header.HeaderValuesSecondary.Heading = " ";
-			this.kryptonNavigator1.Header.HeaderValuesSecondary.Image = null;
 			this.kryptonNavigator1.Location = new System.Drawing.Point(0, 0);
 			this.kryptonNavigator1.Name = "kryptonNavigator1";
 			this.kryptonNavigator1.NavigatorMode = ComponentFactory.Krypton.Navigator.NavigatorMode.OutlookFull;
 			this.kryptonNavigator1.Pages.AddRange(new ComponentFactory.Krypton.Navigator.KryptonPage[] {
             this.kryptonPage1,
             this.kryptonPage2});
-			this.kryptonNavigator1.PaletteMode = ComponentFactory.Krypton.Toolkit.PaletteMode.Global;
 			this.kryptonNavigator1.SelectedIndex = 1;
 			this.kryptonNavigator1.Size = new System.Drawing.Size(299, 644);
-			this.kryptonNavigator1.StateCommon.Metrics.PageButtonSpecPadding = new System.Windows.Forms.Padding(-1);
 			this.kryptonNavigator1.TabIndex = 0;
 			this.kryptonNavigator1.Text = "kryptonNavigator1";
 			// 
@@ -193,7 +142,6 @@ namespace Dashboard.UI.Views
 			this.kryptonPage1.MinimumSize = new System.Drawing.Size(50, 50);
 			this.kryptonPage1.Name = "kryptonPage1";
 			this.kryptonPage1.Size = new System.Drawing.Size(223, 318);
-			this.kryptonPage1.StateCommon.Metrics.PageButtonSpecPadding = new System.Windows.Forms.Padding(-1);
 			this.kryptonPage1.Text = "kryptonPage1";
 			this.kryptonPage1.ToolTipTitle = "Page ToolTip";
 			this.kryptonPage1.UniqueName = "D14AC424367B45EDD14AC424367B45ED";
@@ -205,67 +153,22 @@ namespace Dashboard.UI.Views
 			this.kryptonPage2.LastVisibleSet = true;
 			this.kryptonPage2.MinimumSize = new System.Drawing.Size(50, 50);
 			this.kryptonPage2.Name = "kryptonPage2";
-			this.kryptonPage2.Size = new System.Drawing.Size(297, 587);
-			this.kryptonPage2.StateCommon.Metrics.PageButtonSpecPadding = new System.Windows.Forms.Padding(-1);
+			this.kryptonPage2.Size = new System.Drawing.Size(297, 585);
 			this.kryptonPage2.Text = "kryptonPage2";
 			this.kryptonPage2.ToolTipTitle = "Page ToolTip";
 			this.kryptonPage2.UniqueName = "14A8E59A6E074C3E14A8E59A6E074C3E";
 			// 
 			// kryptonNavigator2
 			// 
-			// 
-			// 
-			// 
-			this.kryptonNavigator2.Button.CloseButton.Edge = ComponentFactory.Krypton.Toolkit.PaletteRelativeEdgeAlign.Inherit;
-			this.kryptonNavigator2.Button.CloseButton.ExtraText = "";
-			this.kryptonNavigator2.Button.CloseButton.Image = null;
-			this.kryptonNavigator2.Button.CloseButton.Orientation = ComponentFactory.Krypton.Toolkit.PaletteButtonOrientation.Inherit;
-			this.kryptonNavigator2.Button.CloseButton.Text = "";
-			this.kryptonNavigator2.Button.CloseButton.UniqueName = "03B2CC7F7045429A03B2CC7F7045429A";
-			// 
-			// 
-			// 
-			this.kryptonNavigator2.Button.ContextButton.Edge = ComponentFactory.Krypton.Toolkit.PaletteRelativeEdgeAlign.Inherit;
-			this.kryptonNavigator2.Button.ContextButton.ExtraText = "";
-			this.kryptonNavigator2.Button.ContextButton.Image = null;
-			this.kryptonNavigator2.Button.ContextButton.Orientation = ComponentFactory.Krypton.Toolkit.PaletteButtonOrientation.Inherit;
-			this.kryptonNavigator2.Button.ContextButton.Text = "";
-			this.kryptonNavigator2.Button.ContextButton.UniqueName = "A88299EFE5244468A88299EFE5244468";
-			// 
-			// 
-			// 
-			this.kryptonNavigator2.Button.NextButton.Edge = ComponentFactory.Krypton.Toolkit.PaletteRelativeEdgeAlign.Inherit;
-			this.kryptonNavigator2.Button.NextButton.ExtraText = "";
-			this.kryptonNavigator2.Button.NextButton.Image = null;
-			this.kryptonNavigator2.Button.NextButton.Orientation = ComponentFactory.Krypton.Toolkit.PaletteButtonOrientation.Inherit;
-			this.kryptonNavigator2.Button.NextButton.Text = "";
-			this.kryptonNavigator2.Button.NextButton.UniqueName = "B8547A8176A045E3B8547A8176A045E3";
-			// 
-			// 
-			// 
-			this.kryptonNavigator2.Button.PreviousButton.Edge = ComponentFactory.Krypton.Toolkit.PaletteRelativeEdgeAlign.Inherit;
-			this.kryptonNavigator2.Button.PreviousButton.ExtraText = "";
-			this.kryptonNavigator2.Button.PreviousButton.Image = null;
-			this.kryptonNavigator2.Button.PreviousButton.Orientation = ComponentFactory.Krypton.Toolkit.PaletteButtonOrientation.Inherit;
-			this.kryptonNavigator2.Button.PreviousButton.Text = "";
-			this.kryptonNavigator2.Button.PreviousButton.UniqueName = "D6C140ECBC4D4644D6C140ECBC4D4644";
 			this.kryptonNavigator2.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.kryptonNavigator2.Header.HeaderValuesPrimary.Description = "";
-			this.kryptonNavigator2.Header.HeaderValuesPrimary.Heading = "(Empty)";
-			this.kryptonNavigator2.Header.HeaderValuesPrimary.Image = null;
-			this.kryptonNavigator2.Header.HeaderValuesSecondary.Description = "";
-			this.kryptonNavigator2.Header.HeaderValuesSecondary.Heading = " ";
-			this.kryptonNavigator2.Header.HeaderValuesSecondary.Image = null;
 			this.kryptonNavigator2.Location = new System.Drawing.Point(0, 0);
 			this.kryptonNavigator2.Name = "kryptonNavigator2";
 			this.kryptonNavigator2.NavigatorMode = ComponentFactory.Krypton.Navigator.NavigatorMode.HeaderGroup;
 			this.kryptonNavigator2.Pages.AddRange(new ComponentFactory.Krypton.Navigator.KryptonPage[] {
             this.kryptonPage3,
             this.kryptonPage4});
-			this.kryptonNavigator2.PaletteMode = ComponentFactory.Krypton.Toolkit.PaletteMode.Global;
 			this.kryptonNavigator2.SelectedIndex = 0;
 			this.kryptonNavigator2.Size = new System.Drawing.Size(627, 644);
-			this.kryptonNavigator2.StateCommon.Metrics.PageButtonSpecPadding = new System.Windows.Forms.Padding(-1);
 			this.kryptonNavigator2.TabIndex = 0;
 			this.kryptonNavigator2.Text = "kryptonNavigator2";
 			// 
@@ -276,8 +179,7 @@ namespace Dashboard.UI.Views
 			this.kryptonPage3.LastVisibleSet = true;
 			this.kryptonPage3.MinimumSize = new System.Drawing.Size(50, 50);
 			this.kryptonPage3.Name = "kryptonPage3";
-			this.kryptonPage3.Size = new System.Drawing.Size(625, 594);
-			this.kryptonPage3.StateCommon.Metrics.PageButtonSpecPadding = new System.Windows.Forms.Padding(-1);
+			this.kryptonPage3.Size = new System.Drawing.Size(625, 591);
 			this.kryptonPage3.Text = "kryptonPage3";
 			this.kryptonPage3.ToolTipTitle = "Page ToolTip";
 			this.kryptonPage3.UniqueName = "1621E52C8F9942891621E52C8F994289";
@@ -290,17 +192,17 @@ namespace Dashboard.UI.Views
 			this.kryptonPage4.MinimumSize = new System.Drawing.Size(50, 50);
 			this.kryptonPage4.Name = "kryptonPage4";
 			this.kryptonPage4.Size = new System.Drawing.Size(100, 100);
-			this.kryptonPage4.StateCommon.Metrics.PageButtonSpecPadding = new System.Windows.Forms.Padding(-1);
 			this.kryptonPage4.Text = "kryptonPage4";
 			this.kryptonPage4.ToolTipTitle = "Page ToolTip";
 			this.kryptonPage4.UniqueName = "D7F5E9A8FF074F7AD7F5E9A8FF074F7A";
 			// 
 			// toolStrip1
 			// 
-			this.toolStrip1.Font = new System.Drawing.Font("Segoe UI", 8.25F);
+			this.toolStrip1.Font = new System.Drawing.Font("Segoe UI", 9F);
 			this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.logoutButton,
-            this.loginNameLabel});
+            this.loginNameLabel,
+            this.modalButton});
 			this.toolStrip1.Location = new System.Drawing.Point(3, 27);
 			this.toolStrip1.Name = "toolStrip1";
 			this.toolStrip1.Size = new System.Drawing.Size(931, 25);
@@ -321,12 +223,12 @@ namespace Dashboard.UI.Views
 			// 
 			this.loginNameLabel.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
 			this.loginNameLabel.Name = "loginNameLabel";
-			this.loginNameLabel.Size = new System.Drawing.Size(74, 22);
+			this.loginNameLabel.Size = new System.Drawing.Size(80, 22);
 			this.loginNameLabel.Text = "(Login Name)";
 			// 
 			// menuStrip1
 			// 
-			this.menuStrip1.Font = new System.Drawing.Font("Segoe UI", 8.25F);
+			this.menuStrip1.Font = new System.Drawing.Font("Segoe UI", 9F);
 			this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
             this.editToolStripMenuItem,
@@ -350,7 +252,7 @@ namespace Dashboard.UI.Views
 			// exitToolStripMenuItem
 			// 
 			this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-			this.exitToolStripMenuItem.Size = new System.Drawing.Size(99, 22);
+			this.exitToolStripMenuItem.Size = new System.Drawing.Size(92, 22);
 			this.exitToolStripMenuItem.Text = "E&xit";
 			// 
 			// editToolStripMenuItem
@@ -369,33 +271,33 @@ namespace Dashboard.UI.Views
 			// 
 			this.cutToolStripMenuItem.Name = "cutToolStripMenuItem";
 			this.cutToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.X)));
-			this.cutToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
+			this.cutToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
 			this.cutToolStripMenuItem.Text = "Cu&t";
 			// 
 			// copyToolStripMenuItem
 			// 
 			this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
 			this.copyToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-			this.copyToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
+			this.copyToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
 			this.copyToolStripMenuItem.Text = "&Copy";
 			// 
 			// pasteToolStripMenuItem
 			// 
 			this.pasteToolStripMenuItem.Name = "pasteToolStripMenuItem";
 			this.pasteToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.V)));
-			this.pasteToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
+			this.pasteToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
 			this.pasteToolStripMenuItem.Text = "&Paste";
 			// 
 			// toolStripSeparator1
 			// 
 			this.toolStripSeparator1.Name = "toolStripSeparator1";
-			this.toolStripSeparator1.Size = new System.Drawing.Size(164, 6);
+			this.toolStripSeparator1.Size = new System.Drawing.Size(161, 6);
 			// 
 			// selectAllToolStripMenuItem
 			// 
 			this.selectAllToolStripMenuItem.Name = "selectAllToolStripMenuItem";
 			this.selectAllToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
-			this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
+			this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
 			this.selectAllToolStripMenuItem.Text = "Select &All";
 			// 
 			// viewToolStripMenuItem
@@ -410,13 +312,13 @@ namespace Dashboard.UI.Views
 			// 
 			this.refreshToolStripMenuItem.Name = "refreshToolStripMenuItem";
 			this.refreshToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
-			this.refreshToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
+			this.refreshToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
 			this.refreshToolStripMenuItem.Text = "R&efresh";
 			// 
 			// toolsToolStripMenuItem
 			// 
 			this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
-			this.toolsToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
+			this.toolsToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
 			this.toolsToolStripMenuItem.Text = "&Tools";
 			// 
 			// helpToolStripMenuItem
@@ -424,24 +326,32 @@ namespace Dashboard.UI.Views
 			this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.aboutToolStripMenuItem});
 			this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-			this.helpToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
+			this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
 			this.helpToolStripMenuItem.Text = "&Help";
 			// 
 			// aboutToolStripMenuItem
 			// 
 			this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-			this.aboutToolStripMenuItem.Size = new System.Drawing.Size(113, 22);
+			this.aboutToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
 			this.aboutToolStripMenuItem.Text = "&About";
 			// 
-			// ShellForm
+			// modalButton
+			// 
+			this.modalButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+			this.modalButton.Image = ((System.Drawing.Image)(resources.GetObject("modalButton.Image")));
+			this.modalButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.modalButton.Name = "modalButton";
+			this.modalButton.Size = new System.Drawing.Size(87, 22);
+			this.modalButton.Text = "Do Something";
+			// 
+			// ShellView
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(937, 721);
 			this.Controls.Add(this.mainPanel);
 			this.Controls.Add(this.statusStrip);
-			this.Name = "ShellForm";
-			this.Text = "Dashboard";
+			this.Name = "ShellView";
+			this.Size = new System.Drawing.Size(937, 721);
 			((System.ComponentModel.ISupportInitialize)(this.mainPanel)).EndInit();
 			this.mainPanel.ResumeLayout(false);
 			this.mainPanel.PerformLayout();
@@ -496,5 +406,6 @@ namespace Dashboard.UI.Views
 		private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem refreshToolStripMenuItem;
+		private System.Windows.Forms.ToolStripButton modalButton;
 	}
 }

@@ -13,4 +13,11 @@ namespace Quokka.WinForms.Internal
 		event EventHandler CheckedChanged;
 		bool IsCheckedChangedSupported { get; }
 	}
+
+	public interface ICommandControl : ICheckControl
+	{
+		string Text { get; set; }
+		bool Enabled { get; set; }
+
+	}
 }

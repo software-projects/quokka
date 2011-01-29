@@ -7,12 +7,15 @@ namespace Dashboard.UI.Presenters
 {
 	public class LoginPresenter : Presenter<ILoginView>
 	{
-		public INavigateCommand Next { get; set; }
+		public INavigateCommand NextCommand { get; set; }
 		public LoginState LoginState { get; set; }
+		public UserState UserState { get; set; }
 
 
 		protected override void InitializePresenter()
 		{
+			UserState.User = null;
+
 			if (!String.IsNullOrEmpty(LoginState.UserName))
 			{
 				View.Username = LoginState.UserName;
@@ -36,7 +39,7 @@ namespace Dashboard.UI.Presenters
 
 			LoginState.UserName = username;
 			LoginState.Password = password;
-			Next.Navigate();
+			NextCommand.Navigate();
 		}
 	}
 }

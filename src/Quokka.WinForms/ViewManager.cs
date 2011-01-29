@@ -1,4 +1,5 @@
 ﻿#region Copyright notice
+
 //
 // Authors: 
 //  John Jeffery <john@jeffery.id.au>
@@ -24,232 +25,80 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
+
 #endregion
 
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Windows.Forms;
-using Quokka.Diagnostics;
 using Quokka.UI.Tasks;
 using Quokka.Uip;
 
 namespace Quokka.WinForms
 {
 	/// <summary>
-	/// Handles views inside a Windows Forms <see cref="Control"/>
+	/// 	Handles views inside a Windows Forms <see cref = "Control" />
 	/// </summary>
-	public class ViewManager : IUipViewManager, IViewDeck
+	[Obsolete("Use class ViewDeck instead. This class will be removed in a future version of Quokka")]
+	public class ViewManager : ViewDeck, IUipViewManager
 	{
-		private readonly Control _control;
-		private readonly List<object> _currentTasks = new List<object>();
 		private readonly List<Form> _modalForms = new List<Form>();
-		private Control _currentVisibleView;
-		private readonly List<Control> _visibleViews = new List<Control>();
 
-		public event EventHandler AllTasksComplete;
+		public new event EventHandler<UipViewEventArgs> ViewClosed;
 
-		public ViewManager(Control control)
+
+		public ViewManager(Control control) : base(control)
 		{
-			Verify.ArgumentNotNull(control, "control", out _control);
 		}
 
-		public void Clear()
+		public override void Clear()
 		{
-			// Clear the controls displayed, but do not dispose of them.
-			// The controls were created in the service container, and the
-			// container will dispose of them.
-			_control.Controls.Clear();
-
-			_currentTasks.Clear();
+			base.Clear();
 			_modalForms.Clear();
-			_visibleViews.Clear();
-			_currentVisibleView = null;
-		}
-
-		public Control Control
-		{
-			get { return _control; }
 		}
 
 		#region IUipViewManager Members
 
-		public event EventHandler<UipViewEventArgs> ViewClosed;
-
-		event EventHandler<ViewClosedEventArgs> IViewDeck.ViewClosed
-		{
-			add
-			{
-				_viewDeckViewClosed += value;
-			}
-			remove
-			{
-				_viewDeckViewClosed -= value;
-			}
-		}
-
-		private event EventHandler<ViewClosedEventArgs> _viewDeckViewClosed;
-
 		public void BeginTask(UipTask task)
 		{
-			BeginTask((object)task);
+			BeginTask((object) task);
 		}
 
 		public void EndTask(UipTask task)
 		{
-			EndTask((object)task);
-		}
-
-		public void BeginTask(object task)
-		{
-			if (!_currentTasks.Contains(task))
-			{
-				_currentTasks.Add(task);
-			}
-		}
-
-		public void EndTask(object task)
-		{
-			_currentTasks.Remove(task);
-			if (_currentTasks.Count == 0)
-			{
-				OnAllTasksComplete(EventArgs.Empty);
-			}
-		}
-
-		private int _transitionReferenceCount;
-
-		public void BeginTransition()
-		{
-			if (Interlocked.Increment(ref _transitionReferenceCount) == 1)
-			{
-				_control.SuspendLayout();
-				Win32.SetWindowRedraw(_control, false);
-				Cursor.Current = Cursors.WaitCursor;
-			}
-		}
-
-		public void EndTransition()
-		{
-			if (Interlocked.Decrement(ref _transitionReferenceCount) == 0)
-			{
-				if (_currentVisibleView == null && _visibleViews.Count > 0)
-				{
-					// At the end of the transition, no view is visible but there
-					// are one or more views that are not visible because they were
-					// hidden in order to display another view, but they were never
-					// commanded to be hidden. Show them in reverse order.
-					ShowView(_visibleViews[_visibleViews.Count - 1]);
-				}
-
-				Cursor.Current = Cursors.Default;
-				Win32.SetWindowRedraw(_control, true);
-				_control.Invalidate(true);
-				_control.ResumeLayout();
-			}
-		}
-
-		public void AddView(object view)
-		{
-			AddView(view, null);
+			EndTask((object) task);
 		}
 
 		public void AddView(object view, object controller)
 		{
-			if (view == null)
-				return;
+			var control = view as Control;
 
-			// view object may optionally be a Form, but it must be a control
+			if (control != null)
+			{
+				// This gives a chance for all of the controls within the view control
+				// to get a look at the controller. To get the controller, the contained
+				// control must implement a method called "SetController", which accepts
+				// a compatible type. (Could be an embedded "IController" interface.
+				if (controller != null)
+				{
+					WinFormsUipUtil.SetController(control, controller);
+				}
+			}
+
+			AddView(view);
+		}
+
+		public override void RemoveView(object view)
+		{
 			Form form = view as Form;
-			Control control = (Control)view;
-
-			if (form != null)
+			if (form != null && _modalForms.Contains(form))
 			{
-				form.TopLevel = false;
-				form.FormBorderStyle = FormBorderStyle.None;
-				form.Closed += View_Closed;
+				// this is a modal form -- close it
+				form.Close();
 			}
-
-			control.Dock = DockStyle.Fill;
-			control.Visible = false;
-			_control.Controls.Add(control);
-
-			// This gives a chance for all of the controls within the view control
-			// to get a look at the controller. To get the controller, the contained
-			// control must implement a method called "SetController", which accepts
-			// a compatible type. (Could be an embedded "IController" interface.
-			if (controller != null)
+			else
 			{
-				WinFormsUipUtil.SetController(control, controller);
-			}
-		}
-
-		private void View_Closed(object sender, EventArgs e)
-		{
-			Form form = sender as Form;
-			if (form != null)
-			{
-				_modalForms.Remove(form);
-			}
-
-			// two events for backwards compatibility
-			OnViewClosed(new UipViewEventArgs(sender));
-			OnViewClosed(new ViewClosedEventArgs(sender));
-		}
-
-		public void RemoveView(object view)
-		{
-			if (view != null)
-			{
-				Control control = (Control)view;
-
-				Form form = view as Form;
-				if (form != null && _modalForms.Contains(form))
-				{
-					// this is a modal form -- close it
-					form.Close();
-				}
-				else
-				{
-					HideView(view);
-					_control.Controls.Remove(control);
-				}
-			}
-		}
-
-		public void ShowView(object view)
-		{
-			if (view != null)
-			{
-				Control control = (Control)view;
-				control.Visible = true;
-				foreach (Control c in _control.Controls)
-				{
-					if (!ReferenceEquals(c, control))
-					{
-						c.Visible = false;
-					}
-				}
-
-				if (!_visibleViews.Contains(control))
-				{
-					_visibleViews.Add(control);
-				}
-				_currentVisibleView = control;
-			}
-		}
-
-		public void HideView(object view)
-		{
-			if (view != null)
-			{
-				Control control = (Control)view;
-				control.Visible = false;
-				if (_currentVisibleView == control)
-				{
-					_currentVisibleView = null;
-				}
-				_visibleViews.Remove(control);
+				base.RemoveView(view);
 			}
 		}
 
@@ -271,8 +120,8 @@ namespace Quokka.WinForms
 				WinFormsUipUtil.SetController(form, controller);
 			}
 			_modalForms.Add(form);
-			form.Closed += View_Closed;
-			form.ShowDialog(_control.TopLevelControl);
+			form.Closed += ViewClosedHandler;
+			form.ShowDialog(Control.TopLevelControl);
 		}
 
 		private delegate UipAnswer AskQuestionDelegate(UipQuestion question);
@@ -280,13 +129,13 @@ namespace Quokka.WinForms
 		public UipAnswer AskQuestion(UipQuestion question)
 		{
 			// This might be called from a different thread
-			if (_control.InvokeRequired)
+			if (Control.InvokeRequired)
 			{
-				return (UipAnswer)_control.Invoke(new AskQuestionDelegate(AskQuestion), question);
+				return (UipAnswer) Control.Invoke(new AskQuestionDelegate(AskQuestion), question);
 			}
 
 			MessageBoxForm questionForm = new MessageBoxForm {Question = question};
-			questionForm.ShowDialog(_control.TopLevelControl);
+			questionForm.ShowDialog(Control.TopLevelControl);
 			if (question.SelectedAnswer != null && question.SelectedAnswer.Callback != null)
 			{
 				question.SelectedAnswer.Callback();
@@ -296,14 +145,6 @@ namespace Quokka.WinForms
 
 		#endregion
 
-		protected virtual void OnAllTasksComplete(EventArgs e)
-		{
-			if (AllTasksComplete != null)
-			{
-				AllTasksComplete(this, e);
-			}
-		}
-
 		protected virtual void OnViewClosed(UipViewEventArgs e)
 		{
 			if (ViewClosed != null)
@@ -312,11 +153,19 @@ namespace Quokka.WinForms
 			}
 		}
 
-		protected virtual void OnViewClosed(ViewClosedEventArgs e)
+		protected override void OnViewClosed(ViewClosedEventArgs e)
 		{
-			if (_viewDeckViewClosed != null)
+			Form form = e.View as Form;
+			if (form != null)
 			{
-				_viewDeckViewClosed(this, e);
+				_modalForms.Remove(form);
+			}
+
+			base.OnViewClosed(e);
+
+			if (ViewClosed != null)
+			{
+				ViewClosed(this, new UipViewEventArgs(e.View));
 			}
 		}
 	}

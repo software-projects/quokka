@@ -78,9 +78,15 @@ namespace Quokka.UI.Tasks
 			GC.SuppressFinalize(this);
 		}
 
+		private bool _hasInitializePresenterBeenCalled;
+
 		internal void PerformPresenterInitialization()
 		{
-			InitializePresenter();
+			if (!_hasInitializePresenterBeenCalled)
+			{
+				_hasInitializePresenterBeenCalled = true;
+				InitializePresenter();
+			}
 		}
 
 		internal object ViewObject { get; set; }

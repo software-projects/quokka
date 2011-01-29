@@ -80,6 +80,7 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="KryptonModalRegion.cs" />
+    <Compile Include="KryptonModalWindowFactory.cs" />
     <Compile Include="KryptonNavigatorRegion.cs" />
     <Compile Include="KryptonPropertyGrid.cs">
       <SubType>Component</SubType>

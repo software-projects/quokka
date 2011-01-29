@@ -1,4 +1,5 @@
 ﻿#region Copyright notice
+
 //
 // Authors: 
 //  John Jeffery <john@jeffery.id.au>
@@ -24,6 +25,7 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
+
 #endregion
 
 using System;
@@ -88,7 +90,7 @@ namespace Quokka.UI.Tasks
 
 		/// <summary>
 		/// 	The type of view specified for this node. If the view type was
-		/// 	not explicitly specified via <see cref = "INodeBuilder.SetView{TView}" />,
+		/// 	not explicitly specified via <see cref = "IAnyNodeBuilder.SetView{TView}" />,
 		/// 	then this property will be <c>null</c>, and the view type will be
 		/// 	determined from <see cref = "InferredViewType" />.
 		/// </summary>
@@ -106,6 +108,13 @@ namespace Quokka.UI.Tasks
 			get { return NodeBuilder.InferredViewType; }
 		}
 
+		/// <summary>
+		/// 	Specifies the type of user interface task, (subtype of <see cref = "UITask" />)
+		/// 	that has been specified as a nested task for this node.
+		/// </summary>
+		/// <remarks>
+		/// 	Can be <c>null</c> if the node does not have a nested task.
+		/// </remarks>
 		public Type NestedTaskType
 		{
 			get { return NodeBuilder.NestedTaskType; }
@@ -120,18 +129,33 @@ namespace Quokka.UI.Tasks
 		}
 
 		/// <summary>
-		/// 	The view object for this node, or <c>null</c>
+		/// 	The view object for this node.
 		/// </summary>
+		/// <remarks>
+		/// 	Can be <c>null</c> if the node does not have a view.
+		/// </remarks>
 		public object View { get; internal set; }
 
 		/// <summary>
 		/// 	The current presenter object for this node, or <c>null</c>.
 		/// </summary>
+		/// <remarks>
+		/// 	Can be <c>null</c> if the node does not have a presener.
+		/// </remarks>
 		public object Presenter { get; internal set; }
 
+		/// <summary>
+		/// 	The nested task for this node.
+		/// </summary>
+		/// <remarks>
+		/// 	Can be <c>null</c> if the node does not have a nested task.
+		/// </remarks>
 		public UITask NestedTask { get; internal set; }
 
-		public bool IsViewModal { get; internal set; }
+		public bool IsViewModal
+		{
+			get { return (Options & UINodeOptions.ShowModal) != 0; }
+		}
 
 		/// <summary>
 		/// 	Should the view stay open when the node is not the current node.
@@ -149,21 +173,45 @@ namespace Quokka.UI.Tasks
 		/// <summary>
 		/// 	The view deck for the node
 		/// </summary>
-		public IViewDeck ViewDeck { get; private set; }
+		public IViewDeck ViewDeck
+		{
+			get
+			{
+				var modalWindow = ModalWindow;
+				return modalWindow == null ? Task.ViewDeck : modalWindow.ViewDeck;
+			}
+		}
+
+		public IModalWindow ModalWindow
+		{
+			get
+			{
+				if (IsViewModal)
+				{
+					if (_modalWindow == null)
+					{
+						_modalWindow = Task.ViewDeck.CreateModalWindow();
+						_modalWindow.Closed += ModalWindowClosed;
+					}
+				}
+
+				return _modalWindow;
+			}
+		}
+
+		private IModalWindow _modalWindow;
 
 		public string Name
 		{
 			get { return NodeBuilder.Name; }
 		}
 
-		// TODO: probably better to have an event for this
+		// Called by the UITask when the task is starting.
 		internal void TaskStarting()
 		{
-			ViewDeck = Task.ViewDeck;
-			ViewDeck.ViewClosed += ViewDeckViewClosed;
 		}
 
-		// TODO: probably better to have as an event for the task?
+		// Called by the UITask when this node becomes the current node
 		internal void EnterNode()
 		{
 			// If the node is being entered for the first time, its service container will be null
@@ -290,8 +338,8 @@ namespace Quokka.UI.Tasks
 				}
 				NodeTransitionBuilder builder = nodeTransitionBuilder;
 				var nextNode = (from n in Task.Nodes
-								where n.NodeBuilder == builder.NextNode
-								select n).FirstOrDefault();
+				                where n.NodeBuilder == builder.NextNode
+				                select n).FirstOrDefault();
 
 				navigateCommand.FromNode = this;
 				navigateCommand.ToNode = nextNode;
@@ -313,7 +361,7 @@ namespace Quokka.UI.Tasks
 
 		internal void CreateNestedTask()
 		{
-			var task = (UITask)Container.Locator.GetInstance(NestedTaskType);
+			var task = (UITask) Container.Locator.GetInstance(NestedTaskType);
 			task.TaskComplete += NestedTaskComplete;
 			task.Start(ViewDeck);
 			NestedTask = task;
@@ -361,17 +409,19 @@ namespace Quokka.UI.Tasks
 			}
 		}
 
-		// TODO: probably better to have an event for this
+		// Called by the UITask when this task *might* need some cleanup.
 		internal void CleanupNode()
 		{
 			bool hideView = false;
 			bool removeView = false;
 			bool removeNestedTask = false;
 			bool disposeContainer = false;
+			bool disposeModalWindow = false;
 
 			if (Task == null)
 			{
 				disposeContainer = true;
+				disposeModalWindow = true;
 			}
 			else
 			{
@@ -381,13 +431,7 @@ namespace Quokka.UI.Tasks
 					disposeContainer = true;
 					removeView = true;
 					removeNestedTask = true;
-
-					// The task is not re-usable, but the view manager might be. Unregister
-					// event to avoid a memory leak.
-					if (ViewDeck != null)
-					{
-						ViewDeck.ViewClosed -= ViewDeckViewClosed;
-					}
+					disposeModalWindow = true;
 				}
 				else
 				{
@@ -413,6 +457,7 @@ namespace Quokka.UI.Tasks
 								disposeContainer = true;
 								removeView = true;
 								removeNestedTask = true;
+								disposeModalWindow = true;
 							}
 						}
 					}
@@ -438,6 +483,11 @@ namespace Quokka.UI.Tasks
 				DisposeNestedTask();
 			}
 
+			if (disposeModalWindow)
+			{
+				DisposeModalWindow();
+			}
+
 			if (disposeContainer)
 			{
 				DisposeView();
@@ -457,6 +507,16 @@ namespace Quokka.UI.Tasks
 				}
 				DisposeUtils.DisposeOf(View);
 				View = null;
+			}
+		}
+
+		private void DisposeModalWindow()
+		{
+			if (_modalWindow != null)
+			{
+				_modalWindow.Closed -= ModalWindowClosed;
+				DisposeUtils.DisposeOf(_modalWindow);
+				_modalWindow = null;
 			}
 		}
 
@@ -491,17 +551,14 @@ namespace Quokka.UI.Tasks
 			}
 		}
 
-		private void ViewDeckViewClosed(object sender, ViewClosedEventArgs e)
+		private void ModalWindowClosed(object sender, EventArgs e)
 		{
-			if (e.View != View)
+			if (Task.CurrentNode == this)
 			{
-				// not this view
-				return;
-			}
-
-			if (IsViewModal && this == Task.CurrentNode && Task.InNavigateMethod)
-			{
-				Task.PopNode();
+				if (NestedTask != null)
+				{
+					NestedTask.Navigate(null);
+				}
 			}
 		}
 	}
