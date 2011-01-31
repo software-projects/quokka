@@ -483,8 +483,8 @@ namespace Quokka.UI.Tasks
 					_raiseTaskStarted = true;
 				}
 
-				// Tell the node that it is now the current node.
-				CurrentNode.EnterNode();
+				// Tell the node that it is now the current node, and tell it what the previous node was.
+				CurrentNode.EnterNode(prevNode);
 
 				bool presenterCreated = false;
 

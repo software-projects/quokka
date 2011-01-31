@@ -200,6 +200,7 @@ namespace Quokka.UI.Tasks
 		}
 
 		private IModalWindow _modalWindow;
+		private UINode _prevNode;
 
 		public string Name
 		{
@@ -212,8 +213,11 @@ namespace Quokka.UI.Tasks
 		}
 
 		// Called by the UITask when this node becomes the current node
-		internal void EnterNode()
+		internal void EnterNode(UINode prevNode)
 		{
+			// Remember what the previous node was. This is useful for modal windows.
+			_prevNode = prevNode;
+
 			// If the node is being entered for the first time, its service container will be null
 			// and has to be created.
 			if (Container == null)
@@ -557,7 +561,21 @@ namespace Quokka.UI.Tasks
 			{
 				if (NestedTask != null)
 				{
-					NestedTask.Navigate(null);
+					if (NestedTask.IsRunning)
+					{
+						NestedTask.Navigate(null);
+					}
+				}
+				else
+				{
+					// This happens when the modal window has closed without the
+					// view or presenter initiating a navigation. We just navigate
+					// back to the previous node.
+					//
+					// TODO: This could be more sophisticated, as it does not handle some situations.
+					// * Previous node is the same node as this node
+					// * Previous node did not have a view
+					Task.Navigate(_prevNode);
 				}
 			}
 		}
