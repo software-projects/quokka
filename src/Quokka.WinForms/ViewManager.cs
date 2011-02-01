@@ -168,5 +168,16 @@ namespace Quokka.WinForms
 				ViewClosed(this, new UipViewEventArgs(e.View));
 			}
 		}
+
+		protected override void TryEndTask(object task)
+		{
+			base.TryEndTask(task);
+
+			var uipTask = task as UipTask;
+			if (uipTask != null && uipTask.IsRunning)
+			{
+				uipTask.EndTask();
+			}
+		}
 	}
 }

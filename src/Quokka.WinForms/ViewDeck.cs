@@ -1,4 +1,34 @@
-﻿using System;
+﻿#region Copyright notice
+
+//
+// Authors: 
+//  John Jeffery <john@jeffery.id.au>
+//
+// Copyright (C) 2006-2011 John Jeffery. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+// 
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Windows.Forms;
@@ -18,17 +48,15 @@ namespace Quokka.WinForms
 	{
 		private readonly Control _control;
 		protected readonly List<object> CurrentTasks = new List<object>();
-		private readonly List<Form> _modalForms = new List<Form>();
 		protected Control CurrentVisibleView;
 		protected readonly List<Control> VisibleViews = new List<Control>();
-		protected readonly SynchronizationContext SynchronizationContext = new WindowsFormsSynchronizationContext();
-
 
 		public event EventHandler AllTasksComplete;
 
 		public ViewDeck(Control control)
 		{
 			_control = Verify.ArgumentNotNull(control, "control");
+			_control.Disposed += ControlDisposed;
 		}
 
 		public virtual void Clear()
@@ -39,7 +67,6 @@ namespace Quokka.WinForms
 			_control.Controls.Clear();
 
 			CurrentTasks.Clear();
-			_modalForms.Clear();
 			VisibleViews.Clear();
 			CurrentVisibleView = null;
 		}
@@ -63,10 +90,13 @@ namespace Quokka.WinForms
 
 		public void EndTask(object task)
 		{
-			CurrentTasks.Remove(task);
-			if (CurrentTasks.Count == 0)
+			if (CurrentTasks.Contains(task))
 			{
-				OnAllTasksComplete(EventArgs.Empty);
+				CurrentTasks.Remove(task);
+				if (CurrentTasks.Count == 0)
+				{
+					OnAllTasksComplete(EventArgs.Empty);
+				}
 			}
 		}
 
@@ -79,9 +109,15 @@ namespace Quokka.WinForms
 			// defined in the node of a task).
 			if (Interlocked.Increment(ref _transitionReferenceCount) == 1)
 			{
-				_control.SuspendLayout();
-				Win32.SetWindowRedraw(_control, false);
 				Cursor.Current = Cursors.WaitCursor;
+
+				// The framework should not call this method when the view deck control
+				// is disposed or disposing, but check just in case.
+				if (!_control.IsDisposed && !_control.Disposing)
+				{
+					_control.SuspendLayout();
+					Win32.SetWindowRedraw(_control, false);
+				}
 			}
 		}
 
@@ -92,26 +128,35 @@ namespace Quokka.WinForms
 			// defined in the node of a task).
 			if (Interlocked.Decrement(ref _transitionReferenceCount) == 0)
 			{
-				if (CurrentVisibleView == null && VisibleViews.Count > 0)
-				{
-					// At the end of the transition, no view is visible but there
-					// are one or more views that are not visible because they were
-					// hidden in order to display another view, but they were never
-					// commanded to be hidden. Show them in reverse order.
-					ShowView(VisibleViews[VisibleViews.Count - 1]);
-				}
-
 				Cursor.Current = Cursors.Default;
-				Win32.SetWindowRedraw(_control, true);
-				_control.Invalidate(true);
-				_control.ResumeLayout();
+
+				// This method can be called after the view deck control has been disposed at the
+				// end of a task. Check for disposed or disposing control and do nothing if this
+				// is the case.
+				if (!_control.IsDisposed && !_control.Disposing)
+				{
+					if (CurrentVisibleView == null && VisibleViews.Count > 0)
+					{
+						// At the end of the transition, no view is visible but there
+						// are one or more views that are not visible because they were
+						// hidden in order to display another view, but they were never
+						// commanded to be hidden. Show them in reverse order.
+						ShowView(VisibleViews[VisibleViews.Count - 1]);
+					}
+
+					Win32.SetWindowRedraw(_control, true);
+					_control.Invalidate(true);
+					_control.ResumeLayout();
+				}
 			}
 		}
 
 		public virtual void AddView(object view)
 		{
-			if (view == null)
+			if (_control.IsDisposed || _control.Disposing || view == null)
+			{
 				return;
+			}
 
 			// view object may optionally be a Form, but it must be a control
 			Form form = view as Form;
@@ -137,48 +182,54 @@ namespace Quokka.WinForms
 
 		public virtual void RemoveView(object view)
 		{
-			if (view != null)
+			if (_control.IsDisposed || _control.Disposing || view == null)
 			{
-				Control control = (Control) view;
-				HideView(view);
-				_control.Controls.Remove(control);
+				return;
 			}
+
+			Control control = (Control) view;
+			HideView(view);
+			_control.Controls.Remove(control);
 		}
 
 		public virtual void ShowView(object view)
 		{
-			if (view != null)
+			if (_control.IsDisposed || _control.Disposing || view == null)
 			{
-				Control control = (Control) view;
-				control.Visible = true;
-				foreach (Control c in _control.Controls)
-				{
-					if (!ReferenceEquals(c, control))
-					{
-						c.Visible = false;
-					}
-				}
-
-				if (!VisibleViews.Contains(control))
-				{
-					VisibleViews.Add(control);
-				}
-				CurrentVisibleView = control;
+				return;
 			}
+
+			Control control = (Control) view;
+			control.Visible = true;
+			foreach (Control c in _control.Controls)
+			{
+				if (!ReferenceEquals(c, control))
+				{
+					c.Visible = false;
+				}
+			}
+
+			if (!VisibleViews.Contains(control))
+			{
+				VisibleViews.Add(control);
+			}
+			CurrentVisibleView = control;
 		}
 
 		public virtual void HideView(object view)
 		{
-			if (view != null)
+			if (_control.IsDisposed || _control.Disposing || view == null)
 			{
-				Control control = (Control) view;
-				control.Visible = false;
-				if (CurrentVisibleView == control)
-				{
-					CurrentVisibleView = null;
-				}
-				VisibleViews.Remove(control);
+				return;
 			}
+
+			Control control = (Control) view;
+			control.Visible = false;
+			if (CurrentVisibleView == control)
+			{
+				CurrentVisibleView = null;
+			}
+			VisibleViews.Remove(control);
 		}
 
 		public virtual IModalWindow CreateModalWindow()
@@ -203,6 +254,32 @@ namespace Quokka.WinForms
 			if (ViewClosed != null)
 			{
 				ViewClosed(this, e);
+			}
+		}
+
+		protected virtual void TryEndTask(object task)
+		{
+			var uiTask = task as UITask;
+			if (uiTask != null && uiTask.IsRunning)
+			{
+				uiTask.EndTask();
+			}
+		}
+
+		private void ControlDisposed(object sender, EventArgs e)
+		{
+			if (CurrentTasks.Count > 0)
+			{
+				// Take a copy of the CurrentTasks collection.
+				// This is necessary because we are going to end the tasks,
+				// which will cause them to remove themselves from the CurrentTasks
+				// collection. Because that collection is being modified, we cannot use
+				// an enumerator on it.
+				var tasks = new List<object>(CurrentTasks);
+				foreach (var task in tasks)
+				{
+					TryEndTask(task);
+				}
 			}
 		}
 	}
