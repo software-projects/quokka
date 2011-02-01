@@ -259,6 +259,24 @@ namespace Quokka.Data.Internal
 			return _dataReader.GetInt32(index);
 		}
 
+		protected int GetInt32FromNumeric(int index)
+		{
+			if (_dataReader.IsDBNull(index))
+			{
+				return default(int);
+			}
+			return Convert.ToInt32(_dataReader.GetValue(index));
+		}
+
+		protected int? GetNullableInt32FromNumeric(int index)
+		{
+			if (_dataReader.IsDBNull(index))
+			{
+				return null;
+			}
+			return Convert.ToInt32(_dataReader.GetValue(index));
+		}
+
 		protected int? GetNullableInt32(int index)
 		{
 			if (_dataReader.IsDBNull(index))

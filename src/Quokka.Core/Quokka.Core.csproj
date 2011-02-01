@@ -156,6 +156,8 @@
     <Compile Include="Data\ISqlQueryReader.cs" />
     <Compile Include="Data\ParameterAttribute.cs" />
     <Compile Include="Data\SqlQuery.cs" />
+    <Compile Include="Data\SqlQuery.Generic.cs" />
+    <Compile Include="Data\SqlQueryBase.cs" />
     <Compile Include="DynamicCodeGeneration\DynamicAssembly.cs" />
     <Compile Include="UI\Commands\IUICommand.cs" />
     <Compile Include="UI\Tasks\ErrorCondition.cs" />

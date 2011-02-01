@@ -32,12 +32,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace SqlQuery
+namespace Quokka.Data.Internal
 {
 	/// <summary>
-	/// 	A collection class that is case insensitive, but will prefer a case-sensitive match if one exists.
+	/// A collection class that is case insensitive, but will prefer a case-sensitive match if one exists.
 	/// </summary>
-	/// <typeparam name = "T"></typeparam>
+	/// <typeparam name="T"></typeparam>
 	public class NameDictionary<T> : IEnumerable<KeyValuePair<string, T>>
 	{
 		private readonly IDictionary<string, T> _mapCaseSensitive = new Dictionary<string, T>();

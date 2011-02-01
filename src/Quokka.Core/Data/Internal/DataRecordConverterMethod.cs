@@ -211,9 +211,25 @@ namespace Quokka.Data.Internal
 						AddConversion(typeof (int), method);
 						break;
 
+					case "GetInt32FromNumeric":
+						AddConversion(typeof (decimal), typeof (int), method);
+						AddConversion(typeof (double), typeof (int), method);
+						AddConversion(typeof (float), typeof (int), method);
+						AddConversion(typeof (short), typeof (int), method);
+						AddConversion(typeof (byte), typeof (int), method);
+						break;
+
 					case "GetNullableInt32":
 						GetNullableInt32 = method;
 						AddConversion(typeof (int), typeof (int?), method);
+						break;
+
+					case "GetNullableInt32FromNumeric":
+						AddConversion(typeof (decimal), typeof (int?), method);
+						AddConversion(typeof (double), typeof (int?), method);
+						AddConversion(typeof (float), typeof (int?), method);
+						AddConversion(typeof (short), typeof (int?), method);
+						AddConversion(typeof (byte), typeof (int?), method);
 						break;
 
 					case "GetInt64":

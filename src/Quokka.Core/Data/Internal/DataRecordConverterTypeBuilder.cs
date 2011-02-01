@@ -36,12 +36,11 @@ using System.Reflection.Emit;
 using System.Text;
 using Quokka.Diagnostics;
 using Quokka.DynamicCodeGeneration;
-using SqlQuery;
 
 namespace Quokka.Data.Internal
 {
 	/// <summary>
-	/// 	Builds subtypes of <see cref = "DataRecordConverter" /> using System.Reflection.Emit.
+	/// Builds subtypes of <see cref="DataRecordConverter"/> using System.Reflection.Emit.
 	/// </summary>
 	internal class DataRecordConverterTypeBuilder
 	{
@@ -137,7 +136,7 @@ namespace Quokka.Data.Internal
 			                                      TypeAttributes.AutoLayout;
 
 			TypeBuilder typeBuilder = DynamicAssembly.Instance.DefineType("DataRecordConverter", typeAttributes,
-			                                                              typeof (DataRecordConverter));
+			                                                              typeof(DataRecordConverter));
 
 			if (!CanBuildConverter)
 			{
@@ -158,8 +157,8 @@ namespace Quokka.Data.Internal
 
 		private static void BuildConstructor(TypeBuilder typeBuilder)
 		{
-			Type parentType = typeof (DataRecordConverter);
-			var parameters = new[] {typeof (IDataReader)};
+			Type parentType = typeof(DataRecordConverter);
+			var parameters = new[] {typeof(IDataReader)};
 			ConstructorInfo parentConstructor = parentType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null,
 			                                                              parameters, null);
 			const MethodAttributes methodAttributes = MethodAttributes.Public
@@ -169,7 +168,7 @@ namespace Quokka.Data.Internal
 
 			ConstructorBuilder constructorBuilder = typeBuilder.DefineConstructor(methodAttributes,
 			                                                                      CallingConventions.Standard,
-			                                                                      new[] {typeof (IDataReader)});
+			                                                                      new[] {typeof(IDataReader)});
 
 			ILGenerator generator = constructorBuilder.GetILGenerator();
 			generator.Emit(OpCodes.Ldarg_0);
@@ -186,7 +185,7 @@ namespace Quokka.Data.Internal
 
 
 			MethodBuilder methodBuilder = typeBuilder.DefineMethod("DoCopy", methodAttributes, CallingConventions.Standard,
-			                                                       typeof (void), new[] {typeof (object)});
+			                                                       typeof(void), new[] {typeof(object)});
 
 			ILGenerator generator = methodBuilder.GetILGenerator();
 			generator.DeclareLocal(_queryInfo.RecordType);
@@ -203,36 +202,36 @@ namespace Quokka.Data.Internal
 
 				switch (fieldInfo.Index)
 				{
-					case 0:
-						generator.Emit(OpCodes.Ldc_I4_0);
-						break;
-					case 1:
-						generator.Emit(OpCodes.Ldc_I4_1);
-						break;
-					case 2:
-						generator.Emit(OpCodes.Ldc_I4_2);
-						break;
-					case 3:
-						generator.Emit(OpCodes.Ldc_I4_3);
-						break;
-					case 4:
-						generator.Emit(OpCodes.Ldc_I4_4);
-						break;
-					case 5:
-						generator.Emit(OpCodes.Ldc_I4_5);
-						break;
-					case 6:
-						generator.Emit(OpCodes.Ldc_I4_6);
-						break;
-					case 7:
-						generator.Emit(OpCodes.Ldc_I4_7);
-						break;
-					case 8:
-						generator.Emit(OpCodes.Ldc_I4_8);
-						break;
-					default:
-						generator.Emit(OpCodes.Ldc_I4, fieldInfo.Index);
-						break;
+				case 0:
+					generator.Emit(OpCodes.Ldc_I4_0);
+					break;
+				case 1:
+					generator.Emit(OpCodes.Ldc_I4_1);
+					break;
+				case 2:
+					generator.Emit(OpCodes.Ldc_I4_2);
+					break;
+				case 3:
+					generator.Emit(OpCodes.Ldc_I4_3);
+					break;
+				case 4:
+					generator.Emit(OpCodes.Ldc_I4_4);
+					break;
+				case 5:
+					generator.Emit(OpCodes.Ldc_I4_5);
+					break;
+				case 6:
+					generator.Emit(OpCodes.Ldc_I4_6);
+					break;
+				case 7:
+					generator.Emit(OpCodes.Ldc_I4_7);
+					break;
+				case 8:
+					generator.Emit(OpCodes.Ldc_I4_8);
+					break;
+				default:
+					generator.Emit(OpCodes.Ldc_I4, fieldInfo.Index);
+					break;
 				}
 
 				generator.Emit(OpCodes.Call, DataRecordConverterMethod.GetMethod(fieldInfo.FieldType, property.PropertyType));
