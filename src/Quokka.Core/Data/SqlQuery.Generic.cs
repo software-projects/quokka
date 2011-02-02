@@ -86,7 +86,7 @@ namespace Quokka.Data
 		{
 			CheckCommand();
 			PopulateCommand(Command);
-			using (IDataReader dataReader = CommandExecuteReader(Command))
+			using (IDataReader dataReader = DecorateDataReader(CommandExecuteReader(Command)))
 			{
 				var list = new List<T>();
 				DataRecordConverter converter = DataRecordConverter.CreateConverterFor(typeof(T), dataReader);
@@ -118,24 +118,8 @@ namespace Quokka.Data
 		{
 			CheckCommand();
 			PopulateCommand(Command);
-			IDataReader reader = CommandExecuteReader(Command);
+			IDataReader reader = DecorateDataReader(CommandExecuteReader(Command));
 			return new QueryReader<T>(reader);
-		}
-
-		/// <summary>
-		/// This method is called to execute the <see cref="IDbCommand"/> against the data source.
-		/// Override this method to provide custom processing and/or error handling.
-		/// </summary>
-		/// <param name="cmd">
-		/// The <see cref="IDbCommand"/> object that will be used to execute the query.
-		/// </param>
-		/// <returns>
-		/// Returns an <see cref="IDataReader"/> object, which is used to read the result set(s)
-		/// from the query.
-		/// </returns>
-		protected virtual IDataReader CommandExecuteReader(IDbCommand cmd)
-		{
-			return cmd.ExecuteReader();
 		}
 	}
 }

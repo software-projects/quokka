@@ -33,13 +33,17 @@ using System.Data;
 namespace Quokka.Data
 {
 	/// <summary>
-	/// SQL command that is not strongly typed.
+	/// 	SQL command that is not strongly typed.
 	/// </summary>
 	public class SqlQuery : SqlQueryBase
 	{
-		public SqlQuery() : this(null) {}
+		public SqlQuery() : this(null)
+		{
+		}
 
-		public SqlQuery(IDbCommand cmd) : base(cmd) {}
+		public SqlQuery(IDbCommand cmd) : base(cmd)
+		{
+		}
 
 		public int ExecuteNonQuery()
 		{
@@ -52,27 +56,17 @@ namespace Quokka.Data
 		{
 			CheckCommand();
 			PopulateCommand(Command);
-			return CommandExecuteReader(Command);
+			return DecorateDataReader(CommandExecuteReader(Command));
 		}
 
 		/// <summary>
-		/// Allows the derived class to customise how the command is executed
+		/// 	Allows the derived class to customise how the command is executed
 		/// </summary>
-		/// <param name="cmd">Command populated with command text and parameters</param>
+		/// <param name = "cmd">Command populated with command text and parameters</param>
 		/// <returns>Number of rows affected by the command</returns>
 		protected virtual int CommandExecuteNonQuery(IDbCommand cmd)
 		{
 			return cmd.ExecuteNonQuery();
-		}
-
-		/// <summary>
-		/// Allows the derived class to customse how the command is executed
-		/// </summary>
-		/// <param name="cmd"></param>
-		/// <returns></returns>
-		protected IDataReader CommandExecuteReader(IDbCommand cmd)
-		{
-			return cmd.ExecuteReader();
 		}
 	}
 }

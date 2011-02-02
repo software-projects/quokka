@@ -32,12 +32,13 @@ using System;
 using System.Data;
 using System.IO;
 using System.Reflection;
+using Quokka.Data.DataReader;
 using Quokka.Data.Internal;
 
 namespace Quokka.Data
 {
 	/// <summary>
-	/// Common base class for <see cref="SqlQuery{T}"/> and <see cref="SqlNonQuery"/>
+	/// 	Common base class for <see cref = "SqlQuery{T}" /> and <see cref = "SqlNonQuery" />
 	/// </summary>
 	public class SqlQueryBase
 	{
@@ -47,16 +48,16 @@ namespace Quokka.Data
 		}
 
 		/// <summary>
-		/// The <see cref="IDbCommand"/> object used to send the query to the database.
+		/// 	The <see cref = "IDbCommand" /> object used to send the query to the database.
 		/// </summary>
 		[IgnoreParameter]
 		public IDbCommand Command { get; set; }
 
 		/// <summary>
-		/// Override this method to set the command text for the query.
+		/// 	Override this method to set the command text for the query.
 		/// </summary>
-		/// <param name="cmd">
-		/// The <see cref="IDbCommand"/> object that will be used to execute the query.
+		/// <param name = "cmd">
+		/// 	The <see cref = "IDbCommand" /> object that will be used to execute the query.
 		/// </param>
 		protected virtual void SetCommandText(IDbCommand cmd)
 		{
@@ -65,11 +66,11 @@ namespace Quokka.Data
 		}
 
 		/// <summary>
-		/// Override this method to set the parameters in the <see cref="IDbCommand"/>
-		/// object prior to executing the query.
+		/// 	Override this method to set the parameters in the <see cref = "IDbCommand" />
+		/// 	object prior to executing the query.
 		/// </summary>
-		/// <param name="cmd">
-		/// The <see cref="IDbCommand"/> object that will be used to execute the query.
+		/// <param name = "cmd">
+		/// 	The <see cref = "IDbCommand" /> object that will be used to execute the query.
 		/// </param>
 		protected virtual void SetParameters(IDbCommand cmd)
 		{
@@ -78,8 +79,8 @@ namespace Quokka.Data
 		}
 
 		/// <summary>
-		/// Retrieve the SQL command text from an embedded resource file. The file name
-		/// has the same name as the query class with the suffix ".sql".
+		/// 	Retrieve the SQL command text from an embedded resource file. The file name
+		/// 	has the same name as the query class with the suffix ".sql".
 		/// </summary>
 		/// <returns></returns>
 		protected string GetCommandTextFromResource()
@@ -88,16 +89,16 @@ namespace Quokka.Data
 		}
 
 		/// <summary>
-		/// Retrieve the SQL command text from an embedded resource file relative to the query type.
+		/// 	Retrieve the SQL command text from an embedded resource file relative to the query type.
 		/// </summary>
-		/// <param name="fileName">
-		/// The file name of the embedded resource file. If this parameter is <c>null</c> or
-		/// empty, then the file name defaults to the name of the query class with the suffix ".sql".
-		/// For example if the query class is <c>MyQuery</c>, then the default file name is
-		/// <c>MyQuery.sql</c>.
+		/// <param name = "fileName">
+		/// 	The file name of the embedded resource file. If this parameter is <c>null</c> or
+		/// 	empty, then the file name defaults to the name of the query class with the suffix ".sql".
+		/// 	For example if the query class is <c>MyQuery</c>, then the default file name is
+		/// 	<c>MyQuery.sql</c>.
 		/// </param>
 		/// <returns>
-		/// SQL command text.
+		/// 	SQL command text.
 		/// </returns>
 		protected string GetCommandTextFromResource(string fileName)
 		{
@@ -133,6 +134,43 @@ namespace Quokka.Data
 		{
 			SetCommandText(cmd);
 			SetParameters(cmd);
+		}
+
+		/// <summary>
+		/// Allows the derived class to customse how the command is executed
+		/// </summary>
+		/// <param name="cmd"></param>
+		/// <returns>
+		/// Returns an <see cref="IDataReader"/> object that contains the result of the query.
+		/// </returns>
+		protected virtual IDataReader CommandExecuteReader(IDbCommand cmd)
+		{
+			return cmd.ExecuteReader();
+		}
+
+		///<summary>
+		///	Provides an opportunity to decorate the <see cref = "IDataReader" /> object
+		///</summary>
+		///<param name = "reader">
+		///	The <see cref = "IDataReader" /> returned by the SQL query
+		///</param>
+		///<returns>
+		///	Returns an <see cref = "IDataReader" /> object that will be used to process the query.
+		///</returns>
+		///<remarks>
+		///	<para>
+		///		The default implementation simply returns the <paramref name = "reader" /> object. 
+		///	</para>
+		///	<para>
+		///		This override can be useful if you wish to place a decorator object around the <see cref = "IDataReader" />.
+		///		For example, you may choose to use the <see cref = "StringTrimDataReader" /> to ensure that all string fields
+		///		have trailing spaces trimmed. You can easily create your own decorator by subclassing 
+		///		<see cref = "DataReaderDecorator" />.
+		///	</para>
+		///</remarks>
+		protected virtual IDataReader DecorateDataReader(IDataReader reader)
+		{
+			return reader;
 		}
 	}
 }
