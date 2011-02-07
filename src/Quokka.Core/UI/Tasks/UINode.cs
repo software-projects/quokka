@@ -377,6 +377,14 @@ namespace Quokka.UI.Tasks
 			task.TaskComplete -= NestedTaskComplete;
 			UINode nextNode = null;
 
+			// The nested task is complete, and this can cause navigation of the
+			// current task. If, however, the current task is complete, then no
+			// navigation will take place
+			if (Task.IsComplete)
+			{
+				return;
+			}
+
 			foreach (var conditionalNodeTransitionBuilder in NodeBuilder.NestedTaskTransitions)
 			{
 				bool condition = conditionalNodeTransitionBuilder.Converter(task);
