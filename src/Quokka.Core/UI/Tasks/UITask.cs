@@ -48,7 +48,6 @@ namespace Quokka.UI.Tasks
 		private bool _endTaskRequested;
 		private bool _raiseTaskComplete;
 		private bool _raiseTaskStarted;
-		private bool _registeredWithViewDeck;
 
 		protected UITask()
 		{
@@ -381,15 +380,9 @@ namespace Quokka.UI.Tasks
 
 				if (nextNode != null)
 				{
-					using (var transition = ViewDeck.BeginTransition())
+					using (var transition = nextNode.ViewDeck.BeginTransition(this))
 					{
 						try {
-							if (!_registeredWithViewDeck)
-							{
-								transition.BeginTask(this);
-								_registeredWithViewDeck = true;
-							}
-
 							do
 							{
 								DoNavigate(nextNode, transition);
@@ -440,15 +433,6 @@ namespace Quokka.UI.Tasks
 				}
 				if (_endTaskRequested)
 				{
-					using (var transition = ViewDeck.BeginTransition())
-					{
-						transition.EndTask(this);
-						foreach (var node in Nodes)
-						{
-							node.CleanupNode();
-						}
-					}
-
 					CurrentNode = null;
 					IsComplete = true;
 					_raiseTaskComplete = true;
@@ -461,7 +445,7 @@ namespace Quokka.UI.Tasks
 
 			if (showModalView && CurrentNode != null)
 			{
-				using (var transition = CurrentNode.ViewDeck.BeginTransition())
+				using (var transition = CurrentNode.ViewDeck.BeginTransition(this))
 				{
 					transition.ShowView(CurrentNode.View);
 				}

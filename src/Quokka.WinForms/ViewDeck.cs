@@ -48,7 +48,8 @@ namespace Quokka.WinForms
 	{
 		private readonly Control _control;
 		private int _transitionReferenceCount;
-		protected readonly List<object> CurrentTasks = new List<object>();
+		protected readonly HashSet<object> CurrentTasks = new HashSet<object>();
+		protected readonly HashSet<UITask> _currentUITasks = new HashSet<UITask>();
 		protected Control CurrentVisibleView;
 		protected readonly List<Control> VisibleViews = new List<Control>();
 
@@ -58,12 +59,20 @@ namespace Quokka.WinForms
 		{
 			_control = Verify.ArgumentNotNull(control, "control");
 			_control.Disposed += ControlDisposed;
+			EndTasksWhenDisposed = true;
 		}
 
 		public Control Control
 		{
 			get { return _control; }
 		}
+
+		/// <summary>
+		/// Determines whether any tasks that have views displayed should be ended when
+		/// the control is disposed. Usually set to <c>true</c>, but will be <c>false</c>
+		/// for modal view decks.
+		/// </summary>
+		public bool EndTasksWhenDisposed { get; set; }
 
 		public virtual void Clear()
 		{
@@ -81,25 +90,28 @@ namespace Quokka.WinForms
 
 		public event EventHandler<ViewClosedEventArgs> ViewClosed;
 
-		public IViewTransition BeginTransition()
+		public IViewTransition BeginTransition(UITask task)
 		{
-			// Use reference counts, because as of Quokka 0.6, it is possible for 
-			// calls to this method to be nested. (This happens when nested tasks are
-			// defined in the node of a task).
-			if (Interlocked.Increment(ref _transitionReferenceCount) == 1)
+			Verify.ArgumentNotNull(task, "task");
+			if (!_currentUITasks.Contains(task))
 			{
-				Cursor.Current = Cursors.WaitCursor;
-
-				// The framework should not call this method when the view deck control
-				// is disposed or disposing, but check just in case.
-				if (!_control.IsDisposed && !_control.Disposing)
-				{
-					_control.SuspendLayout();
-					Win32.SetWindowRedraw(_control, false);
-				}
+				_currentUITasks.Add(task);
+				task.TaskComplete += TaskCompleteHandler;
 			}
 
-			return new ViewTransition(this);
+			BeginTransition();
+			return new ViewTransition(this, task);
+		}
+
+		private void TaskCompleteHandler(object sender, EventArgs e)
+		{
+			var task = sender as UITask;
+			if (task != null)
+			{
+				task.TaskComplete -= TaskCompleteHandler;
+				_currentUITasks.Remove(task);
+				EndTask(task);
+			}
 		}
 
 		public virtual IModalWindow CreateModalWindow()
@@ -129,6 +141,25 @@ namespace Quokka.WinForms
 				if (CurrentTasks.Count == 0)
 				{
 					OnAllTasksComplete(EventArgs.Empty);
+				}
+			}
+		}
+
+		public void BeginTransition()
+		{
+			// Use reference counts, because as of Quokka 0.6, it is possible for 
+			// calls to this method to be nested. (This happens when nested tasks are
+			// defined in the node of a task).
+			if (Interlocked.Increment(ref _transitionReferenceCount) == 1)
+			{
+				Cursor.Current = Cursors.WaitCursor;
+
+				// The framework should not call this method when the view deck control
+				// is disposed or disposing, but check just in case.
+				if (!_control.IsDisposed && !_control.Disposing)
+				{
+					_control.SuspendLayout();
+					Win32.SetWindowRedraw(_control, false);
 				}
 			}
 		}
@@ -235,36 +266,13 @@ namespace Quokka.WinForms
 				return;
 			}
 
-			// Because transitions can be nested, it does no harm to
-			// begin a transition here. The reason for doing this is that
-			// there is code in the EndTransition method that ensures that
-			// if there is no longer a visible view, then the last visible
-			// view will be displayed.
-			//
-			// There was a defect where the UITask code was not calling HideView
-			// inside a BeginTransition/EndTransition pair, so this was a very
-			// quick way to ensure that this would not be a problem in future.
-			//
-			// A better way might be to check and throw an exception if HideView
-			// is called outside of a BeginTransition/EndTransition pair. An even
-			// better solution would be to make use of using/IDisposable pattern
-			// in the interface, but this has backwards compatibility issues.
-			BeginTransition();
-			try
+			Control control = (Control) view;
+			control.Visible = false;
+			if (CurrentVisibleView == control)
 			{
-
-				Control control = (Control) view;
-				control.Visible = false;
-				if (CurrentVisibleView == control)
-				{
-					CurrentVisibleView = null;
-				}
-				VisibleViews.Remove(control);
+				CurrentVisibleView = null;
 			}
-			finally
-			{
-				EndTransition();
-			}
+			VisibleViews.Remove(control);
 		}
 
 		#endregion
@@ -294,23 +302,24 @@ namespace Quokka.WinForms
 			}
 		}
 
-
-
 		#region Private methods
 
 		private void ControlDisposed(object sender, EventArgs e)
 		{
-			if (CurrentTasks.Count > 0)
+			if (EndTasksWhenDisposed)
 			{
-				// Take a copy of the CurrentTasks collection.
-				// This is necessary because we are going to end the tasks,
-				// which will cause them to remove themselves from the CurrentTasks
-				// collection. Because that collection is being modified, we cannot use
-				// an enumerator on it.
-				var tasks = new List<object>(CurrentTasks);
-				foreach (var task in tasks)
+				if (CurrentTasks.Count > 0)
 				{
-					TryEndTask(task);
+					// Take a copy of the CurrentTasks collection.
+					// This is necessary because we are going to end the tasks,
+					// which will cause them to remove themselves from the CurrentTasks
+					// collection. Because that collection is being modified, we cannot use
+					// an enumerator on it.
+					var tasks = new List<object>(CurrentTasks);
+					foreach (var task in tasks)
+					{
+						TryEndTask(task);
+					}
 				}
 			}
 		}
@@ -322,11 +331,14 @@ namespace Quokka.WinForms
 		private class ViewTransition : IViewTransition
 		{
 			private readonly ViewDeck _viewDeck;
+			private readonly UITask _uiTask;
 			private bool _disposed;
 
-			public ViewTransition(ViewDeck viewDeck)
+			public ViewTransition(ViewDeck viewDeck, UITask uiTask)
 			{
 				_viewDeck = Verify.ArgumentNotNull(viewDeck, "viewDeck");
+				_uiTask = Verify.ArgumentNotNull(uiTask, "uiTask");
+				_viewDeck.BeginTask(uiTask);
 			}
 
 			public void Dispose()
@@ -336,16 +348,6 @@ namespace Quokka.WinForms
 					_disposed = true;
 					_viewDeck.EndTransition();
 				}
-			}
-
-			public void BeginTask(object task)
-			{
-				_viewDeck.BeginTask(task);
-			}
-
-			public void EndTask(object task)
-			{
-				_viewDeck.EndTask(task);
 			}
 
 			public void AddView(object view)

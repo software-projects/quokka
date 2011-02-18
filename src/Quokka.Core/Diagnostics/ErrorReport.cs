@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Specialized;
 
-namespace Quokka.UI.Tasks
+namespace Quokka.Diagnostics
 {
 	///<summary>
 	///	Used for reporting error conditions that occur during processing of a task.
 	///</summary>
-	/// <remarks>
-	/// This is just an idea at the moment. Not currently used.
-	/// </remarks>
-	internal class ErrorCondition
+	///<remarks>
+	///	This is just an idea at the moment. Not currently used.
+	///</remarks>
+	public class ErrorReport
 	{
-		public ErrorCondition()
+		public ErrorReport()
 		{
 			Properties = new NameValueCollection();
 		}
@@ -26,6 +26,12 @@ namespace Quokka.UI.Tasks
 		///	code attempting to do at the time the error condition occurred.
 		///</summary>
 		public string Context { get; set; }
+
+		/// <summary>
+		/// The reporter of the error condition. This is usally set to the full name of the class
+		/// that reports the error.
+		/// </summary>
+		public string Source { get; set; }
 
 		///<summary>
 		///	The <see cref = "Exception" /> object associated with the error condition.

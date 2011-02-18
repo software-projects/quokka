@@ -111,6 +111,7 @@ namespace Quokka.WinForms
 			public MyViewDeck(Control control, Form form) : base(control)
 			{
 				_form = Verify.ArgumentNotNull(form, "form");
+				EndTasksWhenDisposed = false;
 			}
 
 			public override void AddView(object view)

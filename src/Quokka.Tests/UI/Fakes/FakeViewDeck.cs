@@ -30,7 +30,6 @@ namespace Quokka.UI.Fakes
 			Assert.IsNotNull(task);
 			Assert.IsInstanceOfType(typeof(UITask), task);
 			var uitask = (UITask) task;
-			Assert.IsFalse(_tasks.Contains(uitask));
 			_tasks.Add(uitask);
 		}
 
@@ -44,13 +43,13 @@ namespace Quokka.UI.Fakes
 			_tasks.Remove(uitask);
 		}
 
-		public IViewTransition BeginTransition()
+		public IViewTransition BeginTransition(UITask task)
 		{
 			if (Interlocked.Increment(ref _transitionReferenceCount) <= 0)
 			{
 				Assert.Fail("transition reference count = " + _transitionReferenceCount);
 			}
-			return new ViewTransition(this);
+			return new ViewTransition(this, task);
 		}
 
 		public void EndTransition()
@@ -119,11 +118,14 @@ namespace Quokka.UI.Fakes
 		private class ViewTransition : IViewTransition
 		{
 			private readonly FakeViewDeck _viewDeck;
+			private readonly UITask _task;
 			private bool _disposed;
 
-			public ViewTransition(FakeViewDeck viewDeck)
+			public ViewTransition(FakeViewDeck viewDeck, UITask task)
 			{
 				_viewDeck = Verify.ArgumentNotNull(viewDeck, "viewDeck");
+				_task = Verify.ArgumentNotNull(task, "task");
+				_viewDeck.BeginTask(task);
 			}
 
 			public void Dispose()
@@ -135,14 +137,9 @@ namespace Quokka.UI.Fakes
 				}
 			}
 
-			public void BeginTask(object task)
+			public void EndTask()
 			{
-				_viewDeck.BeginTask(task);
-			}
-
-			public void EndTask(object task)
-			{
-				_viewDeck.EndTask(task);
+				_viewDeck.EndTask(_task);
 			}
 
 			public void AddView(object view)

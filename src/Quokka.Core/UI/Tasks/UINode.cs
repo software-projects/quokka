@@ -480,7 +480,7 @@ namespace Quokka.UI.Tasks
 			{
 				if (removeView)
 				{
-					using (var transition = ViewDeck.BeginTransition())
+					using (var transition = ViewDeck.BeginTransition(Task))
 					{
 						transition.HideView(View);
 						transition.RemoveView(View);
@@ -488,7 +488,7 @@ namespace Quokka.UI.Tasks
 				}
 				else if (hideView)
 				{
-					using (var transition = ViewDeck.BeginTransition())
+					using (var transition = ViewDeck.BeginTransition(Task))
 					{
 						transition.HideView(View);
 					}
