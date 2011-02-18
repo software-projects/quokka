@@ -381,75 +381,72 @@ namespace Quokka.UI.Tasks
 
 				if (nextNode != null)
 				{
-					ViewDeck.BeginTransition();
-					try
+					using (var transition = ViewDeck.BeginTransition())
 					{
-						if (!_registeredWithViewDeck)
-						{
-							ViewDeck.BeginTask(this);
-							_registeredWithViewDeck = true;
-						}
-
-						do
-						{
-							DoNavigate(nextNode);
-							nextNode = _nextNode;
-							_nextNode = null;
-						} while (nextNode != null);
-
-						if (!_endTaskRequested && CurrentNode != null)
-						{
-							// Finished navigating to a new node, so display the view
-							if (CurrentNode.View != null)
+						try {
+							if (!_registeredWithViewDeck)
 							{
-								if (CurrentNode.IsViewModal)
+								transition.BeginTask(this);
+								_registeredWithViewDeck = true;
+							}
+
+							do
+							{
+								DoNavigate(nextNode, transition);
+								nextNode = _nextNode;
+								_nextNode = null;
+							} while (nextNode != null);
+
+							if (!_endTaskRequested && CurrentNode != null)
+							{
+								// Finished navigating to a new node, so display the view
+								if (CurrentNode.View != null)
 								{
-									// We can't block and show a modal view here
-									// because the _inNavigateMethod member is set to 
-									// true and this will prevent any navigation from
-									// within the modal view. For this reason set a variable
-									// to remind us to show the modal view before leaving this
-									// method.
-									showModalView = true;
+									if (CurrentNode.IsViewModal)
+									{
+										// We can't block and show a modal view here
+										// because the _inNavigateMethod member is set to 
+										// true and this will prevent any navigation from
+										// within the modal view. For this reason set a variable
+										// to remind us to show the modal view before leaving this
+										// method.
+										showModalView = true;
+									}
+									else
+									{
+										// It is possible for the view to navigate while it is
+										// in the process of showing itself (for example in its Load method).
+										// This is a bit pathalogical, but possible. If it should happen, the
+										// view will be cleaned up in the Navigate method.
+										transition.ShowView(CurrentNode.View);
+									}
 								}
-								else
+								else if (CurrentNode.NestedTask != null)
 								{
-									// It is possible for the view to navigate while it is
-									// in the process of showing itself (for example in its Load method).
-									// This is a bit pathalogical, but possible. If it should happen, the
-									// view will be cleaned up in the Navigate method.
-									ViewDeck.ShowView(CurrentNode.View);
+									if (CurrentNode.IsViewModal)
+									{
+										showModalView = true;
+									}
 								}
 							}
-							else if (CurrentNode.NestedTask != null)
-							{
-								if (CurrentNode.IsViewModal)
-								{
-									showModalView = true;
-								}
-							}
 						}
-					}
-					catch (Exception ex)
-					{
-						Log.Error("Unexpected error in transition: " + ex.Message, ex);
-						throw;
-					}
-					finally
-					{
-						ViewDeck.EndTransition();
+						catch (Exception ex)
+						{
+							Log.Error("Unexpected error in transition: " + ex.Message, ex);
+							throw;
+						}
+
 					}
 				}
 				if (_endTaskRequested)
 				{
-					try
+					using (var transition = ViewDeck.BeginTransition())
 					{
-						ViewDeck.BeginTransition();
-						ViewDeck.EndTask(this);
-					}
-					finally
-					{
-						ViewDeck.EndTransition();
+						transition.EndTask(this);
+						foreach (var node in Nodes)
+						{
+							node.CleanupNode();
+						}
 					}
 
 					CurrentNode = null;
@@ -464,12 +461,15 @@ namespace Quokka.UI.Tasks
 
 			if (showModalView && CurrentNode != null)
 			{
-				CurrentNode.ViewDeck.ShowView(CurrentNode.View);
+				using (var transition = CurrentNode.ViewDeck.BeginTransition())
+				{
+					transition.ShowView(CurrentNode.View);
+				}
 				CurrentNode.ModalWindow.ShowModal();
 			}
 		}
 
-		private void DoNavigate(UINode nextNode)
+		private void DoNavigate(UINode nextNode, IViewTransition transition)
 		{
 			if (nextNode != null)
 			{
@@ -531,7 +531,7 @@ namespace Quokka.UI.Tasks
 
 				if (viewCreated)
 				{
-					CurrentNode.ViewDeck.AddView(CurrentNode.View);
+					transition.AddView(CurrentNode.View);
 				}
 
 				if (presenterCreated)

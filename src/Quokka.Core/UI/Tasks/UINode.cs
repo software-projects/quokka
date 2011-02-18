@@ -476,11 +476,22 @@ namespace Quokka.UI.Tasks
 				}
 			}
 
-			if (hideView || removeView)
+			if (ViewDeck != null && View != null)
 			{
-				if (ViewDeck != null && View != null)
+				if (removeView)
 				{
-					ViewDeck.HideView(View);
+					using (var transition = ViewDeck.BeginTransition())
+					{
+						transition.HideView(View);
+						transition.RemoveView(View);
+					}
+				}
+				else if (hideView)
+				{
+					using (var transition = ViewDeck.BeginTransition())
+					{
+						transition.HideView(View);
+					}
 				}
 			}
 
@@ -513,10 +524,6 @@ namespace Quokka.UI.Tasks
 		{
 			if (View != null)
 			{
-				if (ViewDeck != null)
-				{
-					ViewDeck.RemoveView(View);
-				}
 				DisposeUtils.DisposeOf(View);
 				View = null;
 			}

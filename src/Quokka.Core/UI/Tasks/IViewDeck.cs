@@ -37,7 +37,7 @@ namespace Quokka.UI.Tasks
 	/// 	Because only one view is visible at a time, the concept is a 'deck' of views, where only the
 	/// 	view at the top of the deck is visible.
 	/// </summary>
-	public interface IViewDeck
+	public interface IViewDeck_Old
 	{
 		/// <summary>
 		/// 	This event is raised whenever one of the views in the deck is closed.
@@ -131,5 +131,91 @@ namespace Quokka.UI.Tasks
 		/// 	Displays the window as a modal.
 		/// </summary>
 		void ShowModal();
+	}
+
+	public interface IViewDeck
+	{
+		/// <summary>
+		/// 	This event is raised whenever one of the views in the deck is closed.
+		/// </summary>
+		event EventHandler<ViewClosedEventArgs> ViewClosed;
+
+		///<summary>
+		///	Sets the <see cref = "IViewDeck" /> into a mode where the currently displayed
+		///	view can be changed.
+		///</summary>
+		///<returns>
+		/// Returns an <see cref="IViewTransition"/> object, which can be used to change the
+		/// contents of the <see cref="IViewDeck"/>. It is essential that the caller calls
+		/// <see cref="IDisposable.Dispose"/> on this object after finishing the transition.
+		/// </returns>
+		/// <remarks>
+		/// <para>
+		/// It is essential that the caller calls <see cref="IDisposable.Dispose"/> on this 
+		/// object after finishing the transition.
+		/// </para>
+		/// <para>The best way to use this in C# is to make use of the <c>using</c> keyword.</para>
+		/// <code>
+		/// using (var transition = viewDeck.BeginTransition()) {
+		///     transition.AddView(newView);
+		///     transition.RemoveView(oldView);
+		///     transition.ShowView(newView);
+		/// }
+		///  </code>
+		/// </remarks>
+		IViewTransition BeginTransition();
+
+		/// <summary>
+		/// 	Creates a <see cref = "IModalWindow" /> object, which can be used to host
+		/// 	views.
+		/// </summary>
+		/// <returns>
+		/// 	An object that implements the <see cref = "IModalWindow" /> interface.
+		/// </returns>
+		/// <remarks>
+		/// 	The modal window returned is not yet visible. When its <see cref = "IModalWindow.ShowModal" /> method
+		/// 	is called, it will be displayed modally, and the window that the view deck is a child of will be
+		/// 	disabled for the duration that the modal window is displayed.
+		/// </remarks>
+		IModalWindow CreateModalWindow();
+	}
+
+	public interface IViewTransition : IDisposable
+	{
+		/// <summary>
+		/// 	Called whenever a new task is going to make use of the view deck.
+		/// </summary>
+		/// <param name = "task">The task that will use the view deck.</param>
+		void BeginTask(object task);
+
+		/// <summary>
+		/// 	Called whenever a task is no longer going to use the view deck.
+		/// </summary>
+		/// <param name = "task">The task that is no longer going to use the view deck.</param>
+		void EndTask(object task);
+
+		/// <summary>
+		/// 	Adds a view to the view deck, but does not necessarily cause it to be displayed.
+		/// </summary>
+		/// <param name = "view">The view to add to the view deck.</param>
+		void AddView(object view);
+
+		/// <summary>
+		/// 	Removes the view from the view deck.
+		/// </summary>
+		/// <param name = "view">The view to remove from the view deck.</param>
+		void RemoveView(object view);
+
+		/// <summary>
+		/// 	Causes the view to be visible. Only one view in the view deck is visible at a time.
+		/// </summary>
+		/// <param name = "view">The view to be visible.</param>
+		void ShowView(object view);
+
+		/// <summary>
+		/// 	Causes the view to be invisible.
+		/// </summary>
+		/// <param name = "view">The view that should become invisible.</param>
+		void HideView(object view);
 	}
 }

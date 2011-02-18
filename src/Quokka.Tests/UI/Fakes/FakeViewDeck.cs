@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using NUnit.Framework;
+using Quokka.Diagnostics;
 using Quokka.UI.Tasks;
 
 namespace Quokka.UI.Fakes
@@ -43,12 +44,13 @@ namespace Quokka.UI.Fakes
 			_tasks.Remove(uitask);
 		}
 
-		public void BeginTransition()
+		public IViewTransition BeginTransition()
 		{
 			if (Interlocked.Increment(ref _transitionReferenceCount) <= 0)
 			{
 				Assert.Fail("transition reference count = " + _transitionReferenceCount);
 			}
+			return new ViewTransition(this);
 		}
 
 		public void EndTransition()
@@ -111,6 +113,56 @@ namespace Quokka.UI.Fakes
 			if (ViewClosed != null)
 			{
 				ViewClosed(this, new ViewClosedEventArgs(view));
+			}
+		}
+
+		private class ViewTransition : IViewTransition
+		{
+			private readonly FakeViewDeck _viewDeck;
+			private bool _disposed;
+
+			public ViewTransition(FakeViewDeck viewDeck)
+			{
+				_viewDeck = Verify.ArgumentNotNull(viewDeck, "viewDeck");
+			}
+
+			public void Dispose()
+			{
+				if (!_disposed)
+				{
+					_disposed = true;
+					_viewDeck.EndTransition();
+				}
+			}
+
+			public void BeginTask(object task)
+			{
+				_viewDeck.BeginTask(task);
+			}
+
+			public void EndTask(object task)
+			{
+				_viewDeck.EndTask(task);
+			}
+
+			public void AddView(object view)
+			{
+				_viewDeck.AddView(view);
+			}
+
+			public void RemoveView(object view)
+			{
+				_viewDeck.RemoveView(view);
+			}
+
+			public void ShowView(object view)
+			{
+				_viewDeck.ShowView(view);
+			}
+
+			public void HideView(object view)
+			{
+				_viewDeck.HideView(view);
 			}
 		}
 	}

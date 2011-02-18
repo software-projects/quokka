@@ -304,6 +304,12 @@ namespace Quokka.Uip
 			_viewManager = viewManager;
 			_serviceContainer.RegisterInstance(_viewManager);
 
+			var viewDeck = _viewManager as IViewDeck;
+			if (viewDeck != null)
+			{
+				_serviceContainer.RegisterInstance(viewDeck);
+			}
+
 			// Register the nested interfaces one time only. Wait until the first run
 			// to do this, as the controller and view types are not available in the constructor.
 			if (!_taskInitialized)

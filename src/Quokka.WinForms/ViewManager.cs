@@ -59,6 +59,11 @@ namespace Quokka.WinForms
 
 		#region IUipViewManager Members
 
+		void IUipViewManager.BeginTransition()
+		{
+			BeginTransition();
+		}
+
 		public void BeginTask(UipTask task)
 		{
 			BeginTask((object) task);
