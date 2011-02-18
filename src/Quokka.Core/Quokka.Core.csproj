@@ -142,7 +142,7 @@
     <Compile Include="Collections\IDisposableCollection.Generic.cs" />
     <Compile Include="Data\DataReader\DataReaderDecorator.cs" />
     <Compile Include="Data\DataReader\StringTrimDataReader.cs" />
-    <Compile Include="Data\IDataQuery.cs" />
+    <Compile Include="Sandbox\IDataQuery.cs" />
     <Compile Include="Data\IgnoreParameterAttribute.cs" />
     <Compile Include="Data\Internal\DataConversionKey.cs" />
     <Compile Include="Data\Internal\DataRecordConverter.cs" />
