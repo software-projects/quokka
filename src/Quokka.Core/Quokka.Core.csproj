@@ -164,7 +164,17 @@
     <Compile Include="DynamicCodeGeneration\DynamicAssembly.cs" />
     <Compile Include="UI\Commands\IUICommand.cs" />
     <Compile Include="Diagnostics\ErrorReport.cs" />
+    <Compile Include="UI\Messages\Internal\MessageBoxPresenter.cs" />
+    <Compile Include="UI\Messages\Internal\MessageBoxTask.cs" />
+    <Compile Include="UI\Messages\IUIMessageBoxView.cs" />
+    <Compile Include="UI\Messages\UIMessageBox.cs" />
+    <Compile Include="UI\Messages\UIAnswer.cs" />
+    <Compile Include="UI\Messages\UIAnswerCollection.cs" />
+    <Compile Include="UI\Messages\UIAnswerType.cs" />
+    <Compile Include="UI\Messages\UIMessage.cs" />
+    <Compile Include="UI\Messages\UIMessageType.cs" />
     <Compile Include="UI\Tasks\IAnyNodeBuilder.cs" />
+    <Compile Include="UI\Tasks\IModalWindow.cs" />
     <Compile Include="UI\Tasks\INavigateCommand.cs" />
     <Compile Include="UI\Tasks\INodeBuilder.cs" />
     <Compile Include="UI\Tasks\IPresenterNodeBuilder.cs" />
@@ -172,6 +182,7 @@
     <Compile Include="UI\Tasks\IUITask.cs" />
     <Compile Include="UI\Tasks\IViewDeck.cs" />
     <Compile Include="UI\Tasks\IViewNodeBuilder.cs" />
+    <Compile Include="UI\Tasks\IViewTransition.cs" />
     <Compile Include="UI\Tasks\NavigateCommand.cs" />
     <Compile Include="UI\Tasks\NodeBuilder.cs" />
     <Compile Include="UI\Tasks\NodeTransitionBuilder.cs" />

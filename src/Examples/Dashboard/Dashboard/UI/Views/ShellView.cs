@@ -41,5 +41,10 @@ namespace Dashboard.UI.Views
 				DoSomething(this, EventArgs.Empty);
 			}
 		}
+
+		private void modalButton_Click(object sender, EventArgs e)
+		{
+
+		}
 	}
 }

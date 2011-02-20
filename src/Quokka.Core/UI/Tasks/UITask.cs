@@ -32,10 +32,11 @@ using Common.Logging;
 using Microsoft.Practices.ServiceLocation;
 using Quokka.Diagnostics;
 using Quokka.ServiceLocation;
+using Quokka.UI.Messages;
 
 namespace Quokka.UI.Tasks
 {
-	public abstract class UITask : IUITask
+	public abstract class UITask : IUITask, IDisposable
 	{
 		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
 		private IList<UINode> _nodes;
@@ -158,6 +159,7 @@ namespace Quokka.UI.Tasks
 			// for avoiding re-use of tasks.
 			_viewDeck = viewDeck;
 			_serviceContainer.RegisterInstance(_viewDeck);
+			_serviceContainer.RegisterType<UIMessageBox>(ServiceLifecycle.PerRequest);
 
 			CreateState();
 
@@ -168,6 +170,27 @@ namespace Quokka.UI.Tasks
 			}
 
 			Navigate(Nodes[0]);
+		}
+
+		public void Dispose()
+		{
+			if (IsComplete)
+			{
+				return;
+			}
+
+			CurrentNode = null;
+			IsComplete = true;
+
+			foreach (var node in Nodes)
+			{
+				node.CleanupNode();
+			}
+
+			CurrentNode = null;
+			IsComplete = true;
+			_raiseTaskComplete = true;
+			RaiseEvents();
 		}
 
 		/// <summary>
@@ -449,7 +472,7 @@ namespace Quokka.UI.Tasks
 				{
 					transition.ShowView(CurrentNode.View);
 				}
-				CurrentNode.ModalWindow.ShowModal();
+				CurrentNode.ModalWindow.ShowModal(false);
 			}
 		}
 

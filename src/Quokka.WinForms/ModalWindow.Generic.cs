@@ -49,9 +49,16 @@ namespace Quokka.WinForms
 
 		public IWin32Window Owner { get; set; }
 
-		public void ShowModal()
+		public void ShowModal(bool wait)
 		{
-			_syncContext.Post(ShowDialog, null);
+			if (wait)
+			{
+				_syncContext.Send(ShowDialog, null);
+			}
+			else
+			{
+				_syncContext.Post(ShowDialog, null);
+			}
 		}
 
 		protected virtual void OnClosed(EventArgs e)
@@ -97,6 +104,7 @@ namespace Quokka.WinForms
 			_form.StartPosition = FormStartPosition.CenterParent;
 			_form.MinimizeBox = false;
 			_form.MaximizeBox = false;
+			_form.ShowInTaskbar = false;
 			_form.ResumeLayout(false);
 		}
 

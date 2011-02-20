@@ -43,6 +43,7 @@ namespace Dashboard.UI.Views
 			this.toolStrip1 = new System.Windows.Forms.ToolStrip();
 			this.logoutButton = new System.Windows.Forms.ToolStripButton();
 			this.loginNameLabel = new System.Windows.Forms.ToolStripLabel();
+			this.modalButton = new System.Windows.Forms.ToolStripButton();
 			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
 			this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -57,7 +58,6 @@ namespace Dashboard.UI.Views
 			this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.modalButton = new System.Windows.Forms.ToolStripButton();
 			((System.ComponentModel.ISupportInitialize)(this.mainPanel)).BeginInit();
 			this.mainPanel.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.kryptonSplitContainer1)).BeginInit();
@@ -226,6 +226,16 @@ namespace Dashboard.UI.Views
 			this.loginNameLabel.Size = new System.Drawing.Size(80, 22);
 			this.loginNameLabel.Text = "(Login Name)";
 			// 
+			// modalButton
+			// 
+			this.modalButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+			this.modalButton.Image = ((System.Drawing.Image)(resources.GetObject("modalButton.Image")));
+			this.modalButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.modalButton.Name = "modalButton";
+			this.modalButton.Size = new System.Drawing.Size(87, 22);
+			this.modalButton.Text = "Do Something";
+			this.modalButton.Click += new System.EventHandler(this.modalButton_Click);
+			// 
 			// menuStrip1
 			// 
 			this.menuStrip1.Font = new System.Drawing.Font("Segoe UI", 9F);
@@ -334,15 +344,6 @@ namespace Dashboard.UI.Views
 			this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
 			this.aboutToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
 			this.aboutToolStripMenuItem.Text = "&About";
-			// 
-			// modalButton
-			// 
-			this.modalButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-			this.modalButton.Image = ((System.Drawing.Image)(resources.GetObject("modalButton.Image")));
-			this.modalButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-			this.modalButton.Name = "modalButton";
-			this.modalButton.Size = new System.Drawing.Size(87, 22);
-			this.modalButton.Text = "Do Something";
 			// 
 			// ShellView
 			// 

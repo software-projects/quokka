@@ -32,27 +32,6 @@ using System;
 
 namespace Quokka.UI.Tasks
 {
-	/// <summary>
-	/// 	Objects that implement this interface are able to display views in a modal window.
-	/// </summary>
-	public interface IModalWindow : IDisposable
-	{
-		/// <summary>
-		/// 	Occurs when the window is closed
-		/// </summary>
-		event EventHandler Closed;
-
-		/// <summary>
-		/// 	The view deck, in which one view at a time is displayed.
-		/// </summary>
-		IViewDeck ViewDeck { get; }
-
-		/// <summary>
-		/// 	Displays the window as a modal.
-		/// </summary>
-		void ShowModal();
-	}
-
 	public interface IViewDeck
 	{
 		/// <summary>
@@ -65,24 +44,24 @@ namespace Quokka.UI.Tasks
 		///	view can be changed.
 		///</summary>
 		///<returns>
-		/// Returns an <see cref="IViewTransition"/> object, which can be used to change the
-		/// contents of the <see cref="IViewDeck"/>. It is essential that the caller calls
-		/// <see cref="IDisposable.Dispose"/> on this object after finishing the transition.
-		/// </returns>
-		/// <remarks>
-		/// <para>
-		/// It is essential that the caller calls <see cref="IDisposable.Dispose"/> on this 
-		/// object after finishing the transition.
-		/// </para>
-		/// <para>The best way to use this in C# is to make use of the <c>using</c> keyword.</para>
-		/// <code>
-		/// using (var transition = viewDeck.BeginTransition()) {
-		///     transition.AddView(newView);
-		///     transition.RemoveView(oldView);
-		///     transition.ShowView(newView);
-		/// }
-		///  </code>
-		/// </remarks>
+		///	Returns an <see cref = "IViewTransition" /> object, which can be used to change the
+		///	contents of the <see cref = "IViewDeck" />. It is essential that the caller calls
+		///	<see cref = "IDisposable.Dispose" /> on this object after finishing the transition.
+		///</returns>
+		///<remarks>
+		///	<para>
+		///		It is essential that the caller calls <see cref = "IDisposable.Dispose" /> on this 
+		///		object after finishing the transition.
+		///	</para>
+		///	<para>The best way to use this in C# is to make use of the <c>using</c> keyword.</para>
+		///	<code>
+		///		using (var transition = viewDeck.BeginTransition()) {
+		///		transition.AddView(newView);
+		///		transition.RemoveView(oldView);
+		///		transition.ShowView(newView);
+		///		}
+		///	</code>
+		///</remarks>
 		IViewTransition BeginTransition(UITask task);
 
 		/// <summary>
@@ -98,32 +77,5 @@ namespace Quokka.UI.Tasks
 		/// 	disabled for the duration that the modal window is displayed.
 		/// </remarks>
 		IModalWindow CreateModalWindow();
-	}
-
-	public interface IViewTransition : IDisposable
-	{
-		/// <summary>
-		/// 	Adds a view to the view deck, but does not necessarily cause it to be displayed.
-		/// </summary>
-		/// <param name = "view">The view to add to the view deck.</param>
-		void AddView(object view);
-
-		/// <summary>
-		/// 	Removes the view from the view deck.
-		/// </summary>
-		/// <param name = "view">The view to remove from the view deck.</param>
-		void RemoveView(object view);
-
-		/// <summary>
-		/// 	Causes the view to be visible. Only one view in the view deck is visible at a time.
-		/// </summary>
-		/// <param name = "view">The view to be visible.</param>
-		void ShowView(object view);
-
-		/// <summary>
-		/// 	Causes the view to be invisible.
-		/// </summary>
-		/// <param name = "view">The view that should become invisible.</param>
-		void HideView(object view);
 	}
 }

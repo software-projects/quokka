@@ -49,7 +49,7 @@ namespace Quokka.WinForms
 		private readonly Control _control;
 		private int _transitionReferenceCount;
 		protected readonly HashSet<object> CurrentTasks = new HashSet<object>();
-		protected readonly HashSet<UITask> _currentUITasks = new HashSet<UITask>();
+		private readonly HashSet<UITask> _currentUITasks = new HashSet<UITask>();
 		protected Control CurrentVisibleView;
 		protected readonly List<Control> VisibleViews = new List<Control>();
 
@@ -92,11 +92,13 @@ namespace Quokka.WinForms
 
 		public IViewTransition BeginTransition(UITask task)
 		{
-			Verify.ArgumentNotNull(task, "task");
-			if (!_currentUITasks.Contains(task))
+			if (task != null)
 			{
-				_currentUITasks.Add(task);
-				task.TaskComplete += TaskCompleteHandler;
+				if (!_currentUITasks.Contains(task))
+				{
+					_currentUITasks.Add(task);
+					task.TaskComplete += TaskCompleteHandler;
+				}
 			}
 
 			BeginTransition();
@@ -127,20 +129,26 @@ namespace Quokka.WinForms
 
 		public void BeginTask(object task)
 		{
-			if (!CurrentTasks.Contains(task))
+			if (task != null)
 			{
-				CurrentTasks.Add(task);
+				if (!CurrentTasks.Contains(task))
+				{
+					CurrentTasks.Add(task);
+				}
 			}
 		}
 
 		public void EndTask(object task)
 		{
-			if (CurrentTasks.Contains(task))
+			if (task != null)
 			{
-				CurrentTasks.Remove(task);
-				if (CurrentTasks.Count == 0)
+				if (CurrentTasks.Contains(task))
 				{
-					OnAllTasksComplete(EventArgs.Empty);
+					CurrentTasks.Remove(task);
+					if (CurrentTasks.Count == 0)
+					{
+						OnAllTasksComplete(EventArgs.Empty);
+					}
 				}
 			}
 		}
@@ -331,13 +339,11 @@ namespace Quokka.WinForms
 		private class ViewTransition : IViewTransition
 		{
 			private readonly ViewDeck _viewDeck;
-			private readonly UITask _uiTask;
 			private bool _disposed;
 
 			public ViewTransition(ViewDeck viewDeck, UITask uiTask)
 			{
 				_viewDeck = Verify.ArgumentNotNull(viewDeck, "viewDeck");
-				_uiTask = Verify.ArgumentNotNull(uiTask, "uiTask");
 				_viewDeck.BeginTask(uiTask);
 			}
 

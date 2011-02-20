@@ -7,6 +7,7 @@ using Quokka.Events;
 using Quokka.Events.Internal;
 using Quokka.ServiceLocation;
 using Quokka.Services;
+using Quokka.UI.Messages;
 using Quokka.UI.Regions;
 using Quokka.WinForms.Regions;
 
@@ -143,21 +144,30 @@ namespace Quokka.WinForms.Startup
 			{
 				Container.RegisterType<IEventBroker, EventBrokerImpl>(ServiceLifecycle.Singleton);
 			}
+
 			if (!Container.IsTypeRegistered<IDateTimeProvider>())
 			{
 				Container.RegisterType<IDateTimeProvider, DateTimeProvider>(ServiceLifecycle.Singleton);
 			}
+
 			if (!Container.IsTypeRegistered<IGuidProvider>())
 			{
 				Container.RegisterType<IGuidProvider, GuidProvider>(ServiceLifecycle.Singleton);
 			}
+
 			if (!Container.IsTypeRegistered<IRegionManager>())
 			{
 				Container.RegisterType<IRegionManager, RegionManager>(ServiceLifecycle.Singleton);
 			}
+
 			if (!Container.IsTypeRegistered<SynchronizationContext>())
 			{
-				if (SynchronizationContext.Current != null)
+				if (SynchronizationContext.Current == null)
+				{
+					SynchronizationContext ctx = new WindowsFormsSynchronizationContext();
+					Container.RegisterInstance(ctx);
+				}
+				else
 				{
 					Container.RegisterInstance(SynchronizationContext.Current);
 				}
@@ -166,6 +176,11 @@ namespace Quokka.WinForms.Startup
 			if (!Container.IsTypeRegistered<IModalWindowFactory>())
 			{
 				Container.RegisterType<IModalWindowFactory, ModalWindowFactory>(ServiceLifecycle.Singleton);
+			}
+
+			if (!Container.IsTypeRegistered<IUIMessageBoxView>())
+			{
+				Container.RegisterType<IUIMessageBoxView, MessageBoxView>(ServiceLifecycle.PerRequest);
 			}
 		}
 
