@@ -111,14 +111,6 @@ namespace Quokka.UI.Tasks
 		/// </remarks>
 		protected virtual void InitializePresenter()
 		{
-			// For backwards compatibility in Jared's code. Will be removed soon.
-			OnViewCreated();
-		}
-
-		[Obsolete("Use InitializePresenter method instead")]
-		protected virtual void OnViewCreated()
-		{
-			
 		}
 	}
 }

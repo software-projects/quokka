@@ -34,7 +34,7 @@ namespace Quokka.Uip
 	/// <summary>
 	/// Navigator class used by the <see cref="UipTask"/>.
 	/// </summary>
-	[Obsolete("This will be removed from Quokka in a future release")]
+	//[Obsolete("This will be removed from Quokka in a future release")]
 	internal class UipNavigator : IUipNavigator
 	{
 		private readonly UipTask _task;

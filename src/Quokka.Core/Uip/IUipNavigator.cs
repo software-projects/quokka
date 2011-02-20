@@ -74,7 +74,7 @@ namespace Quokka.Uip
     /// navigator object to the controller during unit testing.
     /// </para>
     /// </remarks>
-	[Obsolete("This will be removed from Quokka in a future release")]
+	//[Obsolete("This will be removed from Quokka in a future release")]
 	public interface IUipNavigator
     {
         /// <summary>

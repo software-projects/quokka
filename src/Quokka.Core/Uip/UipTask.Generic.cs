@@ -32,7 +32,7 @@ using Quokka.ServiceLocation;
 
 namespace Quokka.Uip
 {
-	[Obsolete("This will be removed from Quokka in a future release")]
+	//[Obsolete("This will be removed from Quokka in a future release")]
 	public class UipTask<TState> : UipTask
 		where TState : class
 	{

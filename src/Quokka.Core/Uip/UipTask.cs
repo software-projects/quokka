@@ -40,7 +40,7 @@ using Quokka.UI.Tasks;
 
 namespace Quokka.Uip
 {
-	[Obsolete("This will be removed from Quokka in a future release")]
+	//[Obsolete("This will be removed from Quokka in a future release")]
 	public abstract class UipTask : IUITask
 	{
 		private static readonly ILog Log = LogManager.GetCurrentClassLogger();

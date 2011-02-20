@@ -86,7 +86,6 @@
     <Compile Include="Events\ReferenceOption.cs" />
     <Compile Include="Events\ThreadOption.cs" />
     <Compile Include="Modules\IModule.cs" />
-    <Compile Include="Reflection\ObjectFactory.cs" />
     <Compile Include="QuokkaException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\PropertyCollection.cs" />
@@ -103,9 +102,6 @@
     <Compile Include="ServiceLocation\SingletonAttribute.cs" />
     <Compile Include="Services\DateTimeProvider.cs" />
     <Compile Include="Services\GuidProvider.cs" />
-    <Compile Include="Uip\Controllers\IInProgressController.cs" />
-    <Compile Include="Uip\Controllers\InProgressControllerBase.cs" />
-    <Compile Include="Uip\Controllers\WizardControllerBase.cs" />
     <Compile Include="Uip\UipNavigator.cs" />
     <Compile Include="Uip\UipNodeOptions.cs" />
     <Compile Include="Uip\UipQuestion.cs" />

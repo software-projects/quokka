@@ -39,7 +39,7 @@ namespace Quokka.WinForms
 	/// <summary>
 	/// 	Handles views inside a Windows Forms <see cref = "Control" />
 	/// </summary>
-	[Obsolete("Use class ViewDeck instead. This class will be removed in a future version of Quokka")]
+	//[Obsolete("Use class ViewDeck instead. This class will be removed in a future version of Quokka")]
 	public class ViewManager : ViewDeck, IUipViewManager
 	{
 		private readonly List<Form> _modalForms = new List<Form>();

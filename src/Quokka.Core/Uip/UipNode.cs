@@ -43,7 +43,7 @@ namespace Quokka.Uip
 	/// <summary>
 	/// Represents a single UI node in the UI task.
 	/// </summary>
-	[Obsolete("This will be removed from Quokka in a future release")]
+	//[Obsolete("This will be removed from Quokka in a future release")]
 	public class UipNode
 	{
 		private static readonly ILog Log = LogManager.GetCurrentClassLogger();

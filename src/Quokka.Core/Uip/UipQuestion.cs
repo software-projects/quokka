@@ -31,7 +31,7 @@ namespace Quokka.Uip
 	using System;
 	using System.Collections.Generic;
 
-	[Obsolete("This will be removed from Quokka in a future release")]
+	//[Obsolete("This will be removed from Quokka in a future release")]
 	public enum UipQuestionType
 	{
 		Information,
@@ -43,7 +43,7 @@ namespace Quokka.Uip
 		Failure,
 	}
 
-	[Obsolete("This will be removed from Quokka in a future release")]
+	//[Obsolete("This will be removed from Quokka in a future release")]
 	public enum UipAnswerType
 	{
 		// These numbers match the values in System.Windows.Forms.DialogResult
@@ -57,7 +57,7 @@ namespace Quokka.Uip
 		No = 7,
 	}
 
-	[Obsolete("This will be removed from Quokka in a future release")]
+	//[Obsolete("This will be removed from Quokka in a future release")]
 	public class UipQuestion
 	{
 		private UipQuestionType _questionType;
@@ -115,10 +115,10 @@ namespace Quokka.Uip
 		}
 	}
 
-	[Obsolete("This will be removed from Quokka in a future release")]
+	//[Obsolete("This will be removed from Quokka in a future release")]
 	public delegate void UipAnswerCallback();
 
-	[Obsolete("This will be removed from Quokka in a future release")]
+	//[Obsolete("This will be removed from Quokka in a future release")]
 	public class UipAnswer
 	{
 		private readonly string _text;

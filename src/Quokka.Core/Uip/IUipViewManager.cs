@@ -32,7 +32,7 @@ using System;
 
 namespace Quokka.Uip
 {
-	[Obsolete("Use IViewDeck interface instead")]
+	//[Obsolete("Use IViewDeck interface instead")]
 	public interface IUipViewManager
 	{
 		event EventHandler<UipViewEventArgs> ViewClosed;
