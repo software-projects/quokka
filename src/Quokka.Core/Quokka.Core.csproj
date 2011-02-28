@@ -138,6 +138,8 @@
     <Compile Include="Collections\IDisposableCollection.Generic.cs" />
     <Compile Include="Data\DataReader\DataReaderDecorator.cs" />
     <Compile Include="Data\DataReader\StringTrimDataReader.cs" />
+    <Compile Include="Sandbox\ExceptionExtensions.cs" />
+    <Compile Include="Sandbox\IBackgroundWorker.cs" />
     <Compile Include="Sandbox\IDataQuery.cs" />
     <Compile Include="Data\IgnoreParameterAttribute.cs" />
     <Compile Include="Data\Internal\DataConversionKey.cs" />
@@ -158,6 +160,14 @@
     <Compile Include="Data\SqlQuery.Generic.cs" />
     <Compile Include="Data\SqlQueryBase.cs" />
     <Compile Include="DynamicCodeGeneration\DynamicAssembly.cs" />
+    <Compile Include="Sandbox\BackgroundAction.cs" />
+    <Compile Include="Stomp\ByteArrayUtil.cs" />
+    <Compile Include="Stomp\StompCommand.cs" />
+    <Compile Include="Stomp\StompFrame.cs" />
+    <Compile Include="Stomp\StompFrameBuilder.cs" />
+    <Compile Include="Stomp\StompFrameExtensions.cs" />
+    <Compile Include="Stomp\StompHeaderCollection.cs" />
+    <Compile Include="Stomp\StompHeader.cs" />
     <Compile Include="UI\Commands\IUICommand.cs" />
     <Compile Include="Diagnostics\ErrorReport.cs" />
     <Compile Include="UI\Messages\Internal\MessageBoxPresenter.cs" />

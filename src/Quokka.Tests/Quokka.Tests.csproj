@@ -92,8 +92,13 @@
     <Compile Include="QuokkaContainerTests.cs" />
     <Compile Include="Reflection\PropertyUtilTests.cs" />
     <Compile Include="Reflection\TypeUtilTests.cs" />
+    <Compile Include="Sandbox\BackgroundActionTests.cs" />
+    <Compile Include="Sandbox\ExceptionExtensionsTests.cs" />
     <Compile Include="ServiceContainerUtilTests.cs" />
     <Compile Include="ServiceProviderTests.cs" />
+    <Compile Include="Stomp\ByteArrayUtilTests.cs" />
+    <Compile Include="Stomp\StompFrameBuilderTests.cs" />
+    <Compile Include="Stomp\StompFrameTests.cs" />
     <Compile Include="Uip\Fakes\FakeViewManager.cs" />
     <Compile Include="Uip\FakeAppTests2.cs" />
     <Compile Include="Uip\MockApp2\MockTask2.cs" />

@@ -14,16 +14,34 @@ namespace Quokka.Sandbox
 		IList<T> ExecuteList();
 	}
 
+	// not a brilliant name
+	public interface INonQuery
+	{
+		void ExecuteNonQuery();
+	}
+
 	public interface IBus
 	{
-		// Queues a query to run locally
-		IBusQueryHandler<T> Query<T>(IListQuery<T> query);
 
 		// Sends a request to be handled either locally or remotely
 		IBusResponseHandler Send<T>(T message);
 
-		void Reply<T>(T message);
 		void Publish<T>(T message);
+	}
+
+	// Provided to presenters and views -- they do not need to reply to anything
+	public interface IPresenterBus : IBus
+	{
+		// Queues a query to run locally
+		IBusQueryHandler<T> Query<T>(IListQuery<T> query);
+
+		IBusNonQueryHandler<T> Execute<T>(T nonQuery) where T : INonQuery;
+	}
+
+	// Provided to message handlers (workers) so that they can reply
+	public interface IWorkerBus : IBus
+	{
+		void Reply<T>(T message);
 	}
 
 	public interface IBusErrorHandler
@@ -47,6 +65,11 @@ namespace Quokka.Sandbox
 		/// Handle the query result when only one item is expected
 		/// </summary>
 		IBusErrorHandler HandleResult(Action<T> result);
+	}
+
+	public interface IBusNonQueryHandler<T> where T : INonQuery
+	{
+		IBusErrorHandler HandleResult(T result);
 	}
 
 	public interface IReplyChannel
@@ -219,10 +242,24 @@ namespace Quokka.Sandbox
 		}
 	}
 
+	public class SomeModelObject
+	{
+		public int Id { get; set; }
+	}
+
+	public class SomeQuery : IListQuery<SomeModelObject>
+	{
+		public int SomeParameter { get; set; }
+		public IList<SomeModelObject> ExecuteList()
+		{
+			throw new NotImplementedException();
+		}
+	}
+
 
 	public class MyPresenter : Presenter
 	{
-		public IBus Bus { get; set; }
+		public IPresenterBus Bus { get; set; }
 
 		protected override void InitializePresenter()
 		{
@@ -230,16 +267,25 @@ namespace Quokka.Sandbox
 			SendMessage();
 		}
 
-		private void BeginRefresh()
+		public void DoSomething(int someId)
 		{
-			IListQuery<ErrorReport> s = null;
-
-			Bus.Query(s)
-				.HandleResult(RefreshHandler)
-				.HandleError(ErrorHandler);
+			var request = new SomeRequest {SomeId = someId};
+			Bus.Send(request)
+				.HandleResponse<SomeResponse>(SomeResponseHandler);
 		}
 
-		private void RefreshHandler(IList<ErrorReport> list)
+		private void BeginRefresh()
+		{
+			IListQuery<SomeModelObject> query = new SomeQuery {SomeParameter = 42}; 
+
+			Bus.Query(query)
+				.HandleResult(RefreshHandler)
+				.HandleError(ErrorHandler);
+
+
+		}
+
+		private void RefreshHandler(IList<SomeModelObject> list)
 		{
 			// Do something
 		}
@@ -270,5 +316,38 @@ namespace Quokka.Sandbox
 	public class SomeResponse
 	{
 		public int Result { get; set; }
+	}
+
+	public class SomeRequest
+	{
+		public int SomeId { get; set; }
+	}
+
+	public class SomeRequestHandler : IMessageHandler<SomeRequest>
+	{
+		public IWorkerBus Bus { get; set; }
+
+		public void Handle(SomeRequest message)
+		{
+			// Here I have all the stuff I need to process the message
+
+			// and then ...
+
+			Bus.Reply(new SomeResponse{ Result = 42});
+		}
+	}
+
+	public class TransactionalAttribute : Attribute
+	{
+
+	}
+
+	[Transactional]
+	public class ListQueryHandler<T> : IMessageHandler<IListQuery<T>>
+	{
+		public void Handle(IListQuery<T> message)
+		{
+			
+		}
 	}
 }
