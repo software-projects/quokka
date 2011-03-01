@@ -13,6 +13,14 @@ namespace Quokka.Stomp
 	/// </remarks>
 	public class StompFrameBuilder
 	{
+		private StompFrame _frameUnderConstruction;
+		private readonly object _lockObject = new object();
+		private readonly Queue<StompFrame> _readyFrames = new Queue<StompFrame>();
+		private delegate void ReceiveCallback(byte[] data, int offset, int length);
+		private ReceiveCallback _currentCallback;
+		private Buffer _residue;
+		private volatile bool _framesAdded;
+
 		/// <summary>
 		/// 	Event is raised when one or more <see cref = "StompFrame" /> objects
 		/// 	are ready to be processed.
@@ -102,25 +110,17 @@ namespace Quokka.Stomp
 			_currentCallback = ReadCommandLine;
 		}
 
-		private StompFrame _frameUnderConstruction;
-
-		private readonly object _lockObject = new object();
-
-		private readonly Queue<StompFrame> _readyFrames = new Queue<StompFrame>();
-
-		private delegate void ReceiveCallback(byte[] data, int offset, int length);
-
-		private ReceiveCallback _currentCallback;
-
-		private Buffer _residue;
-
-		private bool _framesAdded;
-
 		private void ReadCommandLine(byte[] data, int offset, int length)
 		{
 			_currentCallback = ReadCommandLine;
 
 			string commandText;
+
+			// Skip any leading newlines
+			while (ByteArrayUtil.SkipNewLine(data, ref offset, ref length))
+			{
+				continue;
+			}
 
 			// This loop provides a bit of extra flexibility. When we are looking for a 
 			// command line, we will keep ignoring blank lines (lines containing only spaces)
@@ -130,13 +130,16 @@ namespace Quokka.Stomp
 				int lineLength = ByteArrayUtil.FindLineLength(data, offset, length);
 				if (lineLength < 0)
 				{
-					// This is rare, but there is not enough in the buffer to even read the first line.
-					_residue = new Buffer(data, offset, length);
+					if (length > 0)
+					{
+						// This is rare, but there is not enough in the buffer to even read the first line.
+						_residue = new Buffer(data, offset, length);
+					}
 					return;
 				}
 
 				// We have the first line, so grab the command text.
-				commandText = Encoding.ASCII.GetString(data, offset, lineLength).Trim();
+				commandText = Encoding.UTF8.GetString(data, offset, lineLength).Trim();
 
 				offset += lineLength;
 				length -= lineLength;
@@ -175,7 +178,7 @@ namespace Quokka.Stomp
 				// TODO: This code does not support header folding. The STOMP standard
 				// does not talk about header folding, but it is common for these types of
 				// protocols.
-				string line = Encoding.ASCII.GetString(data, offset, lineLength).Trim();
+				string line = Encoding.UTF8.GetString(data, offset, lineLength).Trim();
 
 				offset += lineLength;
 				length -= lineLength;
@@ -266,14 +269,11 @@ namespace Quokka.Stomp
 				return;
 			}
 
+			// try and read the null, but if it is not there, keep going
 			if (data[offset] == 0)
 			{
 				++offset;
 				--length;
-			}
-			else
-			{
-				// TODO: need some sort of warning here
 			}
 			ReadCommandLine(data, offset, length);
 		}

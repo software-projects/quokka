@@ -13,7 +13,7 @@ namespace Dashboard.UI.Presenters
 		public INavigateCommand DoSomethingCommand { get; set; }
 		public UIMessageBox MessageBox { get; set; }
 
-		protected override void InitializePresenter()
+		public override void InitializePresenter()
 		{
 			View.Username = UserState.User.FullName;
 			View.Logout += (sender, args) => LogoutCommand.Navigate();

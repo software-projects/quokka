@@ -80,6 +80,7 @@
   <ItemGroup>
     <Compile Include="Castle\WindsorContainerTests.cs" />
     <Compile Include="Castle\WindsorServiceContainerTests.cs" />
+    <Compile Include="Collections\DequeTests.cs" />
     <Compile Include="Data\SqlExpressUtilTests.cs" />
     <Compile Include="Diagnostics\VerifyTests.cs" />
     <Compile Include="DynamicCodeGeneration\CodeBuilderTestBase.cs" />
@@ -93,7 +94,7 @@
     <Compile Include="Reflection\PropertyUtilTests.cs" />
     <Compile Include="Reflection\TypeUtilTests.cs" />
     <Compile Include="Sandbox\BackgroundActionTests.cs" />
-    <Compile Include="Sandbox\ExceptionExtensionsTests.cs" />
+    <Compile Include="Diagnostics\ExceptionExtensionsTests.cs" />
     <Compile Include="ServiceContainerUtilTests.cs" />
     <Compile Include="ServiceProviderTests.cs" />
     <Compile Include="Stomp\ByteArrayUtilTests.cs" />

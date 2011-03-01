@@ -261,7 +261,7 @@ namespace Quokka.Sandbox
 	{
 		public IPresenterBus Bus { get; set; }
 
-		protected override void InitializePresenter()
+		public override void InitializePresenter()
 		{
 			BeginRefresh();
 			SendMessage();

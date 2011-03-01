@@ -131,6 +131,9 @@
     <Compile Include="..\CommonAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Collections\Deque.cs" />
+    <Compile Include="Collections\Deque.Enumerator.cs" />
+    <Compile Include="Collections\Deque.Node.cs" />
     <Compile Include="Collections\DisposableCollection.cs">
     </Compile>
     <Compile Include="Collections\DisposableCollection.Generic.cs" />
@@ -138,7 +141,7 @@
     <Compile Include="Collections\IDisposableCollection.Generic.cs" />
     <Compile Include="Data\DataReader\DataReaderDecorator.cs" />
     <Compile Include="Data\DataReader\StringTrimDataReader.cs" />
-    <Compile Include="Sandbox\ExceptionExtensions.cs" />
+    <Compile Include="Diagnostics\ExceptionExtensions.cs" />
     <Compile Include="Sandbox\IBackgroundWorker.cs" />
     <Compile Include="Sandbox\IDataQuery.cs" />
     <Compile Include="Data\IgnoreParameterAttribute.cs" />
@@ -162,12 +165,17 @@
     <Compile Include="DynamicCodeGeneration\DynamicAssembly.cs" />
     <Compile Include="Sandbox\BackgroundAction.cs" />
     <Compile Include="Stomp\ByteArrayUtil.cs" />
+    <Compile Include="Stomp\IStompListener.cs" />
+    <Compile Include="Stomp\IStompTransport.cs" />
+    <Compile Include="Stomp\SocketListener.cs" />
     <Compile Include="Stomp\StompCommand.cs" />
+    <Compile Include="Stomp\ExceptionEventArgs.cs" />
     <Compile Include="Stomp\StompFrame.cs" />
     <Compile Include="Stomp\StompFrameBuilder.cs" />
     <Compile Include="Stomp\StompFrameExtensions.cs" />
     <Compile Include="Stomp\StompHeaderCollection.cs" />
     <Compile Include="Stomp\StompHeader.cs" />
+    <Compile Include="Stomp\SocketTransport.cs" />
     <Compile Include="UI\Commands\IUICommand.cs" />
     <Compile Include="Diagnostics\ErrorReport.cs" />
     <Compile Include="UI\Messages\Internal\MessageBoxPresenter.cs" />

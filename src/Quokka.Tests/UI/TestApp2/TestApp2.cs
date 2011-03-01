@@ -118,7 +118,7 @@ namespace Quokka.UI.TestApp2
 	{
 		public INavigateCommand Next { get; set; }
 
-		protected override void InitializePresenter()
+		public override void InitializePresenter()
 		{
 			View.NextCommand.Execute += (sender, args) => Next.Navigate();
 		}

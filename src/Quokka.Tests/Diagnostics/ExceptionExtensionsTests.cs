@@ -1,7 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
 
-namespace Quokka.Sandbox
+namespace Quokka.Diagnostics
 {
 	[TestFixture]
 	public class ExceptionExtensionsTests

@@ -87,7 +87,7 @@ namespace Quokka.Stomp
 				{
 					// We do not want to close the writer when we finish, because
 					// we do not want to close the underlying stream.
-					var writer = new StreamWriter(stream, Encoding.ASCII);
+					var writer = new StreamWriter(stream, Encoding.UTF8);
 					writer.WriteLine(Command);
 					if (Headers != null)
 					{

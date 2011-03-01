@@ -12,7 +12,7 @@ namespace Dashboard.UI.Presenters
 		public UserState UserState { get; set; }
 
 
-		protected override void InitializePresenter()
+		public override void InitializePresenter()
 		{
 			UserState.User = null;
 

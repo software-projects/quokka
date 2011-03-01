@@ -59,7 +59,7 @@ namespace Quokka.UI.TestApp1
 		public TestTask1 TestTask1 { get; set; }
 		public UINode UINode { get; set; }
 
-		protected override void InitializePresenter()
+		public override void InitializePresenter()
 		{
 			View.Button1Click += (sender, args) => Next.Navigate();
 		}
@@ -105,7 +105,7 @@ namespace Quokka.UI.TestApp1
 		public INavigateCommand Error { get; set; }
 		public INavigateCommand Close { get; set; }
 
-		protected override void InitializePresenter()
+		public override void InitializePresenter()
 		{
 			View.BackButtonClick += delegate { Back.Navigate(); };
 			View.CloseButtonClick += delegate { Close.Navigate(); };

@@ -3,6 +3,7 @@
 	public static class StompHeader
 	{
 		public const string ContentLength = "content-length";
+		public const string ContentType = "content-type";
 		public const string Destination = "destination";
 		public const string Receipt = "receipt";
 		public const string MessageId = "message-id";

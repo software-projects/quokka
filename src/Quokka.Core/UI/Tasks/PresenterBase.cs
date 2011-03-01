@@ -109,7 +109,7 @@ namespace Quokka.UI.Tasks
 		/// 	Do not perform any initialization that concerns the view in the presenter's constructor, as it will 
 		///		not have been assigned yet. Perform initialization of the view in this method instead.
 		/// </remarks>
-		protected virtual void InitializePresenter()
+		public virtual void InitializePresenter()
 		{
 		}
 	}

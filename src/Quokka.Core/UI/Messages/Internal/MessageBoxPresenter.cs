@@ -11,7 +11,7 @@ namespace Quokka.UI.Messages.Internal
 		public INavigateCommand NextCommand { get; set; }
 		public UIMessage Message { get; set; }
 
-		protected override void InitializePresenter()
+		public override void InitializePresenter()
 		{
 			View.Message = Message;
 			View.Answered += AnsweredHandler;

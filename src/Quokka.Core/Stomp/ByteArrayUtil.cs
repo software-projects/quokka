@@ -1,5 +1,6 @@
 ﻿namespace Quokka.Stomp
 {
+	// Various utility methods for handling the content of an array of bytes
 	public class ByteArrayUtil
 	{
 		// ReSharper disable InconsistentNaming
@@ -52,18 +53,27 @@
 			return -1;
 		}
 
-		public static void SkipNewLine(byte[] data, ref int offset, ref int length)
+		/// <summary>
+		/// Modifies offset and length to skip new lines in the data
+		/// </summary>
+		/// <param name="data">Data</param>
+		/// <param name="offset">Offset</param>
+		/// <param name="length">Length</param>
+		/// <returns>
+		/// Returns <c>true</c> if a newline was skipped, <c>false</c> otherwise.
+		/// </returns>
+		public static bool SkipNewLine(byte[] data, ref int offset, ref int length)
 		{
 			if (length == 0)
 			{
-				return;
+				return false;
 			}
 
 			byte @byte = data[offset];
 
 			if (@byte != CarriageReturn && @byte != NewLine)
 			{
-				return;
+				return false;
 			}
 
 			if (@byte == CarriageReturn)
@@ -72,7 +82,7 @@
 				--length;
 				if (length == 0)
 				{
-					return;
+					return true;
 				}
 
 				@byte = data[offset];
@@ -82,7 +92,10 @@
 			{
 				++offset;
 				--length;
+				return true;
 			}
+
+			return false;
 		}
 	}
 }

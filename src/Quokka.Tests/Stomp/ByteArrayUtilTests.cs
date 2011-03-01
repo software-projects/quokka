@@ -65,7 +65,7 @@ namespace Quokka.Stomp
 			Assert.AreEqual(3, lineLength);
 			offset += lineLength;
 			length -= lineLength;
-			ByteArrayUtil.SkipNewLine(data, ref offset, ref length);
+			Assert.IsTrue(ByteArrayUtil.SkipNewLine(data, ref offset, ref length));
 			Assert.AreEqual(5, offset, "Unexpected offset");
 			Assert.AreEqual(12, length, "Unexpected length");
 
@@ -73,7 +73,7 @@ namespace Quokka.Stomp
 			Assert.AreEqual(2, lineLength);
 			offset += lineLength;
 			length -= lineLength;
-			ByteArrayUtil.SkipNewLine(data, ref offset, ref length);
+			Assert.IsTrue(ByteArrayUtil.SkipNewLine(data, ref offset, ref length));
 			Assert.AreEqual(9, offset, "Unexpected offset");
 			Assert.AreEqual(8, length, "Unexpected length");
 
@@ -81,7 +81,7 @@ namespace Quokka.Stomp
 			Assert.AreEqual(2, lineLength);
 			offset += lineLength;
 			length -= lineLength;
-			ByteArrayUtil.SkipNewLine(data, ref offset, ref length);
+			Assert.IsTrue(ByteArrayUtil.SkipNewLine(data, ref offset, ref length));
 			Assert.AreEqual(12, offset, "Unexpected offset");
 			Assert.AreEqual(5, length, "Unexpected length");
 
@@ -89,7 +89,7 @@ namespace Quokka.Stomp
 			Assert.AreEqual(2, lineLength);
 			offset += lineLength;
 			length -= lineLength;
-			ByteArrayUtil.SkipNewLine(data, ref offset, ref length);
+			Assert.IsTrue(ByteArrayUtil.SkipNewLine(data, ref offset, ref length));
 			Assert.AreEqual(15, offset, "Unexpected offset");
 			Assert.AreEqual(2, length, "Unexpected length");
 
@@ -98,9 +98,13 @@ namespace Quokka.Stomp
 
 			offset = data.Length;
 			length = 0;
-			ByteArrayUtil.SkipNewLine(data, ref offset, ref length);
+			Assert.IsFalse(ByteArrayUtil.SkipNewLine(data, ref offset, ref length));
 			Assert.AreEqual(data.Length, offset);
 			Assert.AreEqual(0, length);
+
+			offset = 0;
+			length = data.Length;
+			Assert.IsFalse(ByteArrayUtil.SkipNewLine(data, ref offset, ref length));
 		}
 	}
 }
