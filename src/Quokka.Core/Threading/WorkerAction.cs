@@ -268,11 +268,46 @@ namespace Quokka.Threading
 
 			if (SynchronizationContext == null)
 			{
+				// No SynchronizationContext, so just run on the current thread.
 				action();
 			}
 			else
 			{
-				SynchronizationContext.Send(delegate { action(); }, null);
+				// SynchronizationContext exists, so run in that SC. Because the SC
+				// is likely to mean running on another thread, we have to be careful
+				// to transfer the action context over to that thread.
+
+				// Take a copy of the action context into a local variable
+				var context = _actionContext;
+				try
+				{
+					SynchronizationContext.Send(delegate
+					                            	{
+														// Set the thread-static _actionContext variable
+														// for the current thread.
+					                            		_actionContext = context;
+					                            		try
+					                            		{
+															// Perform the action
+					                            			action();
+					                            		}
+					                            		finally
+					                            		{
+															// Remove the action context from the worker thread.
+					                            			_actionContext = null;
+					                            		}
+					                            	}, null);
+				}
+				finally
+				{
+					// Even though it is highly probable that the SynchronizationContext meant that
+					// the action was performed on another thread, it *is* possible that the action
+					// was performed on the current thread. 
+					//
+					// For this reason, be sure to restore the action context for this thread, because
+					// it was cleared out in the Send delegate.
+					_actionContext = context;
+				}
 			}
 		}
 
