@@ -7,6 +7,7 @@ using Quokka.Events;
 using Quokka.Events.Internal;
 using Quokka.ServiceLocation;
 using Quokka.Services;
+using Quokka.Threading;
 using Quokka.UI.Messages;
 using Quokka.UI.Regions;
 using Quokka.WinForms.Regions;
@@ -181,6 +182,11 @@ namespace Quokka.WinForms.Startup
 			if (!Container.IsTypeRegistered<IUIMessageBoxView>())
 			{
 				Container.RegisterType<IUIMessageBoxView, MessageBoxView>(ServiceLifecycle.PerRequest);
+			}
+
+			if (!Container.IsTypeRegistered<Worker>())
+			{
+				Container.RegisterType<Worker>(ServiceLifecycle.PerRequest);
 			}
 		}
 
