@@ -34,7 +34,7 @@ namespace Quokka.WinForms
 
 		public DataGridView DataGridView { get; private set; }
 		public DisplaySettings DisplaySettings { get; set; }
-		public ViewModelStore<TId, T> Store { get; set; }
+		public VirtualDataSource<TId, T> DataSource { get; set; }
 
 		public Image CheckedImage { get; set; }
 		public Image UncheckedImage { get; set; }
@@ -46,14 +46,14 @@ namespace Quokka.WinForms
 			DataGridView.VirtualMode = true;
 		}
 
-		public VirtualDataGridViewAdapter<TId, T> Init(ViewModelStore<TId, T> store)
+		public VirtualDataGridViewAdapter<TId, T> Init(VirtualDataSource<TId, T> store)
 		{
-			if (Store != null)
+			if (DataSource != null)
 			{
-				throw new InvalidOperationException("Store has already been set");
+				throw new InvalidOperationException("DataSource has already been set");
 			}
-			Store = Verify.ArgumentNotNull(store, "store");
-			Store.ListChanged += ((sender, args) => RefreshRequired());
+			DataSource = Verify.ArgumentNotNull(store, "store");
+			DataSource.ListChanged += ((sender, args) => RefreshRequired());
 
 			if (DisplaySettings != null)
 			{
@@ -71,7 +71,7 @@ namespace Quokka.WinForms
 
 			if (_sortComparison != null)
 			{
-				Store.SetComparer(_sortComparison);
+				DataSource.SetComparer(_sortComparison);
 			}
 
 			RefreshRequired();
@@ -88,11 +88,11 @@ namespace Quokka.WinForms
 		{
 			get
 			{
-				if (Store == null || DataGridView.CurrentRow == null)
+				if (DataSource == null || DataGridView.CurrentRow == null)
 				{
 					return null;
 				}
-				return Store.GetAt(DataGridView.CurrentRow.Index);
+				return DataSource.GetAt(DataGridView.CurrentRow.Index);
 			}
 		}
 
@@ -191,9 +191,9 @@ namespace Quokka.WinForms
 				_sortComparison = comparer.CompareDescending;
 			}
 
-			if (Store != null)
+			if (DataSource != null)
 			{
-				Store.SetComparer(_sortComparison);
+				DataSource.SetComparer(_sortComparison);
 				RefreshRequired();
 			}
 			return this;
@@ -222,11 +222,11 @@ namespace Quokka.WinForms
 		{
 			_refreshPending = false;
 
-			if (Store == null)
+			if (DataSource == null)
 			{
 				DataGridView.RowCount = 0;
 			}
-			else if (DataGridView.RowCount != Store.Count)
+			else if (DataGridView.RowCount != DataSource.Count)
 			{
 				int currentRowIndex = -1;
 				int currentColumnIndex = -1;
@@ -235,7 +235,7 @@ namespace Quokka.WinForms
 				// If number of rows is reduced, need to set rows to zero first
 				// and then subsequently set to the correct value, otherwise DGV
 				// throws an exception.
-				if (DataGridView.RowCount > Store.Count)
+				if (DataGridView.RowCount > DataSource.Count)
 				{
 					if (DataGridView.CurrentCell != null)
 					{
@@ -244,7 +244,7 @@ namespace Quokka.WinForms
 					}
 					DataGridView.RowCount = 0;
 				}
-				DataGridView.RowCount = Store.Count;
+				DataGridView.RowCount = DataSource.Count;
 
 				// Have a go at finding the current cell again.
 				if (currentRowIndex >= DataGridView.RowCount)
@@ -319,7 +319,7 @@ namespace Quokka.WinForms
 			                   		}
 			                   	};
 
-			Store.ForEach(action);
+			DataSource.ForEach(action);
 
 			CheckState checkState = CheckState.Unchecked;
 
@@ -351,7 +351,7 @@ namespace Quokka.WinForms
 		/// <param name = "rowIndex"></param>
 		private void ToggleCheckBox(ColumnInfo columnInfo, int rowIndex)
 		{
-			var item = Store.GetAt(rowIndex);
+			var item = DataSource.GetAt(rowIndex);
 			if (item != null)
 			{
 				var getValueCallback = columnInfo.CellValueCallback;
@@ -464,16 +464,16 @@ namespace Quokka.WinForms
 			{
 				bool newCheckValue = columnInfo.HeaderCheckState == CheckState.Unchecked ? true : false;
 				Action<T> checkAction = obj => columnInfo.CellCheckCallback(obj, newCheckValue);
-				Store.ForEach(checkAction);
+				DataSource.ForEach(checkAction);
 				if (newCheckValue)
 				{
-					columnInfo.CheckCount = Store.Count;
+					columnInfo.CheckCount = DataSource.Count;
 					columnInfo.UncheckCount = 0;
 				}
 				else
 				{
 					columnInfo.CheckCount = 0;
-					columnInfo.UncheckCount = Store.Count;
+					columnInfo.UncheckCount = DataSource.Count;
 				}
 				columnInfo.HeaderCheckState = newCheckValue ? CheckState.Checked : CheckState.Unchecked;
 				DataGridView.BeginInvoke(new Action(() => DataGridView.InvalidateColumn(e.ColumnIndex)));
@@ -502,16 +502,16 @@ namespace Quokka.WinForms
 			{
 				T obj;
 
-				if (Store.BuildListRequired)
+				if (DataSource.BuildListRequired)
 				{
 					using (WaitCursor.Show())
 					{
-						obj = Store.GetAt(e.RowIndex);
+						obj = DataSource.GetAt(e.RowIndex);
 					}
 				}
 				else
 				{
-					obj = Store.GetAt(e.RowIndex);
+					obj = DataSource.GetAt(e.RowIndex);
 				}
 				if (obj != null)
 				{

@@ -8,7 +8,7 @@ namespace Quokka.WinForms
 	/// 	Used as an in-memory store useful for a store against lists and data grids that use virtual mode.
 	/// </summary>
 	/// <typeparam name = "T">The view model object in the store</typeparam>
-	public abstract class ViewModelStore<T> : ViewModelStore<int, T> where T : class
+	public abstract class VirtualDataSource<T> : VirtualDataSource<int, T> where T : class
 	{
 	}
 
@@ -17,7 +17,7 @@ namespace Quokka.WinForms
 	/// </summary>
 	/// <typeparam name = "TId">The type of unique identifier used for type <typeparamref name = "TItem" /></typeparam>
 	/// <typeparam name = "TItem">The view model object in the store</typeparam>
-	public abstract class ViewModelStore<TId, TItem> where TItem : class
+	public abstract class VirtualDataSource<TId, TItem> where TItem : class
 	{
 		private static readonly Predicate<TItem> DefaultFilter = (t => true);
 		private readonly Dictionary<TId, TItem> _dict = new Dictionary<TId, TItem>();
