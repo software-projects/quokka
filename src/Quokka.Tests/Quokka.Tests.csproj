@@ -93,13 +93,14 @@
     <Compile Include="QuokkaContainerTests.cs" />
     <Compile Include="Reflection\PropertyUtilTests.cs" />
     <Compile Include="Reflection\TypeUtilTests.cs" />
-    <Compile Include="Sandbox\BackgroundActionTests.cs" />
     <Compile Include="Diagnostics\ExceptionExtensionsTests.cs" />
     <Compile Include="ServiceContainerUtilTests.cs" />
     <Compile Include="ServiceProviderTests.cs" />
     <Compile Include="Stomp\ByteArrayUtilTests.cs" />
     <Compile Include="Stomp\StompFrameBuilderTests.cs" />
     <Compile Include="Stomp\StompFrameTests.cs" />
+    <Compile Include="Threading\WorkerActionTests.cs" />
+    <Compile Include="Threading\WorkerTests.cs" />
     <Compile Include="Uip\Fakes\FakeViewManager.cs" />
     <Compile Include="Uip\FakeAppTests2.cs" />
     <Compile Include="Uip\MockApp2\MockTask2.cs" />
@@ -158,6 +159,7 @@
     <Folder Include="DomainModel\" />
     <Folder Include="EnumTypes\" />
     <Folder Include="PresentationModel\" />
+    <Folder Include="Sandbox\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -142,7 +142,6 @@
     <Compile Include="Data\DataReader\DataReaderDecorator.cs" />
     <Compile Include="Data\DataReader\StringTrimDataReader.cs" />
     <Compile Include="Diagnostics\ExceptionExtensions.cs" />
-    <Compile Include="Sandbox\IBackgroundWorker.cs" />
     <Compile Include="Sandbox\IDataQuery.cs" />
     <Compile Include="Data\IgnoreParameterAttribute.cs" />
     <Compile Include="Data\Internal\DataConversionKey.cs" />
@@ -163,7 +162,9 @@
     <Compile Include="Data\SqlQuery.Generic.cs" />
     <Compile Include="Data\SqlQueryBase.cs" />
     <Compile Include="DynamicCodeGeneration\DynamicAssembly.cs" />
-    <Compile Include="Sandbox\BackgroundAction.cs" />
+    <Compile Include="Threading\IWorkerActionModule.cs" />
+    <Compile Include="Threading\Worker.cs" />
+    <Compile Include="Threading\WorkerAction.cs" />
     <Compile Include="Stomp\ByteArrayUtil.cs" />
     <Compile Include="Stomp\IStompListener.cs" />
     <Compile Include="Stomp\IStompTransport.cs" />
@@ -176,6 +177,8 @@
     <Compile Include="Stomp\StompHeaderCollection.cs" />
     <Compile Include="Stomp\StompHeader.cs" />
     <Compile Include="Stomp\SocketTransport.cs" />
+    <Compile Include="Threading\WorkerActionExtensions.cs" />
+    <Compile Include="Threading\WorkerActionModule.cs" />
     <Compile Include="UI\Commands\IUICommand.cs" />
     <Compile Include="Diagnostics\ErrorReport.cs" />
     <Compile Include="UI\Messages\Internal\MessageBoxPresenter.cs" />

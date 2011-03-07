@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 
 namespace Quokka.Diagnostics
 {
@@ -13,6 +14,11 @@ namespace Quokka.Diagnostics
 
 		public static bool IsCorruptedStateException(this Exception ex)
 		{
+			if (ex == null)
+			{
+				return false;
+			}
+
 			// Get OutOfMemory exception out of the way quickly, because we don't want
 			// to attempt to allocate memory to check for this one.
 			if (ex is OutOfMemoryException)
@@ -31,6 +37,25 @@ namespace Quokka.Diagnostics
 			}
 
 			return false;
+		}
+
+		public static string UsefulMessage(this Exception ex)
+		{
+			if (ex == null)
+			{
+				return "(null)";
+			}
+
+			for (; ; )
+			{
+				var targetInvocationException = ex as TargetInvocationException;
+				if (targetInvocationException == null || ex.InnerException == null)
+				{
+					return ex.Message;
+				}
+
+				ex = ex.InnerException;
+			}
 		}
 	}
 }
