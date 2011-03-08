@@ -177,7 +177,6 @@
     <Compile Include="Stomp\StompHeaderCollection.cs" />
     <Compile Include="Stomp\StompHeader.cs" />
     <Compile Include="Stomp\SocketTransport.cs" />
-    <Compile Include="Threading\WorkerActionExtensions.cs" />
     <Compile Include="Threading\WorkerActionModule.cs" />
     <Compile Include="UI\Commands\IUICommand.cs" />
     <Compile Include="Diagnostics\ErrorReport.cs" />
