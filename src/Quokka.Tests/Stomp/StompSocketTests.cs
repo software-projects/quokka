@@ -42,14 +42,17 @@ namespace Quokka.Stomp
 			_listener.ClientConnected += ListenerClientConnected;
 			_listener.StartListening();
 
-			_client = new StompClient();
-			_client.EndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), _listener.EndPoint.Port);
+			_client = new StompClient
+			          	{
+			          		EndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), _listener.EndPoint.Port)
+			          	};
 			_client.FrameReady += ClientFrameReady;
 			_client.TransportException += ClientTransportException;
 			_client.ConnectedChanged += ClientConnectedChanged;
 			_client.Connect();
 
 			Assert.IsTrue(_finishedEvent.WaitOne(5000, true));
+			Assert.IsNull(_ex, "Exception encountered: " + _message + Environment.NewLine + _ex);
 			Assert.AreEqual(10, _number);
 		}
 
@@ -58,8 +61,8 @@ namespace Quokka.Stomp
 			if (_client.Connected)
 			{
 				Console.WriteLine("Client: connected to server");
-				var text = "1";
-				var frame = new StompFrame()
+				const string text = "1";
+				var frame = new StompFrame
 				            	{
 				            		Command = StompCommand.Messasge,
 				            		BodyText = text,
@@ -130,7 +133,7 @@ namespace Quokka.Stomp
 			}
 		}
 
-		private void ServerFrameReady(object sender, EventArgs e)
+		private static void ServerFrameReady(object sender, EventArgs e)
 		{
 			var server = (ITransport<StompFrame>) sender;
 			var frame = server.GetNextFrame();

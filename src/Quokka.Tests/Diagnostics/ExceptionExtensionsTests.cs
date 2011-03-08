@@ -23,8 +23,9 @@ namespace Quokka.Diagnostics
 		[Test]
 		public void StackOverflowException()
 		{
+			// this used to be considered a corrupted state exception but is not anymore
 			var ex = new StackOverflowException();
-			Assert.IsTrue(ex.IsCorruptedStateException());
+			Assert.IsFalse(ex.IsCorruptedStateException());
 		}
 
 		[Test]
