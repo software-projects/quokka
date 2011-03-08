@@ -1,13 +1,13 @@
 ﻿using System;
 
-namespace Quokka.Stomp
+namespace Quokka.Sandbox
 {
-	public interface IStompListener : IDisposable
+	public interface IListener<TFrame> : IDisposable
 	{
 		event EventHandler ClientConnected;
 		event EventHandler<ExceptionEventArgs> ListenException;
 
 		void StartListening();
-		IStompTransport GetNextTransport();
+		ITransport<TFrame> GetNextTransport();
 	}
 }

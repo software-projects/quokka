@@ -9,7 +9,6 @@ namespace Quokka.Diagnostics
 		                                                              	{
 		                                                              		typeof (OutOfMemoryException),
 		                                                              		typeof (AccessViolationException),
-																			typeof(StackOverflowException),
 		                                                              	};
 
 		public static bool IsCorruptedStateException(this Exception ex)

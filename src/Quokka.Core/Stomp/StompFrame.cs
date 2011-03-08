@@ -43,6 +43,29 @@ namespace Quokka.Stomp
 
 		public MemoryStream Body { get; set; }
 
+		public string BodyText
+		{
+			get
+			{
+				if (Body == null)
+				{
+					return null;
+				}
+
+				Body.Seek(0, SeekOrigin.Begin);
+				var reader = new StreamReader(Body, Encoding.UTF8);
+				return reader.ReadToEnd();
+			}
+
+			set
+			{
+				Body = new MemoryStream();
+				var writer = new StreamWriter(Body, Encoding.UTF8);
+				writer.Write(value);
+				writer.Flush();
+			}
+		}
+
 		public StompFrame()
 		{
 			Headers = new StompHeaderCollection();

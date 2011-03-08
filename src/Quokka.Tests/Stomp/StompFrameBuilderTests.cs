@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using NUnit.Framework;
 
 // ReSharper disable InconsistentNaming
+
 namespace Quokka.Stomp
 {
 	[TestFixture]
@@ -13,7 +12,6 @@ namespace Quokka.Stomp
 	{
 		public void SetUp()
 		{
-			
 		}
 
 		[Test]
@@ -24,24 +22,22 @@ namespace Quokka.Stomp
 			MemoryStream memoryStream = new MemoryStream(payloadBytes);
 
 			var originalFrame = new StompFrame
-			            	{
-			            		Command = "SEND",
-			            		Headers =
-			            			{
-			            				{"destination", "/queue/a"},
-			            				{"transaction", "tx-112"},
-			            			},
-			            		Body = memoryStream,
-			            	};
+			                    	{
+			                    		Command = "SEND",
+			                    		Headers =
+			                    			{
+			                    				{"destination", "/queue/a"},
+			                    				{"transaction", "tx-112"},
+			                    			},
+			                    		Body = memoryStream,
+			                    	};
 
 			byte[] data = originalFrame.ToArray();
-			bool frameReadyRaised = false;
 
 			var builder = new StompFrameBuilder();
-			builder.FrameReady += delegate { frameReadyRaised = true; };
+			builder.ReceiveBytes(data, 0, data.Length);
 
-			Assert.IsTrue(builder.ReceiveBytes(data, 0, data.Length), "Unexpected result");
-			Assert.IsTrue(frameReadyRaised, "Unexpected frameReadyRaised");
+			Assert.IsTrue(builder.IsFrameReady, "Unexpected result");
 
 			var receivedFrame = builder.GetNextFrame();
 			Assert.IsNotNull(receivedFrame);
@@ -66,15 +62,15 @@ namespace Quokka.Stomp
 			MemoryStream memoryStream = new MemoryStream(payloadBytes);
 
 			var originalFrame = new StompFrame
-			{
-				Command = "SEND",
-				Headers =
-			            			{
-			            				{"destination", "/queue/a"},
-			            				{"transaction", "tx-112"},
-			            			},
-				Body = memoryStream,
-			};
+			                    	{
+			                    		Command = "SEND",
+			                    		Headers =
+			                    			{
+			                    				{"destination", "/queue/a"},
+			                    				{"transaction", "tx-112"},
+			                    			},
+			                    		Body = memoryStream,
+			                    	};
 
 			byte[] data1 = originalFrame.ToArray();
 
@@ -87,13 +83,10 @@ namespace Quokka.Stomp
 			Array.Copy(data1, combinedData, data1.Length);
 			Array.Copy(data2, 0, combinedData, data1.Length, data2.Length);
 
-			int frameReadyRaisedCount = 0;
-
 			var builder = new StompFrameBuilder();
-			builder.FrameReady += delegate { frameReadyRaisedCount += 1; };
 
-			Assert.IsTrue(builder.ReceiveBytes(combinedData, 0, combinedData.Length), "Unexpected result");
-			Assert.AreEqual(1, frameReadyRaisedCount, "Unexpected frameReadyRaisedCount");
+			builder.ReceiveBytes(combinedData, 0, combinedData.Length);
+			Assert.IsTrue(builder.IsFrameReady);
 
 			var receivedFrame1 = builder.GetNextFrame();
 			Assert.IsNotNull(receivedFrame1);
@@ -124,15 +117,15 @@ namespace Quokka.Stomp
 			MemoryStream memoryStream = new MemoryStream(payloadBytes);
 
 			var originalFrame = new StompFrame
-			{
-				Command = "SEND",
-				Headers =
-			            			{
-			            				{"destination", "/queue/a"},
-			            				{"transaction", "tx-112"},
-			            			},
-				Body = memoryStream,
-			};
+			                    	{
+			                    		Command = "SEND",
+			                    		Headers =
+			                    			{
+			                    				{"destination", "/queue/a"},
+			                    				{"transaction", "tx-112"},
+			                    			},
+			                    		Body = memoryStream,
+			                    	};
 
 			byte[] data1 = originalFrame.ToArray();
 
@@ -145,10 +138,7 @@ namespace Quokka.Stomp
 			Array.Copy(data1, combinedData, data1.Length);
 			Array.Copy(data2, 0, combinedData, data1.Length, data2.Length);
 
-			int frameReadyRaisedCount = 0;
-
 			var builder = new StompFrameBuilder();
-			builder.FrameReady += delegate { frameReadyRaisedCount += 1; };
 
 			foreach (byte @byte in combinedData)
 			{
@@ -156,7 +146,7 @@ namespace Quokka.Stomp
 				builder.ReceiveBytes(array, 0, 1);
 			}
 
-			Assert.AreEqual(2, frameReadyRaisedCount, "Unexpected frameReadyRaisedCount");
+			Assert.IsTrue(builder.IsFrameReady);
 
 			var receivedFrame1 = builder.GetNextFrame();
 			Assert.IsNotNull(receivedFrame1);
@@ -187,15 +177,15 @@ namespace Quokka.Stomp
 			MemoryStream memoryStream = new MemoryStream(payloadBytes);
 
 			var originalFrame = new StompFrame
-			{
-				Command = "SEND",
-				Headers =
-			            			{
-			            				{"destination", "/queue/a"},
-			            				{"transaction", "tx-112"},
-			            			},
-				Body = memoryStream,
-			};
+			                    	{
+			                    		Command = "SEND",
+			                    		Headers =
+			                    			{
+			                    				{"destination", "/queue/a"},
+			                    				{"transaction", "tx-112"},
+			                    			},
+			                    		Body = memoryStream,
+			                    	};
 
 			byte[] data1 = originalFrame.ToArray();
 
@@ -210,13 +200,10 @@ namespace Quokka.Stomp
 			Array.Copy(data1, combinedData, data1.Length - 1);
 			Array.Copy(data2, 0, combinedData, data1.Length - 1, data2.Length - 1);
 
-			int frameReadyRaisedCount = 0;
-
 			var builder = new StompFrameBuilder();
-			builder.FrameReady += delegate { frameReadyRaisedCount += 1; };
 
-			Assert.IsTrue(builder.ReceiveBytes(combinedData, 0, combinedData.Length), "Unexpected result");
-			Assert.AreEqual(1, frameReadyRaisedCount, "Unexpected frameReadyRaisedCount");
+			builder.ReceiveBytes(combinedData, 0, combinedData.Length);
+			Assert.IsTrue(builder.IsFrameReady);
 
 			var receivedFrame1 = builder.GetNextFrame();
 			Assert.IsNotNull(receivedFrame1);

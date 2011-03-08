@@ -75,5 +75,17 @@ namespace Quokka.Stomp
 		{
 			new StompFrame().ToArray();
 		}
+
+		[Test]
+		public void BodyText_tests()
+		{
+			var frame = new StompFrame
+			            	{
+			            		Command = "COMMAND",
+			            		BodyText = "1",
+			            	};
+
+			Assert.AreEqual("1", frame.BodyText);
+		}
 	}
 }

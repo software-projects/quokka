@@ -99,6 +99,7 @@
     <Compile Include="Stomp\ByteArrayUtilTests.cs" />
     <Compile Include="Stomp\StompFrameBuilderTests.cs" />
     <Compile Include="Stomp\StompFrameTests.cs" />
+    <Compile Include="Stomp\StompSocketTests.cs" />
     <Compile Include="Threading\WorkerActionTests.cs" />
     <Compile Include="Threading\WorkerTests.cs" />
     <Compile Include="Uip\Fakes\FakeViewManager.cs" />

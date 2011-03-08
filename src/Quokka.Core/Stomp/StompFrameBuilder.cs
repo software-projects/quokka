@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Quokka.Sandbox;
 
 namespace Quokka.Stomp
 {
@@ -11,24 +12,20 @@ namespace Quokka.Stomp
 	/// <remarks>
 	/// 	This class is designed to be thread-safe.
 	/// </remarks>
-	public class StompFrameBuilder
+	public class StompFrameBuilder : IFrameBuilder<StompFrame>
 	{
 		private StompFrame _frameUnderConstruction;
-		private readonly object _lockObject = new object();
 		private readonly Queue<StompFrame> _readyFrames = new Queue<StompFrame>();
+
 		private delegate void ReceiveCallback(byte[] data, int offset, int length);
+
 		private ReceiveCallback _currentCallback;
 		private Buffer _residue;
-		private volatile bool _framesAdded;
 
-		/// <summary>
-		/// 	Event is raised when one or more <see cref = "StompFrame" /> objects
-		/// 	are ready to be processed.
-		/// </summary>
-		/// <remarks>
-		/// 	Use the <see cref = "GetNextFrame" /> method to retrieve <see cref = "StompFrame" /> objects.
-		/// </remarks>
-		public event EventHandler FrameReady;
+		public bool IsFrameReady
+		{
+			get { return _readyFrames.Count > 0; }
+		}
 
 		///<summary>
 		///	Get the next <see cref = "StompFrame" /> that has been built by this builder object.
@@ -38,14 +35,11 @@ namespace Quokka.Stomp
 		///</returns>
 		public StompFrame GetNextFrame()
 		{
-			lock (_lockObject)
+			if (_readyFrames.Count == 0)
 			{
-				if (_readyFrames.Count == 0)
-				{
-					return null;
-				}
-				return _readyFrames.Dequeue();
+				return null;
 			}
+			return _readyFrames.Dequeue();
 		}
 
 		/// <summary>
@@ -54,55 +48,32 @@ namespace Quokka.Stomp
 		/// 	result in a <see cref = "StompFrame" /> being assembled, will be held over and used
 		/// 	in the next call to <see cref = "ReceiveBytes" />.
 		/// </summary>
-		/// <param name = "data">
-		/// 	Array of bytes containing data.
-		/// </param>
-		/// <param name = "offset">
-		/// 	Offset into the <see cref = "data" /> where the received data begins.
-		/// </param>
-		/// <param name = "length">
-		/// 	Number of bytes in the <see cref = "data" /> that have been received.
-		/// </param>
-		/// <returns>
-		/// 	Returns <c>true</c> if one or more <see cref = "StompFrame" /> objects have been
-		/// 	assembled as a result of the data received.
-		/// </returns>
-		/// <remarks>
-		/// 	This class takes a copy of any data it needs from the <see cref = "data" /> array,
-		/// 	so that it can be reused later.
-		/// </remarks>
-		public bool ReceiveBytes(byte[] data, int offset, int length)
+		public void ReceiveBytes(byte[] data, int offset, int length)
 		{
-			bool result;
-			lock (_lockObject)
+			if (_residue == null)
 			{
-				if (_residue == null)
-				{
-					// there is no residue from the previous call
-					_currentCallback(data, offset, length);
-				}
-				else
-				{
-					// there is some residue from the previous call
-					var buffer = _residue;
-					_residue = null;
-					buffer.Append(data, offset, length);
-					_currentCallback(buffer.Data, 0, buffer.Length);
-				}
-
-				result = _readyFrames.Count > 0;
+				// there is no residue from the previous call
+				_currentCallback(data, offset, length);
 			}
-
-			if (_framesAdded)
+			else
 			{
-				_framesAdded = false;
-				if (FrameReady != null)
-				{
-					FrameReady(this, EventArgs.Empty);
-				}
+				// there is some residue from the previous call
+				var buffer = _residue;
+				_residue = null;
+				buffer.Append(data, offset, length);
+				_currentCallback(buffer.Data, 0, buffer.Length);
 			}
+		}
 
-			return result;
+		public ArraySegment<byte> GetReceiveBuffer()
+		{
+			var data = new byte[4096];
+			return new ArraySegment<byte>(data);
+		}
+
+		public byte[] ToArray(StompFrame frame)
+		{
+			return frame.ToArray();
 		}
 
 		public StompFrameBuilder()
@@ -256,7 +227,6 @@ namespace Quokka.Stomp
 			_frameUnderConstruction.Body = memoryStream;
 			_readyFrames.Enqueue(_frameUnderConstruction);
 			_frameUnderConstruction = null;
-			_framesAdded = true;
 		}
 
 		private void ReadNull(byte[] data, int offset, int length)

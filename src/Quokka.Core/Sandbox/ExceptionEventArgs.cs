@@ -1,7 +1,7 @@
 ﻿using System;
 using Quokka.Diagnostics;
 
-namespace Quokka.Stomp
+namespace Quokka.Sandbox
 {
 	/// <summary>
 	/// 	A subclass of <see cref = "EventArgs" /> with an <see cref = "Exception" /> as payload.
