@@ -94,6 +94,7 @@
     <Compile Include="Reflection\PropertyUtilTests.cs" />
     <Compile Include="Reflection\TypeUtilTests.cs" />
     <Compile Include="Diagnostics\ExceptionExtensionsTests.cs" />
+    <Compile Include="Sandbox\ReflectionSpikes.cs" />
     <Compile Include="ServiceContainerUtilTests.cs" />
     <Compile Include="ServiceProviderTests.cs" />
     <Compile Include="Stomp\ByteArrayUtilTests.cs" />
@@ -160,7 +161,6 @@
     <Folder Include="DomainModel\" />
     <Folder Include="EnumTypes\" />
     <Folder Include="PresentationModel\" />
-    <Folder Include="Sandbox\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

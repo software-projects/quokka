@@ -19,7 +19,7 @@
 
 		// Messages Server to Client
 		public const string Connected = "CONNECTED";
-		public const string Messasge = "MESSAGE";
+		public const string Message = "MESSAGE";
 		public const string Error = "ERROR";
 		public const string Receipt = "RECEIPT";
 	}

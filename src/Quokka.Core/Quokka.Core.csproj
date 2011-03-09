@@ -169,8 +169,15 @@
     <Compile Include="Sandbox\SocketClientTransport.cs" />
     <Compile Include="Sandbox\SocketListener.cs" />
     <Compile Include="Sandbox\SocketTransport.cs" />
+    <Compile Include="Stomp\Internal\ClientConnection.cs" />
+    <Compile Include="Stomp\Internal\ClientSession.cs" />
+    <Compile Include="Stomp\Internal\ClientSubscription.cs" />
+    <Compile Include="Stomp\Internal\MessageQueue.cs" />
+    <Compile Include="Stomp\Internal\ServerData.cs" />
+    <Compile Include="Stomp\Internal\StompFrameUtils.cs" />
     <Compile Include="Stomp\StompClientTransport.cs" />
     <Compile Include="Stomp\StompListener.cs" />
+    <Compile Include="Stomp\StompServer.cs" />
     <Compile Include="Threading\IWorkerActionModule.cs" />
     <Compile Include="Threading\Worker.cs" />
     <Compile Include="Threading\WorkerAction.cs" />

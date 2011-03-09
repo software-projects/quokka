@@ -19,12 +19,17 @@ namespace Quokka.Sandbox
 		public event EventHandler ClientConnected;
 		public event EventHandler<ExceptionEventArgs> ListenException;
 
-		public IPEndPoint EndPoint { get; set; }
+		public IPEndPoint ListenEndPoint { get; set; }
 		public int Backlog { get; set; }
+
+		EndPoint IListener<TFrame>.ListenEndPoint
+		{
+			get { return ListenEndPoint; }
+		}
 
 		public SocketListener()
 		{
-			EndPoint = new IPEndPoint(IPAddress.Any, 0);
+			ListenEndPoint = new IPEndPoint(IPAddress.Any, 0);
 			Backlog = 127;
 		}
 
@@ -47,8 +52,8 @@ namespace Quokka.Sandbox
 				}
 
 				_listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-				_listenSocket.Bind(EndPoint);
-				EndPoint = (IPEndPoint)_listenSocket.LocalEndPoint;
+				_listenSocket.Bind(ListenEndPoint);
+				ListenEndPoint = (IPEndPoint)_listenSocket.LocalEndPoint;
 				_listenSocket.Listen(Backlog);
 				_listenSocket.BeginAccept(AcceptCallback, _listenSocket);
 			}
@@ -63,8 +68,8 @@ namespace Quokka.Sandbox
 					if (_listenSocket == null)
 					{
 						_listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-						_listenSocket.Bind(EndPoint);
-						EndPoint = (IPEndPoint)_listenSocket.LocalEndPoint;
+						_listenSocket.Bind(ListenEndPoint);
+						ListenEndPoint = (IPEndPoint)_listenSocket.LocalEndPoint;
 						_listenSocket.Listen(Backlog);
 						_listenSocket.BeginAccept(AcceptCallback, _listenSocket);
 					}

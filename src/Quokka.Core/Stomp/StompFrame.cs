@@ -117,7 +117,7 @@ namespace Quokka.Stomp
 						foreach (var key in Headers.AllKeys)
 						{
 							writer.Write(key);
-							writer.Write(": ");
+							writer.Write(":");
 							writer.WriteLine(Headers[key]);
 						}
 					}

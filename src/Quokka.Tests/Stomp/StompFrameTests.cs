@@ -28,7 +28,7 @@ namespace Quokka.Stomp
 
 			var text = new StreamReader(new MemoryStream(bytes), Encoding.UTF8).ReadToEnd();
 
-			const string expectedText = "CONNECT\r\nlogin: scott\r\npasscode: tiger\r\ncontent-length: 0\r\n\r\n\0";
+			const string expectedText = "CONNECT\r\nlogin:scott\r\npasscode:tiger\r\ncontent-length:0\r\n\r\n\0";
 			Assert.AreEqual(expectedText, text);
 		}
 
@@ -55,8 +55,8 @@ namespace Quokka.Stomp
 			var text = new StreamReader(new MemoryStream(bytes), Encoding.UTF8).ReadToEnd();
 
 			string expectedText = "SEND\r\n"
-			                      + "content-type: application/xml; encoding=UTF8\r\n"
-			                      + "content-length: " + payload.Length + "\r\n\r\n"
+			                      + "content-type:application/xml; encoding=UTF8\r\n"
+			                      + "content-length:" + payload.Length + "\r\n\r\n"
 			                      + someXml
 			                      + "\0";
 			Assert.AreEqual(expectedText, text);

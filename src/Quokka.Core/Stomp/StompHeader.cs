@@ -13,6 +13,8 @@
 		public const string Session = "session";
 		public const string Ack = "ack";
 		public const string Transaction = "transaction";
-		public const string Messasge = "message";
+		public const string Message = "message";
+		public const string Id = "id";
+		public const string Subscription = "subscription";
 	}
 }

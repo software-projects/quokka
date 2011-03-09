@@ -44,7 +44,7 @@ namespace Quokka.Stomp
 
 			_client = new StompClient
 			          	{
-			          		EndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), _listener.EndPoint.Port)
+			          		EndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), _listener.ListenEndPoint.Port)
 			          	};
 			_client.FrameReady += ClientFrameReady;
 			_client.TransportException += ClientTransportException;
@@ -64,7 +64,7 @@ namespace Quokka.Stomp
 				const string text = "1";
 				var frame = new StompFrame
 				            	{
-				            		Command = StompCommand.Messasge,
+				            		Command = StompCommand.Message,
 				            		BodyText = text,
 				            	};
 				_client.SendFrame(frame);
