@@ -22,7 +22,7 @@ namespace Quokka.Stomp.Internal
 		public static StompFrame CreateErrorFrame(string message, StompFrame inResponseTo)
 		{
 			var errorFrame = CreateErrorFrame(message);
-			var receiptId = inResponseTo.Headers[StompHeader.ReceiptId];
+			var receiptId = inResponseTo.Headers[StompHeader.Receipt];
 			if (receiptId != null)
 			{
 				errorFrame.Headers[StompHeader.ReceiptId] = receiptId;

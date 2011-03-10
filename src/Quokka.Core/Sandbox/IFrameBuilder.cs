@@ -15,9 +15,9 @@ namespace Quokka.Sandbox
 		///	The frame containing data to be transmitted.
 		///</param>
 		///<returns>
-		///	An array of bytes to transmit.
+		///	An array segment of bytes to transmit.
 		///</returns>
-		byte[] ToArray(T frame);
+		ArraySegment<byte> ToArray(T frame);
 
 		/// <summary>
 		/// Allocate a read buffer for receiving bytes

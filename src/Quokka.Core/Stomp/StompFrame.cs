@@ -1,17 +1,30 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using Quokka.Diagnostics;
 
 namespace Quokka.Stomp
 {
+	/// <summary>
+	/// This will get renamed to StompMessage soon.
+	/// </summary>
 	public class StompFrame
 	{
+		public StompFrame() : this(StompCommand.Send)
+		{
+			// Default command is SEND, because this is the only kind of
+			// command that application code should create.
+		}
+
+		public StompFrame(string command)
+		{
+			Command = Verify.ArgumentNotNull(command, "command");
+			Headers = new StompHeaderCollection();
+		}
+
 		/// <summary>
 		/// 	The <see cref = "StompCommand" /> for this frame.
 		/// </summary>
-		/// <remarks>
-		/// 	This property should not be left as <c>null</c>.
-		/// </remarks>
 		public string Command { get; set; }
 
 		/// <summary>
@@ -64,11 +77,6 @@ namespace Quokka.Stomp
 				writer.Write(value);
 				writer.Flush();
 			}
-		}
-
-		public StompFrame()
-		{
-			Headers = new StompHeaderCollection();
 		}
 
 		/// <summary>

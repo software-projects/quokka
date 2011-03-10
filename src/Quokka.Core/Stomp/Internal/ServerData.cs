@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Quokka.Stomp.Internal
 {
@@ -9,24 +6,44 @@ namespace Quokka.Stomp.Internal
 	internal class ServerData
 	{
 		private readonly object _lockObject = new object();
-		private readonly Dictionary<string, ClientSession> _clientSessions = new Dictionary<string, ClientSession>();
+		private readonly Dictionary<string, ServerSideSession> _clientSessions = new Dictionary<string, ServerSideSession>();
+		private readonly Dictionary<string, MessageQueue> _messageQueues = new Dictionary<string, MessageQueue>();
 
-		public ClientSession FindSession(string sessionId)
+		public ServerSideSession FindSession(string sessionId)
 		{
-			throw new NotImplementedException();
+			lock (_lockObject)
+			{
+				ServerSideSession session;
+				_clientSessions.TryGetValue(sessionId, out session);
+				return session;
+			}
 		}
 
 		public MessageQueue FindMessageQueue(string messageQueueName)
 		{
-			throw new NotImplementedException();
+			lock (_lockObject)
+			{
+				MessageQueue mq;
+				if (!_messageQueues.TryGetValue(messageQueueName, out mq))
+				{
+					mq = new MessageQueue(messageQueueName);
+					_messageQueues.Add(messageQueueName, mq);
+				}
+				return mq;
+			}
 		}
 
-		public ClientSession CreateSession()
+		public ServerSideSession CreateSession()
 		{
-			throw new NotImplementedException();
+			lock (_lockObject)
+			{
+				var session = new ServerSideSession(this);
+				_clientSessions.Add(session.SessionId, session);
+				return session;
+			}
 		}
 
-		public void EndSession(ClientSession clientSession)
+		public void EndSession(ServerSideSession clientSession)
 		{
 			if (clientSession != null)
 			{

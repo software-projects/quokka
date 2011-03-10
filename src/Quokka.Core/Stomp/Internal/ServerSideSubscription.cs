@@ -7,10 +7,10 @@ namespace Quokka.Stomp.Internal
 	/// <summary>
 	/// 	Represents a client subscription to a destination.
 	/// </summary>
-	internal class ClientSubscription : IDisposable
+	internal class ServerSideSubscription : IDisposable
 	{
 		public string SubscriptionId { get; private set; }
-		public ClientSession Session { get; private set; }
+		public ServerSideSession Session { get; private set; }
 		public MessageQueue MessageQueue { get; private set; }
 		public bool AutoAcknowledge { get; private set; }
 		private long _lastMessageId;
@@ -18,7 +18,7 @@ namespace Quokka.Stomp.Internal
 		private readonly object _lockObject = new object();
 		private readonly Dictionary<long, StompFrame> _unacknowledgedFrames = new Dictionary<long, StompFrame>();
 
-		public ClientSubscription(ClientSession session, string subscriptionId, MessageQueue messageQueue,
+		public ServerSideSubscription(ServerSideSession session, string subscriptionId, MessageQueue messageQueue,
 		                          bool autoAcknowledge)
 		{
 			Session = Verify.ArgumentNotNull(session, "session");
@@ -57,6 +57,7 @@ namespace Quokka.Stomp.Internal
 				{
 					_unacknowledgedFrames.Remove(id);
 				}
+				_lastAcknowledgedMessageId = messageId;
 			}
 		}
 	}

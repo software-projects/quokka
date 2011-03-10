@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using Common.Logging;
 using Quokka.Diagnostics;
 using Quokka.Util;
 
@@ -11,10 +12,12 @@ namespace Quokka.Sandbox
 	public class SocketListener<TFrame, TFrameBuilder> : IListener<TFrame>
 		where TFrameBuilder : IFrameBuilder<TFrame>, new()
 	{
+		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
 		private Socket _listenSocket;
 		private readonly object _lockObject = new object();
 		private readonly Queue<SocketTransport<TFrame>> _transports = new Queue<SocketTransport<TFrame>>();
 		private Timer _timer;
+		private bool _isDisposed;
 
 		public event EventHandler ClientConnected;
 		public event EventHandler<ExceptionEventArgs> ListenException;
@@ -39,10 +42,11 @@ namespace Quokka.Sandbox
 			{
 				DisposeUtils.DisposeOf(ref _listenSocket);
 				DisposeUtils.DisposeOf(ref _timer);
+				_isDisposed = true;
 			}
 		}
 
-		public void StartListening()
+		public void StartListening(EndPoint endPoint)
 		{
 			lock (_lockObject)
 			{
@@ -52,11 +56,17 @@ namespace Quokka.Sandbox
 				}
 
 				_listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-				_listenSocket.Bind(ListenEndPoint);
+				_listenSocket.Bind(endPoint);
 				ListenEndPoint = (IPEndPoint)_listenSocket.LocalEndPoint;
 				_listenSocket.Listen(Backlog);
 				_listenSocket.BeginAccept(AcceptCallback, _listenSocket);
 			}
+
+		}
+
+		public void StartListening()
+		{
+			StartListening(ListenEndPoint);
 		}
 
 		private void TimerCallback(object obj)
@@ -126,24 +136,34 @@ namespace Quokka.Sandbox
 			{
 				lock (_lockObject)
 				{
-					Socket listenSocket = (Socket) ar.AsyncState;
-					Socket handlerSocket = null;
-					handlerSocket = listenSocket.EndAccept(ar);
-					if (!ReferenceEquals(listenSocket, _listenSocket))
+					if (!_isDisposed)
 					{
-						// Here we have a connection, but we are no longer listening on that socket.
-						// Disconnect the socket and throw it away.
-						handlerSocket.Shutdown(SocketShutdown.Both);
-						handlerSocket.Disconnect(false);
-						handlerSocket.Close();
-						handlerSocket = null;
-					}
+						Socket listenSocket = (Socket) ar.AsyncState;
+						Socket handlerSocket = null;
+						handlerSocket = listenSocket.EndAccept(ar);
+						Log.Debug("Server accepted connection");
+						if (!ReferenceEquals(listenSocket, _listenSocket))
+						{
+							// Here we have a connection, but we are no longer listening on that socket.
+							// Disconnect the socket and throw it away.
+							Log.Debug("Different listen socket, closing connection");
+							handlerSocket.Shutdown(SocketShutdown.Both);
+							handlerSocket.Disconnect(false);
+							handlerSocket.Close();
+							handlerSocket = null;
+						}
+						else
+						{
+							// Start waiting for the next connection
+							listenSocket.BeginAccept(AcceptCallback, listenSocket);
+						}
 
-					if (handlerSocket != null)
-					{
-						var transport = new ServerTransport(handlerSocket, new TFrameBuilder());
-						_transports.Enqueue(transport);
-						OnClientConnected(EventArgs.Empty);
+						if (handlerSocket != null)
+						{
+							var transport = new ServerTransport(handlerSocket, new TFrameBuilder());
+							_transports.Enqueue(transport);
+							OnClientConnected(EventArgs.Empty);
+						}
 					}
 				}
 			}

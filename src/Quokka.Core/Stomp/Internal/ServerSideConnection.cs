@@ -5,7 +5,7 @@ using Quokka.Sandbox;
 
 namespace Quokka.Stomp.Internal
 {
-	internal class ClientConnection
+	internal class ServerSideConnection
 	{
 		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
 
@@ -16,11 +16,11 @@ namespace Quokka.Stomp.Internal
 		private delegate void StateAction(StompFrame frame);
 
 		private StateAction _stateAction;
-		private ClientSession _clientSession;
+		private ServerSideSession _session;
 
 		public event EventHandler ConnectionClosed;
 
-		public ClientConnection(ITransport<StompFrame> transport, ServerData serverData)
+		public ServerSideConnection(ITransport<StompFrame> transport, ServerData serverData)
 		{
 			_transport = Verify.ArgumentNotNull(transport, "transport");
 			_serverData = Verify.ArgumentNotNull(serverData, "serverData");
@@ -32,6 +32,10 @@ namespace Quokka.Stomp.Internal
 
 		public void SendFrame(StompFrame frame)
 		{
+			if (Log.IsDebugEnabled)
+			{
+				Log.DebugFormat("Sent {0} command to client", frame.Command);
+			}
 			_transport.SendFrame(frame);
 		}
 
@@ -55,6 +59,7 @@ namespace Quokka.Stomp.Internal
 			if (frame.Command != StompCommand.Connect)
 			{
 				const string message = "Expecting " + StompCommand.Connected + " command";
+				Log.Debug(message);
 				var errorFrame = StompFrameUtils.CreateErrorFrame(message);
 				_transport.SendFrame(errorFrame);
 				_transport.Shutdown();
@@ -67,7 +72,9 @@ namespace Quokka.Stomp.Internal
 
 			if (!Authenticate(login, passcode))
 			{
-				var errorFrame = StompFrameUtils.CreateErrorFrame("Access denied");
+				const string message = "Access denied";
+				Log.Debug(message);
+				var errorFrame = StompFrameUtils.CreateErrorFrame(message);
 				_transport.SendFrame(errorFrame);
 				_transport.Shutdown();
 				_stateAction = ShuttingDown;
@@ -75,68 +82,90 @@ namespace Quokka.Stomp.Internal
 			}
 
 			var sessionId = frame.Headers[StompHeader.Session];
-			ClientSession clientSession = null;
+			ServerSideSession session = null;
 
 			if (sessionId != null)
 			{
-				clientSession = _serverData.FindSession(sessionId);
-				if (clientSession == null)
+				session = _serverData.FindSession(sessionId);
+				if (session == null)
 				{
-					var errorFrame = StompFrameUtils.CreateErrorFrame("Session does not exist: " + sessionId);
+					var message = "Session does not exist: " + sessionId;
+					Log.Debug(message);
+					var errorFrame = StompFrameUtils.CreateErrorFrame(message);
 					_transport.SendFrame(errorFrame);
 					_transport.Shutdown();
 					_stateAction = ShuttingDown;
 					return;
 				}
+
+				if (!session.AddConnection(this))
+				{
+					var message = "Session already in use: " + sessionId;
+					Log.Debug(message);
+					var errorFrame = StompFrameUtils.CreateErrorFrame(message);
+					_transport.SendFrame(errorFrame);
+					_transport.Shutdown();
+					_stateAction = ShuttingDown;
+					return;
+				}
+
+				Log.Debug("Reconnected to session " + sessionId);
 			}
 
-			if (clientSession == null)
+			if (session == null)
 			{
-				clientSession = _serverData.CreateSession();
+				session = _serverData.CreateSession();
+				session.AddConnection(this);
+				Log.Debug("Created new session " + session.SessionId);
 			}
 
-			_clientSession = clientSession;
+			_session = session;
 
 			var connectedFrame = new StompFrame
 			                     	{
 			                     		Command = StompCommand.Connected,
 			                     		Headers =
 			                     			{
-			                     				{StompHeader.Session, clientSession.SessionId}
+			                     				{StompHeader.Session, session.SessionId}
 			                     			}
 			                     	};
 			_transport.SendFrame(connectedFrame);
 			_stateAction = Connected;
+			Log.Debug("Session " + session + " connected");
 		}
 
 		private void Connected(StompFrame frame)
 		{
+			Log.Debug("Received frame " + frame.Command);
 			lock (_lockObject)
 			{
 				if (frame.Command == StompCommand.Disconnect)
 				{
 					_stateAction = ShuttingDown;
 					_transport.Shutdown();
-					_serverData.EndSession(_clientSession);
-					_clientSession = null;
+					_serverData.EndSession(_session);
+					_session = null;
 				}
-				try
+				else
 				{
-					// ReSharper disable PossibleNullReferenceException
-					_clientSession.ProcessFrame(frame);
-					// ReSharper restore PossibleNullReferenceException
-				}
-				catch (Exception ex)
-				{
-					if (ex.IsCorruptedStateException())
+					try
 					{
-						throw;
+						// ReSharper disable PossibleNullReferenceException
+						_session.ProcessFrame(frame);
+						// ReSharper restore PossibleNullReferenceException
 					}
-					Log.Error("Unexpected error handling " + frame.Command + " frame: " + ex.Message, ex);
+					catch (Exception ex)
+					{
+						if (ex.IsCorruptedStateException())
+						{
+							throw;
+						}
+						Log.Error("Unexpected error handling " + frame.Command + " frame: " + ex.Message, ex);
 
-					var errorFrame = StompFrameUtils.CreateErrorFrame("internal server error", frame);
-					_transport.SendFrame(errorFrame);
-					_transport.Shutdown();
+						var errorFrame = StompFrameUtils.CreateErrorFrame("internal server error", frame);
+						_transport.SendFrame(errorFrame);
+						_transport.Shutdown();
+					}
 				}
 			}
 		}

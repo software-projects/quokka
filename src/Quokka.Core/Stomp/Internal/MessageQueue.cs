@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using Common.Logging;
 using Quokka.Diagnostics;
 
 namespace Quokka.Stomp.Internal
 {
 	internal class MessageQueue
 	{
+		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
 		private readonly object _lockObject = new object();
 		private Node _first;
 		private Node _last;
-		private readonly List<ClientSubscription> _subscriptions = new List<ClientSubscription>();
-		private readonly Random _random = new Random((int)DateTime.Now.Ticks);
+		private readonly List<ServerSideSubscription> _subscriptions = new List<ServerSideSubscription>();
+		private readonly Random _random = new Random((int) DateTime.Now.Ticks);
 
 		public string Name { get; private set; }
 
@@ -21,23 +22,42 @@ namespace Quokka.Stomp.Internal
 			Name = Verify.ArgumentNotNull(messageQueueName, "messageQueueName");
 		}
 
-		public void AddSubscription(ClientSubscription clientSubscription)
+		public void AddSubscription(ServerSideSubscription subscription)
 		{
 			lock (_lockObject)
 			{
-				_subscriptions.Add(clientSubscription);
+				_subscriptions.Add(subscription);
+
+				// Send all the queued messages to the subscription. This is not ideal,
+				// because it does not cope with the case where there are multiple clients
+				// connecting for the same queue -- the first client will get all the messages
+				// queued up, and the second client will get none. This is not something that
+				// will be done in the near future with this library, so let it go for now.
+				// Needs a bit of a re-think of the relationship between subscriptions and
+				// the message queue.
+				//
+				// Probably need change it so that the message queue gives the message
+				// to the subscription a couple at a time, and then the subscription asks 
+				// for more messages once they have been acknowledged by the client.
+
+				while (_first != null)
+				{
+					var frame = _first.Frame;
+					_first = _first.Next;
+					subscription.SendFrame(frame);
+				}
 			}
 		}
 
-		public void RemoveSubscription(ClientSubscription clientSubscription)
+		public void RemoveSubscription(ServerSideSubscription subscription)
 		{
 			lock (_lockObject)
 			{
-				_subscriptions.Remove(clientSubscription);
+				_subscriptions.Remove(subscription);
 			}
 		}
 
-		private ClientSubscription ChooseSubscription()
+		private ServerSideSubscription ChooseSubscription()
 		{
 			if (_subscriptions.Count == 0)
 			{
@@ -61,7 +81,7 @@ namespace Quokka.Stomp.Internal
 				if (subscription != null)
 				{
 					// A subscription exists -- send the message straight away
-					StompFrameUtils.AllocateMessageId(frame);
+					Log.Debug("Sending straight to subscription " + subscription.SubscriptionId);
 					subscription.SendFrame(frame);
 					return;
 				}
@@ -72,7 +92,6 @@ namespace Quokka.Stomp.Internal
 				// message to accidentally acknowledge a message on the queue.
 				var node = new Node
 				           	{
-				           		MessageId = 0,
 				           		Frame = frame,
 				           		Previous = _last,
 				           		Next = _first,
@@ -83,11 +102,13 @@ namespace Quokka.Stomp.Internal
 				{
 					_first = node;
 				}
+
+				Log.Debug("Added to end of queue");
 			}
 		}
 
 		/// <summary>
-		/// Sends the frame to all currently published subscribers.
+		/// 	Sends the frame to all currently published subscribers.
 		/// </summary>
 		public void PublishFrame(StompFrame frame)
 		{
@@ -114,65 +135,11 @@ namespace Quokka.Stomp.Internal
 			}
 		}
 
-		// Get the next message, if any, after the specified message id
-		public StompFrame GetNext(long messageId)
-		{
-			lock (_lockObject)
-			{
-				for (var node = _first; node != null; node = node.Next)
-				{
-					if (messageId <= 0 || node.MessageId > messageId)
-					{
-						if (node.MessageId == 0)
-						{
-							node.MessageId = StompFrameUtils.AllocateMessageId(node.Frame);
-						}
-						return node.Frame;
-					}
-				}
-			}
-
-			return null;
-		}
-
-		public StompFrame GetNextAndAcknowledge()
-		{
-			lock (_lockObject)
-			{
-				if (_first != null)
-				{
-					var frame = _first.Frame;
-					_first = _first.Next;
-					return frame;
-				}
-			}
-			return null;
-		}
-
-		// Acknowledge all messages up to and including the message id
-		public void Acknowledge(long messageId)
-		{
-			lock (_lockObject)
-			{
-				while (_first != null)
-				{
-					if (_first.MessageId > messageId)
-					{
-						// front message is not being acknowledged
-						return;
-					}
-					_first = _first.Next;
-				}
-			}
-		}
-
 		private class Node
 		{
-			public long MessageId;
 			public StompFrame Frame;
 			public Node Previous;
 			public Node Next;
 		}
-
 	}
 }

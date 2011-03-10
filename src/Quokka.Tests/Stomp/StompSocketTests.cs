@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net;
 using System.Threading;
 using NUnit.Framework;
@@ -11,7 +12,7 @@ namespace Quokka.Stomp
 	{
 		private StompListener _listener;
 		private ITransport<StompFrame> _server;
-		private StompClient _client;
+		private StompClientTransport _clientTransport;
 
 		private ManualResetEvent _finishedEvent;
 		private Exception _ex;
@@ -24,6 +25,8 @@ namespace Quokka.Stomp
 		{
 			_finishedEvent = new ManualResetEvent(false);
 			_lockObject = new object();
+
+			//Common.Logging.LogManager.Adapter = new Common.Logging.Simple.ConsoleOutLoggerFactoryAdapter();
 		}
 
 		[TearDown]
@@ -42,23 +45,30 @@ namespace Quokka.Stomp
 			_listener.ClientConnected += ListenerClientConnected;
 			_listener.StartListening();
 
-			_client = new StompClient
+			_clientTransport = new StompClientTransport
 			          	{
 			          		EndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), _listener.ListenEndPoint.Port)
 			          	};
-			_client.FrameReady += ClientFrameReady;
-			_client.TransportException += ClientTransportException;
-			_client.ConnectedChanged += ClientConnectedChanged;
-			_client.Connect();
+			_clientTransport.FrameReady += ClientFrameReady;
+			_clientTransport.TransportException += ClientTransportException;
+			_clientTransport.ConnectedChanged += ClientConnectedChanged;
+			_clientTransport.Connect();
 
-			Assert.IsTrue(_finishedEvent.WaitOne(5000, true));
+			if (Debugger.IsAttached)
+			{
+				_finishedEvent.WaitOne();
+			}
+			else
+			{
+				Assert.IsTrue(_finishedEvent.WaitOne(5000, true));
+			}
 			Assert.IsNull(_ex, "Exception encountered: " + _message + Environment.NewLine + _ex);
 			Assert.AreEqual(10, _number);
 		}
 
 		void ClientConnectedChanged(object sender, EventArgs e)
 		{
-			if (_client.Connected)
+			if (_clientTransport.Connected)
 			{
 				Console.WriteLine("Client: connected to server");
 				const string text = "1";
@@ -67,7 +77,7 @@ namespace Quokka.Stomp
 				            		Command = StompCommand.Message,
 				            		BodyText = text,
 				            	};
-				_client.SendFrame(frame);
+				_clientTransport.SendFrame(frame);
 				Console.WriteLine("Client: sent message: " + text);
 			}
 			else
@@ -90,7 +100,7 @@ namespace Quokka.Stomp
 
 		private void ClientFrameReady(object sender, EventArgs e)
 		{
-			var frame = _client.GetNextFrame();
+			var frame = _clientTransport.GetNextFrame();
 			if (frame == null)
 			{
 				return;
@@ -104,13 +114,13 @@ namespace Quokka.Stomp
 			if (_number == 10)
 			{
 				Console.WriteLine("Client: initiated shutdown");
-				_client.Shutdown();
+				_clientTransport.Shutdown();
 			}
 			else
 			{
 				text = (_number + 1).ToString();
 				frame.BodyText = text;
-				_client.SendFrame(frame);
+				_clientTransport.SendFrame(frame);
 				Console.WriteLine("Client: sent message: " + text);
 			}
 		}

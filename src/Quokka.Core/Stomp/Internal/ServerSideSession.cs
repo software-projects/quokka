@@ -8,17 +8,17 @@ namespace Quokka.Stomp.Internal
 	/// <summary>
 	/// 	Wraps a connection with a STOMP client and performs session management.
 	/// </summary>
-	internal class ClientSession : IDisposable
+	internal class ServerSideSession : IDisposable
 	{
 		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
 		private readonly object _lockObject = new object();
 		private readonly ServerData _serverData;
-		private ClientConnection _clientConnection;
-		private readonly Dictionary<string, ClientSubscription> _subscriptions = new Dictionary<string, ClientSubscription>();
+		private ServerSideConnection _clientConnection;
+		private readonly Dictionary<string, ServerSideSubscription> _subscriptions = new Dictionary<string, ServerSideSubscription>();
 
 		public string SessionId { get; private set; }
 
-		public ClientSession(ServerData serverData)
+		public ServerSideSession(ServerData serverData)
 		{
 			SessionId = Guid.NewGuid().ToString();
 			_serverData = Verify.ArgumentNotNull(serverData, "serverData");
@@ -32,7 +32,12 @@ namespace Quokka.Stomp.Internal
 			}
 		}
 
-		public bool AddConnection(ClientConnection clientConnection)
+		public override string ToString()
+		{
+			return SessionId;
+		}
+
+		public bool AddConnection(ServerSideConnection clientConnection)
 		{
 			Verify.ArgumentNotNull(clientConnection, "clientConnection");
 			lock (_lockObject)
@@ -120,6 +125,7 @@ namespace Quokka.Stomp.Internal
 			// Don't allocate the message-id here, as the message queue does it.
 			var messageFrame = StompFrameUtils.CreateCopy(frame);
 			messageFrame.Command = StompCommand.Message;
+			Log.Debug("Adding message to queue: " + messageQueue.Name);
 			messageQueue.AddFrame(messageFrame);
 			SendReceiptIfNecessary(frame);
 		}
@@ -157,7 +163,7 @@ namespace Quokka.Stomp.Internal
 
 			var messageQueue = _serverData.FindMessageQueue(destination);
 
-			var subscription = new ClientSubscription(this, id, messageQueue, ack == "client");
+			var subscription = new ServerSideSubscription(this, id, messageQueue, ack == "client");
 			_subscriptions.Add(id, subscription);
 			SendReceiptIfNecessary(frame);
 		}
@@ -226,7 +232,7 @@ namespace Quokka.Stomp.Internal
 				return;
 			}
 
-			ClientSubscription subscription;
+			ServerSideSubscription subscription;
 			if (!_subscriptions.TryGetValue(subscriptionId, out subscription))
 			{
 				var message = "Subscription does not exist: " + subscription;
@@ -283,7 +289,7 @@ namespace Quokka.Stomp.Internal
 
 		private void SendReceiptIfNecessary(StompFrame frame)
 		{
-			var receiptId = frame.Headers[StompHeader.ReceiptId];
+			var receiptId = frame.Headers[StompHeader.Receipt];
 			if (receiptId != null)
 			{
 				var receiptFrame = new StompFrame

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
+using Common.Logging;
 using Quokka.Diagnostics;
 using Quokka.Util;
 
@@ -12,6 +13,7 @@ namespace Quokka.Sandbox
 	/// </summary>
 	public abstract class SocketTransport<TFrame> : ITransport<TFrame>
 	{
+		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
 		protected readonly object LockObject = new object();
 		private readonly IFrameBuilder<TFrame> _frameBuilder;
 		protected Socket Socket;
@@ -296,8 +298,7 @@ namespace Quokka.Sandbox
 			// If we disconnect part-way through sending the frame, we want
 			// the chance to retransmit it.
 			var frame = _pendingFrames.Peek();
-			var data = _frameBuilder.ToArray(frame);
-			var segment = new ArraySegment<byte>(data);
+			var segment = _frameBuilder.ToArray(frame);
 			SendSegment(segment);
 		}
 
@@ -404,8 +405,17 @@ namespace Quokka.Sandbox
 			{
 				lock (LockObject)
 				{
-					socket.EndDisconnect(ar);
-					socket.Close();
+					try
+					{
+						// The socket may well have been disposed by the time this
+						// operation completes.
+						socket.EndDisconnect(ar);
+						socket.Close();
+					}
+					catch (ObjectDisposedException)
+					{
+						Log.Debug("Socket has already been disposed");
+					}
 
 					if (Socket == socket)
 					{

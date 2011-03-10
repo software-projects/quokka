@@ -8,18 +8,31 @@ using Quokka.Stomp.Internal;
 
 namespace Quokka.Stomp
 {
-	public class StompServer
+	public class StompServer : IDisposable
 	{
 		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
 		private readonly List<IListener<StompFrame>> _listeners = new List<IListener<StompFrame>>();
 		private readonly List<EndPoint> _listenEndPoints = new List<EndPoint>();
-		private readonly List<ClientConnection> _clientConnections = new List<ClientConnection>();
+		private readonly List<ServerSideConnection> _clientConnections = new List<ServerSideConnection>();
 		private readonly object _lockObject = new object();
 		private readonly ServerData _serverData = new ServerData();
 
 		public IList<EndPoint> EndPoints
 		{
 			get { return new ReadOnlyCollection<EndPoint>(_listenEndPoints); }
+		}
+
+		public void Dispose()
+		{
+			foreach (var listener in _listeners)
+			{
+				listener.Dispose();
+			}
+
+			foreach (var connection in _clientConnections)
+			{
+				connection.Disconnect();
+			}
 		}
 
 		public void ListenOn(EndPoint endPoint)
@@ -39,12 +52,13 @@ namespace Quokka.Stomp
 				listener.StartListening();
 
 				_listeners.Add(listener);
-				_listenEndPoints.Add(endPoint);
+				_listenEndPoints.Add(listener.ListenEndPoint);
 			}
 		}
 
 		private void ListenerClientConnected(object sender, EventArgs e)
 		{
+			Log.Debug("STOMP Client connected");
 			lock (_lockObject)
 			{
 				var listener = (IListener<StompFrame>) sender;
@@ -56,7 +70,7 @@ namespace Quokka.Stomp
 						break;
 					}
 
-					var clientConnection = new ClientConnection(transport, _serverData);
+					var clientConnection = new ServerSideConnection(transport, _serverData);
 					clientConnection.ConnectionClosed += ClientConnectionClosed;
 
 					// Perform a check here because the transport could have disconnected before
@@ -77,7 +91,7 @@ namespace Quokka.Stomp
 		{
 			lock (_lockObject)
 			{
-				var clientConnection = (ClientConnection) sender;
+				var clientConnection = (ServerSideConnection) sender;
 				_clientConnections.Remove(clientConnection);
 			}
 		}

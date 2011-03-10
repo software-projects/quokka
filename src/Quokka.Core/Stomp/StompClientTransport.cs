@@ -2,7 +2,7 @@
 
 namespace Quokka.Stomp
 {
-	public class StompClient : SocketClientTransport<StompFrame, StompFrameBuilder>
+	public class StompClientTransport : SocketClientTransport<StompFrame, StompFrameBuilder>
 	{
 	}
 }

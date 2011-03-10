@@ -11,6 +11,13 @@ namespace Quokka.Stomp
 	public class StompFrameTests
 	{
 		[Test]
+		public void Missing_header_results_in_null_value()
+		{
+			var message = new StompFrame();
+			Assert.IsNull(message.Headers["missing-header"]);
+		}
+
+		[Test]
 		public void ToArray_with_empty_body()
 		{
 			var frame = new StompFrame
@@ -73,7 +80,7 @@ namespace Quokka.Stomp
 		[ExpectedException(typeof(InvalidOperationException))]
 		public void Command_cannot_be_null()
 		{
-			new StompFrame().ToArray();
+			new StompFrame { Command = null }.ToArray();
 		}
 
 		[Test]
