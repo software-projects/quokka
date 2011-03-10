@@ -84,7 +84,6 @@
   <ItemGroup>
     <Compile Include="Castle\WindsorContainerTests.cs" />
     <Compile Include="Castle\WindsorServiceContainerTests.cs" />
-    <Compile Include="Collections\DequeTests.cs" />
     <Compile Include="Data\SqlExpressUtilTests.cs" />
     <Compile Include="Diagnostics\VerifyTests.cs" />
     <Compile Include="DynamicCodeGeneration\CodeBuilderTestBase.cs" />
@@ -163,6 +162,7 @@
     <Compile Include="..\CommonAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Collections\" />
     <Folder Include="DomainModel\" />
     <Folder Include="EnumTypes\" />
     <Folder Include="PresentationModel\" />

@@ -131,9 +131,6 @@
     <Compile Include="..\CommonAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Collections\Deque.cs" />
-    <Compile Include="Collections\Deque.Enumerator.cs" />
-    <Compile Include="Collections\Deque.Node.cs" />
     <Compile Include="Collections\DisposableCollection.cs">
     </Compile>
     <Compile Include="Collections\DisposableCollection.Generic.cs" />
