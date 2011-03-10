@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Net;
 using System.Threading;
+using Common.Logging;
 using NUnit.Framework;
 using Quokka.Sandbox;
 
@@ -10,6 +11,7 @@ namespace Quokka.Stomp
 	[TestFixture]
 	public class StompSocketTests
 	{
+		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
 		private StompListener _listener;
 		private ITransport<StompFrame> _server;
 		private StompClientTransport _clientTransport;
@@ -19,6 +21,7 @@ namespace Quokka.Stomp
 		private string _message;
 		private object _lockObject;
 		private int _number;
+		const int _maxNumber = 100;
 
 		[SetUp]
 		public void Setup()
@@ -60,17 +63,17 @@ namespace Quokka.Stomp
 			}
 			else
 			{
-				Assert.IsTrue(_finishedEvent.WaitOne(5000, true));
+				_finishedEvent.WaitOne(5000, true);
 			}
 			Assert.IsNull(_ex, "Exception encountered: " + _message + Environment.NewLine + _ex);
-			Assert.AreEqual(10, _number);
+			Assert.AreEqual(_maxNumber, _number);
 		}
 
 		void ClientConnectedChanged(object sender, EventArgs e)
 		{
 			if (_clientTransport.Connected)
 			{
-				Console.WriteLine("Client: connected to server");
+				Log.Debug("Client: connected to server");
 				const string text = "1";
 				var frame = new StompFrame
 				            	{
@@ -78,11 +81,11 @@ namespace Quokka.Stomp
 				            		BodyText = text,
 				            	};
 				_clientTransport.SendFrame(frame);
-				Console.WriteLine("Client: sent message: " + text);
+				Log.Debug("Client: sent message: " + text);
 			}
 			else
 			{
-				Console.WriteLine("Client: disconnected from server");
+				Log.Debug("Client: disconnected from server");
 			}
 		}
 
@@ -92,7 +95,7 @@ namespace Quokka.Stomp
 			{
 				_ex = e.Exception;
 				_message = "Client: transport exception";
-				Console.WriteLine("Client: transport exception: " + _ex.Message);
+				Log.Debug("Client: transport exception: " + _ex.Message);
 			}
 
 			_finishedEvent.Set();
@@ -108,12 +111,12 @@ namespace Quokka.Stomp
 
 			var text = frame.BodyText;
 
-			Console.WriteLine("Client: received message: " + text);
+			Log.Debug("Client: received message: " + text);
 
 			_number = int.Parse(text);
-			if (_number == 10)
+			if (_number == _maxNumber)
 			{
-				Console.WriteLine("Client: initiated shutdown");
+				Log.Debug("Client: initiated shutdown");
 				_clientTransport.Shutdown();
 			}
 			else
@@ -121,13 +124,13 @@ namespace Quokka.Stomp
 				text = (_number + 1).ToString();
 				frame.BodyText = text;
 				_clientTransport.SendFrame(frame);
-				Console.WriteLine("Client: sent message: " + text);
+				Log.Debug("Client: sent message: " + text);
 			}
 		}
 
 		private void ListenerClientConnected(object sender, EventArgs e)
 		{
-			Console.WriteLine("Listener: client connected");
+			Log.Debug("Listener: client connected");
 			_server = _listener.GetNextTransport();
 			_server.ConnectedChanged += ServerConnectionChanged;
 			_server.FrameReady += ServerFrameReady;
@@ -138,7 +141,7 @@ namespace Quokka.Stomp
 		{
 			if (!_server.Connected)
 			{
-				Console.WriteLine("Server: disconnected from client");
+				Log.Debug("Server: disconnected from client");
 				_finishedEvent.Set();
 			}
 		}
@@ -150,7 +153,7 @@ namespace Quokka.Stomp
 
 			var text = frame.BodyText;
 
-			Console.WriteLine("Server: received message: " + text);
+			Log.Debug("Server: received message: " + text);
 			server.SendFrame(frame);
 		}
 
@@ -160,7 +163,7 @@ namespace Quokka.Stomp
 			{
 				_ex = e.Exception;
 				_message = "Server: transport exception";
-				Console.WriteLine("Server: transport exception: " + e.Exception.Message);
+				Log.Debug("Server: transport exception: " + e.Exception.Message);
 			}
 			_finishedEvent.Set();
 		}
