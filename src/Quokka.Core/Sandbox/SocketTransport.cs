@@ -82,6 +82,7 @@ namespace Quokka.Sandbox
 				_pendingFrames.Enqueue(frame);
 				if (!_sendInProgress)
 				{
+					//Log.Debug("Queued StartSend");
 					ThreadPool.QueueUserWorkItem(StartSend);
 				}
 			}
@@ -207,6 +208,11 @@ namespace Quokka.Sandbox
 
 		private void ReceiveCallback(IAsyncResult ar)
 		{
+			if (ar.CompletedSynchronously)
+			{
+				Log.Debug("BeginReceive was completed synchronously");
+			}
+
 			var state = (ReceiveState) ar.AsyncState;
 			if (state.Socket != Socket)
 			{
@@ -268,6 +274,7 @@ namespace Quokka.Sandbox
 
 		private void StartSend(object obj)
 		{
+			//Log.Debug("-> StartSend");
 			lock (LockObject)
 			{
 				if (!CheckConnected())
@@ -290,6 +297,7 @@ namespace Quokka.Sandbox
 
 				SendNextFrame();
 			}
+			//Log.Debug("<- StartSend");
 		}
 
 		private void SendNextFrame()
@@ -305,16 +313,25 @@ namespace Quokka.Sandbox
 		private void SendSegment(ArraySegment<byte> segment)
 		{
 			var state = new SendState {Segment = segment, Socket = Socket};
-			Socket.BeginSend(segment.Array, segment.Offset, segment.Count, SocketFlags.None, SendCallback, state);
+
+			// It is important to set this to true *prior* to calling BeginSend. The reason
+			// is that BeginSend *might* finish synchronously.
 			_sendInProgress = true;
+			Socket.BeginSend(segment.Array, segment.Offset, segment.Count, SocketFlags.None, SendCallback, state);
 		}
 
 		private void SendCallback(IAsyncResult ar)
 		{
+			//Log.Debug("-> SendCallback");
+			if (ar.CompletedSynchronously)
+			{
+				Log.Debug("BeginSend was completed synchronously");
+			}
 			var state = (SendState) ar.AsyncState;
 			if (state.Socket != Socket)
 			{
 				// callback from previous connection -- ignore
+				//Log.Debug("<- SendCallback (ignoring)");
 				return;
 			}
 
@@ -327,6 +344,7 @@ namespace Quokka.Sandbox
 
 					if (byteCount < state.Segment.Count)
 					{
+						Log.DebugFormat("Only {0] out of {1} bytes transmitted", byteCount, state.Segment.Count);
 						// Not all bytes were sent in the segment, so the remaining data has to be sent
 						var newSegment = new ArraySegment<byte>(state.Segment.Array,
 						                                        state.Segment.Offset + byteCount,
@@ -357,6 +375,7 @@ namespace Quokka.Sandbox
 
 				HandleException(ex);
 			}
+			//Log.Debug("<- SendCallback");
 		}
 
 		#endregion
@@ -399,6 +418,11 @@ namespace Quokka.Sandbox
 
 		private void DisconnectCallback(IAsyncResult ar)
 		{
+			if (ar.CompletedSynchronously)
+			{
+				Log.Debug("BeginDisconnect was completed synchronously");
+			}
+
 			var socket = (Socket) ar.AsyncState;
 
 			try
