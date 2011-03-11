@@ -30,6 +30,7 @@ using System;
 using System.Collections.Generic;
 using Common.Logging;
 using Microsoft.Practices.ServiceLocation;
+using Quokka.Collections;
 using Quokka.Diagnostics;
 using Quokka.ServiceLocation;
 using Quokka.UI.Messages;
@@ -49,6 +50,7 @@ namespace Quokka.UI.Tasks
 		private bool _endTaskRequested;
 		private bool _raiseTaskComplete;
 		private bool _raiseTaskStarted;
+		protected readonly DisposableCollection Disposables = new DisposableCollection();
 
 		protected UITask()
 		{
@@ -60,6 +62,11 @@ namespace Quokka.UI.Tasks
 			// Registers the task instance under both UITask, and the actual type of the task
 			_serviceContainer.RegisterInstance(this);
 			_serviceContainer.RegisterInstance(GetType(), this);
+		}
+
+		~UITask()
+		{
+			Dispose(false);
 		}
 
 		#region Public events
@@ -174,6 +181,10 @@ namespace Quokka.UI.Tasks
 
 		public void Dispose()
 		{
+			GC.SuppressFinalize(this);
+			Disposables.Dispose();
+			Dispose(true);
+
 			if (IsComplete)
 			{
 				return;
@@ -191,6 +202,11 @@ namespace Quokka.UI.Tasks
 			IsComplete = true;
 			_raiseTaskComplete = true;
 			RaiseEvents();
+		}
+
+		protected virtual void Dispose(bool disposing)
+		{
+			
 		}
 
 		/// <summary>
