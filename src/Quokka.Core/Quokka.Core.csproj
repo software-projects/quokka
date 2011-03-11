@@ -178,7 +178,7 @@
     <Compile Include="Stomp\Internal\StompFrameUtils.cs" />
     <Compile Include="Stomp\Internal\StompClientTransport.cs" />
     <Compile Include="Stomp\StompFrameBuilder.Generic.cs" />
-    <Compile Include="Stomp\Internal\StompListener.cs" />
+    <Compile Include="Stomp\Internal\Listener.cs" />
     <Compile Include="Stomp\StompMessageEventArgs.cs" />
     <Compile Include="Stomp\StompServer.cs" />
     <Compile Include="Stomp\StompServerConfig.cs" />

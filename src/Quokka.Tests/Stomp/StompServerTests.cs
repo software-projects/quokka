@@ -123,8 +123,8 @@ namespace Quokka.Stomp
 			StompClient client3 = new StompClient();
 			client3.ConnectTo(serverEndPoint);
 
-			const string queueName = "/queue";
-			const string publishQueueName = "publish /queue";
+			const string queueName = "myqueue";
+			const string publishQueueName = "/topic/myqueue";
 
 			string received1Text = null;
 			string received2Text = null;
