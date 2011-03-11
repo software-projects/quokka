@@ -104,5 +104,92 @@ namespace Quokka.Stomp
 			Assert.AreEqual(receivedText, "This is a simple message");
 		}
 
+		[Test]
+		public void Publish_to_multiple_clients()
+		{
+			StompServer server = new StompServer();
+			var endPoint = new IPEndPoint(IPAddress.Any, 0);
+			server.ListenOn(endPoint);
+
+			var serverPort = ((IPEndPoint)server.EndPoints.First()).Port;
+			var serverEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), serverPort);
+
+			StompClient client1 = new StompClient();
+			client1.ConnectTo(serverEndPoint);
+
+			StompClient client2 = new StompClient();
+			client2.ConnectTo(serverEndPoint);
+
+			StompClient client3 = new StompClient();
+			client3.ConnectTo(serverEndPoint);
+
+			const string queueName = "/queue";
+			const string publishQueueName = "publish /queue";
+
+			string received1Text = null;
+			string received2Text = null;
+			int receivedMessageCount = 0;
+			var waitHandle = new ManualResetEvent(false);
+			var subscribedHandle1 = new ManualResetEvent(false);
+			var subscribedHandle2 = new ManualResetEvent(false);
+
+			var subscription1 = client1.CreateSubscription(queueName);
+			subscription1.MessageArrived += delegate(object sender, StompMessageEventArgs e)
+			                                	{
+			                                		received1Text = e.Message.BodyText;
+			                                		if (Interlocked.Increment(ref receivedMessageCount) == 2)
+			                                		{
+			                                			waitHandle.Set();
+			                                		}
+			                                	};
+			subscription1.StateChanged += delegate
+			                              	{
+												if (subscription1.State == StompSubscriptionState.Subscribed)
+												{
+													subscribedHandle1.Set();
+												}
+			                              	};
+			subscription1.Subscribe();
+
+			var subscription2 = client2.CreateSubscription(queueName);
+			subscription2.MessageArrived += delegate(object sender, StompMessageEventArgs e)
+			                                	{
+			                                		received2Text = e.Message.BodyText;
+			                                		if (Interlocked.Increment(ref receivedMessageCount) == 2)
+			                                		{
+			                                			waitHandle.Set();
+			                                		}
+			                                	};
+			subscription2.StateChanged += delegate
+			                              	{
+			                              		if (subscription2.State == StompSubscriptionState.Subscribed)
+			                              		{
+			                              			subscribedHandle2.Set();
+			                              		}
+			                              	};
+
+			subscription2.Subscribe();
+
+			const string messageText = "This is a published message";
+
+			// wait untili the subscriptions have been sent to the server and confirmed
+			WaitHandle.WaitAll(new[] {subscribedHandle1, subscribedHandle2});
+
+
+			client1.SendTextMessage(publishQueueName, messageText);
+
+			if (Debugger.IsAttached)
+			{
+				waitHandle.WaitOne();
+			}
+			else
+			{
+				waitHandle.WaitOne(2000);
+			}
+
+			Assert.AreEqual(messageText, received1Text, "Unexpected value for received1Text");
+			Assert.AreEqual(messageText, received2Text, "Unexpected value for received2Text");
+		}
+
 	}
 }

@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using Common.Logging;
 using Quokka.Diagnostics;
@@ -17,19 +14,23 @@ namespace Quokka.Sandbox
 		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
 		private Timer _timer;
 		private bool _connectInProgress;
+		private bool _isDisposed;
 
 		public SocketClientTransport() : base(new TFrameBuilder())
 		{
-
 		}
 
 		protected override void Dispose(bool disposing)
 		{
 			base.Dispose(disposing);
-			
+
 			if (disposing)
 			{
-				DisposeUtils.DisposeOf(ref _timer);
+				lock (LockObject)
+				{
+					_isDisposed = true;
+					DisposeUtils.DisposeOf(ref _timer);
+				}
 			}
 		}
 
@@ -43,7 +44,6 @@ namespace Quokka.Sandbox
 				{
 					_timer = new Timer(TimerCallback, this, TimeSpan.FromMilliseconds(0), TimeSpan.FromSeconds(10));
 				}
-
 			}
 		}
 
@@ -51,11 +51,11 @@ namespace Quokka.Sandbox
 		{
 			lock (LockObject)
 			{
-				if (Socket == null || !Socket.Connected && !_connectInProgress)
+				if (Socket == null || !Socket.Connected && !_connectInProgress && !_isDisposed)
 				{
 					Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-					Socket.BeginConnect(EndPoint, ConnectCallback, Socket);
 					_connectInProgress = true;
+					Socket.BeginConnect(EndPoint, ConnectCallback, Socket);
 				}
 			}
 		}

@@ -22,6 +22,11 @@ namespace Quokka.Stomp
 			get { return new ReadOnlyCollection<EndPoint>(_listenEndPoints); }
 		}
 
+		public StompServerConfig Config
+		{
+			get { return _serverData.Config; }
+		}
+
 		public void Dispose()
 		{
 			foreach (var listener in _listeners)
@@ -53,6 +58,12 @@ namespace Quokka.Stomp
 
 				_listeners.Add(listener);
 				_listenEndPoints.Add(listener.ListenEndPoint);
+
+				// if this is the first endpoint added, start the cleanup timer
+				if (_listeners.Count == 1)
+				{
+					_serverData.StartCleanupTimer();
+				}
 			}
 		}
 

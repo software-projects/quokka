@@ -16,5 +16,19 @@
 		public const string Message = "message";
 		public const string Id = "id";
 		public const string Subscription = "subscription";
+
+		public static class NonStandard
+		{
+			/// <summary>
+			/// 	Specifies time that this message expires yyyymmddThhmmssZ
+			/// </summary>
+			public const string Expires = "expires";
+
+			/// <summary>
+			/// 	Used during unit testing to simulate losing a connection
+			/// 	to the server, and attempting to re-establish the session.
+			/// </summary>
+			public const string KeepSession = "keep-session";
+		}
 	}
 }

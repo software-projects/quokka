@@ -6,20 +6,59 @@ using Quokka.Diagnostics;
 
 namespace Quokka.Stomp.Internal
 {
-	internal class MessageQueue
+	internal class MessageQueue : IDisposable
 	{
 		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
 		private readonly object _lockObject = new object();
-		private Node _first;
-		private Node _last;
 		private readonly List<ServerSideSubscription> _subscriptions = new List<ServerSideSubscription>();
 		private readonly Random _random = new Random((int) DateTime.Now.Ticks);
+		private readonly LinkedList<StompFrame> _linkedList = new LinkedList<StompFrame>();
 
 		public string Name { get; private set; }
 
 		public MessageQueue(string messageQueueName)
 		{
 			Name = Verify.ArgumentNotNull(messageQueueName, "messageQueueName");
+		}
+
+		public void Dispose()
+		{
+			// Does nothing at present. Would be useful if the queues were persisted.
+		}
+
+		public bool IsUnused
+		{
+			get
+			{
+				lock (_lockObject)
+				{
+					return _subscriptions.Count == 0 && _linkedList.Count == 0;
+				}
+			}
+		}
+
+		public void RemoveExpired()
+		{
+			lock (_lockObject)
+			{
+				var utcNow = DateTime.UtcNow.ToString("yyyyMMddTHHmmSSZ");
+
+				var removeNodes = new List<LinkedListNode<StompFrame>>();
+				for (var node = _linkedList.First; node != null; node = node.Next)
+				{
+					var expires = node.Value.Headers[StompHeader.NonStandard.Expires];
+					if (expires != null && StringComparer.OrdinalIgnoreCase.Compare(expires, utcNow) <= 0)
+					{
+						removeNodes.Add(node);
+					}
+				}
+
+				foreach (var node in removeNodes)
+				{
+					Log.Debug("Removing expired message from queue " + Name);
+					_linkedList.Remove(node);
+				}
+			}
 		}
 
 		public void AddSubscription(ServerSideSubscription subscription)
@@ -40,10 +79,10 @@ namespace Quokka.Stomp.Internal
 				// to the subscription a couple at a time, and then the subscription asks 
 				// for more messages once they have been acknowledged by the client.
 
-				while (_first != null)
+				while (_linkedList.Count > 0)
 				{
-					var frame = _first.Frame;
-					_first = _first.Next;
+					var frame = _linkedList.First.Value;
+					_linkedList.RemoveFirst();
 					subscription.SendFrame(frame);
 				}
 			}
@@ -86,23 +125,7 @@ namespace Quokka.Stomp.Internal
 					return;
 				}
 
-				// The message id gets allocated when the message is removed.
-				// The reason for this is that published messages get a message
-				// number as well, and we don't want an ACK for a published
-				// message to accidentally acknowledge a message on the queue.
-				var node = new Node
-				           	{
-				           		Frame = frame,
-				           		Previous = _last,
-				           		Next = _first,
-				           	};
-				_last = node;
-
-				if (_first == null)
-				{
-					_first = node;
-				}
-
+				_linkedList.AddLast(frame);
 				Log.Debug("Added to end of queue");
 			}
 		}
@@ -133,13 +156,6 @@ namespace Quokka.Stomp.Internal
 				// without taking a copy
 				_subscriptions.First().SendFrame(frame);
 			}
-		}
-
-		private class Node
-		{
-			public StompFrame Frame;
-			public Node Previous;
-			public Node Next;
 		}
 	}
 }

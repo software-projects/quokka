@@ -15,8 +15,10 @@ namespace Quokka.Stomp.Internal
 		private readonly ServerData _serverData;
 		private ServerSideConnection _clientConnection;
 		private readonly Dictionary<string, ServerSideSubscription> _subscriptions = new Dictionary<string, ServerSideSubscription>();
+		private DateTime _expiresAt;
 
 		public string SessionId { get; private set; }
+
 
 		public ServerSideSession(ServerData serverData)
 		{
@@ -29,6 +31,24 @@ namespace Quokka.Stomp.Internal
 			lock (_lockObject)
 			{
 				_clientConnection = null;
+			}
+		}
+
+		public bool IsUnused
+		{
+			get
+			{
+				lock (_lockObject)
+				{
+					if (_clientConnection == null)
+					{
+						if (DateTime.Now >= _expiresAt)
+						{
+							return true;
+						}
+					}
+				}
+				return false;
 			}
 		}
 
@@ -57,6 +77,10 @@ namespace Quokka.Stomp.Internal
 			lock (_lockObject)
 			{
 				_clientConnection = null;
+
+				// If there is still no connection at this time, the session will
+				// be considered unused.
+				_expiresAt = DateTime.Now + _serverData.Config.UnusedSessionTimeout;
 			}
 		}
 
@@ -119,14 +143,31 @@ namespace Quokka.Stomp.Internal
 				return;
 			}
 
+			const string publishPrefix = "/topic/";
+			var publish = false;
+
+			if (destination.StartsWith(publishPrefix))
+			{
+				destination = destination.Substring(publishPrefix.Length);
+				publish = true;
+			}
+
 			var messageQueue = _serverData.FindMessageQueue(destination);
 
 			// TODO: we could probably get away without creating a copy, and modifying the frame
 			// Don't allocate the message-id here, as the message queue does it.
 			var messageFrame = StompFrameUtils.CreateCopy(frame);
 			messageFrame.Command = StompCommand.Message;
-			Log.Debug("Adding message to queue: " + messageQueue.Name);
-			messageQueue.AddFrame(messageFrame);
+			if (publish)
+			{
+				Log.Debug("Publishing message to topic: " + messageQueue.Name);
+				messageQueue.PublishFrame(messageFrame);
+			}
+			else
+			{
+				Log.Debug("Adding message to queue: " + messageQueue.Name);
+				messageQueue.AddFrame(messageFrame);
+			}
 			SendReceiptIfNecessary(frame);
 		}
 

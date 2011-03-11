@@ -1,7 +1,7 @@
 ﻿namespace Quokka.Stomp
 {
 	/// <summary>
-	/// Valid values for the STOMP SUBSCRIBE ack header
+	/// 	Valid values for the STOMP SUBSCRIBE ack header
 	/// </summary>
 	public static class StompAck
 	{

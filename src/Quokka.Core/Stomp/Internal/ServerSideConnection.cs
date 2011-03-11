@@ -143,7 +143,12 @@ namespace Quokka.Stomp.Internal
 				{
 					_stateAction = ShuttingDown;
 					_transport.Shutdown();
-					_serverData.EndSession(_session);
+
+					var keepSession = frame.GetBoolean(StompHeader.NonStandard.KeepSession, false);
+					if (!keepSession)
+					{
+						_serverData.EndSession(_session);
+					}
 					_session = null;
 				}
 				else

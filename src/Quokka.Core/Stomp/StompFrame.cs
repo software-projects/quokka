@@ -6,8 +6,12 @@ using Quokka.Diagnostics;
 namespace Quokka.Stomp
 {
 	/// <summary>
-	/// This will get renamed to StompMessage soon.
+	/// 	Represents a message that is exchanged between STOMP clients and the STOMP message broker.
 	/// </summary>
+	/// <remarks>
+	/// 	A STOMP message consists of a command, one or more header/value pairs, and a body. For
+	///		more information on the format of a STOMP message see http://stomp.github.com
+	/// </remarks>
 	public class StompFrame
 	{
 		public StompFrame() : this(StompCommand.Send)

@@ -169,16 +169,17 @@ namespace Quokka.Stomp
 		private void ReadBody(byte[] data, int offset, int length)
 		{
 			_currentCallback = ReadBody;
-			int? contentLength = _frameUnderConstruction.GetContentLength();
 
-			if (contentLength == null)
+			string contentLengthText = _frameUnderConstruction.Headers[StompHeader.ContentLength];
+			int contentLength;
+			if (contentLengthText == null || !int.TryParse(contentLengthText, out contentLength))
 			{
 				// We do not know the content length for this frame.
 				ReadBodyUntilNull(data, offset, length);
 				return;
 			}
 
-			if (length < contentLength.Value)
+			if (length < contentLength)
 			{
 				// Not enough data in the buffer for the body. Leave residue until next time.
 				_residue = new Buffer(data, offset, length);
@@ -186,9 +187,9 @@ namespace Quokka.Stomp
 			}
 
 			// We have the body now. Finish off the frame.
-			AddBodyToFrameAndAddFrameToReadyQueue(data, offset, contentLength.Value);
-			offset += contentLength.Value;
-			length -= contentLength.Value;
+			AddBodyToFrameAndAddFrameToReadyQueue(data, offset, contentLength);
+			offset += contentLength;
+			length -= contentLength;
 
 			// Look for terminating null
 			ReadNull(data, offset, length);

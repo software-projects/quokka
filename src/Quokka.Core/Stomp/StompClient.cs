@@ -7,6 +7,9 @@ using Quokka.Sandbox;
 
 namespace Quokka.Stomp
 {
+	/// <summary>
+	/// 	This class allows a program to easily interact with a STOMP message broker.
+	/// </summary>
 	public class StompClient
 	{
 		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
@@ -20,11 +23,25 @@ namespace Quokka.Stomp
 		private bool _sendInProgress;
 		private int _lastSubscriptionId;
 
+		///<summary>
+		///	This event is raised whenever the value of the <see cref = "Connected" /> property changes.
+		///</summary>
 		public event EventHandler ConnectedChanged;
-		public event EventHandler MessageReady;
 
+		///<summary>
+		///	Login to use when connecting to the STOMP message broker.
+		///</summary>
 		public string Login { get; set; }
+
+		///<summary>
+		///	Passcode to use when connecting to the STOMP message broker.
+		///</summary>
 		public string Passcode { get; set; }
+
+		/// <summary>
+		/// 	The endpoint of the STOMP message broker
+		/// </summary>
+		public EndPoint RemoteEndPoint { get; set; }
 
 		public StompClient()
 		{
@@ -32,7 +49,6 @@ namespace Quokka.Stomp
 			Passcode = string.Empty;
 		}
 
-		public EndPoint EndPoint { get; private set; }
 
 		public bool Connected
 		{
@@ -59,7 +75,7 @@ namespace Quokka.Stomp
 				// the only kind of transport we handle at the moment
 				IPEndPoint ipEndPoint = (IPEndPoint) endPoint;
 
-				EndPoint = endPoint;
+				RemoteEndPoint = endPoint;
 				_transport = new StompClientTransport();
 				_transport.ConnectedChanged += TransportConnectedChangedHandler;
 				_transport.FrameReady += TransportFrameReadyHandler;
@@ -76,7 +92,20 @@ namespace Quokka.Stomp
 				var subscriptionId = ++_lastSubscriptionId;
 				var subscription = new StompSubscription(this, subscriptionId, destination);
 				_subscriptions.Add(subscriptionId, subscription);
+				subscription.StateChanged += new EventHandler(SubscriptionStateChanged);
 				return subscription;
+			}
+		}
+
+		public void SubscriptionStateChanged(object sender, EventArgs e)
+		{
+			var subscription = (StompSubscription) sender;
+			if (subscription.State == StompSubscriptionState.Disposed)
+			{
+				lock (_lockObject)
+				{
+					_subscriptions.Remove(subscription.SubscriptionId);
+				}
 			}
 		}
 
@@ -197,18 +226,13 @@ namespace Quokka.Stomp
 			ProcessNextFrame();
 		}
 
-		private void TransportFrameReadyHandler(object state)
-		{
-			ProcessNextFrame();
-		}
-
 		private void ProcessNextFrame()
 		{
 			var connectedChanged = false;
 			StompSubscription subscription = null;
 			StompFrame frame = null;
 
-			for (; ; )
+			for (;;)
 			{
 				lock (_lockObject)
 				{
@@ -274,10 +298,10 @@ namespace Quokka.Stomp
 			StompSubscription subscription;
 			if (!_subscriptions.TryGetValue(subscriptionId, out subscription))
 			{
-				Log.WarnFormat("Receive {0} message with unknown {1}: {2}", 
-					message.Command, 
-					StompHeader.Subscription, 
-					subscriptionId);
+				Log.WarnFormat("Receive {0} message with unknown {1}: {2}",
+				               message.Command,
+				               StompHeader.Subscription,
+				               subscriptionId);
 				return null;
 			}
 
@@ -286,7 +310,6 @@ namespace Quokka.Stomp
 
 		private void HandleError(StompFrame message)
 		{
-			
 		}
 
 		private void HandleReceipt(StompFrame message)
@@ -300,6 +323,7 @@ namespace Quokka.Stomp
 			{
 				// TODO: what do we do here, disconnect?
 				Log.ErrorFormat("Missing {0} header in {1} command", StompHeader.ReceiptId, message.Command);
+				_transport.Shutdown();
 				return;
 			}
 
@@ -308,6 +332,7 @@ namespace Quokka.Stomp
 			{
 				// TODO: what to we do here, disconnect?
 				Log.ErrorFormat("Invalid value for {0} header: {1}", StompHeader.ReceiptId, receiptIdText);
+				_transport.Shutdown();
 				return;
 			}
 
@@ -322,7 +347,19 @@ namespace Quokka.Stomp
 				}
 
 				_pendingSendMessages.Dequeue();
+
+				if (sentMessage.Command == StompCommand.Subscribe)
+				{
+					int subscriptionId = int.Parse(sentMessage.Headers[StompHeader.Id]);
+					StompSubscription subscription;
+					if (_subscriptions.TryGetValue(subscriptionId, out subscription))
+					{
+						subscription.Confirm();
+					}
+				}
 			}
+			_sendInProgress = false;
+			SendNextMessage();
 		}
 
 		private void SendNextMessage()
@@ -330,12 +367,12 @@ namespace Quokka.Stomp
 			if (!_sendInProgress && _connected && _pendingSendMessages.Count > 0)
 			{
 				var frame = _pendingSendMessages.Peek();
+				_sendInProgress = true;
 				_transport.SendFrame(frame);
 				if (Log.IsDebugEnabled)
 				{
 					Log.DebugFormat("{0} command sent: {1}={2}", frame.Command, StompHeader.Receipt, frame.Headers[StompHeader.Receipt]);
 				}
-				_sendInProgress = true;
 			}
 		}
 	}

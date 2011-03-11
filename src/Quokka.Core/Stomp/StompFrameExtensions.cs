@@ -2,22 +2,55 @@
 {
 	public static class StompFrameExtensions
 	{
-		public static int? GetContentLength(this StompFrame frame)
+		public static bool GetBoolean(this StompFrame frame, string header, bool defaultValue)
 		{
-			int contentLength;
-			string text = frame.Headers[StompHeader.ContentLength];
+			var text = frame.Headers[header];
 			if (text == null)
 			{
-				return null;
+				return defaultValue;
 			}
 
-			if (int.TryParse(text, out contentLength))
+			bool value;
+			if (!bool.TryParse(text, out value))
 			{
-				return contentLength;
+				return defaultValue;
 			}
 
-			// TODO: should log this somehow?
-			return null;
+			return value;
+		}
+
+		public static int GetInt32(this StompFrame frame, string header, int defaultValue)
+		{
+			var text = frame.Headers[header];
+			if (text == null)
+			{
+				return defaultValue;
+			}
+
+			int value;
+			if (!int.TryParse(text, out value))
+			{
+				return defaultValue;
+			}
+
+			return value;
+		}
+
+		public static long GetInt64(this StompFrame frame, string header, long defaultValue)
+		{
+			var text = frame.Headers[header];
+			if (text == null)
+			{
+				return defaultValue;
+			}
+
+			long value;
+			if (!long.TryParse(text, out value))
+			{
+				return defaultValue;
+			}
+
+			return value;
 		}
 	}
 }

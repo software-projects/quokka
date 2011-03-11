@@ -22,6 +22,7 @@ namespace Quokka.Sandbox
 		private bool _receiveInProgress;
 		private bool _shutdownPending;
 		private bool _connected;
+		private bool _isDisposed;
 
 		protected SocketTransport(IFrameBuilder<TFrame> frameBuilder)
 		{
@@ -37,12 +38,16 @@ namespace Quokka.Sandbox
 		{
 			if (disposing)
 			{
-				DisposeUtils.DisposeOf(ref Socket);
-				_pendingFrames.Clear();
-				_sendInProgress = false;
-				_receiveInProgress = false;
-				_shutdownPending = false;
-				_connected = false;
+				lock (LockObject)
+				{
+					_isDisposed = true;
+					DisposeUtils.DisposeOf(ref Socket);
+					_pendingFrames.Clear();
+					_sendInProgress = false;
+					_receiveInProgress = false;
+					_shutdownPending = false;
+					_connected = false;
+				}
 			}
 		}
 
@@ -201,9 +206,15 @@ namespace Quokka.Sandbox
 			                   		Socket = Socket,
 			                   	};
 
-			Socket.BeginReceive(receiveBuffer.Array, receiveBuffer.Offset, receiveBuffer.Count, SocketFlags.None, ReceiveCallback,
-			                    receiveState);
+			// Set _receiveInProgress prior to calling BeginReceive, as BeginReceive *might*
+			// return synchronously, in which case the callback is processed on this thread.
 			_receiveInProgress = true;
+			Socket.BeginReceive(receiveBuffer.Array,
+			                    receiveBuffer.Offset,
+			                    receiveBuffer.Count,
+			                    SocketFlags.None,
+			                    ReceiveCallback,
+			                    receiveState);
 		}
 
 		private void ReceiveCallback(IAsyncResult ar)
@@ -252,11 +263,22 @@ namespace Quokka.Sandbox
 					throw;
 				}
 				HandleException(ex);
+				return;
 			}
-			finally
+
+			if (raiseFrameReady)
 			{
-				if (raiseFrameReady)
+				// If this operation was completed synchronously, then this thread still
+				// has the lock on this object, and so we want to raise the event on
+				// a worker thread to avoid lock contention.
+				if (ar.CompletedSynchronously)
 				{
+					ThreadPool.QueueUserWorkItem(delegate { OnFrameReady(EventArgs.Empty); });
+				}
+				else
+				{
+					// Completed asynchronously, we are already on a worker thread and have
+					// released the lock.
 					OnFrameReady(EventArgs.Empty);
 				}
 			}
@@ -429,23 +451,26 @@ namespace Quokka.Sandbox
 			{
 				lock (LockObject)
 				{
-					try
+					if (!_isDisposed)
 					{
-						// The socket may well have been disposed by the time this
-						// operation completes.
-						socket.EndDisconnect(ar);
-						socket.Close();
-					}
-					catch (ObjectDisposedException)
-					{
-						Log.Debug("Socket has already been disposed");
-					}
+						try
+						{
+							// The socket may well have been disposed by the time this
+							// operation completes.
+							socket.EndDisconnect(ar);
+							socket.Close();
+						}
+						catch (ObjectDisposedException)
+						{
+							Log.Debug("Socket has already been disposed");
+						}
 
-					if (Socket == socket)
-					{
-						Socket = null;
+						if (Socket == socket)
+						{
+							Socket = null;
+						}
+						CheckConnected();
 					}
-					CheckConnected();
 				}
 			}
 			catch (Exception ex)

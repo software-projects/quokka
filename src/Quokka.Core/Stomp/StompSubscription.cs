@@ -12,15 +12,14 @@ namespace Quokka.Stomp
 		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
 		private readonly object _lockObject = new object();
 		private readonly string _subscriptionIdText;
-		private bool _subscriptionSent;
-		private bool _isDisposed;
 
 		public StompClient Client { get; private set; }
 		public int SubscriptionId { get; private set; }
 		public string Destination { get; private set; }
+		public StompSubscriptionState State { get; private set; }
 
 		public event EventHandler<StompMessageEventArgs> MessageArrived;
-		public event EventHandler Disposed;
+		public event EventHandler StateChanged;
 
 		internal StompSubscription(StompClient client, int subscriptionId, string destination)
 		{
@@ -35,39 +34,45 @@ namespace Quokka.Stomp
 
 		public void Subscribe()
 		{
+			var raiseStateChanged = false;
+
 			lock (_lockObject)
 			{
-				if (_subscriptionSent)
+				if (State == StompSubscriptionState.Unsubscribed)
 				{
-					// subscription already sent
-					return;
+					var message = new StompFrame(StompCommand.Subscribe)
+					              	{
+					              		Headers =
+					              			{
+					              				{StompHeader.Id, _subscriptionIdText},
+					              				{StompHeader.Destination, Destination},
+					              				{StompHeader.Ack, StompAck.Client},
+					              			}
+					              	};
+					raiseStateChanged = true;
+					State = StompSubscriptionState.Subscribing;
+					Client.SendRawMessage(message);
 				}
+			}
 
-				var message = new StompFrame(StompCommand.Subscribe)
-				              	{
-				              		Headers =
-				              			{
-				              				{StompHeader.Id, _subscriptionIdText},
-				              				{StompHeader.Destination, Destination},
-				              				{StompHeader.Ack, StompAck.Client},
-				              			}
-				              	};
-				Client.SendRawMessage(message);
-				_subscriptionSent = true;
+			if (raiseStateChanged)
+			{
+				RaiseStateChanged();
 			}
 		}
 
 		public void Dispose()
 		{
-			var raiseDisposed = false;
+			var raiseStateChanged = false;
 
 			lock (_lockObject)
 			{
-				if (!_isDisposed)
+				var oldState = State;
+				if (!IsDisposed())
 				{
-					_isDisposed = true;
-					raiseDisposed = true;
-					if (_subscriptionSent)
+					State = StompSubscriptionState.Disposed;
+					raiseStateChanged = true;
+					if (oldState == StompSubscriptionState.Subscribing || oldState == StompSubscriptionState.Subscribed)
 					{
 						var message = new StompFrame(StompCommand.Unsubscribe)
 						              	{
@@ -81,9 +86,9 @@ namespace Quokka.Stomp
 				}
 			}
 
-			if (raiseDisposed && Disposed != null)
+			if (raiseStateChanged)
 			{
-				Disposed(this, EventArgs.Empty);
+				RaiseStateChanged();
 			}
 		}
 
@@ -91,7 +96,7 @@ namespace Quokka.Stomp
 		{
 			lock (_lockObject)
 			{
-				if (_isDisposed)
+				if (IsDisposed())
 				{
 					// Silently discard messages received after being disposed.
 					// By not acknowledging them, they will not be discarded by the server
@@ -123,6 +128,38 @@ namespace Quokka.Stomp
 			if (MessageArrived != null)
 			{
 				MessageArrived(this, new StompMessageEventArgs(message));
+			}
+		}
+
+		internal void Confirm()
+		{
+			var raiseStateChanged = false;
+
+			lock (_lockObject)
+			{
+				if (State == StompSubscriptionState.Subscribing)
+				{
+					State = StompSubscriptionState.Subscribed;
+					raiseStateChanged = true;
+				}
+			}
+
+			if (raiseStateChanged)
+			{
+				RaiseStateChanged();
+			}
+		}
+
+		private bool IsDisposed()
+		{
+			return State == StompSubscriptionState.Disposed;
+		}
+
+		private void RaiseStateChanged()
+		{
+			if (StateChanged != null)
+			{
+				StateChanged(this, EventArgs.Empty);
 			}
 		}
 	}
