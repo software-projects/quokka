@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using Common.Logging;
+using Quokka.Stomp.Server.Messages;
 using Quokka.Util;
 
 namespace Quokka.Stomp.Internal
@@ -13,8 +14,10 @@ namespace Quokka.Stomp.Internal
 		private readonly object _lockObject = new object();
 		private readonly Dictionary<string, ServerSideSession> _sessions = new Dictionary<string, ServerSideSession>();
 		private readonly Dictionary<string, MessageQueue> _messageQueues = new Dictionary<string, MessageQueue>();
+		private MessageQueue _serverStatusMessageQueue;
 		private readonly StompServerConfig _config = new StompServerConfig();
 		private Timer _cleanupTimer;
+		private Timer _serverStatusTimer;
 		private bool _isDisposed;
 
 		public StompServerConfig Config
@@ -25,6 +28,7 @@ namespace Quokka.Stomp.Internal
 		public ServerData()
 		{
 			_cleanupTimer = new Timer(CleanupCallback);
+			_serverStatusTimer = new Timer(ServerStatusCallback);
 		}
 
 		public void StartCleanupTimer()
@@ -60,6 +64,15 @@ namespace Quokka.Stomp.Internal
 				{
 					mq = new MessageQueue(messageQueueName);
 					_messageQueues.Add(messageQueueName, mq);
+
+					if (mq.Name == typeof(ServerStatusMessage).FullName)
+					{
+						// special message queue name -- receives status messages
+						_serverStatusMessageQueue = mq;
+
+						// start the timer to fire soon
+						_serverStatusTimer.Change(TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(-1));
+					}
 				}
 				return mq;
 			}
@@ -75,15 +88,50 @@ namespace Quokka.Stomp.Internal
 			}
 		}
 
-		public void EndSession(ServerSideSession clientSession)
+		public void EndSession(ServerSideSession session)
 		{
-			if (clientSession != null)
+			if (session != null)
 			{
 				lock (_lockObject)
 				{
-					_sessions.Remove(clientSession.SessionId);
-					clientSession.Dispose();
+					_sessions.Remove(session.SessionId);
+					session.Dispose();
 				}
+			}
+		}
+
+		private void ServerStatusCallback(object state)
+		{
+			lock (_lockObject)
+			{
+				if (_serverStatusMessageQueue == null)
+				{
+					return;
+				}
+
+				var message = new ServerStatusMessage
+				              	{
+				              		MessageQueues = new List<MessageQueueStatus>(),
+				              		Sessions = new List<SessionStatus>(),
+				              	};
+
+				foreach (var session in _sessions.Values)
+				{
+					var status = session.CreateSessionStatus();
+					message.Sessions.Add(status);
+				}
+				foreach (var messageQueue in _messageQueues.Values)
+				{
+					var status = messageQueue.CreateStatus();
+					message.MessageQueues.Add(status);
+				}
+
+				var frame = new StompFrame(StompCommand.Message);
+				frame.Serialize(message);
+				frame.SetExpires(_config.ServerStatusPeriod);
+				_serverStatusMessageQueue.PublishFrame(frame);
+
+				_serverStatusTimer.Change(_config.ServerStatusPeriod, TimeSpan.FromMilliseconds(-1));
 			}
 		}
 
@@ -164,6 +212,11 @@ namespace Quokka.Stomp.Internal
 						}
 					}
 				}
+			}
+
+			if (_serverStatusMessageQueue != null && _serverStatusMessageQueue.IsDisposed)
+			{
+				_serverStatusMessageQueue = null;
 			}
 
 			StartCleanupTimer();

@@ -4,9 +4,10 @@ using System.Net.Sockets;
 using System.Threading;
 using Common.Logging;
 using Quokka.Diagnostics;
+using Quokka.Sandbox;
 using Quokka.Util;
 
-namespace Quokka.Sandbox
+namespace Quokka.Stomp.Transport
 {
 	public class SocketClientTransport<TFrame, TFrameBuilder> : SocketTransport<TFrame>
 		where TFrameBuilder : IFrameBuilder<TFrame>, new()
@@ -53,7 +54,7 @@ namespace Quokka.Sandbox
 			{
 				if (Socket == null || !Socket.Connected && !_connectInProgress && !_isDisposed)
 				{
-					Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+					Socket = new Socket(EndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 					_connectInProgress = true;
 					Socket.BeginConnect(EndPoint, ConnectCallback, Socket);
 				}

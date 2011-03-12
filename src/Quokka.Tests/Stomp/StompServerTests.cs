@@ -6,6 +6,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using NUnit.Framework;
+using Quokka.Stomp.Internal;
 
 // ReSharper disable InconsistentNaming
 
@@ -124,7 +125,7 @@ namespace Quokka.Stomp
 			client3.ConnectTo(serverEndPoint);
 
 			const string queueName = "myqueue";
-			const string publishQueueName = "/topic/myqueue";
+			const string publishQueueName = QueueName.PublishPrefix + queueName;
 
 			string received1Text = null;
 			string received2Text = null;

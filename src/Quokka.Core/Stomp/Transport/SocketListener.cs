@@ -5,9 +5,10 @@ using System.Net.Sockets;
 using System.Threading;
 using Common.Logging;
 using Quokka.Diagnostics;
+using Quokka.Sandbox;
 using Quokka.Util;
 
-namespace Quokka.Sandbox
+namespace Quokka.Stomp.Transport
 {
 	public class SocketListener<TFrame, TFrameBuilder> : IListener<TFrame>
 		where TFrameBuilder : IFrameBuilder<TFrame>, new()
@@ -55,7 +56,9 @@ namespace Quokka.Sandbox
 					_timer = new Timer(TimerCallback, this, TimeSpan.FromMilliseconds(0), TimeSpan.FromSeconds(10));
 				}
 
-				_listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+				var ipEndPoint = (IPEndPoint) endPoint;
+
+				_listenSocket = new Socket(ipEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 				_listenSocket.Bind(endPoint);
 				ListenEndPoint = (IPEndPoint)_listenSocket.LocalEndPoint;
 				_listenSocket.Listen(Backlog);

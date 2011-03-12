@@ -5,6 +5,7 @@ using System.Threading;
 using Common.Logging;
 using NUnit.Framework;
 using Quokka.Sandbox;
+using Quokka.Stomp.Transport;
 
 namespace Quokka.Stomp
 {

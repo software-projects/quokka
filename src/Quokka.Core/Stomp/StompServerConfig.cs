@@ -1,4 +1,5 @@
 ﻿using System;
+using Quokka.Stomp.Server.Messages;
 
 namespace Quokka.Stomp
 {
@@ -26,10 +27,21 @@ namespace Quokka.Stomp
 		/// </remarks>
 		public TimeSpan UnusedSessionTimeout { get; set; }
 
+		/// <summary>
+		///		Time between sending server status messages.
+		/// </summary>
+		/// <remarks>
+		///		When a client has subscribed to the <see cref="ServerStatusMessage"/> message
+		///		queue, it will receive regular server status messages. This parameter defines
+		///		how often the server will send these messages.
+		/// </remarks>
+		public TimeSpan ServerStatusPeriod { get; set; }
+
 		public StompServerConfig()
 		{
 			CleanupPeriod = TimeSpan.FromMinutes(1);
 			UnusedSessionTimeout = TimeSpan.FromMinutes(5);
+			ServerStatusPeriod = TimeSpan.FromSeconds(5);
 		}
 	}
 }

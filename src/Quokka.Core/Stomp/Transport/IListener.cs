@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Net;
+using Quokka.Sandbox;
 
-namespace Quokka.Sandbox
+namespace Quokka.Stomp.Transport
 {
 	public interface IListener<TFrame> : IDisposable
 	{

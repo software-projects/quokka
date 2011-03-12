@@ -94,5 +94,92 @@ namespace Quokka.Stomp
 
 			Assert.AreEqual("1", frame.BodyText);
 		}
+
+		[Test]
+		public void Serialize()
+		{
+			var s1 = new SerializeTestClass
+			         	{
+			         		Number = 123,
+			         		Text = "This is some text"
+			         	};
+
+			var frame = new StompFrame();
+			frame.Serialize(s1);
+
+			var s2 = (SerializeTestClass)frame.Deserialize();
+			Assert.IsNotNull(s2);
+			Assert.AreEqual(s1.Number, s2.Number);
+			Assert.AreEqual(s1.Text, s2.Text);
+		}
+
+		[Test]
+		public void Cannot_deserialize_without_content_type()
+		{
+			var s1 = new SerializeTestClass
+			{
+				Number = 123,
+				Text = "This is some text"
+			};
+
+			var frame = new StompFrame();
+			frame.Serialize(s1);
+			frame.Headers[StompHeader.ContentType] = "text/plain";
+
+			try
+			{
+				frame.Deserialize();
+				Assert.Fail("Expected exception");
+			}
+			catch (InvalidOperationException ex)
+			{
+				Assert.AreEqual("Cannot deserialize: content-type:text/plain", ex.Message);
+			}
+		}
+
+		[Test]
+		public void Cannot_deserialize_without_clr_type()
+		{
+			var s1 = new SerializeTestClass
+			{
+				Number = 123,
+				Text = "This is some text"
+			};
+
+			var frame = new StompFrame();
+			frame.Serialize(s1);
+			frame.Headers[StompHeader.NonStandard.ClrType] = null;
+
+			try
+			{
+				frame.Deserialize();
+				Assert.Fail("Expected exception");
+			}
+			catch (InvalidOperationException ex)
+			{
+				Assert.AreEqual("Cannot deserialize: no clr-type specified", ex.Message);
+			}
+		}
+
+		public class SerializeTestClass
+		{
+			public int Number;
+			public string Text;
+		}
+
+		[Test]
+		public void Expires_header()
+		{
+			var frame = new StompFrame();
+			var dateTime = new DateTimeOffset(2099, 11, 10, 19, 18, 17, 16, TimeSpan.FromHours(10));
+
+			frame.SetExpires(dateTime);
+			Assert.AreEqual("20991110T091817Z", frame.Headers[StompHeader.NonStandard.Expires]);
+
+			// truncated milliseconds means not expired
+			Assert.IsFalse(frame.IsExpiredAt(dateTime - TimeSpan.FromSeconds(1)));
+
+			Assert.IsTrue(frame.IsExpiredAt(dateTime + TimeSpan.FromSeconds(1)));
+		}
 	}
 }

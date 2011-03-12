@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Common.Logging;
 using Quokka.Diagnostics;
+using Quokka.Stomp.Server.Messages;
 
 namespace Quokka.Stomp.Internal
 {
@@ -32,6 +33,24 @@ namespace Quokka.Stomp.Internal
 			{
 				_clientConnection = null;
 			}
+		}
+
+		public SessionStatus CreateSessionStatus()
+		{
+			var status = new SessionStatus
+			             	{
+			             		SessionId = SessionId,
+								Subscriptions = new List<SubscriptionStatus>(),
+			             	};
+			lock (_lockObject)
+			{
+				status.Connected = _clientConnection != null;
+				foreach (var subscription in _subscriptions.Values)
+				{
+					status.Subscriptions.Add(subscription.CreateStatus());
+				}
+			}
+			return status;
 		}
 
 		public bool IsUnused
@@ -143,12 +162,11 @@ namespace Quokka.Stomp.Internal
 				return;
 			}
 
-			const string publishPrefix = "/topic/";
 			var publish = false;
 
-			if (destination.StartsWith(publishPrefix))
+			if (destination.StartsWith(QueueName.PublishPrefix))
 			{
-				destination = destination.Substring(publishPrefix.Length);
+				destination = destination.Substring(QueueName.PublishPrefix.Length);
 				publish = true;
 			}
 

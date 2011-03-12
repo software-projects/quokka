@@ -5,6 +5,7 @@ using System.Net;
 using Common.Logging;
 using Quokka.Sandbox;
 using Quokka.Stomp.Internal;
+using Quokka.Stomp.Transport;
 
 namespace Quokka.Stomp
 {

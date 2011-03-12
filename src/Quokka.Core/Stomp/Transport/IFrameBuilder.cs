@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Quokka.Sandbox
+namespace Quokka.Stomp.Transport
 {
 	///<summary>
 	///	Used for assembling and serializing frames

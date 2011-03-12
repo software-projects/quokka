@@ -4,13 +4,14 @@ using System.Net;
 using Common.Logging;
 using Quokka.Diagnostics;
 using Quokka.Sandbox;
+using Quokka.Stomp.Transport;
 
 namespace Quokka.Stomp
 {
 	/// <summary>
 	/// 	This class allows a program to easily interact with a STOMP message broker.
 	/// </summary>
-	public class StompClient
+	public class StompClient : IDisposable
 	{
 		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
 		private readonly object _lockObject = new object();
@@ -22,6 +23,7 @@ namespace Quokka.Stomp
 		private long _receiptId;
 		private bool _sendInProgress;
 		private int _lastSubscriptionId;
+		private bool _isDisposed;
 
 		///<summary>
 		///	This event is raised whenever the value of the <see cref = "Connected" /> property changes.
@@ -49,6 +51,14 @@ namespace Quokka.Stomp
 			Passcode = string.Empty;
 		}
 
+		public void Dispose()
+		{
+			_isDisposed = true;
+			UnsubscribeTransportEvents();
+			_transport.Shutdown();
+			_transport.Dispose();
+			_transport = null;
+		}
 
 		public bool Connected
 		{
@@ -61,11 +71,40 @@ namespace Quokka.Stomp
 			}
 		}
 
+		private void SubscribeTransportEvents()
+		{
+			if (_transport != null)
+			{
+				_transport.ConnectedChanged += TransportConnectedChangedHandler;
+				_transport.FrameReady += TransportFrameReadyHandler;
+				_transport.TransportException += TransportExceptionHandler;
+			}
+		}
+
+		private void UnsubscribeTransportEvents()
+		{
+			if (_transport != null)
+			{
+				_transport.ConnectedChanged += TransportConnectedChangedHandler;
+				_transport.FrameReady += TransportFrameReadyHandler;
+				_transport.TransportException += TransportExceptionHandler;
+			}
+		}
+
+		private void CheckDisposed()
+		{
+			if (_isDisposed)
+			{
+				throw new ObjectDisposedException("StompClient");
+			}
+		}
+
 		public void ConnectTo(EndPoint endPoint)
 		{
 			Verify.ArgumentNotNull(endPoint, "endPoint");
 			lock (_lockObject)
 			{
+				CheckDisposed();
 				if (_transport != null)
 				{
 					Log.Warn("ConnectTo already called");
@@ -77,9 +116,7 @@ namespace Quokka.Stomp
 
 				RemoteEndPoint = endPoint;
 				_transport = new StompClientTransport();
-				_transport.ConnectedChanged += TransportConnectedChangedHandler;
-				_transport.FrameReady += TransportFrameReadyHandler;
-				_transport.TransportException += TransportExceptionHandler;
+				SubscribeTransportEvents();
 				_transport.Connect(ipEndPoint);
 			}
 		}
@@ -89,15 +126,16 @@ namespace Quokka.Stomp
 			Verify.ArgumentNotNull(destination, "destination");
 			lock (_lockObject)
 			{
+				CheckDisposed();
 				var subscriptionId = ++_lastSubscriptionId;
 				var subscription = new StompSubscription(this, subscriptionId, destination);
 				_subscriptions.Add(subscriptionId, subscription);
-				subscription.StateChanged += new EventHandler(SubscriptionStateChanged);
+				subscription.StateChanged += SubscriptionStateChanged;
 				return subscription;
 			}
 		}
 
-		public void SubscriptionStateChanged(object sender, EventArgs e)
+		private void SubscriptionStateChanged(object sender, EventArgs e)
 		{
 			var subscription = (StompSubscription) sender;
 			if (subscription.State == StompSubscriptionState.Disposed)
@@ -113,16 +151,23 @@ namespace Quokka.Stomp
 		{
 			lock (_lockObject)
 			{
-				_receiptId += 1;
-				message.Headers[StompHeader.Receipt] = _receiptId.ToString();
-				_pendingSendMessages.Enqueue(message);
-				SendNextMessage();
+				if (!_isDisposed)
+				{
+					if (message.Command != StompCommand.Ack)
+					{
+						_receiptId += 1;
+						message.Headers[StompHeader.Receipt] = _receiptId.ToString();
+					}
+					_pendingSendMessages.Enqueue(message);
+					SendNextMessage();
+				}
 			}
 		}
 
 		public void SendMessage(StompFrame message)
 		{
 			Verify.ArgumentNotNull(message, "message");
+			CheckDisposed();
 
 			if (message.Command == null)
 			{
@@ -144,6 +189,7 @@ namespace Quokka.Stomp
 		{
 			Verify.ArgumentNotNull(destination, "destination");
 			Verify.ArgumentNotNull(text, "text");
+			CheckDisposed();
 			var frame = new StompFrame(StompCommand.Send)
 			            	{
 			            		Headers =
@@ -170,42 +216,45 @@ namespace Quokka.Stomp
 
 			lock (_lockObject)
 			{
-				if (_connected)
+				if (!_isDisposed)
 				{
-					if (!_transport.Connected)
+					if (_connected)
 					{
-						_connected = false;
-						Log.Debug("Client is now disconnected from server");
-						raiseConnectedChanged = true;
-					}
-				}
-				else
-				{
-					if (_transport.Connected)
-					{
-						var login = Login ?? string.Empty;
-						var passcode = Passcode ?? string.Empty;
-
-						// time to send a CONNECT message
-						var frame = new StompFrame
-						            	{
-						            		Command = StompCommand.Connect,
-						            		Headers =
-						            			{
-						            				{StompHeader.Login, login},
-						            				{StompHeader.Passcode, passcode}
-						            			}
-						            	};
-
-						// a little enhancement, if we are re-connecting a previous session,
-						// include the session id so that we can resume
-						if (_sessionId != null)
+						if (!_transport.Connected)
 						{
-							frame.Headers[StompHeader.Session] = _sessionId;
+							_connected = false;
+							Log.Debug("Client is now disconnected from server");
+							raiseConnectedChanged = true;
 						}
+					}
+					else
+					{
+						if (_transport.Connected)
+						{
+							var login = Login ?? string.Empty;
+							var passcode = Passcode ?? string.Empty;
 
-						_transport.SendFrame(frame);
-						Log.Debug("Sent " + frame.Command + " command to server");
+							// time to send a CONNECT message
+							var frame = new StompFrame
+							            	{
+							            		Command = StompCommand.Connect,
+							            		Headers =
+							            			{
+							            				{StompHeader.Login, login},
+							            				{StompHeader.Passcode, passcode}
+							            			}
+							            	};
+
+							// a little enhancement, if we are re-connecting a previous session,
+							// include the session id so that we can resume
+							if (_sessionId != null)
+							{
+								frame.Headers[StompHeader.Session] = _sessionId;
+							}
+
+							_transport.SendFrame(frame);
+							Log.Debug("Sent " + frame.Command + " command to server");
+						}
 					}
 				}
 			}
@@ -230,7 +279,7 @@ namespace Quokka.Stomp
 		{
 			var connectedChanged = false;
 			StompSubscription subscription = null;
-			StompFrame frame = null;
+			StompFrame frame;
 
 			for (;;)
 			{
@@ -339,8 +388,12 @@ namespace Quokka.Stomp
 			while (_pendingSendMessages.Count > 0)
 			{
 				var sentMessage = _pendingSendMessages.Peek();
+				var idText = sentMessage.Headers[StompHeader.Receipt];
+				if (idText == null)
+				{
+					break;
+				}
 				var id = long.Parse(sentMessage.Headers[StompHeader.Receipt]);
-
 				if (id > receiptId)
 				{
 					break;
@@ -372,6 +425,11 @@ namespace Quokka.Stomp
 				if (Log.IsDebugEnabled)
 				{
 					Log.DebugFormat("{0} command sent: {1}={2}", frame.Command, StompHeader.Receipt, frame.Headers[StompHeader.Receipt]);
+				}
+				if (frame.Headers[StompHeader.Receipt] == null)
+				{
+					// we do not want a receipt
+					_pendingSendMessages.Dequeue();
 				}
 			}
 		}

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Quokka.Diagnostics;
+using Quokka.Stomp.Server.Messages;
 
 namespace Quokka.Stomp.Internal
 {
@@ -19,7 +20,7 @@ namespace Quokka.Stomp.Internal
 		private readonly Dictionary<long, StompFrame> _unacknowledgedFrames = new Dictionary<long, StompFrame>();
 
 		public ServerSideSubscription(ServerSideSession session, string subscriptionId, MessageQueue messageQueue,
-		                          bool autoAcknowledge)
+		                              bool autoAcknowledge)
 		{
 			Session = Verify.ArgumentNotNull(session, "session");
 			SubscriptionId = Verify.ArgumentNotNull(subscriptionId, "subscriptionId");
@@ -59,6 +60,22 @@ namespace Quokka.Stomp.Internal
 				}
 				_lastAcknowledgedMessageId = messageId;
 			}
+		}
+
+		public SubscriptionStatus CreateStatus()
+		{
+			var status = new SubscriptionStatus
+			             	{
+			             		SubscriptionId = SubscriptionId,
+			             		AutoAcknowledge = AutoAcknowledge,
+			             		MessageQueueName = MessageQueue.Name,
+			             	};
+			lock (_lockObject)
+			{
+				status.UnacknowledgedFrameCount = _unacknowledgedFrames.Count;
+				status.TotalMessageCount = _lastMessageId;
+			}
+			return status;
 		}
 	}
 }

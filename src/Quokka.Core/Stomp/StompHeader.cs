@@ -29,6 +29,15 @@
 			/// 	to the server, and attempting to re-establish the session.
 			/// </summary>
 			public const string KeepSession = "keep-session";
+
+			/// <summary>
+			///		When the message payload contains a serialized CLR object,
+			///		this header provides enough information for the receiver
+			///		to find a serializer object for it. The content-type header
+			///		provides information on how the object has been serialized
+			///		(application/xml, application/json, etc).
+			/// </summary>
+			public const string ClrType = "clr-type";
 		}
 	}
 }

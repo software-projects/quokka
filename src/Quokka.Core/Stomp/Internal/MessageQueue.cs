@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Common.Logging;
 using Quokka.Diagnostics;
+using Quokka.Stomp.Server.Messages;
 
 namespace Quokka.Stomp.Internal
 {
@@ -13,8 +14,14 @@ namespace Quokka.Stomp.Internal
 		private readonly List<ServerSideSubscription> _subscriptions = new List<ServerSideSubscription>();
 		private readonly Random _random = new Random((int) DateTime.Now.Ticks);
 		private readonly LinkedList<StompFrame> _linkedList = new LinkedList<StompFrame>();
+		private long _totalMessageCount;
+		private bool _isDisposed;
 
 		public string Name { get; private set; }
+		public bool IsDisposed
+		{
+			get { return _isDisposed; }
+		}
 
 		public MessageQueue(string messageQueueName)
 		{
@@ -23,7 +30,11 @@ namespace Quokka.Stomp.Internal
 
 		public void Dispose()
 		{
-			// Does nothing at present. Would be useful if the queues were persisted.
+			lock (_lockObject)
+			{
+				// Does nothing at present. Would be useful if the queues were persisted.
+				_isDisposed = true;
+			}
 		}
 
 		public bool IsUnused
@@ -37,17 +48,31 @@ namespace Quokka.Stomp.Internal
 			}
 		}
 
+		public MessageQueueStatus CreateStatus()
+		{
+			var status = new MessageQueueStatus {MessageQueueName = Name};
+			lock (_lockObject)
+			{
+				status.SubscriptionCount = _subscriptions.Count;
+				status.PendingMessageCount = _linkedList.Count;
+				status.TotalMessageCount = _totalMessageCount;
+			}
+			return status;
+		}
+
 		public void RemoveExpired()
 		{
 			lock (_lockObject)
 			{
-				var utcNow = DateTime.UtcNow.ToString("yyyyMMddTHHmmSSZ");
+				// Minor optimisation: convert current time to a text string because
+				// it is quicker to compare strings than to constantly convert date/times
+				// to and from strings.
+				var utcNow = ExpiresTextUtils.ToString(DateTimeOffset.Now);
 
 				var removeNodes = new List<LinkedListNode<StompFrame>>();
 				for (var node = _linkedList.First; node != null; node = node.Next)
 				{
-					var expires = node.Value.Headers[StompHeader.NonStandard.Expires];
-					if (expires != null && StringComparer.OrdinalIgnoreCase.Compare(expires, utcNow) <= 0)
+					if (node.Value.IsExpiredAt(utcNow)) 
 					{
 						removeNodes.Add(node);
 					}
@@ -115,6 +140,7 @@ namespace Quokka.Stomp.Internal
 		{
 			lock (_lockObject)
 			{
+				++_totalMessageCount;
 				var subscription = ChooseSubscription();
 
 				if (subscription != null)
@@ -137,6 +163,7 @@ namespace Quokka.Stomp.Internal
 		{
 			lock (_lockObject)
 			{
+				++_totalMessageCount;
 				if (_subscriptions.Count == 0)
 				{
 					// no subscriptions

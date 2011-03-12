@@ -6,7 +6,7 @@ using Common.Logging;
 using Quokka.Diagnostics;
 using Quokka.Util;
 
-namespace Quokka.Sandbox
+namespace Quokka.Stomp.Transport
 {
 	/// <summary>
 	/// 	Abstract base class for client and server socket transports.
@@ -41,11 +41,23 @@ namespace Quokka.Sandbox
 				lock (LockObject)
 				{
 					_isDisposed = true;
-					DisposeUtils.DisposeOf(ref Socket);
+
+					if (Socket != null && !_shutdownPending)
+					{
+						if (Socket.Connected)
+						{
+							Socket.Shutdown(SocketShutdown.Both);
+							// blocking disconnect
+							Socket.Disconnect(false);
+						}
+					}
+					if (!_shutdownPending)
+					{
+						DisposeUtils.DisposeOf(ref Socket);
+					}
 					_pendingFrames.Clear();
 					_sendInProgress = false;
 					_receiveInProgress = false;
-					_shutdownPending = false;
 					_connected = false;
 				}
 			}
@@ -97,10 +109,22 @@ namespace Quokka.Sandbox
 		{
 			lock (LockObject)
 			{
-				_shutdownPending = true;
-				if (_pendingFrames.Count == 0 && !_sendInProgress)
+				if (Socket != null)
 				{
-					BeginDisconnect();
+
+					if (Socket.Connected)
+					{
+						_shutdownPending = true;
+						if (_pendingFrames.Count == 0 && !_sendInProgress)
+						{
+							BeginDisconnect();
+						}
+					}
+					else
+					{
+						Socket.Close();
+						DisposeUtils.DisposeOf(ref Socket);
+					}
 				}
 			}
 		}
@@ -471,6 +495,7 @@ namespace Quokka.Sandbox
 						}
 						CheckConnected();
 					}
+					DisposeUtils.DisposeOf(ref Socket);
 				}
 			}
 			catch (Exception ex)

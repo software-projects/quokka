@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Quokka.Sandbox
+namespace Quokka.Stomp.Transport
 {
 	public interface ITransport<TFrame> : IDisposable
 	{

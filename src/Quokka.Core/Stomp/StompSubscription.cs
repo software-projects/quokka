@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using Common.Logging;
 using Quokka.Diagnostics;
 
@@ -17,6 +18,7 @@ namespace Quokka.Stomp
 		public int SubscriptionId { get; private set; }
 		public string Destination { get; private set; }
 		public StompSubscriptionState State { get; private set; }
+		public SynchronizationContext SynchronizationContext { get; set; }
 
 		public event EventHandler<StompMessageEventArgs> MessageArrived;
 		public event EventHandler StateChanged;
@@ -123,12 +125,7 @@ namespace Quokka.Stomp
 				}
 			}
 
-			// I know this is not thread-safe, but the usage pattern for this event is to create the
-			// subscription, subscribe to the event and stay subscribed to the event.
-			if (MessageArrived != null)
-			{
-				MessageArrived(this, new StompMessageEventArgs(message));
-			}
+			RaiseMessageArrived(message);
 		}
 
 		internal void Confirm()
@@ -159,7 +156,34 @@ namespace Quokka.Stomp
 		{
 			if (StateChanged != null)
 			{
-				StateChanged(this, EventArgs.Empty);
+				var synchronizationContext = SynchronizationContext;
+				if (synchronizationContext == null)
+				{
+					StateChanged(this, EventArgs.Empty);
+				}
+				else
+				{
+					SendOrPostCallback callback =(obj => StateChanged(this, EventArgs.Empty));
+					synchronizationContext.Send(callback, null);
+				}
+			}
+		}
+
+		private void RaiseMessageArrived(StompFrame frame)
+		{
+			if (MessageArrived != null)
+			{
+				var args = new StompMessageEventArgs(frame);
+				var synchronizationContext = SynchronizationContext;
+				if (synchronizationContext == null)
+				{
+					MessageArrived(this, args);
+				}
+				else
+				{
+					SendOrPostCallback callback = (obj => MessageArrived(this, args));
+					synchronizationContext.Send(callback, null);
+				}
 			}
 		}
 	}

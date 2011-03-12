@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Quokka.Sandbox;
+using Quokka.Stomp.Transport;
 
 namespace Quokka.Stomp
 {

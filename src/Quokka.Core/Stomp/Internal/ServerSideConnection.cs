@@ -2,6 +2,7 @@
 using Common.Logging;
 using Quokka.Diagnostics;
 using Quokka.Sandbox;
+using Quokka.Stomp.Transport;
 
 namespace Quokka.Stomp.Internal
 {
