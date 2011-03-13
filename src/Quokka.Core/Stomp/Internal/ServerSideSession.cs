@@ -20,6 +20,9 @@ namespace Quokka.Stomp.Internal
 
 		public string SessionId { get; private set; }
 
+		// this is only used to help with debugging
+		public string ClientId { get; set; }
+
 
 		public ServerSideSession(ServerData serverData)
 		{
@@ -40,6 +43,7 @@ namespace Quokka.Stomp.Internal
 			var status = new SessionStatus
 			             	{
 			             		SessionId = SessionId,
+								ClientId = ClientId,
 								Subscriptions = new List<SubscriptionStatus>(),
 			             	};
 			lock (_lockObject)

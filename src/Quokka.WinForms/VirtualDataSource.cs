@@ -4,6 +4,21 @@ using System.Windows.Forms;
 
 namespace Quokka.WinForms
 {
+	public interface IVirtualDataSource<TItem> where TItem : class
+	{
+		event EventHandler ListChanged;
+		bool BuildListRequired { get; }
+		int Count { get; }
+		Predicate<TItem> Filter { get; set; }
+		Comparison<TItem> Comparer { get; }
+		SortOrder SortOrder { get; }
+		void SetComparer(Comparison<TItem> comparer);
+		void Clear();
+		TItem GetAt(int index);
+		void Sort();
+		void ForEach(Action<TItem> action);
+	}
+
 	/// <summary>
 	/// 	Used as an in-memory store useful for a store against lists and data grids that use virtual mode.
 	/// </summary>
@@ -17,7 +32,7 @@ namespace Quokka.WinForms
 	/// </summary>
 	/// <typeparam name = "TId">The type of unique identifier used for type <typeparamref name = "TItem" /></typeparam>
 	/// <typeparam name = "TItem">The view model object in the store</typeparam>
-	public abstract class VirtualDataSource<TId, TItem> where TItem : class
+	public abstract class VirtualDataSource<TId, TItem> : IVirtualDataSource<TItem> where TItem : class
 	{
 		private static readonly Predicate<TItem> DefaultFilter = (t => true);
 		private readonly Dictionary<TId, TItem> _dict = new Dictionary<TId, TItem>();

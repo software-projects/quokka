@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
+using System.Reflection;
 using Common.Logging;
 using Quokka.Diagnostics;
 using Quokka.Sandbox;
@@ -233,6 +235,10 @@ namespace Quokka.Stomp
 						{
 							var login = Login ?? string.Empty;
 							var passcode = Passcode ?? string.Empty;
+							var processName = Assembly.GetEntryAssembly() == null ? "-" : Assembly.GetEntryAssembly().GetName().Name;
+							var clientId = Environment.MachineName
+							               + "/" + processName
+							               + "/" + Process.GetCurrentProcess().Id;
 
 							// time to send a CONNECT message
 							var frame = new StompFrame
@@ -241,7 +247,8 @@ namespace Quokka.Stomp
 							            		Headers =
 							            			{
 							            				{StompHeader.Login, login},
-							            				{StompHeader.Passcode, passcode}
+							            				{StompHeader.Passcode, passcode},
+														{StompHeader.NonStandard.ClientId, clientId}
 							            			}
 							            	};
 
@@ -391,11 +398,15 @@ namespace Quokka.Stomp
 				var idText = sentMessage.Headers[StompHeader.Receipt];
 				if (idText == null)
 				{
-					break;
+					// message that does not need a receipt, so remove it
+					_pendingSendMessages.Dequeue();
+					continue;
 				}
+
 				var id = long.Parse(sentMessage.Headers[StompHeader.Receipt]);
 				if (id > receiptId)
 				{
+					// this message has not been acknowledged
 					break;
 				}
 
@@ -417,10 +428,9 @@ namespace Quokka.Stomp
 
 		private void SendNextMessage()
 		{
-			if (!_sendInProgress && _connected && _pendingSendMessages.Count > 0)
+			while (!_sendInProgress && _connected && _pendingSendMessages.Count > 0)
 			{
 				var frame = _pendingSendMessages.Peek();
-				_sendInProgress = true;
 				_transport.SendFrame(frame);
 				if (Log.IsDebugEnabled)
 				{
@@ -429,7 +439,14 @@ namespace Quokka.Stomp
 				if (frame.Headers[StompHeader.Receipt] == null)
 				{
 					// we do not want a receipt
+					Log.Debug("No receipt required, remove from pending queue");
 					_pendingSendMessages.Dequeue();
+				}
+				else
+				{
+					// this is a frame for which we want a receipt so stop sending
+					// and wait for the RECEIPT command from the server
+					_sendInProgress = true;
 				}
 			}
 		}

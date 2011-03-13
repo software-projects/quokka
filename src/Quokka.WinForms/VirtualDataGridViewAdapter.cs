@@ -10,15 +10,7 @@ namespace Quokka.WinForms
 
 	public delegate void DataGridViewCellCheckCallback<T>(T obj, bool isChecked);
 
-	public class VirtualDataGridViewAdapter<T> : VirtualDataGridViewAdapter<int, T> where T : class
-	{
-		public VirtualDataGridViewAdapter(DataGridView dataGridView)
-			: base(dataGridView)
-		{
-		}
-	}
-
-	public class VirtualDataGridViewAdapter<TId, T> : IDisposable where T : class
+	public class VirtualDataGridViewAdapter<T> : IDisposable where T : class
 	{
 		private readonly Dictionary<int, ColumnInfo> _columnInfos = new Dictionary<int, ColumnInfo>();
 
@@ -34,7 +26,7 @@ namespace Quokka.WinForms
 
 		public DataGridView DataGridView { get; private set; }
 		public DisplaySettings DisplaySettings { get; set; }
-		public VirtualDataSource<TId, T> DataSource { get; set; }
+		public IVirtualDataSource<T> DataSource { get; set; }
 
 		public Image CheckedImage { get; set; }
 		public Image UncheckedImage { get; set; }
@@ -46,7 +38,7 @@ namespace Quokka.WinForms
 			DataGridView.VirtualMode = true;
 		}
 
-		public VirtualDataGridViewAdapter<TId, T> Init(VirtualDataSource<TId, T> store)
+		public VirtualDataGridViewAdapter<T> Init(IVirtualDataSource<T> store)
 		{
 			if (DataSource != null)
 			{
@@ -96,13 +88,13 @@ namespace Quokka.WinForms
 			}
 		}
 
-		public VirtualDataGridViewAdapter<TId, T> SetDefaultSortOrder(params DataGridViewColumn[] columns)
+		public VirtualDataGridViewAdapter<T> SetDefaultSortOrder(params DataGridViewColumn[] columns)
 		{
 			_defaultSortOrder = (DataGridViewColumn[]) columns.Clone();
 			return this;
 		}
 
-		public VirtualDataGridViewAdapter<TId, T> DefineCellValue(DataGridViewColumn column, DataGridViewCellValueCallback<T> callback)
+		public VirtualDataGridViewAdapter<T> DefineCellValue(DataGridViewColumn column, DataGridViewCellValueCallback<T> callback)
 		{
 			Verify.ArgumentNotNull(column, "column");
 			Verify.ArgumentNotNull(callback, "callback");
@@ -111,7 +103,7 @@ namespace Quokka.WinForms
 			return this;
 		}
 
-		public VirtualDataGridViewAdapter<TId, T> SetCheckColumn(DataGridViewColumn column, DataGridViewCellCheckCallback<T> callback)
+		public VirtualDataGridViewAdapter<T> SetCheckColumn(DataGridViewColumn column, DataGridViewCellCheckCallback<T> callback)
 		{
 			Verify.ArgumentNotNull(column, "column");
 			Verify.ArgumentNotNull(callback, "callback");
@@ -124,7 +116,7 @@ namespace Quokka.WinForms
 			return this;
 		}
 
-		public VirtualDataGridViewAdapter<TId, T> SetLinkColumn(DataGridViewColumn column)
+		public VirtualDataGridViewAdapter<T> SetLinkColumn(DataGridViewColumn column)
 		{
 			Verify.ArgumentNotNull(column, "column");
 			VerifyColumnBelongsToGridView(column);
@@ -133,7 +125,13 @@ namespace Quokka.WinForms
 			return this;
 		}
 
-		public VirtualDataGridViewAdapter<TId, T> SortBy(DataGridViewColumn sortColumn)
+		public VirtualDataGridViewAdapter<T> WithDisplaySettings(DisplaySettings displaySettings)
+		{
+			DisplaySettings = displaySettings;
+			return this;
+		}
+
+		public VirtualDataGridViewAdapter<T> SortBy(DataGridViewColumn sortColumn)
 		{
 			Verify.ArgumentNotNull(sortColumn, "sortColumn");
 			VerifyColumnBelongsToGridView(sortColumn);
@@ -242,9 +240,17 @@ namespace Quokka.WinForms
 						currentRowIndex = DataGridView.CurrentCell.RowIndex;
 						currentColumnIndex = DataGridView.CurrentCell.ColumnIndex;
 					}
-					DataGridView.RowCount = 0;
+					try
+					{
+						DataGridView.RowCount = 0;
+					}
+					catch (ArgumentOutOfRangeException) {}
 				}
-				DataGridView.RowCount = DataSource.Count;
+				try
+				{
+					DataGridView.RowCount = DataSource.Count;
+				}
+				catch (ArgumentOutOfRangeException) {}
 
 				// Have a go at finding the current cell again.
 				if (currentRowIndex >= DataGridView.RowCount)

@@ -11,6 +11,7 @@ namespace Quokka.Stomp.Server.Messages
 	public class SessionStatus
 	{
 		public string SessionId;
+		public string ClientId;
 		public bool Connected;
 		public List<SubscriptionStatus> Subscriptions;
 	}

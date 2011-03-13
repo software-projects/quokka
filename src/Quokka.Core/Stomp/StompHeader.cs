@@ -38,6 +38,11 @@
 			///		(application/xml, application/json, etc).
 			/// </summary>
 			public const string ClrType = "clr-type";
+
+			/// <summary>
+			///		Text string that can be helpful in identifying the client
+			/// </summary>
+			public const string ClientId = "client-id";
 		}
 	}
 }

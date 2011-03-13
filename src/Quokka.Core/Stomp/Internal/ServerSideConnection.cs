@@ -120,6 +120,8 @@ namespace Quokka.Stomp.Internal
 				Log.Debug("Created new session " + session.SessionId);
 			}
 
+			// helps with debugging if we give the session a more friendly name
+			session.ClientId = frame.Headers[StompHeader.NonStandard.ClientId]; 
 			_session = session;
 
 			var connectedFrame = new StompFrame

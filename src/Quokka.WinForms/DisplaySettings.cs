@@ -95,6 +95,8 @@ namespace Quokka.WinForms
         	_name = name;
         }
 
+		public DisplaySettings(Type type) : this(type.FullName) {}
+
         public DisplaySettings(Form form, string name) : this(name) {
 
             if (form == null)

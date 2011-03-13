@@ -92,6 +92,7 @@
     <Compile Include="DisplaySettings.cs">
     </Compile>
     <Compile Include="DisplaySettingsExtensions.cs" />
+    <Compile Include="EventLoggingDataSource.cs" />
     <Compile Include="IModalWindowFactory.cs" />
     <Compile Include="Interfaces\IMainMenu.cs" />
     <Compile Include="Internal\ICheckControl.cs" />
