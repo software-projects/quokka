@@ -19,6 +19,7 @@ namespace Quokka.Sprocket
 			var channel = Sprocket.CreateChannel()
 				.WithSynchronizationContext(SynchronizationContext)
 				.HandleResponse<ServerStatusMessage>(HandleServerStatusMessage)
+				.HandleResponse<MessageLogMessage>(HandleMessageLogMessage)
 				.AddTo(Disposables);
 
 			var publisher = Sprocket.CreatePublisher<ServerStatusMessage>()
@@ -34,6 +35,11 @@ namespace Quokka.Sprocket
 
 		private void HandleServerStatusMessage(ServerStatusMessage msg)
 		{
+		}
+
+		private void HandleMessageLogMessage(MessageLogMessage msg)
+		{
+			
 		}
 	}
 }
