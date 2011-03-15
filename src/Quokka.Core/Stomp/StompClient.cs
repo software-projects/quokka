@@ -6,6 +6,7 @@ using System.Reflection;
 using Common.Logging;
 using Quokka.Diagnostics;
 using Quokka.Sandbox;
+using Quokka.Stomp.Internal;
 using Quokka.Stomp.Transport;
 
 namespace Quokka.Stomp
@@ -301,7 +302,7 @@ namespace Quokka.Stomp
 					switch (frame.Command)
 					{
 						case StompCommand.Connected:
-							_sessionId = frame.Headers[StompHeader.Session];
+							AssignSessionAndResubscribe(frame);
 							_connected = true;
 							connectedChanged = true;
 							Log.DebugFormat("Received {0} response, {1}={2}", frame.Command, StompHeader.Session, _sessionId);
@@ -366,6 +367,17 @@ namespace Quokka.Stomp
 
 		private void HandleError(StompFrame message)
 		{
+			var messageText = message.Headers[StompHeader.Message];
+			if (messageText.StartsWith(ErrorMessages.SessionDoesNotExistPrefix) && !_connected)
+			{
+				// We have tried to reconnect to our old session, but it no longer exists, so remove it.
+				Log.Info("Server says our session no longer exists. Will ask for a new one");
+				_sessionId = null;
+				foreach (var subscription in _subscriptions.Values)
+				{
+					subscription.SubscriptionLost();
+				}
+			}
 		}
 
 		private void HandleReceipt(StompFrame message)
@@ -447,6 +459,23 @@ namespace Quokka.Stomp
 					// this is a frame for which we want a receipt so stop sending
 					// and wait for the RECEIPT command from the server
 					_sendInProgress = true;
+				}
+			}
+		}
+
+		private void AssignSessionAndResubscribe(StompFrame frame)
+		{
+			var oldSessionId = _sessionId;
+			_sessionId = frame.Headers[StompHeader.Session];
+			if (oldSessionId == null && _subscriptions.Count > 0)
+			{
+				// This is where we had an old session, but lost it. The most probable
+				// cause is that the server was stopped and restarted. What we do here
+				// is re-send our subscription information.
+				foreach (var subscription in _subscriptions.Values)
+				{
+					Log.DebugFormat("Resubscribing subscription {0}: {1}", subscription.SubscriptionId, subscription.Destination);
+					subscription.Subscribe();
 				}
 			}
 		}

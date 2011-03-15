@@ -191,6 +191,7 @@ namespace Quokka.Stomp.Internal
 				messageQueue.AddFrame(messageFrame);
 			}
 			SendReceiptIfNecessary(frame);
+			_serverData.LogSendMessage(frame, destination);
 		}
 
 		private void HandleSubscribeCommand(StompFrame frame)

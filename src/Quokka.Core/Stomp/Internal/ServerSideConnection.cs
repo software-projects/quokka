@@ -90,7 +90,7 @@ namespace Quokka.Stomp.Internal
 				session = _serverData.FindSession(sessionId);
 				if (session == null)
 				{
-					var message = "Session does not exist: " + sessionId;
+					var message = ErrorMessages.SessionDoesNotExistPrefix + sessionId;
 					Log.Debug(message);
 					var errorFrame = StompFrameUtils.CreateErrorFrame(message);
 					_transport.SendFrame(errorFrame);

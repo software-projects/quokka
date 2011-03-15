@@ -113,10 +113,10 @@ namespace Quokka.Stomp
 			frame.Headers[StompHeader.NonStandard.ClrType] = typeName;
 		}
 
-		public static void Serialize<T>(this StompFrame frame, T payload) where T : class, new()
+		public static void Serialize(this StompFrame frame, object payload)
 		{
 			Verify.ArgumentNotNull(payload, "payload");
-			frame.Serialize(typeof (T), payload);
+			frame.Serialize(payload.GetType(), payload);
 		}
 
 		public static bool CanDeserialize(this StompFrame frame)

@@ -34,6 +34,26 @@ namespace Quokka.Stomp
 			_subscriptionIdText = subscriptionId.ToString();
 		}
 
+		public void SubscriptionLost()
+		{
+			var raiseStateChanged = false;
+
+			lock(_lockObject)
+			{
+				if (State == StompSubscriptionState.Subscribed
+					|| State == StompSubscriptionState.Subscribing)
+				{
+					State = StompSubscriptionState.Unsubscribed;
+					raiseStateChanged = true;
+				}
+			}
+
+			if (raiseStateChanged)
+			{
+				RaiseStateChanged();
+			}
+		}
+
 		public void Subscribe()
 		{
 			var raiseStateChanged = false;

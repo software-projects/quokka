@@ -91,7 +91,7 @@ namespace Quokka.Sprocket
 
 		public void Publish(object message)
 		{
-			if (message == null)
+			if (message == null || _client == null)
 			{
 				return;
 			}
@@ -123,7 +123,7 @@ namespace Quokka.Sprocket
 
 		public IPublisher<T> CreatePublisher<T>()
 		{
-			throw new NotImplementedException();
+			return new Publisher<T>(this);
 		}
 
 

@@ -15,6 +15,7 @@ namespace Quokka.Stomp.Internal
 		private readonly Dictionary<string, ServerSideSession> _sessions = new Dictionary<string, ServerSideSession>();
 		private readonly Dictionary<string, MessageQueue> _messageQueues = new Dictionary<string, MessageQueue>();
 		private MessageQueue _serverStatusMessageQueue;
+		private MessageQueue _messageLogMessageQueue;
 		private readonly StompServerConfig _config = new StompServerConfig();
 		private Timer _cleanupTimer;
 		private Timer _serverStatusTimer;
@@ -73,6 +74,10 @@ namespace Quokka.Stomp.Internal
 						// start the timer to fire soon
 						_serverStatusTimer.Change(TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(-1));
 					}
+					else if (mq.Name == typeof(MessageLogMessage).FullName)
+					{
+						_messageLogMessageQueue = mq;
+					}
 				}
 				return mq;
 			}
@@ -96,6 +101,34 @@ namespace Quokka.Stomp.Internal
 				{
 					_sessions.Remove(session.SessionId);
 					session.Dispose();
+				}
+			}
+		}
+
+		public void LogSendMessage(StompFrame frame, string destination)
+		{
+			if (_messageLogMessageQueue != null)
+			{
+				lock(_lockObject)
+				{
+					if (_messageLogMessageQueue != null)
+					{
+						var msg = new MessageLogMessage
+						          	{
+						          		SentAt = DateTime.Now,
+						          		ContentLength = frame.GetInt32(StompHeader.ContentLength, 0),
+						          		Destination = destination,
+						          	};
+						var msgFrame = new StompFrame(StompCommand.Message)
+						               	{
+						               		Headers =
+						               			{
+						               				{StompHeader.Destination, _messageLogMessageQueue.Name}
+						               			}
+						               	};
+						msgFrame.Serialize(msg);
+						_messageLogMessageQueue.PublishFrame(msgFrame);
+					}
 				}
 			}
 		}
@@ -217,6 +250,11 @@ namespace Quokka.Stomp.Internal
 			if (_serverStatusMessageQueue != null && _serverStatusMessageQueue.IsDisposed)
 			{
 				_serverStatusMessageQueue = null;
+			}
+
+			if (_messageLogMessageQueue != null && _messageLogMessageQueue.IsDisposed)
+			{
+				_messageLogMessageQueue = null;
 			}
 
 			StartCleanupTimer();

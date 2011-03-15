@@ -146,6 +146,7 @@
     <Compile Include="Sprocket\ISubscriber.cs" />
     <Compile Include="Sprocket\SprocketClient.cs" />
     <Compile Include="Sprocket\SprocketClient.Subscriber.cs" />
+    <Compile Include="Stomp\Internal\ErrorMessages.cs" />
     <Compile Include="Stomp\Internal\QueueName.cs" />
     <Compile Include="Stomp\Server\Messages\MessageLogMessage.cs" />
     <Compile Include="Stomp\Transport\ExceptionEventArgs.cs" />
@@ -241,6 +242,7 @@
     <Compile Include="UI\Tasks\ViewClosedEventArgs.cs" />
     <Compile Include="Util\DisposeUtils.cs" />
     <None Include="Quokka.snk" />
+    <Compile Include="Sprocket\SprocketClient.Publisher.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="TODO.txt" />
