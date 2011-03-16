@@ -58,9 +58,12 @@ namespace Quokka.Stomp
 		{
 			_isDisposed = true;
 			UnsubscribeTransportEvents();
-			_transport.Shutdown();
-			_transport.Dispose();
-			_transport = null;
+			if (_transport != null)
+			{
+				_transport.Shutdown();
+				_transport.Dispose();
+				_transport = null;
+			}
 		}
 
 		public bool Connected
@@ -232,7 +235,7 @@ namespace Quokka.Stomp
 					}
 					else
 					{
-						if (_transport.Connected)
+						if (_transport != null && _transport.Connected)
 						{
 							var login = Login ?? string.Empty;
 							var passcode = Passcode ?? string.Empty;
@@ -293,6 +296,11 @@ namespace Quokka.Stomp
 			{
 				lock (_lockObject)
 				{
+					if (_transport == null)
+					{
+						return;
+					}
+
 					frame = _transport.GetNextFrame();
 					if (frame == null)
 					{
@@ -440,10 +448,22 @@ namespace Quokka.Stomp
 
 		private void SendNextMessage()
 		{
-			while (!_sendInProgress && _connected && _pendingSendMessages.Count > 0)
+			while (!_sendInProgress 
+				&& _connected && 
+				_pendingSendMessages.Count > 0 
+				&& _transport != null)
 			{
 				var frame = _pendingSendMessages.Peek();
-				_transport.SendFrame(frame);
+				try
+				{
+					_transport.SendFrame(frame);
+				}
+				catch (InvalidOperationException)
+				{
+					// TODO this is far from ideal -- need to modify the API to ITransport
+					Log.Warn("Attempt to send frame after transport shutdown");
+					return;
+				}
 				if (Log.IsDebugEnabled)
 				{
 					Log.DebugFormat("{0} command sent: {1}={2}", frame.Command, StompHeader.Receipt, frame.Headers[StompHeader.Receipt]);

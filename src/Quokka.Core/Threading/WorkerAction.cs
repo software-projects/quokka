@@ -96,6 +96,11 @@ namespace Quokka.Threading
 				Action = new WorkerAction();
 			}
 
+			protected Builder(WorkerAction action)
+			{
+				Action = Verify.ArgumentNotNull(action, "action");
+			}
+
 			public ICompletionBuilder DoWork(Action action)
 			{
 				Action.DoWork = action;
@@ -152,15 +157,15 @@ namespace Quokka.Threading
 		{
 			private readonly Builder _builder;
 
-			public Builder(Builder builder)
+			public Builder(Builder builder) : base(builder.Action)
 			{
-				_builder = Verify.ArgumentNotNull(builder, "builder");
+				_builder = builder;
 			}
 
 			public IOptionsBuilder WhenComplete(Action<TResult> action)
 			{
 				var actionAcceptingResult = new ActionAcceptingResult<TResult>(action);
-				_builder.Action.WhenComplete = actionAcceptingResult.Invoke;
+				Action.WhenComplete = actionAcceptingResult.Invoke;
 				return _builder;
 			}
 		}
