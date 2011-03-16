@@ -35,6 +35,11 @@ namespace Quokka.Stomp.Internal
 			lock (_lockObject)
 			{
 				_clientConnection = null;
+				foreach (var subscription in _subscriptions.Values)
+				{
+					subscription.Dispose();
+				}
+				_subscriptions.Clear();
 			}
 		}
 
