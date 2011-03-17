@@ -4,9 +4,9 @@
 	<target name="build" depends="codesign.installer"/>
 
 	<property name="formal.build" value="false" overwrite="false"/>
-	<property name="version" value="0.1.0.0" overwrite="false"/>
+	<property name="full.product.version" value="0.1.0.0" overwrite="false"/>
 	<property name="msi.dir" value="." overwrite="false"/>
-	<property name="msi.file.name" value="Sprocket-${version}.msi" overwrite="false"/>
+	<property name="msi.file.name" value="Sprocket-${full.product.version}.msi" overwrite="false"/>
 	<property name="msi.file.path" value="${path::get-full-path(msi.dir)}\${msi.file.name}"/>
 	<property name="wix.bin.dir" value="/build/programs/wix-3.0.5419.0" overwrite="false"/>
 	<property name="signtool.bin.dir" value="/bin/programs/signtool" overwrite="false"/>
@@ -28,7 +28,7 @@
 
 	<target name="Sprocket.msi" depends="init">
 		<exec basedir="${wix.bin.dir}" program="candle.exe">
-			<arg value="-dProductVersion=${version}"/>
+			<arg value="-dProductVersion=${full.product.version}"/>
 			<arg value="-ext"/>
 			<arg value="WixUtilExtension"/>
 			<arg value="-ext"/>
