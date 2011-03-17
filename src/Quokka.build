@@ -6,7 +6,9 @@
 
 	<property name="config" value="Release"/>
 
-	<property name="output.dir" value="${path::get-full-path('../bin')}" unless="${property::exists('output.dir')}"/>
+	<property name="output.bin.dir" value="${path::get-full-path('../bin')}" overwrite="false"/>
+	<property name="output.artifacts.dir" value="${path::get-full-path('../artifacts')}" overwrite="false"/>
+	
 	<property name="tools.dir" value="${path::get-full-path('../tools')}"/>
 	<property name="nunit.dir" value="${path::combine(tools.dir, 'NUnit')}"/>
 	<property name="nunit.bin.dir" value="${path::combine(nunit.dir, 'bin')}"/>
@@ -88,21 +90,21 @@
 			<arg file="Quokka.sln"/>
 		</exec>
 
-		<copy todir="${output.dir}">
+		<copy todir="${output.bin.dir}">
 			<fileset basedir="Quokka.Tests/bin/${config}">
 				<include name="*.dll"/>
 				<include name="*.pdb"/>
 				<include name="*.xml"/>
 			</fileset>
 		</copy>
-		<copy todir="${output.dir}">
+		<copy todir="${output.bin.dir}">
 			<fileset basedir="Quokka.WinForms.Tests/bin/${config}">
 				<include name="*.dll"/>
 				<include name="*.pdb"/>
 				<include name="*.xml"/>
 			</fileset>
 		</copy>
-		<copy todir="${output.dir}">
+		<copy todir="${output.bin.dir}">
 			<fileset basedir="Sprocket.Server/bin/${config}">
 				<include name="*.exe"/>
 				<include name="*.dll"/>
@@ -112,7 +114,7 @@
 				<exclude name="*.vshost.exe*"/>
 			</fileset>
 		</copy>
-		<copy todir="${output.dir}">
+		<copy todir="${output.bin.dir}">
 			<fileset basedir="Sprocket.Manager/bin/${config}">
 				<include name="*.exe"/>
 				<include name="*.dll"/>
@@ -131,20 +133,21 @@
 			<properties>
 				<property name="config" value="${config}"/>
 				<property name="version" value="${version}"/>
+				<property name="msi.dir" value="${output.artifacts.dir}"/>
 			</properties>
 		</nant>
 	</target>
 	<target name="test" depends="msi">
 		<nunit2>
 			<formatter type="Plain"/>
-			<test assemblyname="${output.dir}/Quokka.Tests.dll"/>
+			<test assemblyname="${output.bin.dir}/Quokka.Tests.dll"/>
 		</nunit2>
 	</target>
 
 	<target name="test.coverage" depends="test">
 		<nant target="compile.tests" buildfile="${project::get-buildfile-path()}">
 			<properties>
-				<property name="output.dir" value="${coverage.dir}"/>
+				<property name="output.bin.dir" value="${coverage.dir}"/>
 				<property name="debug" value="true"/>
 			</properties>
 		</nant>
