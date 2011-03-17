@@ -208,6 +208,10 @@
       <Name>Quokka.WinForms</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup Condition=" '$(FormalBuild)' == 'true' ">
+    <!-- include NAnt-generated assembly info during a formal build -->
+    <Compile Include="..\CommonAssemblyInfo.cs" />
+  </ItemGroup>
   <ItemGroup>
     <Folder Include="Services\" />
   </ItemGroup>

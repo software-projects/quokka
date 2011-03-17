@@ -75,7 +75,7 @@
 				<attribute type="AssemblyVersionAttribute" value="${version.major}.${version.minor}.${version.build}.${version.revision}"/>
 				<attribute type="AssemblyConfigurationAttribute" value="${config}"/>
 				<attribute type="AssemblyCompanyAttribute" value="Quokka.org"/>
-				<attribute type="AssemblyProductAttribute" value="Quokka Assemblies"/>
+				<attribute type="AssemblyProductAttribute" value="Quokka"/>
 				<attribute type="AssemblyCopyrightAttribute" value="Copyright 2004-${build.year}. All Rights Reserved."/>
 			</attributes>
 		</asminfo>
@@ -102,9 +102,39 @@
 				<include name="*.xml"/>
 			</fileset>
 		</copy>
+		<copy todir="${output.dir}">
+			<fileset basedir="Sprocket.Server/bin/${config}">
+				<include name="*.exe"/>
+				<include name="*.dll"/>
+				<include name="*.pdb"/>
+				<include name="*.xml"/>
+				<include name="*.config"/>
+				<exclude name="*.vshost.exe*"/>
+			</fileset>
+		</copy>
+		<copy todir="${output.dir}">
+			<fileset basedir="Sprocket.Manager/bin/${config}">
+				<include name="*.exe"/>
+				<include name="*.dll"/>
+				<include name="*.pdb"/>
+				<include name="*.xml"/>
+				<include name="*.config"/>
+				<exclude name="*.vshost.exe*"/>
+			</fileset>
+		</copy>			
 	</target>
-
-	<target name="test" depends="compile">
+	<target name="msi" depends="compile">
+		<nant>
+			<buildfiles>
+				<include name="Sprocket.Setup/setup.build"/>
+			</buildfiles>
+			<properties>
+				<property name="config" value="${config}"/>
+				<property name="version" value="${version}"/>
+			</properties>
+		</nant>
+	</target>
+	<target name="test" depends="msi">
 		<nunit2>
 			<formatter type="Plain"/>
 			<test assemblyname="${output.dir}/Quokka.Tests.dll"/>

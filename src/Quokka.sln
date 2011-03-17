@@ -26,6 +26,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sprocket.Server", "Sprocket
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sprocket.Manager", "Sprocket.Manager\Sprocket.Manager.csproj", "{0D6CB64A-B03C-47CB-8C45-1B47021784F7}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Setup", "Setup", "{B9320012-B1B3-411A-8D07-08ACBBFAE900}"
+	ProjectSection(SolutionItems) = preProject
+		Quokka.build = Quokka.build
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sprocket.Setup", "Sprocket.Setup", "{3C13EB38-547D-4C1E-B39B-35A2B64193B7}"
+	ProjectSection(SolutionItems) = preProject
+		Sprocket.Setup\setup.build = Sprocket.Setup\setup.build
+		Sprocket.Setup\Sprocket.wxs = Sprocket.Setup\Sprocket.wxs
+		Sprocket.Setup\UI.wxs = Sprocket.Setup\UI.wxs
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,5 +93,6 @@ Global
 		{08A912A3-F373-4C19-839B-8F24B588C81C} = {A0092DF8-6014-475F-97CF-5CB757477A51}
 		{DD65F818-DF46-461C-AFB0-58AACE721606} = {8BBF7230-2636-40FC-8ABA-D24D0BC4DB5A}
 		{BDB6A9B8-73F1-4B0F-A101-DCE22CF06C79} = {08A912A3-F373-4C19-839B-8F24B588C81C}
+		{3C13EB38-547D-4C1E-B39B-35A2B64193B7} = {B9320012-B1B3-411A-8D07-08ACBBFAE900}
 	EndGlobalSection
 EndGlobal
