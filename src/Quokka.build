@@ -18,7 +18,8 @@
 	<property name="coverage.dir" value="${path::combine(temp.dir, 'coverage')}"/>
 	<property name="msbuild.dir" value="${framework.dir}"/>
 
-	<property name="svn.dir" value="d:\build\programs\svn-win32-1.6.2" overwrite="false"/>
+	<property name="build.dir" value="/build"/>
+	<property name="svn.dir" value="${build.dir}/programs/svn-win32-1.6.2" overwrite="false"/>
 	<property name="svn.bin.dir" value="${path::combine(svn.dir, 'bin')}"/>
 
 	<property name="nunit-console.exe" value="${path::combine(nunit.bin.dir, 'nunit-console.exe')}"/>
