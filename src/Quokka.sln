@@ -22,6 +22,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Stomp", "Stomp", "{08A912A3
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestClient", "Examples\Stomp\TestClient\TestClient.csproj", "{BDB6A9B8-73F1-4B0F-A101-DCE22CF06C79}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sprocket.Server", "Sprocket.Server\Sprocket.Server.csproj", "{85DF2EA0-EA0D-44FA-9744-DA5403CB522B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sprocket.Manager", "Sprocket.Manager\Sprocket.Manager.csproj", "{0D6CB64A-B03C-47CB-8C45-1B47021784F7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -60,6 +64,14 @@ Global
 		{BDB6A9B8-73F1-4B0F-A101-DCE22CF06C79}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BDB6A9B8-73F1-4B0F-A101-DCE22CF06C79}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BDB6A9B8-73F1-4B0F-A101-DCE22CF06C79}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85DF2EA0-EA0D-44FA-9744-DA5403CB522B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85DF2EA0-EA0D-44FA-9744-DA5403CB522B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85DF2EA0-EA0D-44FA-9744-DA5403CB522B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85DF2EA0-EA0D-44FA-9744-DA5403CB522B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D6CB64A-B03C-47CB-8C45-1B47021784F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D6CB64A-B03C-47CB-8C45-1B47021784F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D6CB64A-B03C-47CB-8C45-1B47021784F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D6CB64A-B03C-47CB-8C45-1B47021784F7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
