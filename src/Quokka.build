@@ -154,7 +154,7 @@
 		</nant>
 	</target>
 	
-	<target name="test" depends="zipfile">
+	<target name="test" depends="msi">
 		<nunit2>
 			<formatter type="Plain"/>
 			<test assemblyname="${output.bin.dir}/Quokka.Tests.dll"/>
