@@ -8,8 +8,11 @@
 	<property name="msi.dir" value="." overwrite="false"/>
 	<property name="msi.file.name" value="Sprocket-${full.product.version}.msi" overwrite="false"/>
 	<property name="msi.file.path" value="${path::get-full-path(msi.dir)}\${msi.file.name}"/>
-	<property name="wix.bin.dir" value="/build/programs/wix-3.0.5419.0" overwrite="false"/>
-	<property name="signtool.bin.dir" value="/bin/programs/signtool" overwrite="false"/>
+	
+	<property name="build.tools.base.dir" value="/build/programs"/>
+	<property name="svn.bin.dir" value="${build.tools.base.dir}/svn-win32-1.6.2/bin" overwrite="false"/>
+	<property name="wix.bin.dir" value="${build.tools.base.dir}/wix-3.0.5419.0" overwrite="false"/>
+	<property name="signtool.bin.dir" value="${build.tools.base.dir}/signtool" overwrite="false"/>
 	<property name="cert.subject.name" value="Software Projects Pty Ltd" overwrite="false"/>
 	<property name="timestamp.service.url" value="http://timestamp.verisign.com/scripts/timstamp.dll" overwrite="false"/>
 
