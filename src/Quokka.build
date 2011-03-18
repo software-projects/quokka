@@ -42,6 +42,9 @@
 	<property name="version.build" value="0" if="${version.build=='-1'}"/>
 	<property name="version.revision" value="0" if="${version.revision=='-1'}"/>
 	
+	<!-- this is a formal build if the build number is not zero -->
+	<property name="formal.build" value="${version.build != '0'} "/>
+	
 	<!-- full product version, always has 4 parts (major, minor, build, revision) -->
 	<property name="full.product.version" value="${version.major}.${version.minor}.${version.build}.${version.revision}"/>
 	<echo message="full.product.version: ${full.product.version}"/>
