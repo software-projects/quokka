@@ -12,6 +12,8 @@ namespace Quokka.Sprocket
 	{
 		ISprocket Sprocket { get; }
 		SynchronizationContext SynchronizationContext { get; set; }
+		TimeSpan Timeout { get; set; }
+		Action TimeoutAction { get; set; }
 
 		void Send(object message);
 		IChannel HandleResponse<T>(Action<T> action);
@@ -23,6 +25,20 @@ namespace Quokka.Sprocket
 		{
 			Verify.ArgumentNotNull(channel, "channel");
 			channel.SynchronizationContext = sc;
+			return channel;
+		}
+
+		public static IChannel HandleTimeout(this IChannel channel, TimeSpan timeSpan, Action action)
+		{
+			channel.Timeout = timeSpan;
+			channel.TimeoutAction = action;
+			return channel;
+		}
+
+		public static IChannel HandleTimeout(this IChannel channel, int seconds, Action action)
+		{
+			channel.Timeout = TimeSpan.FromSeconds(seconds);
+			channel.TimeoutAction = action;
 			return channel;
 		}
 

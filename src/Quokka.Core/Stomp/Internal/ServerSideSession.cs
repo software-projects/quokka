@@ -178,6 +178,10 @@ namespace Quokka.Stomp.Internal
 				destination = destination.Substring(QueueName.PublishPrefix.Length);
 				publish = true;
 			}
+			else if (destination.StartsWith(QueueName.QueuePrefix))
+			{
+				destination = destination.Substring(QueueName.QueuePrefix.Length);
+			}
 
 			var messageQueue = _serverData.FindMessageQueue(destination);
 

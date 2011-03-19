@@ -43,6 +43,24 @@
 			///		Text string that can be helpful in identifying the client
 			/// </summary>
 			public const string ClientId = "client-id";
+
+			/// <summary>
+			/// Indicates that this is a status message. When a message is published
+			/// it goes to all subscribers. When a subscriber subsribes, it receives
+			/// the last status message published for each separate value of 'status-for'.
+			/// </summary>
+			/// <example>
+			/// If you are publishing the current connection status to a number of different
+			/// hosts, you could set the 'status-for' message to the name of the host. When
+			/// a subscriber connects, they will immediately receive a list of the last
+			/// status message published for each of the hosts.
+			/// </example>
+			public const string StatusFor = "status-for";
+
+			/// <summary>
+			/// Provides a queue name that for receiving replies.
+			/// </summary>
+			public const string ReplyTo = "reply-to";
 		}
 	}
 }

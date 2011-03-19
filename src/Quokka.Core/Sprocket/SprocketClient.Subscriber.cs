@@ -59,6 +59,12 @@ namespace Quokka.Sprocket
 
 			public Func<T, bool> Filter { get; set; }
 
+			private class Message
+			{
+				public StompFrame Frame;
+				public object Payload;
+			}
+
 			private void SubscriptionMessageArrived(object sender, StompMessageEventArgs e)
 			{
 				if (_isDisposed)
@@ -98,17 +104,16 @@ namespace Quokka.Sprocket
 				var sc = SynchronizationContext;
 				if (sc == null)
 				{
-					SendActionCallback(payload);
+					PerformAction(frame, payload);
 				}
 				else
 				{
-					sc.Send(SendActionCallback, payload);
+					sc.Send(delegate { PerformAction(frame, payload); }, null);
 				}
 			}
 
-			private void SendActionCallback(object state)
+			private void PerformAction(StompFrame frame, T payload)
 			{
-				T payload = (T) state;
 				var action = Action;
 				if (action == null)
 				{
@@ -118,11 +123,16 @@ namespace Quokka.Sprocket
 
 				try
 				{
+					CurrentMessage.Frame = frame;
 					action(payload);
 				}
 				catch (Exception ex)
 				{
 					Log.Error("Unexpected error handling subscriber message: " + ex.Message, ex);
+				}
+				finally
+				{
+					CurrentMessage.Frame = null;
 				}
 			}
 		}

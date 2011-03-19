@@ -139,10 +139,12 @@
     <Compile Include="Data\DataReader\DataReaderDecorator.cs" />
     <Compile Include="Data\DataReader\StringTrimDataReader.cs" />
     <Compile Include="Diagnostics\ExceptionExtensions.cs" />
+    <Compile Include="Sprocket\CurrentMessage.cs" />
     <Compile Include="Sprocket\Example.cs" />
     <Compile Include="Sprocket\IChannel.cs" />
     <Compile Include="Sprocket\IPublisher.cs" />
     <Compile Include="Sprocket\ISprocket.cs" />
+    <Compile Include="Sprocket\IStatusMessage.cs" />
     <Compile Include="Sprocket\ISubscriber.cs" />
     <Compile Include="Sprocket\SprocketClient.cs" />
     <Compile Include="Sprocket\SprocketClient.Subscriber.cs" />
@@ -242,6 +244,7 @@
     <Compile Include="UI\Tasks\ViewClosedEventArgs.cs" />
     <Compile Include="Util\DisposeUtils.cs" />
     <None Include="Quokka.snk" />
+    <Compile Include="Sprocket\SprocketClient.Channel.cs" />
     <Compile Include="Sprocket\SprocketClient.Publisher.cs" />
   </ItemGroup>
   <ItemGroup>

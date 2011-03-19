@@ -107,6 +107,48 @@ namespace Quokka.Sprocket
 			            				{StompHeader.Destination, destination}
 			            			}
 			            	};
+			var statusMessage = message as IStatusMessage;
+			if (statusMessage != null)
+			{
+				// This is a status message
+				frame.Headers[StompHeader.NonStandard.StatusFor] = statusMessage.GetStatusId();
+			}
+
+			frame.Serialize(message);
+			_client.SendMessage(frame);
+		}
+
+		public bool CanReply
+		{
+			get
+			{
+				return CurrentMessage.Frame != null
+				       && CurrentMessage.Frame.Headers[StompHeader.NonStandard.ReplyTo] != null;
+			}
+		}
+
+		public void Reply(object message)
+		{
+			if (!CanReply)
+			{
+				throw new InvalidOperationException("Unable to reply");
+			}
+
+			if (message == null || _client == null)
+			{
+				return;
+			}
+
+			var destination = CurrentMessage.Frame.Headers[StompHeader.NonStandard.ReplyTo];
+
+			var frame = new StompFrame(StompCommand.Send)
+			{
+				Headers =
+			            			{
+			            				{StompHeader.Destination, destination}
+			            			}
+			};
+
 			frame.Serialize(message);
 			_client.SendMessage(frame);
 		}
@@ -118,7 +160,7 @@ namespace Quokka.Sprocket
 
 		public IChannel CreateChannel()
 		{
-			throw new NotImplementedException();
+			return new Channel(this);
 		}
 
 		public IPublisher<T> CreatePublisher<T>()
