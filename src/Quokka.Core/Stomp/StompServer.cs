@@ -17,6 +17,7 @@ namespace Quokka.Stomp
 		private readonly List<ServerSideConnection> _clientConnections = new List<ServerSideConnection>();
 		private readonly object _lockObject = new object();
 		private readonly ServerData _serverData = new ServerData();
+		private bool _isDisposed;
 
 		public IList<EndPoint> EndPoints
 		{
@@ -30,14 +31,18 @@ namespace Quokka.Stomp
 
 		public void Dispose()
 		{
-			foreach (var listener in _listeners)
+			lock (_lockObject)
 			{
-				listener.Dispose();
-			}
+				_isDisposed = true;
+				foreach (var listener in _listeners)
+				{
+					listener.Dispose();
+				}
 
-			foreach (var connection in _clientConnections)
-			{
-				connection.Disconnect();
+				foreach (var connection in _clientConnections)
+				{
+					connection.Disconnect();
+				}
 			}
 		}
 
@@ -45,6 +50,10 @@ namespace Quokka.Stomp
 		{
 			lock (_lockObject)
 			{
+				if (_isDisposed)
+				{
+					throw new ObjectDisposedException("StompServer");
+				}
 				var ipEndPoint = endPoint as IPEndPoint;
 				if (ipEndPoint == null)
 				{
@@ -73,6 +82,10 @@ namespace Quokka.Stomp
 			Log.Debug("STOMP Client connected");
 			lock (_lockObject)
 			{
+				if (_isDisposed)
+				{
+					return;
+				}
 				var listener = (IListener<StompFrame>) sender;
 				for (;;)
 				{
@@ -103,6 +116,10 @@ namespace Quokka.Stomp
 		{
 			lock (_lockObject)
 			{
+				if (_isDisposed)
+				{
+					return;
+				}
 				var clientConnection = (ServerSideConnection) sender;
 				_clientConnections.Remove(clientConnection);
 			}
