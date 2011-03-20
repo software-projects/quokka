@@ -213,6 +213,7 @@ namespace Quokka.Sprocket
 		private class TestSynchronizationContext : SynchronizationContext
 		{
 			public bool IsInSend { get; private set; }
+			private readonly object _lockObject = new object();
 
 			public override void Post(SendOrPostCallback d, object state)
 			{
@@ -221,15 +222,18 @@ namespace Quokka.Sprocket
 
 			public override void Send(SendOrPostCallback d, object state)
 			{
-				Assert.IsFalse(IsInSend);
-				IsInSend = true;
-				try
+				lock (_lockObject)
 				{
-					d(state);
-				}
-				finally
-				{
-					IsInSend = false;
+					Assert.IsFalse(IsInSend);
+					IsInSend = true;
+					try
+					{
+						d(state);
+					}
+					finally
+					{
+						IsInSend = false;
+					}
 				}
 			}
 		}
