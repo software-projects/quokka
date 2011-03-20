@@ -63,6 +63,8 @@
 			<arg value="${cert.subject.name}"/>
 			<arg value="/t"/>
 			<arg value="${timestamp.service.url}"/>
+			<arg value="/d"/>
+			<arg value="${msi.file.name}"/>
 			<arg file="${msi.file.path}"/>
 		</exec>
 		<!-- tell team city that the artifacts are ready, even though the build has not finished yet -->
