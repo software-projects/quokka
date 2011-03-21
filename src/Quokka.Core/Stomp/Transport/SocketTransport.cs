@@ -261,6 +261,10 @@ namespace Quokka.Stomp.Transport
 			{
 				lock (LockObject)
 				{
+					if (_isDisposed)
+					{
+						return;
+					}
 					_receiveInProgress = false;
 					int byteCount = Socket.EndReceive(ar);
 
@@ -385,12 +389,17 @@ namespace Quokka.Stomp.Transport
 			{
 				lock (LockObject)
 				{
+					if (_isDisposed)
+					{
+						return;
+					}
+
 					_sendInProgress = false;
 					var byteCount = state.Socket.EndSend(ar);
 
 					if (byteCount < state.Segment.Count)
 					{
-						Log.DebugFormat("Only {0] out of {1} bytes transmitted", byteCount, state.Segment.Count);
+						Log.DebugFormat("Only {0} out of {1} bytes transmitted", byteCount, state.Segment.Count);
 						// Not all bytes were sent in the segment, so the remaining data has to be sent
 						var newSegment = new ArraySegment<byte>(state.Segment.Array,
 						                                        state.Segment.Offset + byteCount,
