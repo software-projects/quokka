@@ -123,6 +123,8 @@ namespace Quokka.Sprocket
 				                  	})
 				.AddTo(_disposables);
 
+
+			Thread.Sleep(500); // YUK
 			channel.Send(new Request {Number = 999});
 
 			_waitEvent.WaitOne(3000);
@@ -184,6 +186,7 @@ namespace Quokka.Sprocket
 				.HandleResponse<Response2>(response => { otherResult = response.AnotherNumber; })
 				.AddTo(_disposables);
 
+			Thread.Sleep(500); // YUK
 			channel.Send(new Request {Number = 42});
 
 			_waitEvent.WaitOne();
