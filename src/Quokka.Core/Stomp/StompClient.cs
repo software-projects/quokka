@@ -153,13 +153,13 @@ namespace Quokka.Stomp
 			}
 		}
 
-		internal void SendRawMessage(StompFrame message)
+		internal void SendRawMessage(StompFrame message, bool receiptRequired)
 		{
 			lock (_lockObject)
 			{
 				if (!_isDisposed)
 				{
-					if (message.Command != StompCommand.Ack)
+					if (receiptRequired)
 					{
 						_receiptId += 1;
 						message.Headers[StompHeader.Receipt] = _receiptId.ToString();
@@ -188,7 +188,7 @@ namespace Quokka.Stomp
 			{
 				throw new InvalidOperationException(("Header mising: " + StompHeader.Destination));
 			}
-			SendRawMessage(message);
+			SendRawMessage(message, false);
 		}
 
 		public void SendTextMessage(string destination, string text)
@@ -205,7 +205,7 @@ namespace Quokka.Stomp
 			            			},
 			            		BodyText = text
 			            	};
-			SendRawMessage(frame);
+			SendRawMessage(frame, false);
 		}
 
 		protected virtual void OnConnectedChanged(EventArgs e)
@@ -464,14 +464,13 @@ namespace Quokka.Stomp
 					Log.Warn("Attempt to send frame after transport shutdown");
 					return;
 				}
-				if (Log.IsDebugEnabled)
-				{
-					Log.DebugFormat("{0} command sent: {1}={2}", frame.Command, StompHeader.Receipt, frame.Headers[StompHeader.Receipt]);
-				}
 				if (frame.Headers[StompHeader.Receipt] == null)
 				{
 					// we do not want a receipt
-					Log.Debug("No receipt required, remove from pending queue");
+					if (Log.IsDebugEnabled)
+					{
+						Log.DebugFormat("{0} command sent: no receipt required", frame.Command);
+					}
 					_pendingSendMessages.Dequeue();
 				}
 				else
@@ -479,6 +478,10 @@ namespace Quokka.Stomp
 					// this is a frame for which we want a receipt so stop sending
 					// and wait for the RECEIPT command from the server
 					_sendInProgress = true;
+					if (Log.IsDebugEnabled)
+					{
+						Log.DebugFormat("{0} command sent: {1}={2}", frame.Command, StompHeader.Receipt, frame.Headers[StompHeader.Receipt]);
+					}
 				}
 			}
 		}

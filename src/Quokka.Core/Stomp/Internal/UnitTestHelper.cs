@@ -14,7 +14,7 @@ namespace Quokka.Stomp.Internal
 			              				{StompHeader.NonStandard.KeepSession, "true"}
 			              			}
 			              	};
-			client.SendRawMessage(message);
+			client.SendRawMessage(message, false);
 		}
 	}
 }

@@ -118,7 +118,10 @@ namespace Quokka.Stomp.Internal
 		/// <param name="frame"></param>
 		public void ProcessFrame(StompFrame frame)
 		{
-			ProcessFrameByCommand(frame);
+			lock (_lockObject)
+			{
+				ProcessFrameByCommand(frame);
+			}
 		}
 
 		private void ProcessFrameByCommand(StompFrame frame)
@@ -346,17 +349,23 @@ namespace Quokka.Stomp.Internal
 
 		public void SendFrame(StompFrame frame)
 		{
-			if (_clientConnection != null)
+			lock (_lockObject)
 			{
-				_clientConnection.SendFrame(frame);
+				if (_clientConnection != null)
+				{
+					_clientConnection.SendFrame(frame);
+				}
 			}
 		}
 
 		public void Disconnect()
 		{
-			if (_clientConnection != null)
+			lock (_lockObject)
 			{
-				_clientConnection.Disconnect();
+				if (_clientConnection != null)
+				{
+					_clientConnection.Disconnect();
+				}
 			}
 		}
 

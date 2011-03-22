@@ -19,6 +19,7 @@ namespace Quokka.Stomp
 		public string Destination { get; private set; }
 		public StompSubscriptionState State { get; private set; }
 		public SynchronizationContext SynchronizationContext { get; set; }
+		public string Ack { get; set; }
 
 		public event EventHandler<StompMessageEventArgs> MessageArrived;
 		public event EventHandler StateChanged;
@@ -28,6 +29,7 @@ namespace Quokka.Stomp
 			Client = Verify.ArgumentNotNull(client, "client");
 			Destination = Verify.ArgumentNotNull(destination, "destination");
 			SubscriptionId = subscriptionId;
+			Ack = StompAck.Auto;
 
 			// minor optimisation: because we are sending this a lot as a string, convert
 			// to string once and resend it.
@@ -68,12 +70,12 @@ namespace Quokka.Stomp
 					              			{
 					              				{StompHeader.Id, _subscriptionIdText},
 					              				{StompHeader.Destination, Destination},
-					              				{StompHeader.Ack, StompAck.Client},
+					              				{StompHeader.Ack, Ack},
 					              			}
 					              	};
 					raiseStateChanged = true;
 					State = StompSubscriptionState.Subscribing;
-					Client.SendRawMessage(message);
+					Client.SendRawMessage(message, true);
 				}
 			}
 
@@ -103,7 +105,7 @@ namespace Quokka.Stomp
 						              				{StompHeader.Id, _subscriptionIdText}
 						              			}
 						              	};
-						Client.SendRawMessage(message);
+						Client.SendRawMessage(message, false);
 					}
 				}
 			}
@@ -133,15 +135,18 @@ namespace Quokka.Stomp
 				}
 				else
 				{
-					var ackMessage = new StompFrame(StompCommand.Ack)
-					                 	{
-					                 		Headers =
-					                 			{
-					                 				{StompHeader.Subscription, _subscriptionIdText},
-					                 				{StompHeader.MessageId, messageId},
-					                 			}
-					                 	};
-					Client.SendRawMessage(ackMessage);
+					if (Ack != StompAck.Auto)
+					{
+						var ackMessage = new StompFrame(StompCommand.Ack)
+						                 	{
+						                 		Headers =
+						                 			{
+						                 				{StompHeader.Subscription, _subscriptionIdText},
+						                 				{StompHeader.MessageId, messageId},
+						                 			}
+						                 	};
+						Client.SendRawMessage(ackMessage, false);
+					}
 				}
 			}
 
