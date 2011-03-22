@@ -154,6 +154,9 @@ namespace Quokka.Sprocket
 				                           	})
 				.AddTo(_disposables);
 
+			// This is lame -- need to have an action when the subscription is ready
+			Thread.Sleep(500);
+
 			channel.Send(new Request {Number = 42});
 
 			_waitEvent.WaitOne();
