@@ -62,6 +62,11 @@ namespace Quokka.Stomp.Internal
 			return status;
 		}
 
+		public bool IsConnected
+		{
+			get { return _clientConnection != null; }
+		}
+
 		public bool IsUnused
 		{
 			get

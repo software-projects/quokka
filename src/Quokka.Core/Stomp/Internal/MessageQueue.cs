@@ -121,19 +121,23 @@ namespace Quokka.Stomp.Internal
 			}
 		}
 
+		// WARNING: Race condition here. We select a subscription that is connected, but by
+		// the time we send to it, it could be disconnected.
 		private ServerSideSubscription ChooseSubscription()
 		{
-			if (_subscriptions.Count == 0)
+			var connectedSubscriptions = _subscriptions.Where(subscription => subscription.Session.IsConnected).ToList();
+
+			if (connectedSubscriptions.Count == 0)
 			{
 				return null;
 			}
-			if (_subscriptions.Count == 1)
+			if (connectedSubscriptions.Count == 1)
 			{
-				return _subscriptions.First();
+				return connectedSubscriptions.First();
 			}
 
-			int index = _random.Next(_subscriptions.Count);
-			return _subscriptions[index];
+			int index = _random.Next(connectedSubscriptions.Count);
+			return connectedSubscriptions[index];
 		}
 
 		public void AddFrame(StompFrame frame)

@@ -170,9 +170,18 @@ namespace Quokka.Stomp.Internal
 						}
 						Log.Error("Unexpected error handling " + frame.Command + " frame: " + ex.Message, ex);
 
-						var errorFrame = StompFrameUtils.CreateErrorFrame("internal server error", frame);
-						_transport.SendFrame(errorFrame);
-						_transport.Shutdown();
+						try
+						{
+							var errorFrame = StompFrameUtils.CreateErrorFrame("internal server error", frame);
+							_transport.SendFrame(errorFrame);
+							_transport.Shutdown();
+						}
+						catch (InvalidOperationException)
+						{
+							// Not ideal, but we can encounter a situation where the transport is shutting down, so if
+							// we send anything it is going to throw and exception. Because we currently do not have an
+							// API for checking this, we just handle the exception.
+						}
 					}
 				}
 			}
