@@ -113,6 +113,13 @@ namespace Quokka.WinForms
 				buttonFlowPanel.Controls.Add(button);
 			}
 
+			if (_message.PossibleAnswers.Count == 0)
+			{
+				// If no answers specified, create a default 'OK' button
+				button = CreateButton(new UIAnswer(UIAnswerType.OK), 0);
+				buttonFlowPanel.Controls.Add(button);
+			}
+
 			if (button != null)
 			{
 				// adjust the width of the form to fit the buttons

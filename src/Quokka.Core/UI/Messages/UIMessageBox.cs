@@ -21,6 +21,11 @@ namespace Quokka.UI.Messages
 					modalWindow.ShowModal(true);
 				}
 			}
+
+			if (message.SelectedAnswer != null && message.SelectedAnswer.Callback != null)
+			{
+				message.SelectedAnswer.Callback();
+			}
 			return message.SelectedAnswer;
 		}
 	}
