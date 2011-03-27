@@ -37,11 +37,18 @@ namespace Quokka.Stomp
 		/// </remarks>
 		public TimeSpan ServerStatusPeriod { get; set; }
 
+		/// <summary>
+		///		The time that the server will wait between accepting a connection and receiving
+		///		a CONNECT frame or a STOMP frame.
+		/// </summary>
+		public TimeSpan ConnectFrameTimeout { get; set; }
+
 		public StompServerConfig()
 		{
 			CleanupPeriod = TimeSpan.FromMinutes(1);
 			UnusedSessionTimeout = TimeSpan.FromMinutes(5);
 			ServerStatusPeriod = TimeSpan.FromSeconds(5);
+			ConnectFrameTimeout = TimeSpan.FromSeconds(30);
 		}
 	}
 }

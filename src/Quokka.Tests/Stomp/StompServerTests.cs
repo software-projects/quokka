@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using NUnit.Framework;
@@ -106,6 +107,41 @@ namespace Quokka.Stomp
 		}
 
 		[Test]
+		public void Times_out_waiting_for_connect_frame()
+		{
+			const int timeout = 500;
+			StompServer server = new StompServer();
+			server.Config.ConnectFrameTimeout = TimeSpan.FromMilliseconds(timeout);
+			var endPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 0);
+			server.ListenOn(endPoint);
+			var socket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+			socket.Connect(server.EndPoints.First());
+			Assert.IsTrue(socket.Connected);
+			Thread.Sleep(timeout * 2);
+
+			// receive bytes from server -- this code assumes that we get the entire
+			// frame in one read
+			var frameBuilder = new StompFrameBuilder();
+			do
+			{
+				var buffer = frameBuilder.GetReceiveBuffer();
+				int byteCount = socket.Receive(buffer.Array, buffer.Offset, buffer.Count, SocketFlags.None);
+				frameBuilder.ReceiveBytes(buffer.Array, buffer.Offset, byteCount);
+			} while (!frameBuilder.IsFrameReady);
+			var frame = frameBuilder.GetNextFrame();
+			Assert.IsNotNull(frame);
+			Assert.AreEqual(StompCommand.Error, frame.Command);
+
+			// Perform another read, and we should get zero bytes, indicating that the other
+			// side has shutdown the connection.
+			{
+				var buffer = frameBuilder.GetReceiveBuffer();
+				int byteCount = socket.Receive(buffer.Array, buffer.Offset, buffer.Count, SocketFlags.None);
+				Assert.AreEqual(0, byteCount);
+			}
+		}
+
+		[Test]
 		public void Publish_to_multiple_clients()
 		{
 			StompServer server = new StompServer();
@@ -191,6 +227,5 @@ namespace Quokka.Stomp
 			Assert.AreEqual(messageText, received1Text, "Unexpected value for received1Text");
 			Assert.AreEqual(messageText, received2Text, "Unexpected value for received2Text");
 		}
-
 	}
 }

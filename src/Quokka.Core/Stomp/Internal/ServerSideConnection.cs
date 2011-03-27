@@ -25,8 +25,6 @@ namespace Quokka.Stomp.Internal
 
 		public event EventHandler ConnectionClosed;
 
-		public static TimeSpan ConnectTimeout = TimeSpan.FromSeconds(30);
-
 		public ServerSideConnection(ITransport<StompFrame> transport, ServerData serverData)
 		{
 			_transport = Verify.ArgumentNotNull(transport, "transport");
@@ -37,7 +35,9 @@ namespace Quokka.Stomp.Internal
 			_stateAction = ExpectingConnect;
 			_incomingHeartBeatTimer = new Timer(HandleIncomingHeartBeatTimeout);
 			_outgoingHeartBeatTimer = new Timer(HandleOutgoingHeartBeatTimeout);
-			_connectTimer = new Timer(HandleConnectTimeout, null, (int)ConnectTimeout.TotalMilliseconds, Timeout.Infinite);
+			_connectTimer = new Timer(HandleConnectTimeout, null,
+			                          (int) serverData.Config.ConnectFrameTimeout.TotalMilliseconds,
+			                          Timeout.Infinite);
 		}
 
 		public void SendFrame(StompFrame frame)
