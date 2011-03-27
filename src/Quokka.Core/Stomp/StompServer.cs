@@ -60,7 +60,7 @@ namespace Quokka.Stomp
 					throw new ArgumentException("Cannot listen on endpoint: " + endPoint);
 				}
 
-				var listener = new StompListener {ListenEndPoint = ipEndPoint};
+				var listener = new StompListener {SpecifiedEndPoint = ipEndPoint};
 
 				listener.ListenException += ListenerListenException;
 				listener.ClientConnected += ListenerClientConnected;

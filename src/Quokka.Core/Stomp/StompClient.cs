@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
-using System.Reflection;
+using System.Threading;
 using Common.Logging;
 using Quokka.Diagnostics;
-using Quokka.Sandbox;
 using Quokka.Stomp.Internal;
 using Quokka.Stomp.Transport;
 
@@ -21,7 +21,13 @@ namespace Quokka.Stomp
 		private StompClientTransport _transport;
 		private readonly Queue<StompFrame> _pendingSendMessages = new Queue<StompFrame>();
 		private readonly Dictionary<int, StompSubscription> _subscriptions = new Dictionary<int, StompSubscription>();
+		private readonly Timer _outgoingHeartBeatTimer;
+		private readonly Timer _incomingHeartBeatTimer;
+		private readonly Timer _connectTimer;
 		private bool _connected;
+		private bool _waitingForConnectedFrame;
+		private HeartBeatValues _sentHeartBeatValues;
+		private HeartBeatValues _negotiatedHeartBeatValues;
 		private string _sessionId;
 		private long _receiptId;
 		private bool _sendInProgress;
@@ -46,23 +52,58 @@ namespace Quokka.Stomp
 		/// <summary>
 		/// 	The endpoint of the STOMP message broker
 		/// </summary>
-		public EndPoint RemoteEndPoint { get; set; }
+		public EndPoint RemoteEndPoint { get; private set; }
+
+		/// <summary>
+		///		Outgoing heart beat timeout in milliseconds
+		/// </summary>
+		public int OutgoingHeartBeat { get; set; }
+
+		/// <summary>
+		///		Incoming heart beat timeout in milliseconds
+		/// </summary>
+		public int IncomingHeartBeat { get; set; }
+
+		/// <summary>
+		///		
+		/// </summary>
+		public TimeSpan ConnectTimeout { get; set; }
+
 
 		public StompClient()
 		{
 			Login = string.Empty;
 			Passcode = string.Empty;
+
+			OutgoingHeartBeat = 30000;
+			IncomingHeartBeat = 30000;
+			ConnectTimeout = TimeSpan.FromSeconds(15);
+
+			_outgoingHeartBeatTimer = new Timer(OutgoingHeartBeatTimerCallback);
+			_incomingHeartBeatTimer = new Timer(IncomingHeartBeatTimerCallback);
+			_connectTimer = new Timer(ConnectTimerCallback);
 		}
 
 		public void Dispose()
 		{
-			_isDisposed = true;
-			UnsubscribeTransportEvents();
-			if (_transport != null)
+			lock (_lockObject)
 			{
-				_transport.Shutdown();
-				_transport.Dispose();
-				_transport = null;
+				if (!_isDisposed)
+				{
+					_isDisposed = true;
+					UnsubscribeTransportEvents();
+					if (_transport != null)
+					{
+						_transport.Shutdown();
+						_transport.Dispose();
+						_transport = null;
+					}
+					_incomingHeartBeatTimer.Dispose();
+					_outgoingHeartBeatTimer.Dispose();
+					_connectTimer.Dispose();
+					_connected = false;
+					_waitingForConnectedFrame = false;
+				}
 			}
 		}
 
@@ -119,11 +160,39 @@ namespace Quokka.Stomp
 
 				// the only kind of transport we handle at the moment
 				IPEndPoint ipEndPoint = (IPEndPoint) endPoint;
-
 				RemoteEndPoint = endPoint;
 				_transport = new StompClientTransport();
 				SubscribeTransportEvents();
 				_transport.Connect(ipEndPoint);
+			}
+		}
+
+		private void DisconnectAndReconnect()
+		{
+			lock (_lockObject)
+			{
+				if (_transport != null)
+				{
+					UnsubscribeTransportEvents();
+					_transport.Dispose();
+					_transport = null;
+				}
+				_waitingForConnectedFrame = false;
+				_sendInProgress = false;
+			}
+
+			// call this without a lock, as it has its own lock and
+			// releases it for callbacks
+			CheckConnected();
+
+			lock (_lockObject)
+			{
+				if (_transport == null)
+				{
+					_transport = new StompClientTransport();
+					SubscribeTransportEvents();
+					_transport.Connect((IPEndPoint)RemoteEndPoint);
+				}
 			}
 		}
 
@@ -218,6 +287,11 @@ namespace Quokka.Stomp
 
 		private void TransportConnectedChangedHandler(object sender, EventArgs e)
 		{
+			CheckConnected();
+		}
+
+		private void CheckConnected() {
+
 			bool raiseConnectedChanged = false;
 
 			lock (_lockObject)
@@ -226,23 +300,30 @@ namespace Quokka.Stomp
 				{
 					if (_connected)
 					{
-						if (!_transport.Connected)
+						if (_transport == null || !_transport.Connected)
 						{
 							_connected = false;
 							Log.Debug("Client is now disconnected from server");
 							raiseConnectedChanged = true;
 						}
+						StopOutgoingHeartBeatTimer();
+						StopIncomingHeartBeatTimer();
+						StopConnectTimer();
 					}
 					else
 					{
-						if (_transport != null && _transport.Connected)
+						if (_transport != null && _transport.Connected && !_waitingForConnectedFrame)
 						{
 							var login = Login ?? string.Empty;
 							var passcode = Passcode ?? string.Empty;
-							var processName = Assembly.GetEntryAssembly() == null ? "-" : Assembly.GetEntryAssembly().GetName().Name;
+
+							// the client id provides some help with diagnostics by identifying the client process
+							var processName = Path.GetFileNameWithoutExtension(Process.GetCurrentProcess().MainModule.FileName) ;
 							var clientId = Environment.MachineName
 							               + "/" + processName
 							               + "/" + Process.GetCurrentProcess().Id;
+
+							_sentHeartBeatValues = new HeartBeatValues(OutgoingHeartBeat, IncomingHeartBeat);
 
 							// time to send a CONNECT message
 							var frame = new StompFrame
@@ -252,6 +333,7 @@ namespace Quokka.Stomp
 							            			{
 							            				{StompHeader.Login, login},
 							            				{StompHeader.Passcode, passcode},
+														{StompHeader.HeartBeat, _sentHeartBeatValues.ToString()},
 														{StompHeader.NonStandard.ClientId, clientId}
 							            			}
 							            	};
@@ -263,6 +345,8 @@ namespace Quokka.Stomp
 								frame.Headers[StompHeader.Session] = _sessionId;
 							}
 
+							_waitingForConnectedFrame = true;
+							StartConnectTimer();
 							_transport.SendFrame(frame);
 							Log.Debug("Sent " + frame.Command + " command to server");
 						}
@@ -307,14 +391,20 @@ namespace Quokka.Stomp
 						return;
 					}
 
+					// received a frame, so we can restart the timer
+					StartIncomingHeartBeatTimer();
+
+					if (frame.IsHeartBeat)
+					{
+						// received a heart beat frame -- all we want to do is restart the timer
+						continue;
+					}
+
 					switch (frame.Command)
 					{
 						case StompCommand.Connected:
-							AssignSessionAndResubscribe(frame);
-							_connected = true;
 							connectedChanged = true;
-							Log.DebugFormat("Received {0} response, {1}={2}", frame.Command, StompHeader.Session, _sessionId);
-							SendNextMessage();
+							HandleConnected(frame);
 							break;
 						case StompCommand.Message:
 							subscription = HandleMessage(frame);
@@ -341,6 +431,22 @@ namespace Quokka.Stomp
 					subscription.ReceiveMessage(frame);
 				}
 			}
+		}
+
+		private void HandleConnected(StompFrame frame)
+		{
+			AssignSessionAndResubscribe(frame);
+			StopConnectTimer();
+			_connected = true;
+			_waitingForConnectedFrame = false;
+			Log.DebugFormat("Received {0} response, {1}={2}", frame.Command, StompHeader.Session, _sessionId);
+
+			var serverHeartBeatValues = new HeartBeatValues(frame.Headers[StompHeader.HeartBeat]);
+			_negotiatedHeartBeatValues= _sentHeartBeatValues.CombineWith(serverHeartBeatValues);
+
+			StartIncomingHeartBeatTimer();
+			StartOutgoingHeartBeatTimer();
+			SendNextMessage();
 		}
 
 		private StompSubscription HandleMessage(StompFrame message)
@@ -457,6 +563,7 @@ namespace Quokka.Stomp
 				try
 				{
 					_transport.SendFrame(frame);
+					StartOutgoingHeartBeatTimer();
 				}
 				catch (InvalidOperationException)
 				{
@@ -490,7 +597,7 @@ namespace Quokka.Stomp
 		{
 			var oldSessionId = _sessionId;
 			_sessionId = frame.Headers[StompHeader.Session];
-			if (oldSessionId == null && _subscriptions.Count > 0)
+			if (oldSessionId != _sessionId && _subscriptions.Count > 0)
 			{
 				// This is where we had an old session, but lost it. The most probable
 				// cause is that the server was stopped and restarted. What we do here
@@ -501,6 +608,66 @@ namespace Quokka.Stomp
 					subscription.Subscribe();
 				}
 			}
+		}
+
+		private void StartConnectTimer()
+		{
+			int milliseconds = (int)ConnectTimeout.TotalMilliseconds;
+			_connectTimer.Change(milliseconds, Timeout.Infinite);
+		}
+
+		private void StartOutgoingHeartBeatTimer()
+		{
+			if (_negotiatedHeartBeatValues.Outgoing > 0)
+			{
+				_outgoingHeartBeatTimer.Change(_negotiatedHeartBeatValues.Outgoing, Timeout.Infinite);
+			}
+		}
+
+		private void StartIncomingHeartBeatTimer()
+		{
+			if (_negotiatedHeartBeatValues.Incoming > 0)
+			{
+				_incomingHeartBeatTimer.Change(_negotiatedHeartBeatValues.Incoming, Timeout.Infinite);
+			}
+		}
+
+		private void StopOutgoingHeartBeatTimer()
+		{
+			_outgoingHeartBeatTimer.Change(Timeout.Infinite, Timeout.Infinite);
+		}
+
+		private void StopIncomingHeartBeatTimer()
+		{
+			_outgoingHeartBeatTimer.Change(Timeout.Infinite, Timeout.Infinite);
+		}
+
+		private void StopConnectTimer()
+		{
+			_connectTimer.Change(Timeout.Infinite, Timeout.Infinite);
+		}
+
+		private void OutgoingHeartBeatTimerCallback(object state)
+		{
+			lock (_lockObject)
+			{
+				if (!_isDisposed && Connected)
+				{
+					SendRawMessage(StompFrame.HeartBeat, false);
+				}
+			}
+		}
+
+		private void IncomingHeartBeatTimerCallback(object state)
+		{
+			Log.Error("Timeout waiting for heart-beat from server");
+			DisconnectAndReconnect();
+		}
+
+		private void ConnectTimerCallback(object state)
+		{
+			Log.Error("Timeout waiting for " + StompCommand.Connected + " response from server");
+			DisconnectAndReconnect();
 		}
 	}
 }

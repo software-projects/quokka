@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Threading;
 using Common.Logging;
 using Quokka.Diagnostics;
-using Quokka.Sandbox;
 using Quokka.Stomp.Transport;
 
 namespace Quokka.Stomp.Internal
@@ -18,8 +18,14 @@ namespace Quokka.Stomp.Internal
 
 		private StateAction _stateAction;
 		private ServerSideSession _session;
+		private HeartBeatValues _negotiatedHeartBeats;
+		private readonly Timer _incomingHeartBeatTimer;
+		private readonly Timer _outgoingHeartBeatTimer;
+		private Timer _connectTimer;
 
 		public event EventHandler ConnectionClosed;
+
+		public static TimeSpan ConnectTimeout = TimeSpan.FromSeconds(30);
 
 		public ServerSideConnection(ITransport<StompFrame> transport, ServerData serverData)
 		{
@@ -29,20 +35,53 @@ namespace Quokka.Stomp.Internal
 			_transport.FrameReady += TransportFrameReady;
 			_transport.TransportException += TransportTransportException;
 			_stateAction = ExpectingConnect;
+			_incomingHeartBeatTimer = new Timer(HandleIncomingHeartBeatTimeout);
+			_outgoingHeartBeatTimer = new Timer(HandleOutgoingHeartBeatTimeout);
+			_connectTimer = new Timer(HandleConnectTimeout, null, (int)ConnectTimeout.TotalMilliseconds, Timeout.Infinite);
 		}
 
 		public void SendFrame(StompFrame frame)
 		{
-			if (Log.IsDebugEnabled)
+			lock (_lockObject)
 			{
-				Log.DebugFormat("Sent {0} command to client", frame.Command);
-			}
-			_transport.SendFrame(frame);
+				if (_stateAction == ShuttingDown)
+				{
+					Log.Warn("Discarded frame: transport is shutting down: " + frame);
+				}
+				else
+				{
+					_transport.SendFrame(frame);
+					StartOutgoingHeartBeatTimer();
+				}
+			} 
 		}
 
 		public void Disconnect()
 		{
-			_transport.Shutdown();
+			lock (_lockObject)
+			{
+				DisconnectWithoutLocking();
+			}
+		}
+
+		private void DisconnectWithoutLocking()
+		{
+			if (_stateAction == ShuttingDown)
+			{
+				Log.Warn("Ignoring duplicate Disconnect request");
+			}
+			else
+			{
+				_transport.Shutdown();
+				_stateAction = ShuttingDown;
+				_outgoingHeartBeatTimer.Change(Timeout.Infinite, Timeout.Infinite);
+				_incomingHeartBeatTimer.Change(Timeout.Infinite, Timeout.Infinite);
+				if (_connectTimer != null)
+				{
+					_connectTimer.Dispose();
+					_connectTimer = null;
+				}
+			}
 		}
 
 		// ReSharper disable MemberCanBeMadeStatic.Local
@@ -57,14 +96,16 @@ namespace Quokka.Stomp.Internal
 
 		private void ExpectingConnect(StompFrame frame)
 		{
-			if (frame.Command != StompCommand.Connect)
+			if (frame.Command != StompCommand.Connect
+				&& frame.Command != StompCommand.Stomp)
 			{
-				const string message = "Expecting " + StompCommand.Connected + " command";
-				Log.Debug(message);
+				string message = "Expecting " + StompCommand.Connected 
+					+ " or " + StompCommand.Stomp
+					+ " command, received " + frame.Command;
+				Log.Error(message);
 				var errorFrame = StompFrameUtils.CreateErrorFrame(message);
 				_transport.SendFrame(errorFrame);
-				_transport.Shutdown();
-				_stateAction = ShuttingDown;
+				DisconnectWithoutLocking();
 				return;
 			}
 
@@ -73,14 +114,15 @@ namespace Quokka.Stomp.Internal
 
 			if (!Authenticate(login, passcode))
 			{
-				const string message = "Access denied";
-				Log.Debug(message);
+				string message = "Received " + frame.Command + " frame, Access denied";
+				Log.Warn(message);
 				var errorFrame = StompFrameUtils.CreateErrorFrame(message);
 				_transport.SendFrame(errorFrame);
-				_transport.Shutdown();
-				_stateAction = ShuttingDown;
+				DisconnectWithoutLocking();
 				return;
 			}
+
+			Log.Debug("Received " + frame.Command + " frame, authenticated OK");
 
 			var sessionId = frame.Headers[StompHeader.Session];
 			ServerSideSession session = null;
@@ -90,23 +132,22 @@ namespace Quokka.Stomp.Internal
 				session = _serverData.FindSession(sessionId);
 				if (session == null)
 				{
+					Log.Warn("Received " + frame.Command + " frame for non-existent session: " + sessionId);
 					var message = ErrorMessages.SessionDoesNotExistPrefix + sessionId;
 					Log.Debug(message);
 					var errorFrame = StompFrameUtils.CreateErrorFrame(message);
 					_transport.SendFrame(errorFrame);
-					_transport.Shutdown();
-					_stateAction = ShuttingDown;
+					DisconnectWithoutLocking();
 					return;
 				}
 
 				if (!session.AddConnection(this))
 				{
-					var message = "Session already in use: " + sessionId;
-					Log.Debug(message);
+					var message = frame.Command + " frame requested a session already in use: " + sessionId;
+					Log.Warn(message);
 					var errorFrame = StompFrameUtils.CreateErrorFrame(message);
 					_transport.SendFrame(errorFrame);
-					_transport.Shutdown();
-					_stateAction = ShuttingDown;
+					DisconnectWithoutLocking();
 					return;
 				}
 
@@ -132,21 +173,44 @@ namespace Quokka.Stomp.Internal
 			                     				{StompHeader.Session, session.SessionId}
 			                     			}
 			                     	};
+
+			if (frame.Headers[StompHeader.HeartBeat] == null)
+			{
+				// no heart-beat header received, so we default to 0,0
+				_negotiatedHeartBeats = new HeartBeatValues(0, 0);
+			}
+			else
+			{
+				var otherHeartBeatValues = new HeartBeatValues(frame.Headers[StompHeader.HeartBeat]);
+				var myHeartBeatValues = new HeartBeatValues(30000, 30000);
+				_negotiatedHeartBeats = myHeartBeatValues.CombineWith(otherHeartBeatValues);
+				connectedFrame.Headers[StompHeader.HeartBeat] = _negotiatedHeartBeats.ToString();
+			}
 			_transport.SendFrame(connectedFrame);
+			if (_connectTimer != null)
+			{
+				_connectTimer.Change(Timeout.Infinite, Timeout.Infinite);
+				_connectTimer.Dispose();
+				_connectTimer = null;
+			}
+			StartIncomingHeartBeatTimer();
+			StartOutgoingHeartBeatTimer();
 			_stateAction = Connected;
 			Log.Debug("Session " + session + " connected");
 		}
 
 		private void Connected(StompFrame frame)
 		{
-			Log.Debug("Received frame " + frame.Command);
 			lock (_lockObject)
 			{
-				if (frame.Command == StompCommand.Disconnect)
+				StartIncomingHeartBeatTimer();
+				if (frame.IsHeartBeat)
 				{
-					_stateAction = ShuttingDown;
-					_transport.Shutdown();
-
+					// nothing else to do
+				}
+				else if (frame.Command == StompCommand.Disconnect)
+				{
+					DisconnectWithoutLocking();
 					var keepSession = frame.GetBoolean(StompHeader.NonStandard.KeepSession, false);
 					if (!keepSession)
 					{
@@ -174,7 +238,7 @@ namespace Quokka.Stomp.Internal
 						{
 							var errorFrame = StompFrameUtils.CreateErrorFrame("internal server error", frame);
 							_transport.SendFrame(errorFrame);
-							_transport.Shutdown();
+							DisconnectWithoutLocking();
 						}
 						catch (InvalidOperationException)
 						{
@@ -229,7 +293,7 @@ namespace Quokka.Stomp.Internal
 					{
 						var errorFrame = StompFrameUtils.CreateErrorFrame("Internal server error");
 						_transport.SendFrame(errorFrame);
-						_transport.Shutdown();
+						DisconnectWithoutLocking();
 					}
 				}
 			}
@@ -238,6 +302,63 @@ namespace Quokka.Stomp.Internal
 		private static void TransportTransportException(object sender, ExceptionEventArgs e)
 		{
 			Log.Error("Transport layer exception: " + e.Exception.Message, e.Exception);
+		}
+
+		private void StartIncomingHeartBeatTimer()
+		{
+			if (_negotiatedHeartBeats.Incoming > 0)
+			{
+				// allow for twice as long as the negotiated value
+				var timeout = _negotiatedHeartBeats.Incoming*2;
+				_incomingHeartBeatTimer.Change(timeout, Timeout.Infinite);
+			}
+		}
+
+		private void StartOutgoingHeartBeatTimer()
+		{
+			if (_negotiatedHeartBeats.Outgoing > 0)
+			{
+				_outgoingHeartBeatTimer.Change(_negotiatedHeartBeats.Outgoing, Timeout.Infinite);
+			}
+		}
+
+		private void HandleIncomingHeartBeatTimeout(object state)
+		{
+			lock (_lockObject)
+			{
+				if (_stateAction == Connected)
+				{
+					Log.Warn("Incoming connection timed out, disconnecting");
+					DisconnectWithoutLocking();
+				}
+			}
+		}
+
+		private void HandleOutgoingHeartBeatTimeout(object state)
+		{
+			lock (_lockObject)
+			{
+				if (_stateAction == Connected)
+				{
+					SendFrame(StompFrame.HeartBeat);
+					StartOutgoingHeartBeatTimer();
+				}
+			}
+		}
+
+		private void HandleConnectTimeout(object state)
+		{
+			lock (_lockObject)
+			{
+				if (_connectTimer != null && _stateAction == ExpectingConnect)
+				{
+					const string message = "Timed out waiting for " + StompCommand.Connect + " frame";
+					Log.Warn(message);
+					var errorFrame = StompFrameUtils.CreateErrorFrame(message);
+					_transport.SendFrame(errorFrame);
+					DisconnectWithoutLocking();
+				}
+			}
 		}
 	}
 }

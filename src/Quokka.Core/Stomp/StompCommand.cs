@@ -7,6 +7,7 @@
 	{
 		// Messages Client to Server
 		public const string Connect = "CONNECT";
+		public const string Stomp = "STOMP";
 		public const string Send = "SEND";
 		public const string Subscribe = "SUBSCRIBE";
 		public const string Unsubscribe = "UNSUBSCRIBE";

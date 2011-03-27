@@ -14,6 +14,8 @@ namespace Quokka.Stomp
 	/// </remarks>
 	public class StompFrame
 	{
+		public static readonly StompFrame HeartBeat = new StompFrame(string.Empty);
+
 		public StompFrame() : this(StompCommand.Send)
 		{
 			// Default command is SEND, because this is the only kind of
@@ -30,6 +32,14 @@ namespace Quokka.Stomp
 		/// 	The <see cref = "StompCommand" /> for this frame.
 		/// </summary>
 		public string Command { get; set; }
+
+		/// <summary>
+		/// Does this frame represent a heart beat message. (Single newline in STOMP protocol)
+		/// </summary>
+		public bool IsHeartBeat
+		{
+			get { return ReferenceEquals(this, HeartBeat) || String.IsNullOrEmpty(Command); }
+		}
 
 		/// <summary>
 		/// 	Collection of name/value pairs, which represent the STOMP frame headers.
@@ -100,9 +110,9 @@ namespace Quokka.Stomp
 		/// </remarks>
 		public byte[] ToArray()
 		{
-			if (Command == null)
+			if (IsHeartBeat)
 			{
-				throw new InvalidOperationException("Command not specified");
+				return new byte[] {10};
 			}
 
 			// Before transmitting, always set the content-length header.
@@ -147,6 +157,96 @@ namespace Quokka.Stomp
 				stream.WriteByte(0);
 
 				return stream.ToArray();
+			}
+		}
+
+		public override string ToString()
+		{
+			if (IsHeartBeat)
+			{
+				return "(heart-beat)";
+			}
+			var sb = new StringBuilder(Command);
+			switch (Command)
+			{
+				case StompCommand.Abort:
+				case StompCommand.Begin:
+				case StompCommand.Commit:
+					AppendHeader(sb, StompHeader.Transaction);
+					break;
+				case StompCommand.Ack:
+				case StompCommand.Nack:
+					AppendHeader(sb, StompHeader.Subscription);
+					AppendHeader(sb, StompHeader.Subscription);
+					AppendHeaderIfPresent(sb, StompHeader.Transaction);
+					break;
+				case StompCommand.Connect:
+				case StompCommand.Stomp:
+					AppendHeaderIfPresent(sb, StompHeader.HeartBeat);
+					break;
+				case StompCommand.Connected:
+					AppendHeader(sb, StompHeader.Session);
+					AppendHeaderIfPresent(sb, StompHeader.HeartBeat);
+					break;
+				case StompCommand.Error:
+					AppendHeader(sb, StompHeader.Message);
+					break;
+				case StompCommand.Message:
+					AppendHeader(sb, StompHeader.MessageId);
+					AppendHeader(sb, StompHeader.Subscription);
+					break;
+				case StompCommand.Receipt:
+					AppendHeader(sb, StompHeader.ReceiptId);
+					break;
+				case StompCommand.Send:
+					AppendHeader(sb, StompHeader.Destination);
+					break;
+				case StompCommand.Subscribe:
+					AppendHeader(sb, StompHeader.Id);
+					AppendHeader(sb, StompHeader.Destination);
+					AppendHeaderIfPresent(sb, StompHeader.Ack);
+					break;
+				case StompCommand.Unsubscribe:
+					AppendHeader(sb, StompHeader.Id);
+					break;
+			}
+
+			AppendHeaderIfPresent(sb, StompHeader.Receipt);
+			AppendContentLength(sb);
+			AppendHeaderIfPresent(sb, StompHeader.NonStandard.ClrType);
+
+			return sb.ToString();
+		}
+
+		private void AppendHeader(StringBuilder sb, string header)
+		{
+			sb.Append(' ');
+			sb.Append(header);
+			sb.Append(':');
+			sb.Append(Headers[header]);
+		}
+
+		private void AppendHeaderIfPresent(StringBuilder sb, string header)
+		{
+			var value = Headers[header];
+			if (value != null)
+			{
+				sb.Append(' ');
+				sb.Append(header);
+				sb.Append(':');
+				sb.Append(value);
+			}
+		}
+
+		private void AppendContentLength(StringBuilder sb)
+		{
+			var value = Headers[StompHeader.ContentLength];
+			if (value != null && value != "0")
+			{
+				sb.Append(' ');
+				sb.Append(StompHeader.ContentLength);
+				sb.Append(':');
+				sb.Append(value);
 			}
 		}
 	}

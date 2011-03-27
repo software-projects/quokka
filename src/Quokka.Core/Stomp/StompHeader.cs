@@ -16,6 +16,7 @@
 		public const string Message = "message";
 		public const string Id = "id";
 		public const string Subscription = "subscription";
+		public const string HeartBeat = "heart-beat";
 
 		public static class NonStandard
 		{

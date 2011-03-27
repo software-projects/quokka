@@ -23,7 +23,8 @@ namespace Quokka.Stomp.Transport
 		public event EventHandler ClientConnected;
 		public event EventHandler<ExceptionEventArgs> ListenException;
 
-		public IPEndPoint ListenEndPoint { get; set; }
+		public IPEndPoint SpecifiedEndPoint { get; set; }
+		public IPEndPoint ListenEndPoint { get; private set; }
 		public int Backlog { get; set; }
 
 		EndPoint IListener<TFrame>.ListenEndPoint
@@ -33,7 +34,7 @@ namespace Quokka.Stomp.Transport
 
 		public SocketListener()
 		{
-			ListenEndPoint = new IPEndPoint(IPAddress.Any, 0);
+			SpecifiedEndPoint = new IPEndPoint(IPAddress.Any, 0);
 			Backlog = 127;
 		}
 
@@ -56,20 +57,14 @@ namespace Quokka.Stomp.Transport
 					_timer = new Timer(TimerCallback, this, TimeSpan.FromMilliseconds(0), TimeSpan.FromSeconds(10));
 				}
 
-				var ipEndPoint = (IPEndPoint) endPoint;
-
-				_listenSocket = new Socket(ipEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-				_listenSocket.Bind(endPoint);
-				ListenEndPoint = (IPEndPoint)_listenSocket.LocalEndPoint;
-				_listenSocket.Listen(Backlog);
-				_listenSocket.BeginAccept(AcceptCallback, _listenSocket);
+				SpecifiedEndPoint = (IPEndPoint) endPoint;
+				CreateListenSocketAndBeginAccept();
 			}
-
 		}
 
 		public void StartListening()
 		{
-			StartListening(ListenEndPoint);
+			StartListening(SpecifiedEndPoint);
 		}
 
 		private void TimerCallback(object obj)
@@ -80,11 +75,7 @@ namespace Quokka.Stomp.Transport
 				{
 					if (_listenSocket == null)
 					{
-						_listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-						_listenSocket.Bind(ListenEndPoint);
-						ListenEndPoint = (IPEndPoint)_listenSocket.LocalEndPoint;
-						_listenSocket.Listen(Backlog);
-						_listenSocket.BeginAccept(AcceptCallback, _listenSocket);
+						CreateListenSocketAndBeginAccept();
 					}
 				}
 			}
@@ -101,6 +92,15 @@ namespace Quokka.Stomp.Transport
 				}
 				HandleException(ex);
 			}
+		}
+
+		private void CreateListenSocketAndBeginAccept()
+		{
+			_listenSocket = new Socket(SpecifiedEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+			_listenSocket.Bind(SpecifiedEndPoint);
+			ListenEndPoint = (IPEndPoint)_listenSocket.LocalEndPoint;
+			_listenSocket.Listen(Backlog);
+			_listenSocket.BeginAccept(AcceptCallback, _listenSocket);
 		}
 
 		private void HandleException(Exception ex)

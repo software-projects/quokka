@@ -4,7 +4,6 @@ using System.Net.Sockets;
 using System.Threading;
 using Common.Logging;
 using Quokka.Diagnostics;
-using Quokka.Sandbox;
 using Quokka.Util;
 
 namespace Quokka.Stomp.Transport

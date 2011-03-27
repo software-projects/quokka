@@ -237,17 +237,25 @@ namespace Quokka.Stomp.Transport
 			                    receiveBuffer.Offset,
 			                    receiveBuffer.Count,
 			                    SocketFlags.None,
-			                    ReceiveCallback,
+			                    ReceiveCallbackMightBeSynchronous,
 			                    receiveState);
 		}
 
-		private void ReceiveCallback(IAsyncResult ar)
+		private void ReceiveCallbackMightBeSynchronous(IAsyncResult ar)
 		{
 			if (ar.CompletedSynchronously)
 			{
 				Log.Debug("BeginReceive was completed synchronously");
+				ThreadPool.QueueUserWorkItem(delegate { ReceiveCallbackOnWorkerThread(ar); });
 			}
+			else
+			{
+				ReceiveCallbackOnWorkerThread(ar);
+			}
+		}
 
+		private void ReceiveCallbackOnWorkerThread(IAsyncResult ar)
+		{
 			var state = (ReceiveState) ar.AsyncState;
 			if (state.Socket != Socket)
 			{
@@ -296,19 +304,9 @@ namespace Quokka.Stomp.Transport
 
 			if (raiseFrameReady)
 			{
-				// If this operation was completed synchronously, then this thread still
-				// has the lock on this object, and so we want to raise the event on
-				// a worker thread to avoid lock contention.
-				if (ar.CompletedSynchronously)
-				{
-					ThreadPool.QueueUserWorkItem(delegate { OnFrameReady(EventArgs.Empty); });
-				}
-				else
-				{
-					// Completed asynchronously, we are already on a worker thread and have
-					// released the lock.
-					OnFrameReady(EventArgs.Empty);
-				}
+				// Because we know we are on a worker thread, we can be sure that the
+				// lock has been released and we can raise the event.
+				OnFrameReady(EventArgs.Empty);
 			}
 		}
 

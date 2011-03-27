@@ -77,10 +77,11 @@ namespace Quokka.Stomp
 		}
 
 		[Test]
-		[ExpectedException(typeof(InvalidOperationException))]
-		public void Command_cannot_be_null()
+		public void Null_command_results_in_heartbeat()
 		{
-			new StompFrame { Command = null }.ToArray();
+			var data = new StompFrame { Command = null }.ToArray();
+			Assert.AreEqual(1, data.Length);
+			Assert.AreEqual(10, data[0]);
 		}
 
 		[Test]
@@ -180,6 +181,17 @@ namespace Quokka.Stomp
 			Assert.IsFalse(frame.IsExpiredAt(dateTime - TimeSpan.FromSeconds(1)));
 
 			Assert.IsTrue(frame.IsExpiredAt(dateTime + TimeSpan.FromSeconds(1)));
+		}
+
+		[Test]
+		public void KeepAlive_frame()
+		{
+			var frame = new StompFrame(string.Empty);
+			Assert.IsTrue(frame.IsHeartBeat);
+			frame.Command = null;
+			Assert.IsTrue(frame.IsHeartBeat);
+			frame.Command = "XXX";
+			Assert.IsFalse(frame.IsHeartBeat);
 		}
 	}
 }

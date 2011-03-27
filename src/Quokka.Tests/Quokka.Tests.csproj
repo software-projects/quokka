@@ -102,6 +102,7 @@
     <Compile Include="ServiceProviderTests.cs" />
     <Compile Include="Sprocket\SprocketChannelTests.cs" />
     <Compile Include="Stomp\ByteArrayUtilTests.cs" />
+    <Compile Include="Stomp\HeartBeatValuesTests.cs" />
     <Compile Include="Stomp\StompFrameBuilderTests.cs" />
     <Compile Include="Stomp\StompFrameTests.cs" />
     <Compile Include="Stomp\StompServerTests.cs" />

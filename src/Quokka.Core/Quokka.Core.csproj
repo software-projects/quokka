@@ -149,6 +149,7 @@
     <Compile Include="Sprocket\SprocketClient.cs" />
     <Compile Include="Sprocket\SprocketClient.Subscriber.cs" />
     <Compile Include="Stomp\Internal\ErrorMessages.cs" />
+    <Compile Include="Stomp\Internal\HeartBeatValues.cs" />
     <Compile Include="Stomp\Internal\QueueName.cs" />
     <Compile Include="Stomp\Server\Messages\MessageLogMessage.cs" />
     <Compile Include="Stomp\Transport\ExceptionEventArgs.cs" />
@@ -191,7 +192,6 @@
     <Compile Include="Stomp\StompClient.cs" />
     <Compile Include="Stomp\Internal\StompFrameUtils.cs" />
     <Compile Include="Stomp\Internal\StompClientTransport.cs" />
-    <Compile Include="Stomp\StompFrameBuilder.Generic.cs" />
     <Compile Include="Stomp\Internal\Listener.cs" />
     <Compile Include="Stomp\StompMessageEventArgs.cs" />
     <Compile Include="Stomp\StompServer.cs" />

@@ -246,5 +246,25 @@ namespace Quokka.Stomp
 			Assert.AreEqual(originalFrame.Headers["destination"], receivedFrame.Headers["destination"]);
 			Assert.AreEqual("queue://this-contains:three:colons", receivedFrame.Headers["destination"]);
 		}
+
+		[Test]
+		public void Serialize_keep_alive()
+		{
+			var builder = new StompFrameBuilder();
+
+			var data = builder.ToArray(null);
+			Assert.AreEqual(1, data.Count);
+			Assert.AreEqual(10, data.Array[data.Offset]);
+
+			data = builder.ToArray(StompFrame.HeartBeat);
+			Assert.AreEqual(1, data.Count);
+			Assert.AreEqual(10, data.Array[data.Offset]);
+
+			data = builder.ToArray(new StompFrame(string.Empty));
+			Assert.AreEqual(1, data.Count);
+			Assert.AreEqual(10, data.Array[data.Offset]);
+
+			Assert.IsTrue(StompFrame.HeartBeat.IsHeartBeat);
+		}
 	}
 }

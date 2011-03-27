@@ -102,7 +102,7 @@ namespace Quokka.Stomp
 				waitHandle.WaitOne(2000);
 			}
 
-			Assert.AreEqual(receivedText, "This is a simple message");
+			Assert.AreEqual("This is a simple message", receivedText);
 		}
 
 		[Test]
