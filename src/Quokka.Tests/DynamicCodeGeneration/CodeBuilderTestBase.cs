@@ -40,7 +40,9 @@ namespace Quokka.DynamicCodeGeneration
 		    string[] possiblePaths = new[]
 		                                 {
                                              @"c:\program files\Microsoft Visual Studio 8\SDK\v2.0\Bin\peverify.exe",
+                                             @"c:\program files\Microsoft.NET\SDK\v2.0\Bin\peverify.exe",
                                              @"c:\program files\Microsoft SDKs\Windows\v6.0A\bin\peverify.exe",
+                                             @"c:\program files\Microsoft SDKs\Windows\v7.0A\bin\peverify.exe",
 		                                 };
 		    string filePath = null;
             foreach (var possiblePath in possiblePaths)
