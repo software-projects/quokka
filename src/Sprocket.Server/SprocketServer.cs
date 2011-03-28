@@ -41,9 +41,12 @@ namespace Sprocket.Server
                 int portNumber = int.Parse(ConfigurationManager.AppSettings["listenPort"]);
                 var ipv4EndPoint = new IPEndPoint(IPAddress.Any, portNumber);
                 _stompServer.ListenOn(ipv4EndPoint);
-                var ipv6EndPoint = new IPEndPoint(IPAddress.IPv6Any, portNumber);
-                _stompServer.ListenOn(ipv6EndPoint);
-                Log.Info("Service started, listening on port " + portNumber);
+				if (System.Net.Sockets.Socket.OSSupportsIPv6)
+				{
+					var ipv6EndPoint = new IPEndPoint(IPAddress.IPv6Any, portNumber);
+					_stompServer.ListenOn(ipv6EndPoint);
+				}
+            	Log.Info("Service started, listening on port " + portNumber);
             }
             catch (Exception ex)
             {

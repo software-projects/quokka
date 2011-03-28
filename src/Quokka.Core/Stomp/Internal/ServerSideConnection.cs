@@ -38,6 +38,10 @@ namespace Quokka.Stomp.Internal
 			_connectTimer = new Timer(HandleConnectTimeout, null,
 			                          (int) serverData.Config.ConnectFrameTimeout.TotalMilliseconds,
 			                          Timeout.Infinite);
+
+			// it is possible that a frame was received before we subscribed to the FrameReady
+			// event, so schedule a check here
+			ThreadPool.QueueUserWorkItem(delegate { ProcessReceivedFrames(); }, null);
 		}
 
 		public void SendFrame(StompFrame frame)
@@ -274,6 +278,12 @@ namespace Quokka.Stomp.Internal
 
 		private void TransportFrameReady(object sender, EventArgs e)
 		{
+			// Don't lock, as the called method does its own locking.
+			ProcessReceivedFrames();
+		}
+
+		private void ProcessReceivedFrames() {
+
 			var frame = _transport.GetNextFrame();
 			if (frame == null)
 			{

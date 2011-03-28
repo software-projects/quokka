@@ -30,7 +30,7 @@ namespace Quokka.Stomp
 			_finishedEvent = new ManualResetEvent(false);
 			_lockObject = new object();
 
-			Common.Logging.LogManager.Adapter = new Common.Logging.Simple.ConsoleOutLoggerFactoryAdapter();
+			//Common.Logging.LogManager.Adapter = new Common.Logging.Simple.ConsoleOutLoggerFactoryAdapter();
 		}
 
 		[TearDown]
