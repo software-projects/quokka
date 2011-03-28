@@ -256,13 +256,6 @@ namespace Quokka.Stomp.Transport
 
 		private void ReceiveCallbackOnWorkerThread(IAsyncResult ar)
 		{
-			var state = (ReceiveState) ar.AsyncState;
-			if (state.Socket != Socket)
-			{
-				// different socket, do nothing
-				return;
-			}
-
 			bool raiseFrameReady = false;
 
 			try
@@ -273,6 +266,14 @@ namespace Quokka.Stomp.Transport
 					{
 						return;
 					}
+
+					var state = (ReceiveState)ar.AsyncState;
+					if (state.Socket != Socket || Socket == null)
+					{
+						// Different socket, or we no longer have a socket, so do not complete the read
+						return;
+					}
+
 					_receiveInProgress = false;
 					int byteCount = Socket.EndReceive(ar);
 
