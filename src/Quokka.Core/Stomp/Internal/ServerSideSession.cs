@@ -67,22 +67,20 @@ namespace Quokka.Stomp.Internal
 			get { return _clientConnection != null; }
 		}
 
-		public bool IsUnused
+		public bool Cleanup()
 		{
-			get
+			lock (_lockObject)
 			{
-				lock (_lockObject)
+				if (_clientConnection == null)
 				{
-					if (_clientConnection == null)
+					if (DateTime.Now >= _expiresAt)
 					{
-						if (DateTime.Now >= _expiresAt)
-						{
-							return true;
-						}
+						_serverData.RemoveSession(SessionId);
+						return true;
 					}
 				}
-				return false;
 			}
+			return false;
 		}
 
 		public override string ToString()

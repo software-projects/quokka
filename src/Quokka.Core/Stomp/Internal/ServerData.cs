@@ -14,11 +14,11 @@ namespace Quokka.Stomp.Internal
 		private readonly object _lockObject = new object();
 		private readonly Dictionary<string, ServerSideSession> _sessions = new Dictionary<string, ServerSideSession>();
 		private readonly Dictionary<string, MessageQueue> _messageQueues = new Dictionary<string, MessageQueue>();
-		private MessageQueue _serverStatusMessageQueue;
-		private MessageQueue _messageLogMessageQueue;
+		private volatile MessageQueue _serverStatusMessageQueue;
+		private volatile MessageQueue _messageLogMessageQueue;
 		private readonly StompServerConfig _config = new StompServerConfig();
 		private Timer _cleanupTimer;
-		private Timer _serverStatusTimer;
+		private readonly Timer _serverStatusTimer;
 		private bool _isDisposed;
 
 		public StompServerConfig Config
@@ -53,6 +53,14 @@ namespace Quokka.Stomp.Internal
 				ServerSideSession session;
 				_sessions.TryGetValue(sessionId, out session);
 				return session;
+			}
+		}
+
+		public void RemoveSession(string sessionId)
+		{
+			lock (_lockObject)
+			{
+				_sessions.Remove(sessionId);
 			}
 		}
 
@@ -107,34 +115,49 @@ namespace Quokka.Stomp.Internal
 
 		public void LogSendMessage(StompFrame frame, string destination)
 		{
+			MessageQueue messageLoggingQueue = null;
+
 			if (_messageLogMessageQueue != null)
 			{
 				lock(_lockObject)
 				{
+// ReSharper disable ConditionIsAlwaysTrueOrFalse
 					if (_messageLogMessageQueue != null)
+// ReSharper restore ConditionIsAlwaysTrueOrFalse
 					{
-						var msg = new MessageLogMessage
-						          	{
-						          		SentAt = DateTime.Now,
-						          		ContentLength = frame.GetInt32(StompHeader.ContentLength, 0),
-						          		Destination = destination,
-						          	};
-						var msgFrame = new StompFrame(StompCommand.Message)
-						               	{
-						               		Headers =
-						               			{
-						               				{StompHeader.Destination, _messageLogMessageQueue.Name}
-						               			}
-						               	};
-						msgFrame.Serialize(msg);
-						_messageLogMessageQueue.PublishFrame(msgFrame);
+						messageLoggingQueue = _messageLogMessageQueue;
 					}
 				}
+			}
+
+			if (messageLoggingQueue != null)
+			{
+				var msg = new MessageLogMessage
+				          	{
+				          		SentAt = DateTime.Now,
+				          		ContentLength = frame.GetInt32(StompHeader.ContentLength, 0),
+				          		Destination = destination,
+				          	};
+				var msgFrame = new StompFrame(StompCommand.Message)
+				               	{
+				               		Headers =
+				               			{
+				               				{StompHeader.Destination, messageLoggingQueue.Name}
+				               			}
+				               	};
+				msgFrame.Serialize(msg);
+
+
+
+				messageLoggingQueue.PublishFrame(msgFrame);
 			}
 		}
 
 		private void ServerStatusCallback(object state)
 		{
+			List<ServerSideSession> sessions;
+			List<MessageQueue> messageQueues;
+
 			lock (_lockObject)
 			{
 				if (_serverStatusMessageQueue == null)
@@ -142,28 +165,45 @@ namespace Quokka.Stomp.Internal
 					return;
 				}
 
-				var message = new ServerStatusMessage
-				              	{
-				              		MessageQueues = new List<MessageQueueStatus>(),
-				              		Sessions = new List<SessionStatus>(),
-				              	};
+				sessions = new List<ServerSideSession>(_sessions.Values);
+				messageQueues = new List<MessageQueue>(_messageQueues.Values);
+			}
 
-				foreach (var session in _sessions.Values)
-				{
-					var status = session.CreateSessionStatus();
-					message.Sessions.Add(status);
-				}
-				foreach (var messageQueue in _messageQueues.Values)
-				{
-					var status = messageQueue.CreateStatus();
-					message.MessageQueues.Add(status);
-				}
+			// need to be unlocked to perform this, otherwise we could deadlock
 
-				var frame = new StompFrame(StompCommand.Message);
-				frame.Serialize(message);
-				frame.SetExpires(_config.ServerStatusPeriod);
-				_serverStatusMessageQueue.PublishFrame(frame);
 
+			var message = new ServerStatusMessage
+			              	{
+			              		MessageQueues = new List<MessageQueueStatus>(),
+			              		Sessions = new List<SessionStatus>(),
+			              	};
+
+			foreach (var session in sessions)
+			{
+				var status = session.CreateSessionStatus();
+				message.Sessions.Add(status);
+			}
+			foreach (var messageQueue in messageQueues)
+			{
+				var status = messageQueue.CreateStatus();
+				message.MessageQueues.Add(status);
+			}
+
+			var frame = new StompFrame(StompCommand.Message);
+			frame.Serialize(message);
+			frame.SetExpires(_config.ServerStatusPeriod);
+
+			MessageQueue queue;
+			lock (_lockObject)
+			{
+				queue = _serverStatusMessageQueue;
+			}
+
+// ReSharper disable ConditionIsAlwaysTrueOrFalse
+			if (queue != null)
+// ReSharper restore ConditionIsAlwaysTrueOrFalse
+			{
+				queue.PublishFrame(frame);
 				_serverStatusTimer.Change(_config.ServerStatusPeriod, TimeSpan.FromMilliseconds(-1));
 			}
 		}
@@ -174,8 +214,6 @@ namespace Quokka.Stomp.Internal
 			IEnumerable<ServerSideSession> sessions;
 			List<MessageQueue> unusedMessageQueues = null;
 			List<ServerSideSession> unusedSessions = null;
-
-			Log.Debug("Starting cleanup");
 
 			// We don't want to lock all of the data for the time taken to cleanup
 			// everything. What we do is get a list of all message queues and a list
@@ -197,18 +235,29 @@ namespace Quokka.Stomp.Internal
 				messageQueue.RemoveExpired();
 				if (messageQueue.IsUnused)
 				{
-					if (unusedMessageQueues == null)
+					lock (_lockObject)
 					{
-						unusedMessageQueues = new List<MessageQueue>();
+						if (messageQueue.IsUnused)
+						{
+							Log.Debug("Clean up message queue " + messageQueue.Name);
+							_messageQueues.Remove(messageQueue.Name);
+							if (unusedMessageQueues == null)
+							{
+								unusedMessageQueues = new List<MessageQueue>();
+							}
+							unusedMessageQueues.Add(messageQueue);
+						}
 					}
-					unusedMessageQueues.Add(messageQueue);
 				}
 			}
 
 			foreach (var session in sessions)
 			{
-				if (session.IsUnused)
+				if (session.Cleanup())
 				{
+					// This session has now been removed from the _sessions collection
+					Log.Debug("Clean up session " + session.SessionId + ": " + session.ClientId);
+
 					if (unusedSessions == null)
 					{
 						unusedSessions = new List<ServerSideSession>();
@@ -219,42 +268,32 @@ namespace Quokka.Stomp.Internal
 
 			if (unusedMessageQueues != null)
 			{
-				lock (_lockObject)
+				foreach (var messageQueue in unusedMessageQueues)
 				{
-					foreach (var messageQueue in unusedMessageQueues)
-					{
-						if (messageQueue.IsUnused)
-						{
-							_messageQueues.Remove(messageQueue.Name);
-							messageQueue.Dispose();
-						}
-					}
+					messageQueue.Dispose();
 				}
 			}
 
 			if (unusedSessions != null)
 			{
-				lock (_lockObject)
+				foreach (var session in unusedSessions)
 				{
-					foreach (var session in unusedSessions)
-					{
-						if (session.IsUnused)
-						{
-							_sessions.Remove(session.SessionId);
-							session.Dispose();
-						}
-					}
+					session.Dispose();
 				}
 			}
 
-			if (_serverStatusMessageQueue != null && _serverStatusMessageQueue.IsDisposed)
+			lock (_lockObject)
 			{
-				_serverStatusMessageQueue = null;
-			}
 
-			if (_messageLogMessageQueue != null && _messageLogMessageQueue.IsDisposed)
-			{
-				_messageLogMessageQueue = null;
+				if (_serverStatusMessageQueue != null && _serverStatusMessageQueue.IsDisposed)
+				{
+					_serverStatusMessageQueue = null;
+				}
+
+				if (_messageLogMessageQueue != null && _messageLogMessageQueue.IsDisposed)
+				{
+					_messageLogMessageQueue = null;
+				}
 			}
 
 			StartCleanupTimer();
