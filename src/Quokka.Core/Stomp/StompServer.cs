@@ -79,6 +79,8 @@ namespace Quokka.Stomp
 
 		private void ListenerClientConnected(object sender, EventArgs e)
 		{
+			var newConnections = new List<ServerSideConnection>();
+
 			Log.Debug("STOMP Client connected");
 			lock (_lockObject)
 			{
@@ -103,12 +105,19 @@ namespace Quokka.Stomp
 					if (transport.Connected)
 					{
 						_clientConnections.Add(clientConnection);
+						newConnections.Add(clientConnection);
 					}
 					else
 					{
 						Log.Warn("Client connection closed immediately after connection");
 					}
 				}
+			}
+
+			// These objects might have received frames before they had a chance to subscribe to events
+			foreach (var clientConnection in newConnections)
+			{
+				clientConnection.ProcessReceivedFrames();
 			}
 		}
 

@@ -38,10 +38,6 @@ namespace Quokka.Stomp.Internal
 			_connectTimer = new Timer(HandleConnectTimeout, null,
 			                          (int) serverData.Config.ConnectFrameTimeout.TotalMilliseconds,
 			                          Timeout.Infinite);
-
-			// it is possible that a frame was received before we subscribed to the FrameReady
-			// event, so schedule a check here
-			ThreadPool.QueueUserWorkItem(delegate { ProcessReceivedFrames(); }, null);
 		}
 
 		public void SendFrame(StompFrame frame)
@@ -282,28 +278,30 @@ namespace Quokka.Stomp.Internal
 			ProcessReceivedFrames();
 		}
 
-		private void ProcessReceivedFrames() {
-
-			var frame = _transport.GetNextFrame();
-			if (frame == null)
+		public void ProcessReceivedFrames() {
+			for (; ; )
 			{
-				return;
-			}
-
-			lock (_lockObject)
-			{
-				try
+				var frame = _transport.GetNextFrame();
+				if (frame == null)
 				{
-					_stateAction(frame);
+					return;
 				}
-				catch (Exception ex)
+
+				lock (_lockObject)
 				{
-					Log.Error("Unexpected exception: " + ex.Message, ex);
-					if (_transport.Connected)
+					try
 					{
-						var errorFrame = StompFrameUtils.CreateErrorFrame("Internal server error");
-						_transport.SendFrame(errorFrame);
-						DisconnectWithoutLocking();
+						_stateAction(frame);
+					}
+					catch (Exception ex)
+					{
+						Log.Error("Unexpected exception: " + ex.Message, ex);
+						if (_transport.Connected)
+						{
+							var errorFrame = StompFrameUtils.CreateErrorFrame("Internal server error");
+							_transport.SendFrame(errorFrame);
+							DisconnectWithoutLocking();
+						}
 					}
 				}
 			}

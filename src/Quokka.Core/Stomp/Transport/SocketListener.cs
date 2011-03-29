@@ -134,8 +134,21 @@ namespace Quokka.Stomp.Transport
 
 		private void AcceptCallback(IAsyncResult ar)
 		{
+			if (ar.CompletedSynchronously)
+			{
+				ThreadPool.QueueUserWorkItem(delegate { AcceptCallbackOnWorkerThread(ar); }, null);
+			}
+			else
+			{
+				AcceptCallbackOnWorkerThread(ar);
+			}
+		}
+
+		private void AcceptCallbackOnWorkerThread(IAsyncResult ar)
+		{
 			try
 			{
+				bool clientConnected = false;
 				lock (_lockObject)
 				{
 					if (!_isDisposed)
@@ -164,9 +177,14 @@ namespace Quokka.Stomp.Transport
 						{
 							var transport = new ServerTransport(handlerSocket, new TFrameBuilder());
 							_transports.Enqueue(transport);
-							OnClientConnected(EventArgs.Empty);
+							clientConnected = true;
 						}
 					}
+				}
+
+				if (clientConnected)
+				{
+					OnClientConnected(EventArgs.Empty);
 				}
 			}
 			catch (Exception ex)
