@@ -16,7 +16,7 @@ namespace Quokka.Stomp.Internal
 		public bool AutoAcknowledge { get; private set; }
 		private long _lastMessageId;
 		private long _lastAcknowledgedMessageId;
-		private readonly object _lockObject = new object();
+		private readonly object _lockObject = GlobalLock.Instance;
 		private readonly Dictionary<long, StompFrame> _unacknowledgedFrames = new Dictionary<long, StompFrame>();
 
 		public ServerSideSubscription(ServerSideSession session, string subscriptionId, MessageQueue messageQueue,
@@ -27,6 +27,30 @@ namespace Quokka.Stomp.Internal
 			MessageQueue = Verify.ArgumentNotNull(messageQueue, "messageQueue");
 			MessageQueue.AddSubscription(this);
 			AutoAcknowledge = autoAcknowledge;
+
+			MessageQueue.MessageReceived += (o, e) => ReceiveMessagesFromQueue();
+			MessageQueue.MessagePublished += MessageQueueMessagePublished;
+		}
+
+		public void ReceiveMessagesFromQueue()
+		{
+			// This method does not lock
+			for (; ; )
+			{
+				var frame = MessageQueue.RemoveFrame();
+				if (frame == null)
+				{
+					return;
+				}
+				SendFrame(frame);
+			}
+		}
+
+		private void MessageQueueMessagePublished(object sender, StompMessageEventArgs e)
+		{
+			// This method does not lock
+			var frame = StompFrameUtils.CreateCopy(e.Message);
+			SendFrame(frame);
 		}
 
 		public void Dispose()
@@ -38,16 +62,16 @@ namespace Quokka.Stomp.Internal
 		{
 			lock (_lockObject)
 			{
-				long messageId = ++_lastMessageId;
+				var messageId = ++_lastMessageId;
 				frame.Headers[StompHeader.MessageId] = messageId.ToString();
 				frame.Headers[StompHeader.Subscription] = SubscriptionId;
-				Session.SendFrame(frame);
-
 				if (!AutoAcknowledge)
 				{
 					_unacknowledgedFrames.Add(messageId, frame);
 				}
 			}
+
+			Session.SendFrame(frame);
 		}
 
 		public void Acknowledge(long messageId)

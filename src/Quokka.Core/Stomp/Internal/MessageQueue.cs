@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Common.Logging;
 using Quokka.Diagnostics;
 using Quokka.Stomp.Server.Messages;
@@ -11,8 +12,8 @@ namespace Quokka.Stomp.Internal
 	{
 		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
 		private readonly object _lockObject = new object();
+		// it's not really necessary to have a list of subscriptions here anymore -- it could be removed pretty easily
 		private readonly List<ServerSideSubscription> _subscriptions = new List<ServerSideSubscription>();
-		private readonly Random _random = new Random((int) DateTime.Now.Ticks);
 		private readonly LinkedList<StompFrame> _linkedList = new LinkedList<StompFrame>();
 		private long _totalMessageCount;
 		private bool _isDisposed;
@@ -23,9 +24,18 @@ namespace Quokka.Stomp.Internal
 			get { return _isDisposed; }
 		}
 
+		public event EventHandler MessageReceived;
+		public event EventHandler<StompMessageEventArgs> MessagePublished;
+
 		public MessageQueue(string messageQueueName)
 		{
 			Name = Verify.ArgumentNotNull(messageQueueName, "messageQueueName");
+
+			// Ensure the events are subscribed, so that we do not have to check for
+			// null before raising the events. There is a race condition between the
+			// check for null and raising the event.
+			MessageReceived += delegate { };
+			MessagePublished += delegate { };
 		}
 
 		public void Dispose()
@@ -91,25 +101,6 @@ namespace Quokka.Stomp.Internal
 			lock (_lockObject)
 			{
 				_subscriptions.Add(subscription);
-
-				// Send all the queued messages to the subscription. This is not ideal,
-				// because it does not cope with the case where there are multiple clients
-				// connecting for the same queue -- the first client will get all the messages
-				// queued up, and the second client will get none. This is not something that
-				// will be done in the near future with this library, so let it go for now.
-				// Needs a bit of a re-think of the relationship between subscriptions and
-				// the message queue.
-				//
-				// Probably need change it so that the message queue gives the message
-				// to the subscription a couple at a time, and then the subscription asks 
-				// for more messages once they have been acknowledged by the client.
-
-				while (_linkedList.Count > 0)
-				{
-					var frame = _linkedList.First.Value;
-					_linkedList.RemoveFirst();
-					subscription.SendFrame(frame);
-				}
 			}
 		}
 
@@ -121,43 +112,29 @@ namespace Quokka.Stomp.Internal
 			}
 		}
 
-		// WARNING: Race condition here. We select a subscription that is connected, but by
-		// the time we send to it, it could be disconnected.
-		private ServerSideSubscription ChooseSubscription()
-		{
-			var connectedSubscriptions = _subscriptions.Where(subscription => subscription.Session.IsConnected).ToList();
-
-			if (connectedSubscriptions.Count == 0)
-			{
-				return null;
-			}
-			if (connectedSubscriptions.Count == 1)
-			{
-				return connectedSubscriptions.First();
-			}
-
-			int index = _random.Next(connectedSubscriptions.Count);
-			return connectedSubscriptions[index];
-		}
-
 		public void AddFrame(StompFrame frame)
 		{
 			lock (_lockObject)
 			{
 				++_totalMessageCount;
-				var subscription = ChooseSubscription();
-
-				if (subscription != null)
-				{
-					// A subscription exists -- send the message straight away
-					Log.Debug("Sending straight to subscription " + subscription.SubscriptionId);
-					subscription.SendFrame(frame);
-					return;
-				}
-
 				_linkedList.AddLast(frame);
-				Log.Debug("Added to end of queue");
 			}
+
+			ThreadPool.QueueUserWorkItem(delegate { MessageReceived(this, EventArgs.Empty); });
+		}
+
+		public StompFrame RemoveFrame()
+		{
+			StompFrame frame = null;
+			lock (_lockObject)
+			{
+				if (_linkedList.Count > 0)
+				{
+					frame = _linkedList.First();
+					_linkedList.RemoveFirst();
+				}
+			}
+			return frame;
 		}
 
 		/// <summary>
@@ -173,20 +150,9 @@ namespace Quokka.Stomp.Internal
 					// no subscriptions
 					return;
 				}
-
-				for (int index = 1; index < _subscriptions.Count; ++index)
-				{
-					// Because each subscription gets to modify the frame,
-					// the second and subsequent subscriptions (if any) 
-					// need to have a copy.
-					var copy = StompFrameUtils.CreateCopy(frame);
-					_subscriptions[index].SendFrame(copy);
-				}
-
-				// Minor optimisation: publish the message to the first subscription 
-				// without taking a copy
-				_subscriptions.First().SendFrame(frame);
 			}
+
+			ThreadPool.QueueUserWorkItem(delegate { MessagePublished(this, new StompMessageEventArgs(frame)); });
 		}
 	}
 }

@@ -12,7 +12,7 @@ namespace Quokka.Stomp.Internal
 	internal class ServerSideSession : IDisposable
 	{
 		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
-		private readonly object _lockObject = new object();
+		private readonly object _lockObject = GlobalLock.Instance;
 		private readonly ServerData _serverData;
 		private ServerSideConnection _clientConnection;
 		private readonly Dictionary<string, ServerSideSubscription> _subscriptions = new Dictionary<string, ServerSideSubscription>();
@@ -245,6 +245,7 @@ namespace Quokka.Stomp.Internal
 			var subscription = new ServerSideSubscription(this, id, messageQueue, ack == "client");
 			_subscriptions.Add(id, subscription);
 			SendReceiptIfNecessary(frame);
+
 		}
 
 		private void HandleUnsubscribeCommand(StompFrame frame)

@@ -149,6 +149,7 @@
     <Compile Include="Sprocket\SprocketClient.cs" />
     <Compile Include="Sprocket\SprocketClient.Subscriber.cs" />
     <Compile Include="Stomp\Internal\ErrorMessages.cs" />
+    <Compile Include="Stomp\Internal\GlobalLock.cs" />
     <Compile Include="Stomp\Internal\HeartBeatValues.cs" />
     <Compile Include="Stomp\Internal\QueueName.cs" />
     <Compile Include="Stomp\Server\Messages\MessageLogMessage.cs" />

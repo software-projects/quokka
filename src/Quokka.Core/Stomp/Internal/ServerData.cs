@@ -11,7 +11,7 @@ namespace Quokka.Stomp.Internal
 	internal class ServerData : IDisposable
 	{
 		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
-		private readonly object _lockObject = new object();
+		private readonly object _lockObject = GlobalLock.Instance;
 		private readonly Dictionary<string, ServerSideSession> _sessions = new Dictionary<string, ServerSideSession>();
 		private readonly Dictionary<string, MessageQueue> _messageQueues = new Dictionary<string, MessageQueue>();
 		private volatile MessageQueue _serverStatusMessageQueue;

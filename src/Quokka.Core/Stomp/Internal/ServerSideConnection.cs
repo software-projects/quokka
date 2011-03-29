@@ -12,7 +12,7 @@ namespace Quokka.Stomp.Internal
 
 		private readonly ITransport<StompFrame> _transport;
 		private readonly ServerData _serverData;
-		private readonly object _lockObject = new object();
+		private readonly object _lockObject = GlobalLock.Instance;
 
 		private delegate void StateAction(StompFrame frame);
 
