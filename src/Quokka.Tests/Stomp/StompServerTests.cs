@@ -82,8 +82,16 @@ namespace Quokka.Stomp
 			string receivedText = null;
 			int receivedMessageCount = 0;
 			var waitHandle = new ManualResetEvent(false);
+			var subscribedWaitHandle = new ManualResetEvent(false);
 
 			var subscription = client2.CreateSubscription(queueName);
+			subscription.StateChanged += delegate
+			                             	{
+												if (subscription.State == StompSubscriptionState.Subscribed)
+												{
+													subscribedWaitHandle.Set();
+												}
+			                             	};
 			subscription.MessageArrived += delegate(object sender, StompMessageEventArgs e)
 			                               	{
 			                               		receivedText = e.Message.BodyText;
@@ -92,17 +100,9 @@ namespace Quokka.Stomp
 			                               	};
 			subscription.Subscribe();
 
+			WaitOnHandle(subscribedWaitHandle, 2000, "Timed out waiting for subscription");
 			client1.SendTextMessage(queueName, "This is a simple message");
-
-			if (Debugger.IsAttached)
-			{
-				waitHandle.WaitOne();
-			}
-			else
-			{
-				Assert.IsTrue(waitHandle.WaitOne(2000), "Timed out waiting for message");
-			}
-
+			WaitOnHandle(waitHandle, 2000, "Timed out waiting for message");
 			Assert.AreEqual("This is a simple message", receivedText);
 		}
 
@@ -226,6 +226,18 @@ namespace Quokka.Stomp
 
 			Assert.AreEqual(messageText, received1Text, "Unexpected value for received1Text");
 			Assert.AreEqual(messageText, received2Text, "Unexpected value for received2Text");
+		}
+
+		private static void WaitOnHandle(WaitHandle waitHandle, int milliseconds, string timeoutMessage)
+		{
+			if (Debugger.IsAttached)
+			{
+				waitHandle.WaitOne();
+			}
+			else
+			{
+				Assert.IsTrue(waitHandle.WaitOne(milliseconds), timeoutMessage);
+			}
 		}
 	}
 }
