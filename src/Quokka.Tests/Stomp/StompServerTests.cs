@@ -100,7 +100,7 @@ namespace Quokka.Stomp
 			}
 			else
 			{
-				waitHandle.WaitOne(2000);
+				Assert.IsTrue(waitHandle.WaitOne(2000), "Timed out waiting for message");
 			}
 
 			Assert.AreEqual("This is a simple message", receivedText);

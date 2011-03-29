@@ -278,8 +278,9 @@ namespace Quokka.Stomp.Internal
 			ProcessReceivedFrames();
 		}
 
-		public void ProcessReceivedFrames() {
-			for (; ; )
+		public void ProcessReceivedFrames()
+		{
+			for (;;)
 			{
 				var frame = _transport.GetNextFrame();
 				if (frame == null)
