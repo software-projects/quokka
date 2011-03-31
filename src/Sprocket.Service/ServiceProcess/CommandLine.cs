@@ -5,7 +5,7 @@ using System.Reflection;
 using NDesk.Options;
 using Quokka.Diagnostics;
 
-namespace Sprocket.Server.ServiceProcess
+namespace Sprocket.Service.ServiceProcess
 {
     public class CommandLine
     {

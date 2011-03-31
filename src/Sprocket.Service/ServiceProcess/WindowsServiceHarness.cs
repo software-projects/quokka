@@ -2,7 +2,7 @@
 using System.ServiceProcess;
 using Quokka.Diagnostics;
 
-namespace Sprocket.Server.ServiceProcess
+namespace Sprocket.Service.ServiceProcess
 {
     [ToolboxItem(false)]
     public class WindowsServiceHarness : ServiceBase

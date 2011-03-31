@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sprocket.Server.ServiceProcess
+namespace Sprocket.Service.ServiceProcess
 {
     // some of my favorite extension methods off of the Type class
     public static class TypeExtensions

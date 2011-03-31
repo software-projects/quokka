@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{85DF2EA0-EA0D-44FA-9744-DA5403CB522B}</ProjectGuid>
+    <ProjectGuid>{E1C1FA24-05BC-4455-BD04-46AA10D2DF98}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Sprocket.Server</RootNamespace>
-    <AssemblyName>Sprocket.Server</AssemblyName>
+    <RootNamespace>Sprocket.Service</RootNamespace>
+    <AssemblyName>Sprocket.Service</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\Sprocket.Server\bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -25,7 +25,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\Sprocket.Server\bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -34,30 +34,40 @@
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\log4net\log4net.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.configuration" />
+    <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SupervisedProcess\SupervisedProcessHarness.cs" />
-    <Compile Include="SupervisedProcess\ProcessUtils.cs" />
-    <Compile Include="SupervisedProcess\SupervisedService.cs" />
+    <Compile Include="ProcessExtensions.cs" />
+    <Compile Include="ProcessSupervisor.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SupervisedProcess\ConsoleHarness.cs" />
-    <Compile Include="SprocketServer.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-    <None Include="Sprocket.Server.log4net.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <Compile Include="ServiceProcess\CommandLine.cs" />
+    <Compile Include="ServiceProcess\ConsoleHarness.cs" />
+    <Compile Include="ServiceProcess\Options.cs" />
+    <Compile Include="ServiceProcess\TypeExtensions.cs" />
+    <Compile Include="ServiceProcess\WindowsService.cs" />
+    <Compile Include="ServiceProcess\WindowsServiceAttribute.cs" />
+    <Compile Include="ServiceProcess\WindowsServiceHarness.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ServiceProcess\WindowsServiceInstaller.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="SprocketService.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Quokka.Core\Quokka.Core.csproj">
@@ -66,16 +76,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Common.Logging.dll">
+    <None Include="App.config" />
+    <None Include="Sprocket.Server.log4net.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Common.Logging.Log4Net.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup Condition=" '$(FormalBuild)' == 'true' ">
-    <!-- include NAnt-generated assembly info during a formal build -->
-    <Compile Include="..\CommonAssemblyInfo.cs" />
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

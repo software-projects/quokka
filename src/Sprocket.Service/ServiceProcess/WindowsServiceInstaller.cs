@@ -5,7 +5,7 @@ using System.Configuration.Install;
 using System.Reflection;
 using System.ServiceProcess;
 
-namespace Sprocket.Server.ServiceProcess
+namespace Sprocket.Service.ServiceProcess
 {
     // A generic windows service installer
     [RunInstaller(true)]

@@ -75,30 +75,36 @@
 						</Component>
 						<Component Id="Sprocket.Server.exe" Guid="*">
 							<File Id="Sprocket.Server.exe" KeyPath="yes"/>
-							<ServiceInstall Id="Sprocket.Server.ServiceInstall"
-											Name="Sprocket.Server"
-											Description="Sprocket Service Broker."
-											DisplayName="Sprocket Server"
-											ErrorControl="normal"
-											EraseDescription="no"
-											Start="auto"
-											Type="ownProcess"
-											Vital="yes">
-							</ServiceInstall>
-							<ServiceControl Id="Sprocket.Server.ServiceControl" Start="install" Stop="both" Remove="uninstall"
-															Name="Sprocket.Server" Wait="yes"/>
-							<util:EventSource Name="Sprocket.Server"
-												 Log="Application"
-												 EventMessageFile="[WindowsFolder]Microsoft.NET\Framework\v$(var.RequiredClrVersion)\EventLogMessages.dll"
-												 SupportsErrors="yes"
-												 SupportsWarnings="yes"
-												 SupportsInformationals="yes"/>
 						</Component>
 						<Component Id="Sprocket.Server.exe.config" Guid="*">
 							<File Id="Sprocket.Server.exe.config" KeyPath="yes"/>
 						</Component>
 						<Component Id="Sprocket.Server.log4net.config" Guid="*">
 							<File Id="Sprocket.Server.log4net.config" KeyPath="yes"/>
+						</Component>
+						<Component Id="Sprocket.Service.exe" Guid="*">
+							<File Id="Sprocket.Service.exe" KeyPath="yes"/>
+							<ServiceInstall Id="Sprocket.Service.ServiceInstall"
+											Name="Sprocket"
+											Description="Sprocket Service Broker."
+											DisplayName="Sprocket"
+											ErrorControl="normal"
+											EraseDescription="no"
+											Start="auto"
+											Type="ownProcess"
+											Vital="yes">
+							</ServiceInstall>
+							<ServiceControl Id="Sprocket.Service.ServiceControl" Start="install" Stop="both" Remove="uninstall"
+															Name="Sprocket" Wait="yes"/>
+							<util:EventSource Name="Sprocket"
+												 Log="Application"
+												 EventMessageFile="[WindowsFolder]Microsoft.NET\Framework\v$(var.RequiredClrVersion)\EventLogMessages.dll"
+												 SupportsErrors="yes"
+												 SupportsWarnings="yes"
+												 SupportsInformationals="yes"/>
+						</Component>
+						<Component Id="Sprocket.Service.exe.config" Guid="*">
+							<File Id="Sprocket.Service.exe.config" KeyPath="yes"/>
 						</Component>
 					</Directory>
 				</Directory>
@@ -145,6 +151,8 @@
 			<ComponentRef Id="Sprocket.Server.exe"/>
 			<ComponentRef Id="Sprocket.Server.exe.config"/>
 			<ComponentRef Id="Sprocket.Server.log4net.config"/>
+			<ComponentRef Id="Sprocket.Service.exe"/>
+			<ComponentRef Id="Sprocket.Service.exe.config"/>
 		</ComponentGroup>
 
 		<Feature Id="DefaultFeature" Level="1">

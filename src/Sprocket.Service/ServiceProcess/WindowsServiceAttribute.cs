@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ServiceProcess;
 
-namespace Sprocket.Server.ServiceProcess
+namespace Sprocket.Service.ServiceProcess
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
     public class WindowsServiceAttribute : Attribute

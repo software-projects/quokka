@@ -2,19 +2,14 @@
 using System.Configuration;
 using System.IO;
 using System.Net;
-using System.ServiceProcess;
 using log4net;
 using log4net.Config;
 using Quokka.Stomp;
-using Sprocket.Server.ServiceProcess;
+using Sprocket.Server.SupervisedProcess;
 
 namespace Sprocket.Server
 {
-    [WindowsService("Sprocket.Server", 
-        DisplayName="Sprocket Server", 
-        Description="A simple Service Broker",
-        StartMode = ServiceStartMode.Automatic)]
-    public class SprocketServer : WindowsService
+    public class SprocketServer : MonitoredService
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof (SprocketServer));
         private StompServer _stompServer;
@@ -46,19 +41,20 @@ namespace Sprocket.Server
 					var ipv6EndPoint = new IPEndPoint(IPAddress.IPv6Any, portNumber);
 					_stompServer.ListenOn(ipv6EndPoint);
 				}
-            	Log.Info("Service started, listening on port " + portNumber);
+            	Log.Info("Server started, listening on port " + portNumber);
             }
             catch (Exception ex)
             {
-                Log.Error("Failed to start service: " + ex.Message, ex);
+                Log.Error("Failed to start server: " + ex.Message, ex);
                 throw;
             }
         }
 
         public override void Stop()
         {
+        	System.Threading.Thread.Sleep(20000);
             _stompServer.Dispose();
-            Log.Info("Service stopped");
+            Log.Info("Server stopped");
         }
     }
 }

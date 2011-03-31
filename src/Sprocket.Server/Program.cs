@@ -1,4 +1,4 @@
-﻿using Sprocket.Server.ServiceProcess;
+﻿using Sprocket.Server.SupervisedProcess;
 
 namespace Sprocket.Server
 {
@@ -6,7 +6,7 @@ namespace Sprocket.Server
     {
         private static void Main(string[] args)
         {
-            WindowsService.Run<SprocketServer>(args);
+            MonitoredService.Run<SprocketServer>(args);
         }
     }
 }

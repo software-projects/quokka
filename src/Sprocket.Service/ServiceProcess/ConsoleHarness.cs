@@ -2,7 +2,7 @@
 using System.Threading;
 using Quokka.Diagnostics;
 
-namespace Sprocket.Server.ServiceProcess
+namespace Sprocket.Service.ServiceProcess
 {
     public static class ConsoleHarness
     {
