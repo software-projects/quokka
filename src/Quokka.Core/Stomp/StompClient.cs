@@ -628,7 +628,7 @@ namespace Quokka.Stomp
 		{
 			if (_negotiatedHeartBeatValues.Incoming > 0)
 			{
-				_incomingHeartBeatTimer.Change(_negotiatedHeartBeatValues.Incoming, Timeout.Infinite);
+				_incomingHeartBeatTimer.Change(_negotiatedHeartBeatValues.Incoming*2, Timeout.Infinite);
 			}
 		}
 
