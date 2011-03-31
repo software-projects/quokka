@@ -28,14 +28,13 @@ namespace Quokka.Stomp.Internal
 			MessageQueue.AddSubscription(this);
 			AutoAcknowledge = ack == StompAck.Auto;
 
-			MessageQueue.MessageReceived += (o, e) => ReceiveMessagesFromQueue();
+			MessageQueue.MessageReceived += MessageQueueMessageReceived;
 			MessageQueue.MessagePublished += MessageQueueMessagePublished;
 		}
 
 		public void ReceiveMessagesFromQueue()
 		{
-			// This method does not lock
-			for (; ; )
+			while (Session.IsConnected)
 			{
 				var frame = MessageQueue.RemoveFrame();
 				if (frame == null)
@@ -53,9 +52,16 @@ namespace Quokka.Stomp.Internal
 			SendFrame(frame);
 		}
 
+		private void MessageQueueMessageReceived(object sender, EventArgs e)
+		{
+			ReceiveMessagesFromQueue();
+		}
+
 		public void Dispose()
 		{
 			MessageQueue.RemoveSubscription(this);
+			MessageQueue.MessageReceived -= MessageQueueMessageReceived;
+			MessageQueue.MessagePublished -= MessageQueueMessagePublished;
 		}
 
 		public void SendFrame(StompFrame frame)

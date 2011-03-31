@@ -91,6 +91,8 @@ namespace Quokka.Stomp.Internal
 		public bool AddConnection(ServerSideConnection clientConnection)
 		{
 			Verify.ArgumentNotNull(clientConnection, "clientConnection");
+			IEnumerable<ServerSideSubscription> subscriptions = null;
+
 			lock (_lockObject)
 			{
 				if (_clientConnection != null)
@@ -99,8 +101,22 @@ namespace Quokka.Stomp.Internal
 				}
 				_clientConnection = clientConnection;
 				_clientConnection.ConnectionClosed += ClientConnectionClosed;
-				return true;
+
+				if (_subscriptions.Count > 0)
+				{
+					subscriptions = new List<ServerSideSubscription>(_subscriptions.Values);
+				}
 			}
+
+			if (subscriptions != null)
+			{
+				foreach (var subscription in subscriptions)
+				{
+					subscription.ReceiveMessagesFromQueue();
+				}
+			}
+
+			return true;
 		}
 
 		private void ClientConnectionClosed(object sender, EventArgs e)

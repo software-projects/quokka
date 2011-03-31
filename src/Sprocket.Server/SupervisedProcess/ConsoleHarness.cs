@@ -7,7 +7,7 @@ namespace Sprocket.Server.SupervisedProcess
     public class ConsoleHarness
     {
         private readonly MonitoredService _serviceImplementation;
-        private ManualResetEvent _stopEvent;
+        private readonly ManualResetEvent _stopEvent;
 
 		public ConsoleHarness(MonitoredService serviceImplementation)
 		{
@@ -15,22 +15,19 @@ namespace Sprocket.Server.SupervisedProcess
 			_stopEvent = new ManualResetEvent(false);
 		}
 
-        public void Run(string[] args)
-        {
-            if (args == null)
-            {
-                args = new string[0];
-            }
-            Console.CancelKeyPress += ConsoleCancelKeyPress;
-            using (_stopEvent = new ManualResetEvent(false))
-            {
-                _serviceImplementation.Start(args);
-                _stopEvent.WaitOne();
-            }
-            _serviceImplementation.Stop();
-        }
+		public void Run(string[] args)
+		{
+			if (args == null)
+			{
+				args = new string[0];
+			}
+			Console.CancelKeyPress += ConsoleCancelKeyPress;
+			_serviceImplementation.Start(args);
+			_stopEvent.WaitOne();
+			_serviceImplementation.Stop();
+		}
 
-        private void ConsoleCancelKeyPress(object sender, ConsoleCancelEventArgs e)
+    	private void ConsoleCancelKeyPress(object sender, ConsoleCancelEventArgs e)
         {
             e.Cancel = true;
             _stopEvent.Set();

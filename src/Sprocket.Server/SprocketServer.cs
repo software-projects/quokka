@@ -52,7 +52,6 @@ namespace Sprocket.Server
 
         public override void Stop()
         {
-        	System.Threading.Thread.Sleep(20000);
             _stompServer.Dispose();
             Log.Info("Server stopped");
         }
