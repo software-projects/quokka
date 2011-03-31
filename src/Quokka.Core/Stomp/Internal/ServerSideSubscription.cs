@@ -20,13 +20,13 @@ namespace Quokka.Stomp.Internal
 		private readonly Dictionary<long, StompFrame> _unacknowledgedFrames = new Dictionary<long, StompFrame>();
 
 		public ServerSideSubscription(ServerSideSession session, string subscriptionId, MessageQueue messageQueue,
-		                              bool autoAcknowledge)
+		                              string ack)
 		{
 			Session = Verify.ArgumentNotNull(session, "session");
 			SubscriptionId = Verify.ArgumentNotNull(subscriptionId, "subscriptionId");
 			MessageQueue = Verify.ArgumentNotNull(messageQueue, "messageQueue");
 			MessageQueue.AddSubscription(this);
-			AutoAcknowledge = autoAcknowledge;
+			AutoAcknowledge = ack == StompAck.Auto;
 
 			MessageQueue.MessageReceived += (o, e) => ReceiveMessagesFromQueue();
 			MessageQueue.MessagePublished += MessageQueueMessagePublished;

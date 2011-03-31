@@ -242,7 +242,7 @@ namespace Quokka.Stomp.Internal
 
 			var messageQueue = _serverData.FindMessageQueue(destination);
 
-			var subscription = new ServerSideSubscription(this, id, messageQueue, ack == "client");
+			var subscription = new ServerSideSubscription(this, id, messageQueue, ack);
 			_subscriptions.Add(id, subscription);
 			SendReceiptIfNecessary(frame);
 
