@@ -34,9 +34,23 @@ namespace Quokka.Krypton
 			}
 		}
 
+		// This class is in response to a bug in Windows Forms.
+		// Deeply nested controls do not resize properly when their parents are resized.
+		// See http://support.microsoft.com/kb/953934
+		private class MyKryptonPage : KryptonPage
+		{
+			protected override void OnSizeChanged(EventArgs e)
+			{
+				if (Handle != null)
+				{
+					BeginInvoke((MethodInvoker) (() => base.OnSizeChanged(e)));
+				}
+			}
+		}
+
 		protected override Control CreateHostControl()
 		{
-			return new KryptonPage();
+			return new MyKryptonPage();
 		}
 
 		protected override void OnAdd(RegionItem item)
