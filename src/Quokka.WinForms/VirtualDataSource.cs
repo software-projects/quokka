@@ -210,6 +210,37 @@ namespace Quokka.WinForms
 		}
 
 		/// <summary>
+		/// 	Add or update an item to the store. If the item does not already exist in the store, it
+		///		is added. If there is an item in the store with the same Id, then it is replaced.
+		/// </summary>
+		/// <param name = "obj"></param>
+		/// <remarks>
+		///		Unlike the <see cref="Add"/> method, this method will force a rebuild of the list
+		///		regardless of whether the updated item is visible according to the current filter.
+		///		This is because the update may have caused the object to go from visible to invisible,
+		///		or vice-versa.
+		/// </remarks>
+		public void Update(TItem obj)
+		{
+			// ignore null objects
+			if (obj == null)
+			{
+				return;
+			}
+
+			lock (_lockObject)
+			{
+				TId id = GetId(obj);
+				_dict[id] = obj;
+
+				_sortRequired = true;
+				_buildListRequired = true;
+			}
+
+			RaiseListChanged();
+		}
+
+		/// <summary>
 		/// 	Add a range of items to the store. This is considerably more efficent than calling <see cref = "Add" />
 		/// 	repeatedly for each item in a large collection.
 		/// </summary>
