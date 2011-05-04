@@ -133,6 +133,7 @@
 	</target>
 
 	<target name="zipfile" depends="compile">
+		<mkdir dir="${output.artifacts.dir}"/>
 		<zip zipfile="${zip.file.path}">
 		  <fileset basedir="${output.bin.dir}">
 			<include name="Quokka**.dll" />
