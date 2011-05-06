@@ -139,7 +139,6 @@
     <Compile Include="Collections\IDisposableCollection.Generic.cs" />
     <Compile Include="Data\DataReader\DataReaderDecorator.cs" />
     <Compile Include="Data\DataReader\StringTrimDataReader.cs" />
-    <Compile Include="Data\Internal\DataRecordConverterTypeBuilder2.cs" />
     <Compile Include="Data\Internal\TypeExtensions.cs" />
     <Compile Include="Diagnostics\ExceptionExtensions.cs" />
     <Compile Include="Sprocket\CurrentMessage.cs" />
