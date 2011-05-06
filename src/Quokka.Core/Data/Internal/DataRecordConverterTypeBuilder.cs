@@ -46,13 +46,83 @@ namespace Quokka.Data.Internal
 	{
 		private readonly List<string> _errors = new List<string>();
 
-		private readonly Dictionary<DataRecordFieldInfo, PropertyInfo> _mapFieldToProperty =
-			new Dictionary<DataRecordFieldInfo, PropertyInfo>();
+		private readonly Dictionary<DataRecordFieldInfo, PropertyList> _mapFieldToProperty =
+			new Dictionary<DataRecordFieldInfo, PropertyList>();
 
 		private readonly Dictionary<PropertyInfo, DataRecordFieldInfo> _mapPropertyToField =
 			new Dictionary<PropertyInfo, DataRecordFieldInfo>();
 
 		private readonly DataRecordConverterSpec _queryInfo;
+
+		private class PropertyList
+		{
+			public readonly List<PropertyInfo> GetProperties = new List<PropertyInfo>();
+			public readonly PropertyInfo SetProperty;
+			public readonly Type RecordType;
+			public readonly string Expression;
+			public readonly List<string> Errors = new List<string>();
+			private static readonly char[] SplitChars = new[] {'.'};
+
+			public PropertyList(Type recordType, string expression)
+			{
+				RecordType = Verify.ArgumentNotNull(recordType, "recordType");
+				Expression = Verify.ArgumentNotNull(expression, "expression");
+
+				var propertyNames = Expression.Split(SplitChars);
+
+				var type = RecordType;
+				for (int index = 0; index < propertyNames.Length - 1; ++index)
+				{
+					var propertyName = propertyNames[index].Trim();
+					var property = type.GetPropertyCaseInsensitive(propertyName);
+					if (property == null)
+					{
+						Errors.Add(string.Format("Type {0} does not have a property named '{1}'", type.FullName, propertyName));
+						return;
+					}
+
+					GetProperties.Add(property);
+					type = property.PropertyType;
+				}
+
+				var setPropertyName = propertyNames[propertyNames.Length - 1].Trim();
+				SetProperty = type.GetPropertyCaseInsensitive(setPropertyName);
+				if (SetProperty == null)
+				{
+					Errors.Add(string.Format("Type {0} does not have a property named '{1}'", type.FullName, setPropertyName));
+				}
+
+				foreach (var property in GetProperties)
+				{
+					if (!property.CanRead)
+					{
+						Errors.Add(string.Format("Property is not readable: {0} ({1})", property.Name, property.DeclaringType.FullName));
+					}
+				}
+
+				if (SetProperty != null && !SetProperty.HasPublicSetter())
+				{
+					Errors.Add(string.Format("Property {0} is not publicly writable ({1})", SetProperty.Name, SetProperty.DeclaringType.FullName));
+				}
+			}
+
+			public bool HasErrors
+			{
+				get { return Errors != null && Errors.Count > 0; }
+			}
+
+			public Type PropertyType
+			{
+				get
+				{
+					if (SetProperty == null)
+					{
+						return null;
+					}
+					return SetProperty.PropertyType;
+				}
+			}
+		}
 
 		public DataRecordConverterTypeBuilder(DataRecordConverterSpec queryInfo)
 		{
@@ -70,7 +140,7 @@ namespace Quokka.Data.Internal
 
 			foreach (PropertyInfo property in properties)
 			{
-				if (property.CanWrite)
+				if (property.HasPublicSetter())
 				{
 					propertyMap.Add(property.Name, property);
 				}
@@ -78,29 +148,25 @@ namespace Quokka.Data.Internal
 
 			foreach (DataRecordFieldInfo field in queryInfo.Fields)
 			{
-				PropertyInfo property;
-				if (propertyMap.TryGetValue(field.FieldName, out property))
+				var propertyList = new PropertyList(queryInfo.RecordType, field.FieldName);
+				if (propertyList.HasErrors)
 				{
-					if (DataRecordConverterMethod.CanHandleConversion(field.FieldType, property.PropertyType))
-					{
-						_mapFieldToProperty.Add(field, property);
-					}
-					else
-					{
-						_errors.Add(string.Format("Cannot convert from {0} to {1} for {2}",
-						                          field.FieldType.Name, property.PropertyType.Name, field.FieldName));
-					}
+					_errors.AddRange(propertyList.Errors);
+				}
+				else if (DataRecordConverterMethod.CanHandleConversion(field.FieldType, propertyList.PropertyType))
+				{
+					_mapFieldToProperty.Add(field, propertyList);
 				}
 				else
 				{
-					_errors.Add(string.Format("Type {0} does not have a property named '{1}'",
-					                          _queryInfo.RecordType, field.FieldName));
+					_errors.Add(string.Format("Cannot convert from {0} to {1} for {2}",
+					                          field.FieldType.Name, propertyList.PropertyType.Name, field.FieldName));
 				}
 			}
 
 			foreach (PropertyInfo property in properties)
 			{
-				if (property.CanWrite)
+				if (property.HasPublicSetter())
 				{
 					DataRecordFieldInfo field;
 					if (dataRecordMap.TryGetValue(property.Name, out field))
@@ -196,8 +262,14 @@ namespace Quokka.Data.Internal
 
 			foreach (DataRecordFieldInfo fieldInfo in _queryInfo.Fields)
 			{
-				PropertyInfo property = _mapFieldToProperty[fieldInfo];
+				PropertyList propertyList = _mapFieldToProperty[fieldInfo];
 				generator.Emit(OpCodes.Ldloc_0);
+
+				foreach (var getProperty in propertyList.GetProperties)
+				{
+					generator.Emit(OpCodes.Callvirt, getProperty.GetGetMethod());
+				}
+
 				generator.Emit(OpCodes.Ldarg_0);
 
 				switch (fieldInfo.Index)
@@ -234,8 +306,8 @@ namespace Quokka.Data.Internal
 					break;
 				}
 
-				generator.Emit(OpCodes.Call, DataRecordConverterMethod.GetMethod(fieldInfo.FieldType, property.PropertyType));
-				generator.Emit(OpCodes.Callvirt, _mapFieldToProperty[fieldInfo].GetSetMethod());
+				generator.Emit(OpCodes.Call, DataRecordConverterMethod.GetMethod(fieldInfo.FieldType, propertyList.PropertyType));
+				generator.Emit(OpCodes.Callvirt, propertyList.SetProperty.GetSetMethod());
 			}
 
 			generator.Emit(OpCodes.Ret);

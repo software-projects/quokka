@@ -79,13 +79,18 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.SqlServerCe, Version=3.5.1.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Castle\WindsorContainerTests.cs" />
     <Compile Include="Castle\WindsorServiceContainerTests.cs" />
+    <Compile Include="Data\TestQueries\NestedPropertyQuery.cs" />
+    <Compile Include="Data\TestQueries\SimpleQuery.cs" />
     <Compile Include="Data\SqlExpressUtilTests.cs" />
+    <Compile Include="Data\SqlQueryTests.cs" />
+    <Compile Include="Data\TestDatabase.cs" />
     <Compile Include="Diagnostics\VerifyTests.cs" />
     <Compile Include="DynamicCodeGeneration\CodeBuilderTestBase.cs" />
     <Compile Include="DynamicCodeGeneration\DuckProxyTests.cs" />
@@ -163,6 +168,12 @@
   <ItemGroup Condition=" '$(FormalBuild)' == 'true' ">
     <!-- include NAnt-generated assembly info during a formal build -->
     <Compile Include="..\CommonAssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Data\TestQueries\SimpleQuery.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Data\TestQueries\NestedPropertyQuery.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Collections\" />
