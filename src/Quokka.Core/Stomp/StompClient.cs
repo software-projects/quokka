@@ -494,65 +494,72 @@ namespace Quokka.Stomp
 			}
 		}
 
-		private void HandleReceipt(StompFrame message)
-		{
-			var receiptIdText = message.Headers[StompHeader.ReceiptId];
-			if (Log.IsDebugEnabled)
-			{
-				Log.DebugFormat("{0} received, {1}={2}", message.Command, StompHeader.ReceiptId, receiptIdText);
-			}
-			if (receiptIdText == null)
-			{
-				// TODO: what do we do here, disconnect?
-				Log.ErrorFormat("Missing {0} header in {1} command", StompHeader.ReceiptId, message.Command);
-				_transport.Shutdown();
-				return;
-			}
+        private void HandleReceipt(StompFrame message)
+        {
+            var receiptIdText = message.Headers[StompHeader.ReceiptId];
+            if (Log.IsDebugEnabled)
+            {
+                Log.DebugFormat("{0} received, {1}={2}", message.Command, StompHeader.ReceiptId, receiptIdText);
+            }
+            if (receiptIdText == null)
+            {
+                // TODO: what do we do here, disconnect?
+                Log.ErrorFormat("Missing {0} header in {1} command", StompHeader.ReceiptId, message.Command);
+                _transport.Shutdown();
+                return;
+            }
 
-			long receiptId;
-			if (!long.TryParse(receiptIdText, out receiptId))
-			{
-				// TODO: what to we do here, disconnect?
-				Log.ErrorFormat("Invalid value for {0} header: {1}", StompHeader.ReceiptId, receiptIdText);
-				_transport.Shutdown();
-				return;
-			}
+            long receiptId;
+            if (!long.TryParse(receiptIdText, out receiptId))
+            {
+                // TODO: what to we do here, disconnect?
+                Log.ErrorFormat("Invalid value for {0} header: {1}", StompHeader.ReceiptId, receiptIdText);
+                _transport.Shutdown();
+                return;
+            }
 
-			while (_pendingSendMessages.Count > 0)
-			{
-				var sentMessage = _pendingSendMessages.Peek();
-				var idText = sentMessage.Headers[StompHeader.Receipt];
-				if (idText == null)
-				{
-					// message that does not need a receipt, so remove it
-					_pendingSendMessages.Dequeue();
-					continue;
-				}
+            if (_pendingSendMessages.Count == 0)
+            {
+                Log.ErrorFormat("Received RECEIPT {0} but nothing asked for it", receiptId);
+                _transport.Shutdown();
+                return;
+            }
 
-				var id = long.Parse(sentMessage.Headers[StompHeader.Receipt]);
-				if (id > receiptId)
-				{
-					// this message has not been acknowledged
-					break;
-				}
+            var sentMessage = _pendingSendMessages.Peek();
+            var idText = sentMessage.Headers[StompHeader.Receipt];
+            if (idText == null)
+            {
+                Log.ErrorFormat("Received RECEIPT {0} but nothing asked for it (and there is a message queued)",
+                               receiptId);
+                _transport.Shutdown();
+                return;
+            }
 
-				_pendingSendMessages.Dequeue();
+            // the current implementation never sends more than one message requiring receipt without receiving a receipt
+            var id = long.Parse(sentMessage.Headers[StompHeader.Receipt]);
+            if (id != receiptId)
+            {
+                Log.ErrorFormat("Received RECEIPT {0} but expected RECEIPT {1}", id, receiptId);
+                _transport.Shutdown();
+            }
 
-				if (sentMessage.Command == StompCommand.Subscribe)
-				{
-					int subscriptionId = int.Parse(sentMessage.Headers[StompHeader.Id]);
-					StompSubscription subscription;
-					if (_subscriptions.TryGetValue(subscriptionId, out subscription))
-					{
-						subscription.Confirm();
-					}
-				}
-			}
-			_sendInProgress = false;
-			SendNextMessage();
-		}
+            _pendingSendMessages.Dequeue();
+            _sendInProgress = false;
 
-		private void SendNextMessage()
+            if (sentMessage.Command == StompCommand.Subscribe)
+            {
+                int subscriptionId = int.Parse(sentMessage.Headers[StompHeader.Id]);
+                StompSubscription subscription;
+                if (_subscriptions.TryGetValue(subscriptionId, out subscription))
+                {
+                    subscription.Confirm();
+                }
+            }
+
+            SendNextMessage();
+        }
+
+	    private void SendNextMessage()
 		{
 			while (!_sendInProgress 
 				&& _connected && 

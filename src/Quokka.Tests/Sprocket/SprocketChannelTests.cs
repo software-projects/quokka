@@ -52,6 +52,37 @@ namespace Quokka.Sprocket
 			}
 		}
 
+        [Test]
+        public void multiple_channels_does_not_cause_race_condition()
+        {
+            int result;
+            
+            _client2.CreateSubscriber<Request>()
+                    .WithAction(request => _client2.Reply( new Response1 { Number = request.Number }))
+                    .AddTo(_disposables);
+
+            for (int i = 0; i < 20; i++)
+            {
+                var channel = _client1.CreateChannel()
+                    .HandleResponse<Response1>(response =>
+                                                   {
+                                                       result = response.Number;
+                                                       _waitEvent.Set();
+                                                   }).AddTo(_disposables);
+
+                result = 0;
+                _waitEvent.Reset();
+
+                channel.Send(new Request {Number = 42});
+
+                if (!_waitEvent.WaitOne(2500))
+                {
+                    Assert.Fail("Wait timed out");
+                }
+                Assert.AreEqual(42, result);
+            }
+        }
+
 		[Test]
 		public void Times_out_when_there_is_no_subscriber()
 		{
