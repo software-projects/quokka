@@ -160,10 +160,13 @@ namespace Quokka.Data.Internal
 		public static DataParameterBuilder GetInstance(Type type)
 		{
 			DataParameterBuilder instance;
-			if (!Instances.TryGetValue(type, out instance))
+			lock (Instances)
 			{
-				instance = new DataParameterBuilder(type);
-				Instances[type] = instance;
+				if (!Instances.TryGetValue(type, out instance))
+				{
+					instance = new DataParameterBuilder(type);
+					Instances.Add(type, instance);
+				}
 			}
 			return instance;
 		}
