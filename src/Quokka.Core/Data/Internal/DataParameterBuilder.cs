@@ -185,9 +185,9 @@ namespace Quokka.Data.Internal
 			cmd.Parameters.Clear();
 			if (_namedParameters != null)
 			{
-				string prefix = GetParameterNamePrefix(cmd);
 				foreach (var keyValuePair in _namedParameters)
 				{
+					string prefix = GetParameterNamePrefix(cmd, keyValuePair.Value);
 					string parameterName = prefix + keyValuePair.Key;
 					DataParameterInfo parameterInfo = keyValuePair.Value;
 					AddParameter(cmd, parameterName, parameterInfo.Property, query);
@@ -213,7 +213,7 @@ namespace Quokka.Data.Internal
 			cmd.Parameters.Add(parameter);
 		}
 
-		private static string GetParameterNamePrefix(IDbCommand cmd)
+		private static string GetParameterNamePrefix(IDbCommand cmd, DataParameterInfo parameterInfo)
 		{
 			string typeName = cmd.GetType().FullName;
 			if (typeName.StartsWith("System.Data.SqlClient") ||
@@ -224,6 +224,11 @@ namespace Quokka.Data.Internal
 			if (typeName.StartsWith("MySql"))
 			{
 				return "?";
+			}
+
+			if (!Char.IsLetterOrDigit(parameterInfo.Attribute.ParameterName[0]))
+			{
+				return parameterInfo.Attribute.ParameterName[0].ToString();
 			}
 
 			// TODO: probably need to look into postgres, firebird, etc
