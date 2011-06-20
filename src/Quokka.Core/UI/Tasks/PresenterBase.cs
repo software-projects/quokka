@@ -69,13 +69,41 @@ namespace Quokka.UI.Tasks
 		}
 
 		/// <summary>
+		/// Has the presenter been disposed.
+		/// </summary>
+		/// <remarks>
+		/// It is valid to access this property after the presenter has been disposed.
+		/// </remarks>
+		public bool IsDisposed { get; private set; }
+
+		/// <summary>
+		/// Is the presenter in the process of being disposed
+		/// </summary>
+		/// <remarks>
+		/// It is valid to access this property after the presenter has been disposed.
+		/// </remarks>
+		public bool IsDisposing { get; private set; }
+
+		/// <summary>
 		/// 	Implements the <see cref = "IDisposable" /> interface.
 		/// </summary>
 		public void Dispose()
 		{
-			Dispose(true);
-			Disposables.Dispose();
-			GC.SuppressFinalize(this);
+			if (!IsDisposed && !IsDisposing)
+			{
+				try
+				{
+					IsDisposing = true;
+					Dispose(true);
+					Disposables.Dispose();
+					GC.SuppressFinalize(this);
+				}
+				finally
+				{
+					IsDisposing = false;
+					IsDisposed = true;
+				}
+			}
 		}
 
 		private bool _hasInitializePresenterBeenCalled;
