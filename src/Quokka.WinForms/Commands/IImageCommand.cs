@@ -17,6 +17,7 @@ namespace Quokka.WinForms.Commands
 		CheckState CheckState { get; set; }
 		bool Enabled { get; set; }
 		string Text { get; set; }
+		string ExtraText { get; set; }
 		Image ImageLarge { get; set; }
 		Image ImageSmall { get; set; }
 		Color ImageTransparentColor { get; set; }

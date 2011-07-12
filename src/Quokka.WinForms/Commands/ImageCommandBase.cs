@@ -17,6 +17,7 @@ namespace Quokka.WinForms.Commands
 		private Image _imageLarge;
 		private Image _imageSmall;
 		private Color _imageTransparentColor;
+		private string _extraText;
 
 		public event PropertyChangedEventHandler PropertyChanged;
 
@@ -83,6 +84,20 @@ namespace Quokka.WinForms.Commands
 				}
 			}
 		}
+
+		public string ExtraText
+		{
+			get { return _extraText; }
+			set
+			{
+				if (_extraText != value)
+				{
+					_extraText = value;
+					RaisePropertyChanged("ExtraText");
+				}
+			}
+		}
+
 
 		public Image ImageLarge
 		{
