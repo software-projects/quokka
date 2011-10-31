@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- This document was created with Syntext Serna Free. --><!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "docbookV4.5/docbookx.dtd" []>
+<chapter>
+  <title>Introduction</title>
+  <para>The <firstterm>Quokka</firstterm> framework is a library that helps write rich client applications for the Microsoft .NET Framework. It has been in development since early 2005, with features added reasonably consistently since that time.</para>
+  <para>Quokka provides an application developer with the following main features:<itemizedlist>
+      <listitem>
+        <formalpara>
+          <title>Composite Application Support</title>
+          <para>Quokka supports the concept of an <firstterm>application shell</firstterm>, which provides the main visual &apos;shell&apos; for the application, including the main window, menus, toolbars, etc. The specifics of the application can be implemented using independent modules, which are loaded by the shell.</para>
+        </formalpara>
+        <para>Composite applications allow for large applications to be written by independent teams, and provide an extension mechanism by which additional features can be added to an application with minimal disruption to the existing functionality. The composite application support in Quokka was originally designed to provide a similar benefit as the Microsoft Composite Application Block (<acronym>CAB</acronym>) (TODO citation needed), although the intention was to provide application developers with a significantly simpler <acronym>API</acronym>. Since the advent of the <acronym>CAB</acronym> for <acronym>WPF</acronym> (<abbrev>aka</abbrev> &quot;Prism&quot;), the Quokka <acronym>API</acronym> has been reworked to be as consistent with Prism as possible.</para>
+      </listitem>
+      <listitem>
+        <formalpara>
+          <title>Model-View-Controller (<acronym>MVC</acronym>) Support for Modal Applications</title>
+          <para>Many applications involve user interface navigation, where user interface forms are displayed to the user in certain sequences defined by the application workflow. A common example of this is a &apos;Wizard&apos; application, which presents screens to a user in a defined sequence to perform a particular task.</para>
+        </formalpara>
+        <para>It is common to code the user interface navigation as part of the user interface forms themselves, but this can lead to complex interdependencies within the user interface code. If the application workflow needs to be modified, for example by introducing a new screen, then this affects both the previous form and the next form in the workflow. Reusing a form in the application becomes a problem, as that form will need complex navigation logic that takes into account where the form is in the application workflow.</para>
+        <para>Quokka provides the concept of the <firstterm>User Interface Task</firstterm>, which defines a navigation graph of nodes, each node containing a view and its controller, along with the definitions of which other nodes can be reached and under what circumstances.</para>
+        <para>Think of this feature as something more powerful than the Tasks in the Microsoft User Interface Process Application Block (<acronym>UIPAB</acronym>), but not quite as heavy as Windows Workflow Foundation (<acronym>WWF</acronym>).</para>
+      </listitem>
+      <listitem>
+        <formalpara>
+          <title>Dynamic Code Generation and Duck Typing</title>
+          <para>Quokka makes use of dynamic code generation in an attempt to reduce the amount of code an application programmer has to write.</para>
+        </formalpara>
+        <para>Dynamic languages have been becoming more popular in recent years, due in no small part to the flexibility that <firstterm>Duck Typing</firstterm> offers. Quokka has been providing an innovative form of duck typing for some time in an effort to reduce the coupling between application objects, in particular views and their controllers. This duck typing is entirely possible from within a statically typed language like <systemitem>C#</systemitem>, giving the advantages of both static and dynamic typing in the one programming environment.</para>
+      </listitem>
+      <listitem>
+        <formalpara>
+          <title>Dependency Injection Support</title>
+          <para>Quokka makes extensive use of dependency injection (<acronym>DI</acronym>) to reduce coupling, and increase the testability and flexibility of the framework. Early versions of Quokka actually implemented its own simple <acronym>DI</acronym> container, but has been modified in more recent versions to make use of vastly more mature, feature-rich, and popular <acronym>DI</acronym> libraries like Microsoft Unity and Castle Windsor.</para>
+        </formalpara>
+      </listitem>
+    </itemizedlist></para>
+</chapter>

@@ -1,9 +1,10 @@
 #region Copyright notice
+
 //
 // Authors: 
 //  John Jeffery <john@jeffery.id.au>
 //
-// Copyright (C) 2006 John Jeffery. All rights reserved.
+// Copyright (C) 2006-2011 John Jeffery. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -24,28 +25,32 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
+
 #endregion
 
-using System;
 using System.Windows.Forms;
-using Quokka.Uip;
 
 namespace Quokka.WinForms
 {
-    public static class WinFormsUipUtil
-    {
-        /// <summary>
-        /// Attempt to set the controller for a WinForms control, and all its contained controls
-        /// </summary>
-        /// <param name="control">The control (may have any level of contained controls)</param>
-        /// <param name="controller">The controller to assign.</param>
-        public static void SetController(Control control, object controller) {
-            if (control == null)
-                return;
-            UipUtil.SetController(control, controller, false);
-            foreach (Control containedControl in control.Controls) {
-                SetController(containedControl, controller);
-            }
-        }
-    }
+	internal static class WinFormsUipUtil
+	{
+		/// <summary>
+		/// Attempt to set the controller for a WinForms control, and all its contained controls
+		/// </summary>
+		/// <param name="control">The control (may have any level of contained controls)</param>
+		/// <param name="controller">The controller to assign.</param>
+		internal static void SetController(Control control, object controller)
+		{
+			if (control == null)
+				return;
+
+			// Do not set the controller for the control itself, as this has already been done
+			// by the task processing itself.
+			//UipUtil.SetController(control, controller, false);
+			foreach (Control containedControl in control.Controls)
+			{
+				SetController(containedControl, controller);
+			}
+		}
+	}
 }

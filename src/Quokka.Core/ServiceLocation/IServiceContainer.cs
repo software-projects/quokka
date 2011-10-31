@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using Microsoft.Practices.ServiceLocation;
 
 namespace Quokka.ServiceLocation
@@ -61,15 +60,13 @@ namespace Quokka.ServiceLocation
 		/// <returns>The <see cref="IServiceContainer"/>.</returns>
 		IServiceContainer RegisterType(Type from, Type to, string name, ServiceLifecycle lifecycle);
 
-
-
-
 		/// <summary>
 		/// Register an instance of an object with the container.
 		/// </summary>
 		/// <param name="from">
 		/// The type that is requested from the container. Often this is an interface type, but it can be
-		/// a concrete type that is the type of <paramref name="instance"/>, or a supertype of <paramref name="instance"/>.
+		/// a concrete type that is the type of <paramref name="instance"/>, or a supertype of the type of
+		/// <paramref name="instance"/>.
 		/// </param>
 		/// <param name="name">
 		/// The name associated with the mapping, or <c>null</c> if this is the default mapping.
@@ -87,9 +84,10 @@ namespace Quokka.ServiceLocation
 		/// creating an instance of the object.
 		/// </summary>
 		/// <param name="type">Type registered with the container</param>
-		/// <param name="name">Name registered, or <c>null</c> if the default mapping.</param>
-		/// <returns></returns>
-		bool IsTypeRegistered(Type type, string name);
-
+		/// <returns>Returns <see langword="true"/> if the type can be resolved, <see langword="false"/> otherwise.</returns>
+		/// <remarks>
+		/// This method is used by the framework to register default implementations for framework interfaces.
+		/// </remarks>
+		bool IsTypeRegistered(Type type);
 	}
 }

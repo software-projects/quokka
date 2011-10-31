@@ -4,7 +4,7 @@
 // Authors: 
 //  John Jeffery <john@jeffery.id.au>
 //
-// Copyright (C) 2006 John Jeffery. All rights reserved.
+// Copyright (C) 2006-2011 John Jeffery. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -43,6 +43,7 @@ namespace Quokka.Uip
 	/// <summary>
 	/// Represents a single UI node in the UI task.
 	/// </summary>
+	//[Obsolete("This will be removed from Quokka in a future release")]
 	public class UipNode
 	{
 		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
@@ -247,18 +248,33 @@ namespace Quokka.Uip
 		/// </summary>
 		internal void EnterNode()
 		{
-			CreateServiceContainerIfNecessary();
-			Verify.IsNotNull(_container);
+			Verify.IsNotNull(_task);
 
-			// Both controller and view are singletons. The container only lasts as long as the
-			// node is current (or as long as the task runs in the case of a StayOpen node).
-			if (_controllerType != null)
+			// If the node is being entered for the first time, its service container will be null
+			// and has to be created.
+			if (_container == null)
 			{
-				_container.RegisterType(_controllerType, null, null, ServiceLifecycle.Singleton);
-			}
-			if (_viewType != null)
-			{
-				_container.RegisterType(_viewType, null, null, ServiceLifecycle.Singleton);
+				IServiceContainer parentContainer = _task.ServiceLocator.GetInstance<IServiceContainer>();
+				Verify.IsNotNull(parentContainer);
+
+				// Do not assign the container to _container yet -- wait until all the registration is 
+				// complete. That way if one of the registrations throws an exception ,we are not left with
+				// a node whose container is not fully initialised.
+				IServiceContainer nodeContainer = parentContainer.CreateChildContainer();
+
+				// Both controller and view are singletons. The container only lasts as long as the
+				// node is current (or as long as the task runs in the case of a StayOpen node).
+				if (_controllerType != null)
+				{
+					nodeContainer.RegisterType(_controllerType, null, null, ServiceLifecycle.Singleton);
+				}
+				if (_viewType != null)
+				{
+					nodeContainer.RegisterType(_viewType, null, null, ServiceLifecycle.Singleton);
+				}
+
+				// node container is now initialised, assign to the member variable
+				_container = nodeContainer;
 			}
 		}
 
@@ -293,6 +309,9 @@ namespace Quokka.Uip
 					// The task is complete -- all nodes should dispose of their container
 					disposeContainer = true;
 					removeView = true;
+
+					// The task is not re-usable, but the view manager might be. Unregister
+					// event to avoid a memory leak.
 					_task.ViewManager.ViewClosed -= ViewManager_ViewClosed;
 				}
 				else
@@ -332,17 +351,47 @@ namespace Quokka.Uip
 			if (removeView)
 			{
 				_task.ViewManager.RemoveView(_view);
+				DisposeView();
+				DisposeController();
 			}
 
 			if (disposeContainer)
 			{
-				if (_container != null)
+				DisposeView();
+				DisposeController();
+				DisposeContainer();
+			}
+		}
+
+		private void DisposeContainer()
+		{
+			DisposeOf(_container);
+			_container = null;
+		}
+
+		private void DisposeView() {
+			DisposeOf(_view);
+			_view = null;
+		}
+
+		private void DisposeController() {
+			DisposeOf(_controller);
+			_controller = null;
+		}
+
+		private static void DisposeOf(object obj)
+		{
+			IDisposable disposable = obj as IDisposable;
+			if (disposable != null)
+			{
+				try
 				{
-					_container.Dispose();
+					disposable.Dispose();
 				}
-				_container = null;
-				_controller = null;
-				_view = null;
+				catch (ObjectDisposedException)
+				{
+					// should not be thrown, but lots of objects do throw this
+				}
 			}
 		}
 
@@ -430,18 +479,6 @@ namespace Quokka.Uip
 				_view = view;
 			}
 			return _view;
-		}
-
-		private void CreateServiceContainerIfNecessary()
-		{
-			if (_container != null)
-			{
-				return;
-			}
-			Verify.IsNotNull(_task);
-			IServiceContainer parentContainer = (IServiceContainer) _task.ServiceProvider.GetService(typeof (IServiceContainer));
-			Verify.IsNotNull(parentContainer);
-			_container = parentContainer.CreateChildContainer();
 		}
 
 		/// <summary>

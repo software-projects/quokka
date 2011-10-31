@@ -3,10 +3,11 @@
 	<property name="nant.settings.currentframework" value="net-3.5"/>
 	<property name="framework.dir" value="${framework::get-framework-directory(nant.settings.currentframework)}"/>
 
-
 	<property name="config" value="Release"/>
 
-	<property name="output.dir" value="${path::get-full-path('../bin')}" unless="${property::exists('output.dir')}"/>
+	<property name="output.bin.dir" value="${path::get-full-path('../bin')}" overwrite="false"/>
+	<property name="output.artifacts.dir" value="${path::get-full-path('../artifacts')}" overwrite="false"/>
+	
 	<property name="tools.dir" value="${path::get-full-path('../tools')}"/>
 	<property name="nunit.dir" value="${path::combine(tools.dir, 'NUnit')}"/>
 	<property name="nunit.bin.dir" value="${path::combine(nunit.dir, 'bin')}"/>
@@ -15,42 +16,41 @@
 	<property name="unittest.dir" value="${path::combine(temp.dir, 'unittest')}"/>
 	<property name="coverage.dir" value="${path::combine(temp.dir, 'coverage')}"/>
 	<property name="msbuild.dir" value="${framework.dir}"/>
-
-	<property name="svn.dir" value="d:\build\programs\svn-win32-1.6.2" overwrite="false"/>
-	<property name="svn.bin.dir" value="${path::combine(svn.dir, 'bin')}"/>
-
 	<property name="nunit-console.exe" value="${path::combine(nunit.bin.dir, 'nunit-console.exe')}"/>
+		
+	<!-- 
+		VERSION NUMBERING STANDARD:
+		
+		The version number is acquired from an environment variable BUILD_NUMBER, which is set
+		by the TeamCity build agent.
+	-->
+	
+	<property name="product.version" value="${environment::get-variable('BUILD_NUMBER')}" if="${environment::variable-exists('BUILD_NUMBER')}"/>
+	<property name="product.version" value="0.1.0" overwrite="false"/>
+	<echo message="product.version: ${product.version}"/>
 
-	<target name="version">
-		<tstamp>
-			<formatter property="build.year" pattern="yyyy"/>
-			<formatter property="build.timestamp" pattern="yyyy-MM-ddTHH:mm:ss"/>
-			<formatter property="build.date" pattern="yyyy-MM-dd"/>
-			<formatter property="build.year.month" pattern="yyMM"/>
-			<formatter property="build.day.hour" pattern="ddHH"/>
-			<formatter property="build.minute.second" pattern="mmss"/>
-		</tstamp>
+	<!-- parse the product.version for the major, minor, build and revision -->	
+	<property name="version.major" value="${version::get-major(version::parse(product.version))}"/>
+	<property name="version.minor" value="${version::get-minor(version::parse(product.version))}"/>
+	<property name="version.build" value="${version::get-build(version::parse(product.version))}"/>
+	<property name="version.revision" value="${version::get-revision(version::parse(product.version))}"/>
 
-		<property name="svn.revision.file" value="${path::get-temp-file-name()}"/>
-		<exec basedir="${svn.bin.dir}" program="svnversion" output="${svn.revision.file}"/>
-		<loadfile file="${svn.revision.file}" property="svn.revision.string"/>
-		<property name="svn.revision" failonerror="false" value="${int::parse(svn.revision.string)}"/>
-		<if test="${not property::exists('svn.revision')}">
-			<property name="version.major" value="0"/>
-			<property name="version.minor" value="0"/>
-			<property name="version.build" value="0"/>
-			<property name="version.revision" value="0"/>
-		</if>
-		<if test="${property::exists('svn.revision')}">
-			<property name="version.major" value="0"/>
-			<property name="version.minor" value="4"/>
-			<property name="version.build" value="${svn.revision}"/>
-			<property name="version.revision" value="0"/>
-		</if>
-		<property name="version" value="${version.major}.${version.minor}.${version.build}.${version.revision}"/>
-		<echo message="Version: ${version}"/>
-	</target>
-
+	<!-- default values for version if any part is not defined -->
+	<!-- cannot default to 0.0.0.0, because that upsets the WiX build script, so we default to 0.1.0.0 -->
+	<property name="version.major" value="0" if="${version.major=='-1'}"/>
+	<property name="version.minor" value="1" if="${version.minor=='-1'}"/>
+	<property name="version.build" value="0" if="${version.build=='-1'}"/>
+	<property name="version.revision" value="0" if="${version.revision=='-1'}"/>
+	
+	<!-- this is a formal build if the build number is not zero -->
+	<property name="formal.build" value="${version.build != '0'} "/>
+	
+	<!-- full product version, always has 4 parts (major, minor, build, revision) -->
+	<property name="full.product.version" value="${version.major}.${version.minor}.${version.build}.${version.revision}"/>
+	<echo message="full.product.version: ${full.product.version}"/>
+	<property name="zip.file.name" value="Quokka-${full.product.version}.zip"/>
+	<property name="zip.file.path" value="${path::get-full-path(output.artifacts.dir)}\${zip.file.name}"/>
+	
 	<target name="clean">
 		<delete>
 			<fileset>
@@ -62,17 +62,28 @@
 		</delete>
 	</target>
 
-	<target name="CommonAssemblyInfo.cs" depends="version">
+	<target name="timestamp">
+		<tstamp>
+			<formatter property="build.year" pattern="yyyy"/>
+			<formatter property="build.timestamp" pattern="yyyy-MM-ddTHH:mm:ss"/>
+			<formatter property="build.date" pattern="yyyy-MM-dd"/>
+			<formatter property="build.year.month" pattern="yyMM"/>
+			<formatter property="build.day.hour" pattern="ddHH"/>
+			<formatter property="build.minute.second" pattern="mmss"/>
+		</tstamp>
+	</target>
+	
+	<target name="CommonAssemblyInfo.cs" depends="timestamp">
 		<asminfo language="CSharp" output="CommonAssemblyInfo.cs">
 			<imports>
 				<import namespace="System"/>
 				<import namespace="System.Reflection"/>
 			</imports>
 			<attributes>
-				<attribute type="AssemblyVersionAttribute" value="${version.major}.${version.minor}.${version.build}.${version.revision}"/>
+				<attribute type="AssemblyVersionAttribute" value="${full.product.version}"/>
 				<attribute type="AssemblyConfigurationAttribute" value="${config}"/>
 				<attribute type="AssemblyCompanyAttribute" value="Quokka.org"/>
-				<attribute type="AssemblyProductAttribute" value="Quokka Assemblies"/>
+				<attribute type="AssemblyProductAttribute" value="Quokka"/>
 				<attribute type="AssemblyCopyrightAttribute" value="Copyright 2004-${build.year}. All Rights Reserved."/>
 			</attributes>
 		</asminfo>
@@ -85,33 +96,79 @@
 			<arg file="Quokka.sln"/>
 		</exec>
 
-		<copy todir="${output.dir}">
+		<copy todir="${output.bin.dir}">
 			<fileset basedir="Quokka.Tests/bin/${config}">
 				<include name="*.dll"/>
 				<include name="*.pdb"/>
 				<include name="*.xml"/>
 			</fileset>
 		</copy>
-		<copy todir="${output.dir}">
+		<copy todir="${output.bin.dir}">
 			<fileset basedir="Quokka.WinForms.Tests/bin/${config}">
 				<include name="*.dll"/>
 				<include name="*.pdb"/>
 				<include name="*.xml"/>
 			</fileset>
 		</copy>
+		<copy todir="${output.bin.dir}">
+			<fileset basedir="Sprocket.Server/bin/${config}">
+				<include name="*.exe"/>
+				<include name="*.dll"/>
+				<include name="*.pdb"/>
+				<include name="*.xml"/>
+				<include name="*.config"/>
+				<exclude name="*.vshost.exe*"/>
+			</fileset>
+		</copy>
+		<copy todir="${output.bin.dir}">
+			<fileset basedir="Sprocket.Manager/bin/${config}">
+				<include name="*.exe"/>
+				<include name="*.dll"/>
+				<include name="*.pdb"/>
+				<include name="*.xml"/>
+				<include name="*.config"/>
+				<exclude name="*.vshost.exe*"/>
+			</fileset>
+		</copy>			
 	</target>
 
-	<target name="test" depends="compile">
+	<target name="zipfile" depends="compile">
+		<mkdir dir="${output.artifacts.dir}"/>
+		<zip zipfile="${zip.file.path}">
+		  <fileset basedir="${output.bin.dir}">
+			<include name="Quokka**.dll" />
+			<include name="Quokka**.pdb" />
+			<exclude name="*Tests*"/>
+		  </fileset>
+		</zip>
+		<!-- tell team city that the artifacts are ready, even though the build has not finished yet -->
+		<echo message="##teamcity[publishArtifacts '${zip.file.path}']"/>
+	</target>
+
+	<target name="msi" depends="zipfile">
+		<nant>
+			<buildfiles>
+				<include name="Sprocket.Setup/setup.build"/>
+			</buildfiles>
+			<properties>
+				<property name="config" value="${config}"/>
+				<property name="version" value="${full.product.version}"/>
+				<property name="msi.dir" value="${output.artifacts.dir}"/>
+			</properties>
+		</nant>
+	</target>
+	
+	<target name="test" depends="msi">
 		<nunit2>
 			<formatter type="Plain"/>
-			<test assemblyname="${output.dir}/Quokka.Tests.dll"/>
+			<test assemblyname="${output.bin.dir}/Quokka.Tests.dll"/>
 		</nunit2>
 	</target>
 
 	<target name="test.coverage" depends="test">
 		<nant target="compile.tests" buildfile="${project::get-buildfile-path()}">
 			<properties>
-				<property name="output.dir" value="${coverage.dir}"/>
+				<property name="output.bin.dir" value="${coverage.dir}"/>
 				<property name="debug" value="true"/>
 			</properties>
 		</nant>

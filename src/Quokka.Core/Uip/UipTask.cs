@@ -1,3 +1,31 @@
+#region Copyright notice
+//
+// Authors: 
+//  John Jeffery <john@jeffery.id.au>
+//
+// Copyright (C) 2006-2011 John Jeffery. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+// 
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+#endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,10 +36,12 @@ using Quokka.Diagnostics;
 using Quokka.DynamicCodeGeneration;
 using Quokka.Reflection;
 using Quokka.ServiceLocation;
+using Quokka.UI.Tasks;
 
 namespace Quokka.Uip
 {
-	public abstract class UipTask
+	//[Obsolete("This will be removed from Quokka in a future release")]
+	public abstract class UipTask : IUITask
 	{
 		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
 		private static readonly List<UipTask> _runningTasks = new List<UipTask>();
@@ -45,7 +75,10 @@ namespace Quokka.Uip
 
 			_serviceContainer = CreateServiceContainer();
 			_serviceContainer.RegisterInstance<IUipNavigator>(_navigator);
+
+			// Registers the task instance under both UipTask, and the actual type of the task
 			_serviceContainer.RegisterInstance(this);
+			_serviceContainer.RegisterInstance(GetType(), this);
 		}
 
 		#endregion
@@ -55,7 +88,18 @@ namespace Quokka.Uip
 		/// <summary>
 		/// Provides services to controller and view objects created while this task is running.
 		/// </summary>
+		[Obsolete("Use ServiceContainer or ServiceLocator instead")]
 		public IServiceProvider ServiceProvider
+		{
+			get { return _serviceContainer.Locator; }
+		}
+
+		public IServiceContainer ServiceContainer
+		{
+			get { return _serviceContainer; }
+		}
+
+		public IServiceLocator ServiceLocator
 		{
 			get { return _serviceContainer.Locator; }
 		}
@@ -218,6 +262,12 @@ namespace Quokka.Uip
 			return null;
 		}
 
+		void IUITask.Start(IViewDeck viewDeck)
+		{
+			var viewManager = (IUipViewManager) viewDeck;
+			Start(viewManager);
+		}
+
 		/// <summary>
 		/// Start the UI task.
 		/// </summary>
@@ -253,6 +303,12 @@ namespace Quokka.Uip
 			// for avoiding re-use of tasks.
 			_viewManager = viewManager;
 			_serviceContainer.RegisterInstance(_viewManager);
+
+			var viewDeck = _viewManager as IViewDeck;
+			if (viewDeck != null)
+			{
+				_serviceContainer.RegisterInstance(viewDeck);
+			}
 
 			// Register the nested interfaces one time only. Wait until the first run
 			// to do this, as the controller and view types are not available in the constructor.
@@ -294,7 +350,7 @@ namespace Quokka.Uip
 
 			try
 			{
-				serviceLocator = ServiceLocator.Current;
+				serviceLocator = Microsoft.Practices.ServiceLocation.ServiceLocator.Current;
 			}
 			catch (NullReferenceException)
 			{
@@ -430,6 +486,11 @@ namespace Quokka.Uip
 								}
 							}
 						}
+					}
+					catch (Exception ex)
+					{
+						Log.Error("Unexpected exception in transition: " + ex.Message, ex);
+						throw;
 					}
 					finally
 					{

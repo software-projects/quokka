@@ -1,9 +1,10 @@
 #region Copyright notice
+
 //
 // Authors: 
 //  John Jeffery <john@jeffery.id.au>
 //
-// Copyright (C) 2006 John Jeffery. All rights reserved.
+// Copyright (C) 2006-2011 John Jeffery. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -24,39 +25,27 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
+
 #endregion
+
+using System;
 
 namespace Quokka.Uip
 {
-	using System;
-	using Quokka.Diagnostics;
+	//[Obsolete("Use IViewDeck interface instead")]
+	public interface IUipViewManager
+	{
+		event EventHandler<UipViewEventArgs> ViewClosed;
 
-	public class UipViewEventArgs : EventArgs {
-        private readonly object _view;
-
-        public UipViewEventArgs(object view) {
-        	Verify.ArgumentNotNull(view, "view");
-            _view = view;
-        }
-
-        public object View {
-            get { return _view; }
-        }
-    }
-
-    public interface IUipViewManager
-    {
-        event EventHandler<UipViewEventArgs> ViewClosed;
-
-    	void BeginTask(UipTask task);
+		void BeginTask(UipTask task);
 		void EndTask(UipTask task);
 		void BeginTransition();
-        void EndTransition();
-        void AddView(object view, object controller);
-        void RemoveView(object view);
-        void ShowView(object view);
-        void HideView(object view);
-    	void ShowModalView(object view, object controller);
-    	UipAnswer AskQuestion(UipQuestion question);
-    }
+		void EndTransition();
+		void AddView(object view, object controller);
+		void RemoveView(object view);
+		void ShowView(object view);
+		void HideView(object view);
+		void ShowModalView(object view, object controller);
+		UipAnswer AskQuestion(UipQuestion question);
+	}
 }

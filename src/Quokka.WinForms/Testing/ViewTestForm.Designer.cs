@@ -36,7 +36,7 @@ namespace Quokka.WinForms.Testing
 			this.controllerNameLabel = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
 			this.label1 = new System.Windows.Forms.Label();
-			this.viewManagerPanel = new Quokka.WinForms.ViewManagerPanel();
+			this.viewManagerPanel = new System.Windows.Forms.Panel();
 			this.currentNodeDetailsPanel.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -128,11 +128,10 @@ namespace Quokka.WinForms.Testing
 			// 
 			// viewManagerPanel
 			// 
-			this.viewManagerPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.viewManagerPanel.Location = new System.Drawing.Point(0, 62);
+			this.viewManagerPanel.Location = new System.Drawing.Point(109, 170);
 			this.viewManagerPanel.Name = "viewManagerPanel";
-			this.viewManagerPanel.Size = new System.Drawing.Size(573, 444);
-			this.viewManagerPanel.TabIndex = 0;
+			this.viewManagerPanel.Size = new System.Drawing.Size(273, 174);
+			this.viewManagerPanel.TabIndex = 2;
 			// 
 			// ViewTestForm
 			// 
@@ -154,7 +153,6 @@ namespace Quokka.WinForms.Testing
 
 		#endregion
 
-		private ViewManagerPanel viewManagerPanel;
 		private System.Windows.Forms.Panel currentNodeDetailsPanel;
 		private System.Windows.Forms.Button changeButton;
 		private System.Windows.Forms.Label viewNameLabel;
@@ -163,5 +161,6 @@ namespace Quokka.WinForms.Testing
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.Button refreshButton;
 		private System.Windows.Forms.Button clearButton;
+		private System.Windows.Forms.Panel viewManagerPanel;
 	}
 }

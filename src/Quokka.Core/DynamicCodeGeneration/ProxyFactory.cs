@@ -4,7 +4,7 @@
 // Authors: 
 //  John Jeffery <john@jeffery.id.au>
 //
-// Copyright (C) 2006 John Jeffery. All rights reserved.
+// Copyright (C) 2006-2011 John Jeffery. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -44,7 +44,6 @@ namespace Quokka.DynamicCodeGeneration
 	{
 		private static readonly ProxyStore duckProxyStore;
 		private static readonly ProxyStore navigatorProxyStore;
-		private static DynamicAssembly dynamicAssembly;
 
 		static ProxyFactory()
 		{
@@ -110,11 +109,11 @@ namespace Quokka.DynamicCodeGeneration
 
 		private static Type CreateDuckProxyType(Type interfaceType, Type innerType)
 		{
-			if (dynamicAssembly == null) {
-				dynamicAssembly = new DynamicAssembly();
-			}
+			var moduleBuilder = DynamicAssembly.Instance.ModuleBuilder;
+			var className = DynamicAssembly.Instance.CreateClassName("DuckProxy");
 
-			return dynamicAssembly.CreateDuckProxyType(interfaceType, innerType);
+			DuckProxyBuilder builder = new DuckProxyBuilder(moduleBuilder, className, interfaceType, innerType);
+			return builder.CreateType();
 		}
 
 		#endregion
@@ -165,11 +164,11 @@ namespace Quokka.DynamicCodeGeneration
 
 		private static Type CreateNavigatorProxyType(Type interfaceType, Type innerType)
 		{
-			if (dynamicAssembly == null) {
-				dynamicAssembly = new DynamicAssembly();
-			}
+			var moduleBuilder = DynamicAssembly.Instance.ModuleBuilder;
+			var className = DynamicAssembly.Instance.CreateClassName("NavigatorProxy");
 
-			return dynamicAssembly.CreateNavigatorProxyType(interfaceType, innerType);
+			NavigatorProxyBuilder builder = new NavigatorProxyBuilder(moduleBuilder, className, interfaceType, innerType);
+			return builder.CreateType();
 		}
 
 		#endregion

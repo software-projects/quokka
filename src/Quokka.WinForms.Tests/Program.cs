@@ -1,7 +1,7 @@
 using System;
 using System.Windows.Forms;
 using Microsoft.Practices.ServiceLocation;
-using Quokka.Unity;
+using Quokka.Castle;
 using Quokka.WinForms.Startup;
 using Quokka.WinForms.Testing;
 

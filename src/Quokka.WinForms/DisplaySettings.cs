@@ -46,7 +46,10 @@ namespace Quokka.WinForms
 			// Don't use the full ProductVersion here, because it includes the build
 			// number and the revision number. Usually we do not want the display settings
 			// being changed with every build. This code uses the major version number only.
-			RegistryUtil.MajorVersion = (Application.ProductVersion ?? "0").Split('.')[0].Trim();
+			if (String.IsNullOrEmpty(RegistryUtil.MajorVersion))
+			{
+				RegistryUtil.MajorVersion = (Application.ProductVersion ?? "0").Split('.')[0].Trim();
+			}
 		}
 
 		[Obsolete("Use RegistryUtil instead")]
@@ -91,6 +94,8 @@ namespace Quokka.WinForms
             _key = Registry.CurrentUser.CreateSubKey(keyPath);
         	_name = name;
         }
+
+		public DisplaySettings(Type type) : this(type.FullName) {}
 
         public DisplaySettings(Form form, string name) : this(name) {
 

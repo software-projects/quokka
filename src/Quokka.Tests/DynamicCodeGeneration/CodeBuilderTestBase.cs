@@ -37,10 +37,32 @@ namespace Quokka.DynamicCodeGeneration
 
 		protected void VerifyAssembly()
 		{
+		    string[] possiblePaths = new[]
+		                                 {
+                                             @"c:\program files\Microsoft Visual Studio 8\SDK\v2.0\Bin\peverify.exe",
+                                             @"c:\program files\Microsoft.NET\SDK\v2.0\Bin\peverify.exe",
+                                             @"c:\program files\Microsoft SDKs\Windows\v6.0A\bin\peverify.exe",
+                                             @"c:\program files\Microsoft SDKs\Windows\v7.0A\bin\peverify.exe",
+		                                 };
+		    string filePath = null;
+            foreach (var possiblePath in possiblePaths)
+            {
+                if (File.Exists(possiblePath))
+                {
+                    filePath = possiblePath;
+                    break;
+                }
+            }
+
+            if (filePath == null)
+            {
+                throw new NotSupportedException("Cannot find PEVERIFY.EXE on this machine");
+            }
+
 			assemblyBuilder.Save(assemblyFileName);
 			Process process = new Process();
 			process.StartInfo.UseShellExecute = false;
-			process.StartInfo.FileName = @"c:\program files\Microsoft Visual Studio 8\SDK\v2.0\Bin\peverify.exe";
+			process.StartInfo.FileName = filePath;
 			process.StartInfo.Arguments = "peverify.exe \"" + assemblyFileName + "\""; // " /quiet";
 			process.Start();
 			process.WaitForExit();

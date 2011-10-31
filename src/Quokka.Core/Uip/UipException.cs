@@ -3,7 +3,7 @@
 // Authors: 
 //  John Jeffery <john@jeffery.id.au>
 //
-// Copyright (C) 2006 John Jeffery. All rights reserved.
+// Copyright (C) 2006-2011 John Jeffery. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -34,6 +34,7 @@ namespace Quokka.Uip
     /// <summary>
     /// Base class for all exceptions thrown by the UIP framework
     /// </summary>
+	[Obsolete("This will be removed from Quokka in a future release")]
     public class UipException : QuokkaException
     {
         public UipException() { }
@@ -46,7 +47,8 @@ namespace Quokka.Uip
     /// Thrown when a navigation request is made for an undefined transition.
     /// </summary>
     /// <seealso cref="IUipNavigator"/>
-    public class UipUndefinedTransitionException : UipException
+	[Obsolete("This will be removed from Quokka in a future release")]
+	public class UipUndefinedTransitionException : UipException
     {
         public UipUndefinedTransitionException() : base("Undefined UIP transition") { }
         public UipUndefinedTransitionException(string message) : base(message) { }
@@ -57,6 +59,7 @@ namespace Quokka.Uip
 	/// <summary>
 	/// Thrown when an attempt is made to define a UIP task when a task with the same name already exists.
 	/// </summary>
+	[Obsolete("This will be removed from Quokka in a future release")]
 	public class UipTaskAlreadyExistsException : UipException
 	{
         public UipTaskAlreadyExistsException() : base("A UIP task with that name already exists") { }
@@ -65,6 +68,7 @@ namespace Quokka.Uip
 		protected UipTaskAlreadyExistsException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 	}
 
+	[Obsolete("This will be removed from Quokka in a future release")]
 	public class UipTaskDefinitionCreateException : UipException
 	{
         public UipTaskDefinitionCreateException() : base("Failed to create task definition") { }
@@ -73,6 +77,7 @@ namespace Quokka.Uip
 		protected UipTaskDefinitionCreateException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 	}
 
+	[Obsolete("This will be removed from Quokka in a future release")]
 	public class UipUnknownTaskException : UipException
 	{
         public UipUnknownTaskException() : base("Unknown task") { }
@@ -81,6 +86,7 @@ namespace Quokka.Uip
 		protected UipUnknownTaskException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 	}
 
+	[Obsolete("This will be removed from Quokka in a future release")]
 	public class UipTaskDefinitionNameMismatchException : UipException 
 	{
         public UipTaskDefinitionNameMismatchException() : base("Task definition name mismatch") { }
@@ -89,6 +95,7 @@ namespace Quokka.Uip
 		protected UipTaskDefinitionNameMismatchException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 	}
 
+	[Obsolete("This will be removed from Quokka in a future release")]
 	public class UipDuplicateNodeNameException : UipException
 	{
 		public UipDuplicateNodeNameException() : base("Duplicate node name") { }

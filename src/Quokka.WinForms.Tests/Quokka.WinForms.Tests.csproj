@@ -1,4 +1,5 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -11,10 +12,27 @@
     <AssemblyName>Quokka.WinForms.Tests</AssemblyName>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
-    <OldToolsVersion>2.0</OldToolsVersion>
+    <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -24,6 +42,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,8 +51,13 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ComponentFactory.Krypton.Toolkit, Version=3.5.2.0, Culture=neutral, PublicKeyToken=a87e673e9ecb6e8e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Krypton\ComponentFactory.Krypton.Toolkit.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\CommonServiceLocator\Microsoft.Practices.ServiceLocation.dll</HintPath>
@@ -57,6 +81,13 @@
     </Compile>
     <Compile Include="Controllers\CommandLinkTestController.cs" />
     <Compile Include="Controllers\MessageBoxTestController.cs" />
+    <Compile Include="KryptonPropertyGridTest.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="KryptonPropertyGridTest.Designer.cs">
+      <DependentUpon>KryptonPropertyGridTest.cs</DependentUpon>
+    </Compile>
+    <Compile Include="KryptonTesting.cs" />
     <Compile Include="MessageBoxTestForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -68,6 +99,9 @@
     <EmbeddedResource Include="CommandLinkTestForm.resx">
       <SubType>Designer</SubType>
       <DependentUpon>CommandLinkTestForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="KryptonPropertyGridTest.resx">
+      <DependentUpon>KryptonPropertyGridTest.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MessageBoxTestForm.resx">
       <SubType>Designer</SubType>
@@ -83,6 +117,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -94,17 +129,17 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Quokka.Castle\Quokka.Castle.csproj">
+      <Project>{36487FB8-01B3-4C16-AFFA-E4A86090E43B}</Project>
+      <Name>Quokka.Castle</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Quokka.Core\Quokka.Core.csproj">
       <Project>{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}</Project>
       <Name>Quokka.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Quokka.Unity\Quokka.Unity.csproj">
-      <Project>{52A00CC5-7821-40EC-A08A-F777301B55DB}</Project>
-      <Name>Quokka.Unity</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Quokka.WinForms.Startup\Quokka.WinForms.Startup.csproj">
-      <Project>{CD4991EE-AF09-4E88-BBF0-0BB8EB843DD5}</Project>
-      <Name>Quokka.WinForms.Startup</Name>
+    <ProjectReference Include="..\Quokka.Krypton\Quokka.Krypton.csproj">
+      <Project>{7CAFB430-325C-4C28-A2A0-E03E8D1B0EBD}</Project>
+      <Name>Quokka.Krypton</Name>
     </ProjectReference>
     <ProjectReference Include="..\Quokka.WinForms\Quokka.WinForms.csproj">
       <Project>{2E9F1CF5-C91E-4B40-B5F0-273C0E2ADFB6}</Project>
@@ -114,6 +149,23 @@
   <ItemGroup Condition=" '$(FormalBuild)' == 'true' ">
     <!-- include NAnt-generated assembly info during a formal build -->
     <Compile Include="..\CommonAssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

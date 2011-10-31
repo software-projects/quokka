@@ -3,7 +3,7 @@
 // Authors: 
 //  John Jeffery <john@jeffery.id.au>
 //
-// Copyright (C) 2006 John Jeffery. All rights reserved.
+// Copyright (C) 2006-2011 John Jeffery. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -30,22 +30,22 @@ using System;
 using Microsoft.Practices.ServiceLocation;
 using NUnit.Framework;
 using Quokka.Uip.MockApp;
-using Quokka.Unity;
+using Quokka.Castle;
 
 namespace Quokka.Uip
 {
     [TestFixture]
     public class MockAppTests
     {
-        bool taskCompleted;
-    	private IServiceLocator serviceLocator;
+        bool _taskCompleted;
+    	private IServiceLocator _serviceLocator;
 
         [SetUp]
         public void SetUp() {
-            taskCompleted = false;
+            _taskCompleted = false;
 
-        	serviceLocator = ServiceContainerFactory.CreateContainer().Locator;
-        	ServiceLocator.SetLocatorProvider(() => serviceLocator);
+        	_serviceLocator = ServiceContainerFactory.CreateContainer().Locator;
+        	ServiceLocator.SetLocatorProvider(() => _serviceLocator);
         }
 
         [TearDown]
@@ -126,7 +126,7 @@ namespace Quokka.Uip
             Assert.AreEqual("Node1", task.CurrentNode.Name);
             Assert.IsTrue(task.IsRunning);
             Assert.IsFalse(task.IsComplete);
-            Assert.IsFalse(taskCompleted);
+            Assert.IsFalse(_taskCompleted);
 
             // Should navigate to NavigateInViewLoadEvent and then straight to Node2
 
@@ -147,13 +147,13 @@ namespace Quokka.Uip
             Assert.AreEqual("Node1", task.CurrentNode.Name);
             view1 = (MockView1)viewManager.VisibleView;
             view1.PushEndButton();
-            Assert.IsTrue(taskCompleted);
+            Assert.IsTrue(_taskCompleted);
             Assert.IsTrue(task.IsComplete);
             Assert.IsFalse(task.IsRunning);
         }
 
         void task_TaskComplete(object sender, EventArgs e) {
-            taskCompleted = true;
+            _taskCompleted = true;
         }
     }
 }

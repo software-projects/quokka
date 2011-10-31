@@ -1,6 +1,23 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{A0092DF8-6014-475F-97CF-5CB757477A51}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dashboard", "Dashboard", "{8BBF7230-2636-40FC-8ABA-D24D0BC4DB5A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Stomp", "Stomp", "{08A912A3-F373-4C19-839B-8F24B588C81C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Setup", "Setup", "{B9320012-B1B3-411A-8D07-08ACBBFAE900}"
+	ProjectSection(SolutionItems) = preProject
+		Quokka.build = Quokka.build
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sprocket.Setup", "Sprocket.Setup", "{3C13EB38-547D-4C1E-B39B-35A2B64193B7}"
+	ProjectSection(SolutionItems) = preProject
+		Sprocket.Setup\setup.build = Sprocket.Setup\setup.build
+		Sprocket.Setup\Sprocket.wxs = Sprocket.Setup\Sprocket.wxs
+		Sprocket.Setup\UI.wxs = Sprocket.Setup\UI.wxs
+	EndProjectSection
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quokka.Tests", "Quokka.Tests\Quokka.Tests.csproj", "{FA1B5C87-5E8C-4B9A-8493-302C821D31F6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quokka.WinForms", "Quokka.WinForms\Quokka.WinForms.csproj", "{2E9F1CF5-C91E-4B40-B5F0-273C0E2ADFB6}"
@@ -9,17 +26,19 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quokka.WinForms.Tests", "Qu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quokka.Core", "Quokka.Core\Quokka.Core.csproj", "{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quokka.Domain", "Quokka.Domain\Quokka.Domain.csproj", "{59F8AE7F-F658-4902-A915-A871F54208DB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quokka.Krypton", "Quokka.Krypton\Quokka.Krypton.csproj", "{7CAFB430-325C-4C28-A2A0-E03E8D1B0EBD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quokka.NH", "Quokka.NH\Quokka.NH.csproj", "{BA85A91F-6C8C-4E54-8CA8-0952E6556231}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashboard", "Examples\Dashboard\Dashboard\Dashboard.csproj", "{DD65F818-DF46-461C-AFB0-58AACE721606}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quokka.WinForms.Startup", "Quokka.WinForms.Startup\Quokka.WinForms.Startup.csproj", "{CD4991EE-AF09-4E88-BBF0-0BB8EB843DD5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quokka.Castle", "Quokka.Castle\Quokka.Castle.csproj", "{36487FB8-01B3-4C16-AFFA-E4A86090E43B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quokka.Unity", "Quokka.Unity\Quokka.Unity.csproj", "{52A00CC5-7821-40EC-A08A-F777301B55DB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestClient", "Examples\Stomp\TestClient\TestClient.csproj", "{BDB6A9B8-73F1-4B0F-A101-DCE22CF06C79}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{A0092DF8-6014-475F-97CF-5CB757477A51}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sprocket.Server", "Sprocket.Server\Sprocket.Server.csproj", "{85DF2EA0-EA0D-44FA-9744-DA5403CB522B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example1", "Examples\Example1\Example1.csproj", "{6ED4DC5A-E095-4BE9-84CD-74D2E043EFCA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sprocket.Manager", "Sprocket.Manager\Sprocket.Manager.csproj", "{0D6CB64A-B03C-47CB-8C45-1B47021784F7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sprocket.Service", "Sprocket.Service\Sprocket.Service.csproj", "{E1C1FA24-05BC-4455-BD04-46AA10D2DF98}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,31 +62,43 @@ Global
 		{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{59F8AE7F-F658-4902-A915-A871F54208DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{59F8AE7F-F658-4902-A915-A871F54208DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{59F8AE7F-F658-4902-A915-A871F54208DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{59F8AE7F-F658-4902-A915-A871F54208DB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BA85A91F-6C8C-4E54-8CA8-0952E6556231}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BA85A91F-6C8C-4E54-8CA8-0952E6556231}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BA85A91F-6C8C-4E54-8CA8-0952E6556231}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BA85A91F-6C8C-4E54-8CA8-0952E6556231}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CD4991EE-AF09-4E88-BBF0-0BB8EB843DD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CD4991EE-AF09-4E88-BBF0-0BB8EB843DD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CD4991EE-AF09-4E88-BBF0-0BB8EB843DD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CD4991EE-AF09-4E88-BBF0-0BB8EB843DD5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{52A00CC5-7821-40EC-A08A-F777301B55DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{52A00CC5-7821-40EC-A08A-F777301B55DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{52A00CC5-7821-40EC-A08A-F777301B55DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{52A00CC5-7821-40EC-A08A-F777301B55DB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6ED4DC5A-E095-4BE9-84CD-74D2E043EFCA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6ED4DC5A-E095-4BE9-84CD-74D2E043EFCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6ED4DC5A-E095-4BE9-84CD-74D2E043EFCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6ED4DC5A-E095-4BE9-84CD-74D2E043EFCA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CAFB430-325C-4C28-A2A0-E03E8D1B0EBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CAFB430-325C-4C28-A2A0-E03E8D1B0EBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CAFB430-325C-4C28-A2A0-E03E8D1B0EBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CAFB430-325C-4C28-A2A0-E03E8D1B0EBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD65F818-DF46-461C-AFB0-58AACE721606}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD65F818-DF46-461C-AFB0-58AACE721606}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD65F818-DF46-461C-AFB0-58AACE721606}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD65F818-DF46-461C-AFB0-58AACE721606}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36487FB8-01B3-4C16-AFFA-E4A86090E43B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36487FB8-01B3-4C16-AFFA-E4A86090E43B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36487FB8-01B3-4C16-AFFA-E4A86090E43B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36487FB8-01B3-4C16-AFFA-E4A86090E43B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDB6A9B8-73F1-4B0F-A101-DCE22CF06C79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDB6A9B8-73F1-4B0F-A101-DCE22CF06C79}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDB6A9B8-73F1-4B0F-A101-DCE22CF06C79}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDB6A9B8-73F1-4B0F-A101-DCE22CF06C79}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85DF2EA0-EA0D-44FA-9744-DA5403CB522B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85DF2EA0-EA0D-44FA-9744-DA5403CB522B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85DF2EA0-EA0D-44FA-9744-DA5403CB522B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85DF2EA0-EA0D-44FA-9744-DA5403CB522B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D6CB64A-B03C-47CB-8C45-1B47021784F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D6CB64A-B03C-47CB-8C45-1B47021784F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D6CB64A-B03C-47CB-8C45-1B47021784F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D6CB64A-B03C-47CB-8C45-1B47021784F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1C1FA24-05BC-4455-BD04-46AA10D2DF98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1C1FA24-05BC-4455-BD04-46AA10D2DF98}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1C1FA24-05BC-4455-BD04-46AA10D2DF98}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1C1FA24-05BC-4455-BD04-46AA10D2DF98}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{6ED4DC5A-E095-4BE9-84CD-74D2E043EFCA} = {A0092DF8-6014-475F-97CF-5CB757477A51}
+		{8BBF7230-2636-40FC-8ABA-D24D0BC4DB5A} = {A0092DF8-6014-475F-97CF-5CB757477A51}
+		{08A912A3-F373-4C19-839B-8F24B588C81C} = {A0092DF8-6014-475F-97CF-5CB757477A51}
+		{DD65F818-DF46-461C-AFB0-58AACE721606} = {8BBF7230-2636-40FC-8ABA-D24D0BC4DB5A}
+		{BDB6A9B8-73F1-4B0F-A101-DCE22CF06C79} = {08A912A3-F373-4C19-839B-8F24B588C81C}
+		{3C13EB38-547D-4C1E-B39B-35A2B64193B7} = {B9320012-B1B3-411A-8D07-08ACBBFAE900}
 	EndGlobalSection
 EndGlobal

@@ -1,4 +1,5 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -13,10 +14,26 @@
     <AssemblyOriginatorKeyFile>Quokka.snk</AssemblyOriginatorKeyFile>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
-    <OldToolsVersion>2.0</OldToolsVersion>
+    <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -26,6 +43,7 @@
     <DefineConstants>TRACE;DEBUG;SkipPostSharp</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -34,6 +52,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Common.Logging, Version=2.0.0.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
@@ -60,17 +79,38 @@
     <Compile Include="Diagnostics\NullLogger.cs" />
     <Compile Include="Diagnostics\Verify.cs" />
     <Compile Include="DynamicCodeGeneration\AbstractProxyBuilder.cs" />
-    <Compile Include="DynamicCodeGeneration\DynamicAssembly.cs" />
     <Compile Include="DynamicCodeGeneration\MemberMapping.cs" />
     <Compile Include="DynamicCodeGeneration\NavigatorProxyBuilder.cs" />
     <Compile Include="DynamicCodeGeneration\ProxyFactory.cs" />
     <Compile Include="DynamicCodeGeneration\DuckProxyBuilder.cs" />
-    <Compile Include="Reflection\ObjectFactory.cs" />
+    <Compile Include="Events\Event.cs" />
+    <Compile Include="Events\Event.Generic.cs" />
+    <Compile Include="Events\EventBase.cs" />
+    <Compile Include="Events\EventSubscriptionExtensions.cs" />
+    <Compile Include="Events\IEventBroker.cs" />
+    <Compile Include="Events\IEventSubscription.cs" />
+    <Compile Include="Events\IEventSubscription.Generic.cs" />
+    <Compile Include="Events\Internal\BackgroundThreadSubscription.cs" />
+    <Compile Include="Events\Internal\BackgroundThreadSubscription.Generic.cs" />
+    <Compile Include="Events\Internal\DelegateReference.cs" />
+    <Compile Include="Events\Internal\EventBrokerImpl.cs" />
+    <Compile Include="Events\Internal\EventSubscription.cs" />
+    <Compile Include="Events\Internal\EventSubscription.Generic.cs" />
+    <Compile Include="Events\Internal\EventSubscriptionBase.cs">
+    </Compile>
+    <Compile Include="Events\Internal\PublisherThreadSubscription.cs" />
+    <Compile Include="Events\Internal\PublisherThreadSubscription.Generic.cs" />
+    <Compile Include="Events\Internal\UIThreadSubscription.cs" />
+    <Compile Include="Events\Internal\UIThreadSubscription.Generic.cs" />
+    <Compile Include="Events\ReferenceOption.cs" />
+    <Compile Include="Events\ThreadOption.cs" />
+    <Compile Include="Modules\IModule.cs" />
     <Compile Include="QuokkaException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\PropertyCollection.cs" />
     <Compile Include="Reflection\PropertyUtil.cs" />
     <Compile Include="Reflection\TypeUtil.cs" />
+    <Compile Include="Security\MD5Crypt.cs" />
     <Compile Include="ServiceContainerUtil.cs" />
     <Compile Include="ServiceLocation\PerRequestAttribute.cs" />
     <Compile Include="ServiceLocation\RegisterTypeAttribute.cs" />
@@ -81,9 +121,6 @@
     <Compile Include="ServiceLocation\SingletonAttribute.cs" />
     <Compile Include="Services\DateTimeProvider.cs" />
     <Compile Include="Services\GuidProvider.cs" />
-    <Compile Include="Uip\Controllers\IInProgressController.cs" />
-    <Compile Include="Uip\Controllers\InProgressControllerBase.cs" />
-    <Compile Include="Uip\Controllers\WizardControllerBase.cs" />
     <Compile Include="Uip\UipNavigator.cs" />
     <Compile Include="Uip\UipNodeOptions.cs" />
     <Compile Include="Uip\UipQuestion.cs" />
@@ -95,6 +132,17 @@
     <Compile Include="Uip\UipNode.cs" />
     <Compile Include="Uip\UipTask.cs" />
     <Compile Include="Uip\UipUtil.cs" />
+    <Compile Include="Uip\UipViewEventArgs.cs" />
+    <Compile Include="UI\Binding\PropertyComparer.cs" />
+    <Compile Include="UI\Regions\IRegion.cs" />
+    <Compile Include="UI\Regions\IRegionAdapter.cs" />
+    <Compile Include="UI\Regions\IRegionCollection.cs" />
+    <Compile Include="UI\Regions\IRegionManager.cs" />
+    <Compile Include="UI\Regions\IViewsCollection.cs" />
+    <Compile Include="UI\Regions\RegionAdapterMappings.cs" />
+    <Compile Include="UI\Regions\RegionExtensions.cs" />
+    <Compile Include="UI\Regions\ViewsCollection.cs" />
+    <Compile Include="UI\Binding\SortableBindingList.cs" />
     <Compile Include="Util\RegistryUtil.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(FormalBuild)' == 'true' ">
@@ -102,7 +150,143 @@
     <Compile Include="..\CommonAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Collections\DisposableCollection.cs">
+    </Compile>
+    <Compile Include="Collections\DisposableCollection.Generic.cs" />
+    <Compile Include="Collections\IDisposableCollection.cs" />
+    <Compile Include="Collections\IDisposableCollection.Generic.cs" />
+    <Compile Include="Data\DataReader\DataReaderDecorator.cs" />
+    <Compile Include="Data\DataReader\StringTrimDataReader.cs" />
+    <Compile Include="Data\Internal\TypeExtensions.cs" />
+    <Compile Include="Diagnostics\ExceptionExtensions.cs" />
+    <Compile Include="Sprocket\CurrentMessage.cs" />
+    <Compile Include="Sprocket\Example.cs" />
+    <Compile Include="Sprocket\IChannel.cs" />
+    <Compile Include="Sprocket\IPublisher.cs" />
+    <Compile Include="Sprocket\ISprocket.cs" />
+    <Compile Include="Sprocket\IStatusMessage.cs" />
+    <Compile Include="Sprocket\ISubscriber.cs" />
+    <Compile Include="Sprocket\SprocketClient.cs" />
+    <Compile Include="Sprocket\SprocketClient.Subscriber.cs" />
+    <Compile Include="Stomp\Internal\ErrorMessages.cs" />
+    <Compile Include="Stomp\Internal\GlobalLock.cs" />
+    <Compile Include="Stomp\Internal\HeartBeatValues.cs" />
+    <Compile Include="Stomp\Internal\QueueName.cs" />
+    <Compile Include="Stomp\Server\Messages\MessageLogMessage.cs" />
+    <Compile Include="Stomp\Transport\ExceptionEventArgs.cs" />
+    <Compile Include="Sandbox\IDataQuery.cs" />
+    <Compile Include="Data\IgnoreParameterAttribute.cs" />
+    <Compile Include="Data\Internal\DataConversionKey.cs" />
+    <Compile Include="Data\Internal\DataRecordConverter.cs" />
+    <Compile Include="Data\Internal\DataRecordConverterMethod.cs" />
+    <Compile Include="Data\Internal\DataRecordConverterTypeBuilder.cs" />
+    <Compile Include="Data\Internal\DataRecordFieldInfo.cs" />
+    <Compile Include="Data\Internal\DataParameterBuilder.cs" />
+    <Compile Include="Data\Internal\DataParameterTypeMapping.cs" />
+    <Compile Include="Data\Internal\DataParameterInfo.cs" />
+    <Compile Include="Data\Internal\NameDictionary.cs" />
+    <Compile Include="Data\Internal\DataRecordConverterSpec.cs" />
+    <Compile Include="Data\Internal\SqlCommandText.cs" />
+    <Compile Include="Data\Internal\SqlQueryReader.cs" />
+    <Compile Include="Data\ISqlQueryReader.cs" />
+    <Compile Include="Data\ParameterAttribute.cs" />
+    <Compile Include="Data\SqlQuery.cs" />
+    <Compile Include="Data\SqlQuery.Generic.cs" />
+    <Compile Include="Data\SqlQueryBase.cs" />
+    <Compile Include="DynamicCodeGeneration\DynamicAssembly.cs" />
+    <Compile Include="Stomp\Transport\IFrameBuilder.cs" />
+    <Compile Include="Stomp\Transport\IListener.cs" />
+    <Compile Include="Stomp\Transport\ITransport.cs" />
+    <Compile Include="Stomp\Transport\SocketClientTransport.cs" />
+    <Compile Include="Stomp\Transport\SocketListener.cs" />
+    <Compile Include="Stomp\Transport\SocketTransport.cs" />
+    <Compile Include="Stomp\Internal\ExpiresTextUtils.cs" />
+    <Compile Include="Stomp\Internal\ServerSideConnection.cs" />
+    <Compile Include="Stomp\Internal\ServerSideSession.cs" />
+    <Compile Include="Stomp\Internal\ServerSideSubscription.cs" />
+    <Compile Include="Stomp\Internal\MessageQueue.cs" />
+    <Compile Include="Stomp\Internal\ServerData.cs" />
+    <Compile Include="Stomp\Server\Messages\ServerStatusMessage.cs" />
+    <Compile Include="Stomp\StompFrameExtensions.cs" />
+    <Compile Include="Stomp\Internal\UnitTestHelper.cs" />
+    <Compile Include="Stomp\StompAck.cs" />
+    <Compile Include="Stomp\StompClient.cs" />
+    <Compile Include="Stomp\Internal\StompFrameUtils.cs" />
+    <Compile Include="Stomp\Internal\StompClientTransport.cs" />
+    <Compile Include="Stomp\Internal\Listener.cs" />
+    <Compile Include="Stomp\StompMessageEventArgs.cs" />
+    <Compile Include="Stomp\StompServer.cs" />
+    <Compile Include="Stomp\StompServerConfig.cs" />
+    <Compile Include="Stomp\StompSubscription.cs" />
+    <Compile Include="Stomp\StompSubscriptionState.cs" />
+    <Compile Include="Threading\IWorkerActionModule.cs" />
+    <Compile Include="Threading\Worker.cs" />
+    <Compile Include="Threading\WorkerAction.cs" />
+    <Compile Include="Stomp\Internal\ByteArrayUtil.cs" />
+    <Compile Include="Stomp\StompCommand.cs" />
+    <Compile Include="Stomp\StompFrame.cs" />
+    <Compile Include="Stomp\StompFrameBuilder.cs" />
+    <Compile Include="Stomp\StompHeaderCollection.cs" />
+    <Compile Include="Stomp\StompHeader.cs" />
+    <Compile Include="Threading\WorkerActionModule.cs" />
+    <Compile Include="UI\Commands\IUICommand.cs" />
+    <Compile Include="Diagnostics\ErrorReport.cs" />
+    <Compile Include="UI\Messages\Internal\MessageBoxPresenter.cs" />
+    <Compile Include="UI\Messages\Internal\MessageBoxTask.cs" />
+    <Compile Include="UI\Messages\IUIMessageBoxView.cs" />
+    <Compile Include="UI\Messages\UIMessageBox.cs" />
+    <Compile Include="UI\Messages\UIAnswer.cs" />
+    <Compile Include="UI\Messages\UIAnswerCollection.cs" />
+    <Compile Include="UI\Messages\UIAnswerType.cs" />
+    <Compile Include="UI\Messages\UIMessage.cs" />
+    <Compile Include="UI\Messages\UIMessageType.cs" />
+    <Compile Include="UI\Tasks\IAnyNodeBuilder.cs" />
+    <Compile Include="UI\Tasks\IModalWindow.cs" />
+    <Compile Include="UI\Tasks\INavigateCommand.cs" />
+    <Compile Include="UI\Tasks\INodeBuilder.cs" />
+    <Compile Include="UI\Tasks\IPresenterNodeBuilder.cs" />
+    <Compile Include="UI\Tasks\INestedTaskNodeBuilder.cs" />
+    <Compile Include="UI\Tasks\IUITask.cs" />
+    <Compile Include="UI\Tasks\IViewDeck.cs" />
+    <Compile Include="UI\Tasks\IViewNodeBuilder.cs" />
+    <Compile Include="UI\Tasks\IViewTransition.cs" />
+    <Compile Include="UI\Tasks\NavigateCommand.cs" />
+    <Compile Include="UI\Tasks\NodeBuilder.cs" />
+    <Compile Include="UI\Tasks\NodeTransitionBuilder.cs" />
+    <Compile Include="UI\Tasks\Presenter.cs" />
+    <Compile Include="UI\Tasks\Presenter.Generic.cs" />
+    <Compile Include="UI\Tasks\PresenterBase.cs" />
+    <Compile Include="UI\Tasks\TaskBuilder.cs" />
+    <Compile Include="UI\Tasks\TaskBuilderStorage.cs" />
+    <Compile Include="UI\Tasks\UINode.cs" />
+    <Compile Include="UI\Tasks\UINodeOptions.cs" />
+    <Compile Include="UI\Tasks\UITask.cs" />
+    <Compile Include="UI\Tasks\UITaskException.cs" />
+    <Compile Include="UI\Tasks\ViewClosedEventArgs.cs" />
+    <Compile Include="Util\DisposeUtils.cs" />
     <None Include="Quokka.snk" />
+    <Compile Include="Sprocket\SprocketClient.Channel.cs" />
+    <Compile Include="Sprocket\SprocketClient.Publisher.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="TODO.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <PropertyGroup>
     <DontImportPostSharp>True</DontImportPostSharp>
