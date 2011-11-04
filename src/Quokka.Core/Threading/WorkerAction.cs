@@ -24,6 +24,10 @@ namespace Quokka.Threading
 
 		public virtual void Run()
 		{
+			// To handle recursive calls, keep a copy of the previous
+			// action context on the stack.
+			var previousActionContext = _actionContext;
+
 			try
 			{
 				_actionContext = new ActionContext();
@@ -47,7 +51,7 @@ namespace Quokka.Threading
 			}
 			finally
 			{
-				_actionContext = null;
+				_actionContext = previousActionContext;
 			}
 		}
 
