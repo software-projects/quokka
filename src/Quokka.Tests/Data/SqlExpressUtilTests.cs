@@ -5,6 +5,7 @@ using NUnit.Framework;
 namespace Quokka.Data
 {
 	[TestFixture]
+	[Ignore("No longer works on machine without SQLEXPRESS installed")]
 	public class SqlExpressUtilTests
 	{
 		private string _dbFile;

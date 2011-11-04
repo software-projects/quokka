@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <project name="Quokka" default="test" xmlns="http://nant.sf.net/release/0.86-beta1/nant.xsd">
-	<property name="nant.settings.currentframework" value="net-3.5"/>
+	<property name="nant.settings.currentframework" value="net-4.0"/>
 	<property name="framework.dir" value="${framework::get-framework-directory(nant.settings.currentframework)}"/>
 
 	<property name="config" value="Release"/>

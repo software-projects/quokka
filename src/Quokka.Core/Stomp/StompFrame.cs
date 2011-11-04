@@ -108,7 +108,7 @@ namespace Quokka.Stomp
 		/// 	is <c>null</c> or empty, the "content-length" header will still be set (and its
 		/// 	value will be "0").
 		/// </remarks>
-		public byte[] ToArray()
+		internal byte[] ToArray()
 		{
 			if (IsHeartBeat)
 			{

@@ -31,9 +31,11 @@ namespace Quokka.Stomp
 			            		Body = null,
 			            	};
 
-			var bytes = frame.ToArray();
+			var builder = new StompFrameBuilder();
 
-			var text = new StreamReader(new MemoryStream(bytes), Encoding.UTF8).ReadToEnd();
+			var bytes = builder.ToArray(frame);
+
+			var text = new StreamReader(new MemoryStream(bytes.Array, bytes.Offset, bytes.Count), Encoding.UTF8).ReadToEnd();
 
 			const string expectedText = "CONNECT\r\nlogin:scott\r\npasscode:tiger\r\ncontent-length:0\r\n\r\n\0";
 			Assert.AreEqual(expectedText, text);
@@ -57,9 +59,10 @@ namespace Quokka.Stomp
 			            		Body = body,
 			            	};
 
-			var bytes = frame.ToArray();
+			var builder = new StompFrameBuilder();
+			var bytes = builder.ToArray(frame);
 
-			var text = new StreamReader(new MemoryStream(bytes), Encoding.UTF8).ReadToEnd();
+			var text = new StreamReader(new MemoryStream(bytes.Array, bytes.Offset, bytes.Count), Encoding.UTF8).ReadToEnd();
 
 			string expectedText = "SEND\r\n"
 			                      + "content-type:application/xml; encoding=UTF8\r\n"
@@ -79,9 +82,10 @@ namespace Quokka.Stomp
 		[Test]
 		public void Null_command_results_in_heartbeat()
 		{
-			var data = new StompFrame { Command = null }.ToArray();
-			Assert.AreEqual(1, data.Length);
-			Assert.AreEqual(10, data[0]);
+			var builder = new StompFrameBuilder();
+			var data = builder.ToArray(new StompFrame { Command = null });
+			Assert.AreEqual(1, data.Count);
+			Assert.AreEqual(10, data.Array[data.Offset]);
 		}
 
 		[Test]
