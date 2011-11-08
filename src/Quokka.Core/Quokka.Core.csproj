@@ -72,6 +72,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\StringValueAttribute.cs" />
+    <Compile Include="Data\Migrations\DataMigration.cs" />
+    <Compile Include="Data\Migrations\DataMigrator.cs" />
+    <Compile Include="Data\Migrations\DbCommandExtensions.cs" />
+    <Compile Include="Data\SqlMapper.cs" />
     <Compile Include="Data\SqlExpressUtil.cs" />
     <Compile Include="Diagnostics\ILogger.cs" />
     <Compile Include="Diagnostics\ILogManager.cs" />
@@ -288,6 +292,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <DontImportPostSharp>True</DontImportPostSharp>
   </PropertyGroup>
