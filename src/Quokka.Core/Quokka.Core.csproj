@@ -76,8 +76,8 @@
     <Compile Include="Config\ConfigParameterType.cs" />
     <Compile Include="Config\ConfigValueChangedEvent.cs" />
     <Compile Include="Config\IConfig.cs" />
-    <Compile Include="Config\Implementation\CachingConfigServiceBase.cs" />
-    <Compile Include="Config\Implementation\ConfigServiceBase.cs" />
+    <Compile Include="Config\Implementation\CachingConfigBase.cs" />
+    <Compile Include="Config\Implementation\ConfigBase.cs" />
     <Compile Include="Config\Parameter.cs" />
     <Compile Include="Config\Internal\TimeSpanExtensions.cs" />
     <Compile Include="Data\Migrations\DatabaseMigration.cs" />

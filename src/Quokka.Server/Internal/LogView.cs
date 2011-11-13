@@ -31,6 +31,7 @@ namespace Quokka.Server.Internal
 			_adapter.ListChanged += (o, e) => ListChanged();
 
 			var appender = new DisplayAppender(_dataSource);
+			appender.Fix = FixFlags.Message;
 
 			// Don't show NHibernate debug logs as they are very verbose
 			appender.AddFilter(new SuppressDebugFilter { LoggerToMatch = "NHibernate" });

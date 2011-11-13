@@ -5,6 +5,7 @@ using System.Threading;
 using System.Windows.Forms;
 using Castle.Facilities.AutoTx;
 using Castle.Facilities.Logging;
+using Castle.Facilities.NHibernateIntegration;
 using Castle.Facilities.Startable;
 using Castle.MicroKernel.Registration;
 using Castle.Windsor;
@@ -153,7 +154,7 @@ namespace Quokka.Server
 			Container.AddFacility<StartableFacility>();
 			Container.AddFacility<LoggingFacility>(f => f.LogUsing(LoggerImplementation.Log4net));
 			Container.AddFacility<TransactionFacility>();
-			//Container.AddFacility("nhibernate.facility", new NHibernateFacility());
+			Container.AddFacility("nhibernate.facility", new NHibernateFacility(new NHibernateConfigurationBuilder()));
 
 			// Create the NHibernate facility.
 #if CONFIGURE_NHIBERNATE_FACILITY_BY_CODE
