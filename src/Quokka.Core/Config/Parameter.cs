@@ -1,5 +1,6 @@
 ﻿using System;
 using Quantum.Constants;
+using Quokka.Config.Internal;
 using Quokka.Diagnostics;
 
 namespace Quokka.Config
@@ -198,6 +199,11 @@ namespace Quokka.Config
 		{
 			get { return DefaultValue.ToString("yyyy-MM-dd"); }
 		}
+
+		public bool TryParse(string s, out DateTime result)
+		{
+			return DateTime.TryParse(s, out result);
+		}
 	}
 
 	/// <summary>
@@ -217,6 +223,11 @@ namespace Quokka.Config
 		{
 			get { return DefaultValue == null ? null : DefaultValue.ToString(); }
 		}
+
+		public bool TryParse(string s, out Uri result)
+		{
+			return Uri.TryCreate(s, UriKind.RelativeOrAbsolute, out result);
+		}
 	}
 
 	/// <summary>
@@ -232,9 +243,14 @@ namespace Quokka.Config
 
 		public TimeSpan DefaultValue { get; private set; }
 
+		public bool TryParse(string s, out TimeSpan result)
+		{
+			return TimeSpanExtensions.TryParse(s, out result);
+		}
+
 		public override string DefaultValueAsString
 		{
-			get { return DefaultValue.ToString(); }
+			get { return DefaultValue.ToReadableString(); }
 		}
 	}
 }

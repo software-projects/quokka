@@ -9,6 +9,7 @@ namespace Quokka.Config
 		bool GetValue(BooleanParameter parameter);
 		Uri GetValue(UrlParameter parameter);
 		DateTime GetValue(DateParameter parameter);
+		TimeSpan GetValue(TimeSpanParameter parameter);
 	}
 
 	/// <summary>
@@ -40,5 +41,6 @@ namespace Quokka.Config
 		void SetValue(BooleanParameter parameter, bool value);
 		void SetValue(UrlParameter parameter, Uri value);
 		void SetValue(DateParameter parameter, DateTime value);
+		void SetValue(TimeSpanParameter parameter, TimeSpan value);
 	}
 }
