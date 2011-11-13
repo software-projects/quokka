@@ -22,6 +22,11 @@ using System.Text.RegularExpressions;
 
 namespace Quokka.Data
 {
+	/// <summary>
+	/// This class is sourced from Dapper (http://code.google.com/p/dapper-dot-net/). Only
+	/// the namespace has been change (from Dapper to Quokka.Data), to avoid potential conflicts
+	/// with any code that includes the same code using the Dapper namespace.
+	/// </summary>
 	public static class SqlMapper
 	{
 		public interface IDynamicParameters

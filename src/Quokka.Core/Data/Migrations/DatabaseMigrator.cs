@@ -163,12 +163,9 @@ namespace Quokka.Data.Migrations
 			var hash = new HashSet<Assembly>();
 
 			// Find all migrations in the database
-			var sql = string.Format("select Module, Version, Description, CreatedAt"
-									+ " from {0}"
-									+ " order by Version", DatabaseMigrationTableName);
+			var sql = string.Format("select Module, Version, Description, CreatedAt from {0}", DatabaseMigrationTableName);
 			// create dictionary mapping version to migration
 			var existingMigrations = Connection.Query<DatabaseMigration>(sql).ToDictionary(m => m.Version);
-
 
 			foreach (var assembly in Assemblies)
 			{

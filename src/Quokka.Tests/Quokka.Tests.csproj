@@ -89,6 +89,7 @@
   <ItemGroup>
     <Compile Include="Castle\WindsorContainerTests.cs" />
     <Compile Include="Castle\WindsorServiceContainerTests.cs" />
+    <Compile Include="Config\TimeSpanExtensionsTests.cs" />
     <Compile Include="Data\TestQueries\NestedPropertyQuery.cs" />
     <Compile Include="Data\TestQueries\SimpleQuery.cs" />
     <Compile Include="Data\SqlExpressUtilTests.cs" />
@@ -109,6 +110,7 @@
     <Compile Include="Sandbox\ReflectionSpikes.cs" />
     <Compile Include="ServiceContainerUtilTests.cs" />
     <Compile Include="ServiceProviderTests.cs" />
+    <Compile Include="Spikes\MiscSpikeTests.cs" />
     <Compile Include="Sprocket\SprocketChannelTests.cs" />
     <Compile Include="Stomp\ByteArrayUtilTests.cs" />
     <Compile Include="Stomp\HeartBeatValuesTests.cs" />
