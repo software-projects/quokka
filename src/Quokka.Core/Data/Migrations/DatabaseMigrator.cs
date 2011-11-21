@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.Common;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Transactions;
 using Common.Logging;
 using Quokka.Diagnostics;
+using IsolationLevel = System.Data.IsolationLevel;
 
 namespace Quokka.Data.Migrations
 {
@@ -71,11 +72,12 @@ namespace Quokka.Data.Migrations
 			{
 				try
 				{
-					using (var tx = Connection.BeginTransaction(IsolationLevel.RepeatableRead))
+					using (var tx = new TransactionScope(TransactionScopeOption.RequiresNew))
 					{
 						Log.Info("Applying schema migration: " + schemaMigration.ResourceName);
+						Connection.EnlistTransaction(Transaction.Current);
 						PerformMigration(schemaMigration);
-						tx.Commit();
+						tx.Complete();
 						Log.Info("Schema migration successful: " + schemaMigration.ResourceName);
 					}
 				}
@@ -112,22 +114,23 @@ namespace Quokka.Data.Migrations
 		{
 			try
 			{
-				using (var tx = Connection.BeginTransaction())
+				using (var tx = new TransactionScope(TransactionScopeOption.RequiresNew))
 				{
+					Connection.EnlistTransaction(Transaction.Current);
 					var cmd = Connection.CreateCommand();
 
 					// TODO: this is SQL Server specific
 					cmd.CommandText = string.Format("if not exists(select * from information_schema.tables where table_name = '{0}')"
 					                                + " begin"
-					                                + " create table DataMigrations("
+					                                + " create table {0}("
 					                                + " Version nvarchar(14) not null,"
+													+ " Module nvarchar(128) not null,"
 					                                + " CreatedAt datetime not null,"
 					                                + " Description nvarchar(255) null,"
 					                                + " primary key(Version))"
 					                                + " end", DatabaseMigrationTableName);
-
 					cmd.ExecuteNonQuery();
-					tx.Commit();
+					tx.Complete();
 				}
 			}
 			catch (Exception ex)
