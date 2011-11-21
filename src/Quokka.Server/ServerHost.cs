@@ -8,11 +8,13 @@ using Castle.Facilities.Logging;
 using Castle.Facilities.NHibernateIntegration;
 using Castle.Facilities.Startable;
 using Castle.MicroKernel.Registration;
+using Castle.Services.Transaction;
 using Castle.Windsor;
 using Castle.Windsor.Installer;
 using Microsoft.Practices.ServiceLocation;
 using Quokka.Server.Internal;
 using Quokka.ServiceLocation;
+using Quokka.Services;
 using log4net;
 using log4net.Config;
 
@@ -151,9 +153,21 @@ namespace Quokka.Server
 
 		protected virtual void ConfigureContainer()
 		{
+			Container.Register(Component.For<IClock>().ImplementedBy<SystemClock>().LifeStyle.Singleton);
+			Container.Register(Component.For<IDateTimeProvider>().ImplementedBy<DateTimeProvider>().LifeStyle.Singleton);
+			Container.Register(Component.For<IGuidProvider>().ImplementedBy<GuidProvider>().LifeStyle.Singleton);
+
 			Container.AddFacility<StartableFacility>();
+			Container.AddFacility<ConfigParamFacility>();
 			Container.AddFacility<LoggingFacility>(f => f.LogUsing(LoggerImplementation.Log4net));
 			Container.AddFacility<TransactionFacility>();
+
+			// Explicitly registering the transaction manager avoids a spurious info message
+			// in the event log by the nhibernate facility
+			Container.Register(
+				Component.For<ITransactionManager>()
+					.ImplementedBy<DefaultTransactionManager>());
+
 			Container.AddFacility("nhibernate.facility", new NHibernateFacility(new NHibernateConfigurationBuilder()));
 
 			// Create the NHibernate facility.
