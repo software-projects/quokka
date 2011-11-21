@@ -69,20 +69,23 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\StringValueAttribute.cs" />
     <Compile Include="Config\ConfigParameterType.cs" />
-    <Compile Include="Config\ConfigValueChangedEvent.cs" />
+    <Compile Include="Config\ConfigChangedMessage.cs" />
     <Compile Include="Config\IConfig.cs" />
     <Compile Include="Config\Implementation\CachingConfigBase.cs" />
     <Compile Include="Config\Implementation\ConfigBase.cs" />
+    <Compile Include="Config\ISetConfig.cs" />
     <Compile Include="Config\Parameter.cs" />
     <Compile Include="Config\Internal\TimeSpanExtensions.cs" />
     <Compile Include="Data\Migrations\DatabaseMigration.cs" />
     <Compile Include="Data\Migrations\DatabaseMigrator.cs" />
     <Compile Include="Data\Migrations\DbCommandExtensions.cs" />
+    <Compile Include="Data\SqlExceptionExtensions.cs" />
     <Compile Include="Data\SqlMapper.cs" />
     <Compile Include="Data\SqlExpressUtil.cs" />
     <Compile Include="Diagnostics\ILogger.cs" />
@@ -116,6 +119,8 @@
     <Compile Include="Events\Internal\UIThreadSubscription.Generic.cs" />
     <Compile Include="Events\ReferenceOption.cs" />
     <Compile Include="Events\ThreadOption.cs" />
+    <Compile Include="Sandbox\MessageAttributes.cs" />
+    <Compile Include="Services\IClock.cs" />
     <Compile Include="Modules\IModule.cs" />
     <Compile Include="QuokkaException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -133,6 +138,7 @@
     <Compile Include="ServiceLocation\SingletonAttribute.cs" />
     <Compile Include="Services\DateTimeProvider.cs" />
     <Compile Include="Services\GuidProvider.cs" />
+    <Compile Include="Services\SystemClock.cs" />
     <Compile Include="Uip\UipNavigator.cs" />
     <Compile Include="Uip\UipNodeOptions.cs" />
     <Compile Include="Uip\UipQuestion.cs" />
