@@ -136,6 +136,7 @@ namespace Quokka.Stomp
 			_server.ConnectedChanged += ServerConnectionChanged;
 			_server.FrameReady += ServerFrameReady;
 			_server.TransportException += ServerTransportException;
+			ProcessServerFrames(_server);
 		}
 
 		private void ServerConnectionChanged(object sender, EventArgs e)
@@ -150,12 +151,23 @@ namespace Quokka.Stomp
 		private static void ServerFrameReady(object sender, EventArgs e)
 		{
 			var server = (ITransport<StompFrame>) sender;
-			var frame = server.GetNextFrame();
+			ProcessServerFrames(server);
+		}
 
-			var text = frame.BodyText;
+		private static void ProcessServerFrames(ITransport<StompFrame> server)
+		{
+			for (; ; )
+			{
+				var frame = server.GetNextFrame();
+				if (frame == null)
+				{
+					break;
+				}
 
-			Log.Debug("Server: received message: " + text);
-			server.SendFrame(frame);
+				var text = frame.BodyText;
+				Log.Debug("Server: received message: " + text);
+				server.SendFrame(frame);
+			}
 		}
 
 		private void ServerTransportException(object sender, ExceptionEventArgs e)
