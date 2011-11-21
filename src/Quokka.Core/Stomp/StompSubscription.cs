@@ -59,12 +59,13 @@ namespace Quokka.Stomp
 		public void Subscribe()
 		{
 			var raiseStateChanged = false;
+			StompFrame message = null;
 
 			lock (_lockObject)
 			{
 				if (State == StompSubscriptionState.Unsubscribed)
 				{
-					var message = new StompFrame(StompCommand.Subscribe)
+					message = new StompFrame(StompCommand.Subscribe)
 					              	{
 					              		Headers =
 					              			{
@@ -75,8 +76,12 @@ namespace Quokka.Stomp
 					              	};
 					raiseStateChanged = true;
 					State = StompSubscriptionState.Subscribing;
-					Client.SendRawMessage(message, true);
 				}
+			}
+
+			if (message != null)
+			{
+				Client.SendRawMessage(message, true);
 			}
 
 			if (raiseStateChanged)
