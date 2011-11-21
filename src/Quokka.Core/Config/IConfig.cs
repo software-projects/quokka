@@ -10,13 +10,16 @@ namespace Quokka.Config
 		Uri GetValue(UrlParameter parameter);
 		DateTime GetValue(DateParameter parameter);
 		TimeSpan GetValue(TimeSpanParameter parameter);
-	}
 
-	/// <summary>
-	/// Interface for updating configuration parameters
-	/// </summary>
-	public interface ISetConfig
-	{
+		/// <summary>
+		/// Can configuration parameter values be written via this interace.
+		/// </summary>
+		/// <remarks>
+		/// If this property value is <c>false</c>, any of the methods for
+		/// setting config parameter values will throw <see cref="NotSupportedException"/>.
+		/// </remarks>
+		bool CanWrite { get; }
+
 		/// <summary>
 		/// Register the parameter with the configuration store.
 		/// </summary>
@@ -25,16 +28,10 @@ namespace Quokka.Config
 		/// parameter is not already registered it will be stored with its default
 		/// value.
 		/// </param>
+		/// <exception cref="NotSupportedException">
+		/// Writing is not supported.
+		/// </exception>
 		void Register(Parameter parameter);
-
-		/// <summary>
-		/// Clear the configuration cache
-		/// </summary>
-		/// <param name="parameter">
-		/// The individual parameter to clear the cache for, or specify <c>null</c>
-		/// to clear all parameters.
-		/// </param>
-		void ClearCache(Parameter parameter = null);
 
 		void SetValue(StringParameter parameter, string value);
 		void SetValue(Int32Parameter parameter, int value);

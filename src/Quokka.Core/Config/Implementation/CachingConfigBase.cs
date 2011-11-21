@@ -1,34 +1,62 @@
 ﻿using System;
 using System.Collections.Generic;
 using Quokka.Diagnostics;
-using Quokka.Events;
+using Quokka.Sprocket;
 
 namespace Quokka.Config.Implementation
 {
 	/// <summary>
-	/// Provides a base class for implementing <see cref="IConfig"/>, where config values are cached
-	/// locally.
+	/// Provides a base class for implementing <see cref="IConfig"/>, where config values are cached locally.
 	/// </summary>
 	/// <remarks>
-	/// Subscribes to the <see cref="ConfigValueChangedEvent"/>, and clears the appropriate values
-	/// from the cache when the event is published.
+	/// Subscribes to <see cref="ConfigChangedMessage"/>, and clears the appropriate values
+	/// from the cache when the message is published.
 	/// </remarks>
 	public abstract class CachingConfigBase : ConfigBase, IDisposable
 	{
 		private readonly Dictionary<string, string> _cachedValues = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 		private readonly object _lockObject = new object();
-		private readonly IEventSubscription _eventSubscription;
+		private IDisposable _subscription;
+		private readonly ISprocket _sprocket;
 
-		protected CachingConfigBase(IEventBroker eventBroker)
+		protected CachingConfigBase(ISprocket sprocket)
 		{
-			Verify.ArgumentNotNull(eventBroker, "eventBroker");
-			_eventSubscription = eventBroker.GetEvent<ConfigValueChangedEvent>()
-				.Subscribe(ClearCache);
+			// Do not subscribe to the message straight away, because
+			_sprocket = Verify.ArgumentNotNull(sprocket, "sprocket");
+
+			if (_sprocket.Connected)
+			{
+				Subscribe();
+			}
+			else
+			{
+				// If we are not connected yet, there is the possibility that the sprocket connection
+				// has not been opened yet. (Flaw in the current implementation that you cannot create
+				// a subscription before opening the client).
+				_sprocket.ConnectedChanged += SprocketConnectedChanged;
+			}
+		}
+
+		private void Subscribe()
+		{
+			_subscription = _sprocket.CreateSubscriber<ConfigChangedMessage>().WithAction(ConfigValueChangedHandler);
+		}
+
+		private void SprocketConnectedChanged(object sender, EventArgs e)
+		{
+			lock (_lockObject)
+			{
+				if (_subscription == null)
+				{
+					Subscribe();
+					_sprocket.ConnectedChanged -= SprocketConnectedChanged;
+				}
+			}
 		}
 
 		public void Dispose()
 		{
-			_eventSubscription.Dispose();
+			_subscription.Dispose();
 		}
 
 		public void ClearCache()
@@ -54,17 +82,17 @@ namespace Quokka.Config.Implementation
 			}
 		}
 
-		public void ClearCache(string paramName)
+		public void ConfigValueChangedHandler(ConfigChangedMessage message)
 		{
 			lock (_lockObject)
 			{
-				if (paramName == null)
+				if (message == null || string.IsNullOrWhiteSpace(message.ParamName))
 				{
 					_cachedValues.Clear();
 				}
 				else
 				{
-					_cachedValues.Remove(paramName);
+					_cachedValues.Remove(message.ParamName);
 				}
 			}
 		}
@@ -81,7 +109,7 @@ namespace Quokka.Config.Implementation
 				}
 			}
 
-			var found = TryGetStringValueAfterCacheMiss(parameter.ParamName, out result);
+			var found = TryGetStringValueAfterCacheMiss(parameter, out result);
 			if (found)
 			{
 				lock (_lockObject)
@@ -93,7 +121,11 @@ namespace Quokka.Config.Implementation
 			return found;
 		}
 
+		protected override void Publish(ConfigChangedMessage message)
+		{
+			_sprocket.Publish(message);
+		}
 
-		protected abstract bool TryGetStringValueAfterCacheMiss(string paramName, out string result);
+		protected abstract bool TryGetStringValueAfterCacheMiss(Parameter parameter, out string result);
 	}
 }

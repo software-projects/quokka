@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Transactions;
+using Quokka.Diagnostics;
 
 namespace Quokka.Config.Implementation
 {
@@ -9,6 +11,7 @@ namespace Quokka.Config.Implementation
 	{
 		public string GetValue(StringParameter parameter)
 		{
+			Verify.ArgumentNotNull(parameter, "parameter");
 			string stringValue;
 
 			if (TryGetStringValue(parameter, out stringValue))
@@ -21,6 +24,7 @@ namespace Quokka.Config.Implementation
 
 		public int GetValue(Int32Parameter parameter)
 		{
+			Verify.ArgumentNotNull(parameter, "parameter");
 			string stringValue;
 
 			if (TryGetStringValue(parameter, out stringValue))
@@ -37,6 +41,7 @@ namespace Quokka.Config.Implementation
 
 		public bool GetValue(BooleanParameter parameter)
 		{
+			Verify.ArgumentNotNull(parameter, "parameter");
 			string stringValue;
 
 			if (TryGetStringValue(parameter, out stringValue))
@@ -53,6 +58,7 @@ namespace Quokka.Config.Implementation
 
 		public Uri GetValue(UrlParameter parameter)
 		{
+			Verify.ArgumentNotNull(parameter, "parameter");
 			string stringValue;
 
 			if (TryGetStringValue(parameter, out stringValue))
@@ -69,6 +75,7 @@ namespace Quokka.Config.Implementation
 
 		public DateTime GetValue(DateParameter parameter)
 		{
+			Verify.ArgumentNotNull(parameter, "parameter");
 			string stringValue;
 
 			if (TryGetStringValue(parameter, out stringValue))
@@ -85,6 +92,7 @@ namespace Quokka.Config.Implementation
 
 		public TimeSpan GetValue(TimeSpanParameter parameter)
 		{
+			Verify.ArgumentNotNull(parameter, "parameter");
 			string stringValue;
 
 			if (TryGetStringValue(parameter, out stringValue))
@@ -109,5 +117,121 @@ namespace Quokka.Config.Implementation
 		/// value will be used.
 		/// </returns>
 		protected abstract bool TryGetStringValue(Parameter parameter, out string result);
+
+		protected virtual bool SetStringValue(Parameter parameter, string stringValue, bool overwriteIfExists)
+		{
+			throw new NotSupportedException("Writing configuration parameter values is not supported");
+		}
+
+		protected virtual void Publish(ConfigChangedMessage message)
+		{
+			throw new NotSupportedException("Publishing ConfigChangedMessage messages is not supported");
+		}
+
+		/// <summary>
+		/// Indicates whether write operations are supported by this implementation.
+		/// </summary>
+		/// <remarks>
+		/// Subclasses must set this property to <c>true</c> if they support write operations.
+		/// </remarks>
+		public bool CanWrite { get; set; }
+
+		private void Publish(Parameter parameter, string stringValue)
+		{
+			var message = new ConfigChangedMessage
+			              	{
+			              		ParamName = parameter.ParamName,
+			              		ParamType = parameter.ParamType,
+			              		ParamValue = stringValue,
+			              	};
+
+			// Publish to subscribers -- if a transaction is current, the message will
+			// be sent when the transaction is committed.
+			Publish(message);
+		}
+
+		private void VerifyWriteSupported()
+		{
+			if (!CanWrite)
+			{
+				throw new NotSupportedException("Write operations not supported");
+			}
+		}
+
+		public void Register(Parameter parameter)
+		{
+			Verify.ArgumentNotNull(parameter, "parameter");
+			VerifyWriteSupported();
+			var stringValue = parameter.DefaultValueAsString;
+			if (SetStringValue(parameter, stringValue, false))
+			{
+				Publish(parameter, stringValue);
+			}
+		}
+
+		public void SetValue(StringParameter parameter, string value)
+		{
+			Verify.ArgumentNotNull(parameter, "parameter");
+			VerifyWriteSupported();
+			if (SetStringValue(parameter, value, true))
+			{
+				Publish(parameter, value);
+			}
+		}
+
+		public void SetValue(Int32Parameter parameter, int value)
+		{
+			Verify.ArgumentNotNull(parameter, "parameter");
+			VerifyWriteSupported();
+			var stringValue = value.ToString();
+			if (SetStringValue(parameter, stringValue, true))
+			{
+				Publish(parameter, stringValue);
+			}
+		}
+
+		public void SetValue(BooleanParameter parameter, bool value)
+		{
+			Verify.ArgumentNotNull(parameter, "parameter");
+			VerifyWriteSupported();
+			var stringValue = value.ToString();
+			if (SetStringValue(parameter, stringValue, true))
+			{
+				Publish(parameter, stringValue);
+			}
+		}
+
+		public void SetValue(UrlParameter parameter, Uri value)
+		{
+			Verify.ArgumentNotNull(parameter, "parameter");
+			VerifyWriteSupported();
+			var stringValue = value == null ? null : value.ToString();
+			if (SetStringValue(parameter, stringValue, true))
+			{
+				Publish(parameter, stringValue);
+			}
+		}
+
+		public void SetValue(DateParameter parameter, DateTime value)
+		{
+			Verify.ArgumentNotNull(parameter, "parameter");
+			VerifyWriteSupported();
+			var stringValue = parameter.ConvertToString(value);
+			if (SetStringValue(parameter, stringValue, true))
+			{
+				Publish(parameter, stringValue);
+			}
+		}
+
+		public void SetValue(TimeSpanParameter parameter, TimeSpan value)
+		{
+			Verify.ArgumentNotNull(parameter, "parameter");
+			VerifyWriteSupported();
+			var stringValue = parameter.ConvertToString(value);
+			if (SetStringValue(parameter, stringValue, true))
+			{
+				Publish(parameter, stringValue);
+			}
+		}
 	}
 }

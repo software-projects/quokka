@@ -197,12 +197,17 @@ namespace Quokka.Config
 
 		public override string DefaultValueAsString
 		{
-			get { return DefaultValue.ToString("yyyy-MM-dd"); }
+			get { return ConvertToString(DefaultValue); }
 		}
 
 		public bool TryParse(string s, out DateTime result)
 		{
 			return DateTime.TryParse(s, out result);
+		}
+
+		public string ConvertToString(DateTime value)
+		{
+			return value.ToString("yyyy-mm-dd");
 		}
 	}
 
@@ -251,6 +256,11 @@ namespace Quokka.Config
 		public override string DefaultValueAsString
 		{
 			get { return DefaultValue.ToReadableString(); }
+		}
+
+		public string ConvertToString(TimeSpan timeSpan)
+		{
+			return timeSpan.ToReadableString();
 		}
 	}
 }
