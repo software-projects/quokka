@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
+using Castle.Core.Logging;
 using Castle.Facilities.AutoTx;
 using Castle.Facilities.Logging;
 using Castle.Facilities.NHibernateIntegration;
 using Castle.Facilities.Startable;
+using Castle.MicroKernel;
 using Castle.MicroKernel.Registration;
 using Castle.Services.Transaction;
 using Castle.Windsor;
@@ -79,6 +81,8 @@ namespace Quokka.Server
 				ConfigureContainer();
 				Logger.Debug("Configured container");
 
+				StartComponents();
+
 				Logger.Info("Program started");
 			}
 			catch
@@ -141,6 +145,34 @@ namespace Quokka.Server
 		protected virtual void CreateContainer()
 		{
 			Container = new WindsorContainer();
+#if DEBUG
+			Container.Kernel.ComponentRegistered += delegate(string key, IHandler handler)
+			                                        	{
+															if (key == handler.ComponentModel.Implementation.ToString())
+															{
+																if (handler.Service == handler.ComponentModel.Implementation)
+																{
+																	Logger.DebugFormat("Registered {0} ({1})",
+																	                   handler.Service,
+																	                   handler.ComponentModel.LifestyleType);
+																}
+																else
+																{
+																	Logger.DebugFormat("Registered {0} => {1} ({2})",
+																					   handler.Service,
+																					   handler.ComponentModel.Implementation,
+																					   handler.ComponentModel.LifestyleType);
+																}
+															}
+															else
+															{
+																Logger.DebugFormat("Registered key={0}: {1} => {2} ({3})",
+																                   key, handler.Service,
+																                   handler.ComponentModel.Implementation,
+																                   handler.ComponentModel.LifestyleType);
+															}
+			                                        	};
+#endif
 		}
 
 		protected virtual void ConfigureQuokka()
@@ -151,15 +183,34 @@ namespace Quokka.Server
 			ServiceLocator.SetLocatorProvider(() => serviceContainer.Locator);
 		}
 
+		protected virtual void StartComponents()
+		{
+			foreach (var facility in Container.Kernel.GetFacilities())
+			{
+				var startableFacility = facility as CustomizedStartableFacility;
+				if (startableFacility != null)
+				{
+					startableFacility.StartAll();
+				}
+			}
+		}
+
 		protected virtual void ConfigureContainer()
 		{
+			Container.AddFacility<LoggingFacility>(f => f.LogUsing(LoggerImplementation.Log4net));
+
+			var loggerFactory = Container.Resolve<ILoggerFactory>();
+			var startableFacility = new CustomizedStartableFacility
+			                        	{
+											Logger = loggerFactory.Create(typeof (CustomizedStartableFacility))
+										};
+			Container.AddFacility(startableFacility.GetType().FullName, startableFacility);
+
 			Container.Register(Component.For<IClock>().ImplementedBy<SystemClock>().LifeStyle.Singleton);
 			Container.Register(Component.For<IDateTimeProvider>().ImplementedBy<DateTimeProvider>().LifeStyle.Singleton);
 			Container.Register(Component.For<IGuidProvider>().ImplementedBy<GuidProvider>().LifeStyle.Singleton);
 
-			Container.AddFacility<StartableFacility>();
 			Container.AddFacility<ConfigParamFacility>();
-			Container.AddFacility<LoggingFacility>(f => f.LogUsing(LoggerImplementation.Log4net));
 			Container.AddFacility<TransactionFacility>();
 
 			// Explicitly registering the transaction manager avoids a spurious info message

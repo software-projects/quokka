@@ -81,6 +81,7 @@
       <DependentUpon>CannotStartError.cs</DependentUpon>
     </Compile>
     <Compile Include="Internal\ConfigParamFacility.cs" />
+    <Compile Include="Internal\CustomizedStartableFacility.cs" />
     <Compile Include="Internal\DisplayAppender.cs" />
     <Compile Include="Internal\DisposableAction.cs" />
     <Compile Include="Internal\HostingForm.cs">
