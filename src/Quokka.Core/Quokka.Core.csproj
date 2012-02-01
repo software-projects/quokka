@@ -68,6 +68,8 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -105,6 +107,11 @@
     <Compile Include="Events\ReferenceOption.cs" />
     <Compile Include="Events\ThreadOption.cs" />
     <Compile Include="Modules\IModule.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="QuokkaException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\PropertyCollection.cs" />
@@ -144,6 +151,98 @@
     <Compile Include="UI\Regions\ViewsCollection.cs" />
     <Compile Include="UI\Binding\SortableBindingList.cs" />
     <Compile Include="Util\RegistryUtil.cs" />
+    <Compile Include="WinForms\CommandLink.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WinForms\Commands\ActionCommand.cs" />
+    <Compile Include="WinForms\Commands\IImageCommand.cs" />
+    <Compile Include="WinForms\Commands\ImageCommandBase.cs" />
+    <Compile Include="WinForms\Commands\UICommand.cs" />
+    <Compile Include="WinForms\Components\DisposableCollectionComponent.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WinForms\Controls\MainMenuListView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="WinForms\Controls\MainMenuListView.Designer.cs">
+      <DependentUpon>MainMenuListView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WinForms\CustomPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WinForms\DisplaySettings.cs" />
+    <Compile Include="WinForms\DisplaySettingsExtensions.cs" />
+    <Compile Include="WinForms\EventLoggingDataSource.cs" />
+    <Compile Include="WinForms\IModalWindowFactory.cs" />
+    <Compile Include="WinForms\Interfaces\IMainMenu.cs" />
+    <Compile Include="WinForms\Internal\ICheckControl.cs" />
+    <Compile Include="WinForms\MessageBoxForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WinForms\MessageBoxForm.Designer.cs">
+      <DependentUpon>MessageBoxForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WinForms\MessageBoxIcons.cs" />
+    <Compile Include="WinForms\MessageBoxView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="WinForms\MessageBoxView.Designer.cs">
+      <DependentUpon>MessageBoxView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WinForms\ModalWindow.cs" />
+    <Compile Include="WinForms\ModalWindow.Generic.cs" />
+    <Compile Include="WinForms\ModalWindowFactory.cs" />
+    <Compile Include="WinForms\Regions\DeckRegion.cs" />
+    <Compile Include="WinForms\Regions\IRegionInfo.cs" />
+    <Compile Include="WinForms\Regions\IRegionInfoAware.cs" />
+    <Compile Include="WinForms\Regions\ModalRegion.cs" />
+    <Compile Include="WinForms\Regions\ModalRegion.Generic.cs" />
+    <Compile Include="WinForms\Regions\Region.cs" />
+    <Compile Include="WinForms\Regions\RegionAdapterBase.cs" />
+    <Compile Include="WinForms\Regions\RegionItem.cs" />
+    <Compile Include="WinForms\Regions\RegionManager.cs" />
+    <Compile Include="WinForms\Regions\RegionPane.cs" />
+    <Compile Include="WinForms\Regions\SingleActiveRegion.cs" />
+    <Compile Include="WinForms\Regions\TabControlRegion.cs" />
+    <Compile Include="WinForms\Startup\BootstrapperBase.cs" />
+    <Compile Include="WinForms\Startup\DefaultSplashScreen.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WinForms\Startup\DefaultSplashScreen.Designer.cs">
+      <DependentUpon>DefaultSplashScreen.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WinForms\Startup\ISplashScreenView.cs" />
+    <Compile Include="WinForms\Startup\SplashScreenApplication.cs" />
+    <Compile Include="WinForms\Startup\SplashScreenPresenter.cs" />
+    <Compile Include="WinForms\Startup\StartupException.cs" />
+    <Compile Include="WinForms\Testing\SelectViewTestNodeForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WinForms\Testing\SelectViewTestNodeForm.Designer.cs">
+      <DependentUpon>SelectViewTestNodeForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WinForms\Testing\TestsViewAttribute.cs" />
+    <Compile Include="WinForms\Testing\ViewTestForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WinForms\Testing\ViewTestForm.Designer.cs">
+      <DependentUpon>ViewTestForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WinForms\Testing\ViewTestManager.cs" />
+    <Compile Include="WinForms\Testing\ViewTestNode.cs" />
+    <Compile Include="WinForms\ViewDeck.cs" />
+    <Compile Include="WinForms\ViewManager.cs" />
+    <Compile Include="WinForms\VirtualDataGridViewAdapter.cs" />
+    <Compile Include="WinForms\VirtualDataSource.cs" />
+    <Compile Include="WinForms\WaitCursor.cs" />
+    <Compile Include="WinForms\Win32.cs" />
+    <Compile Include="WinForms\WinFormsUipUtil.cs" />
+    <Compile Include="WinForms\WizardButtonBar.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="WinForms\WizardButtonBar.Designer.cs">
+      <DependentUpon>WizardButtonBar.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(FormalBuild)' == 'true' ">
     <!-- include NAnt-generated assembly info during a formal build -->
@@ -269,6 +368,16 @@
     <Compile Include="Sprocket\SprocketClient.Publisher.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\Arrow.gif" />
+    <None Include="Resources\Failure.gif" />
+    <None Include="Resources\Forbidden.gif" />
+    <None Include="Resources\Information.gif" />
+    <None Include="Resources\NoEntry.gif" />
+    <None Include="Resources\Question.gif" />
+    <None Include="Resources\SelectedArrow.gif" />
+    <None Include="Resources\Shield.gif" />
+    <None Include="Resources\Success.gif" />
+    <None Include="Resources\Warning.gif" />
     <Content Include="TODO.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -288,6 +397,39 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WinForms\Controls\MainMenuListView.resx">
+      <DependentUpon>MainMenuListView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WinForms\MessageBoxForm.resx">
+      <DependentUpon>MessageBoxForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WinForms\MessageBoxView.resx">
+      <DependentUpon>MessageBoxView.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WinForms\Startup\DefaultSplashScreen.resx">
+      <DependentUpon>DefaultSplashScreen.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WinForms\Testing\SelectViewTestNodeForm.resx">
+      <DependentUpon>SelectViewTestNodeForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WinForms\Testing\ViewTestForm.resx">
+      <DependentUpon>ViewTestForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WinForms\WizardButtonBar.resx">
+      <DependentUpon>WizardButtonBar.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <DontImportPostSharp>True</DontImportPostSharp>
   </PropertyGroup>

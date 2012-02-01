@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 using Quokka.UI.Messages;
-using Quokka.WinForms.Properties;
+using Quokka.Properties;
 
 namespace Quokka.WinForms
 {

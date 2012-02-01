@@ -17,7 +17,8 @@
     </UpgradeBackupLocation>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>Quokka.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -75,174 +76,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CommandLink.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Commands\ActionCommand.cs" />
-    <Compile Include="Commands\IImageCommand.cs" />
-    <Compile Include="Commands\UICommand.cs" />
-    <Compile Include="Commands\ImageCommandBase.cs" />
-    <Compile Include="Components\DisposableCollectionComponent.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Controls\MainMenuListView.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\MainMenuListView.Designer.cs">
-      <DependentUpon>MainMenuListView.cs</DependentUpon>
-    </Compile>
-    <Compile Include="CustomPanel.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="DisplaySettings.cs">
-    </Compile>
-    <Compile Include="DisplaySettingsExtensions.cs" />
-    <Compile Include="EventLoggingDataSource.cs" />
-    <Compile Include="IModalWindowFactory.cs" />
-    <Compile Include="Interfaces\IMainMenu.cs" />
-    <Compile Include="Internal\ICheckControl.cs" />
-    <Compile Include="MessageBoxView.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="MessageBoxView.Designer.cs">
-      <DependentUpon>MessageBoxView.cs</DependentUpon>
-    </Compile>
-    <Compile Include="MessageBoxForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="MessageBoxForm.Designer.cs">
-      <DependentUpon>MessageBoxForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="MessageBoxIcons.cs" />
-    <Compile Include="ModalWindow.cs" />
-    <Compile Include="ModalWindow.Generic.cs">
-    </Compile>
-    <Compile Include="ModalWindowFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Regions\DeckRegion.cs" />
-    <Compile Include="Regions\IRegionInfoAware.cs" />
-    <Compile Include="Regions\ModalRegion.cs" />
-    <Compile Include="Regions\ModalRegion.Generic.cs" />
-    <Compile Include="Regions\RegionItem.cs" />
-    <Compile Include="Regions\RegionAdapterBase.cs" />
-    <Compile Include="Regions\RegionManager.cs" />
-    <Compile Include="Regions\RegionPane.cs" />
-    <Compile Include="Regions\SingleActiveRegion.cs" />
-    <Compile Include="Startup\BootstrapperBase.cs" />
-    <Compile Include="Startup\StartupException.cs" />
-    <Compile Include="ViewDeck.cs" />
-    <Compile Include="ViewManager.cs">
-    </Compile>
-    <Compile Include="Regions\IRegionInfo.cs" />
-    <Compile Include="Regions\Region.cs" />
-    <Compile Include="Regions\TabControlRegion.cs" />
-    <Compile Include="Startup\DefaultSplashScreen.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Startup\DefaultSplashScreen.Designer.cs">
-      <DependentUpon>DefaultSplashScreen.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Startup\ISplashScreenView.cs" />
-    <Compile Include="Startup\SplashScreenApplication.cs" />
-    <Compile Include="Startup\SplashScreenPresenter.cs" />
-    <Compile Include="Testing\SelectViewTestNodeForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Testing\SelectViewTestNodeForm.Designer.cs">
-      <DependentUpon>SelectViewTestNodeForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Testing\TestsViewAttribute.cs" />
-    <Compile Include="Testing\ViewTestForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Testing\ViewTestForm.Designer.cs">
-      <DependentUpon>ViewTestForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Testing\ViewTestManager.cs" />
-    <Compile Include="Testing\ViewTestNode.cs" />
-    <Compile Include="VirtualDataGridViewAdapter.cs" />
-    <Compile Include="VirtualDataSource.cs" />
-    <Compile Include="WaitCursor.cs" />
-    <Compile Include="Win32.cs" />
-    <Compile Include="WinFormsUipUtil.cs" />
-    <Compile Include="WizardButtonBar.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="WizardButtonBar.Designer.cs">
-      <DependentUpon>WizardButtonBar.cs</DependentUpon>
-    </Compile>
     <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="MessageBoxForm.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>MessageBoxForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <SubType>Designer</SubType>
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="WizardButtonBar.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>WizardButtonBar.cs</DependentUpon>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Information.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Warning.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Failure.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Forbidden.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\NoEntry.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Question.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Quokka.snk" />
-    <None Include="Resources\Success.gif" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Quokka.Core\Quokka.Core.csproj">
       <Project>{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}</Project>
       <Name>Quokka.Core</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Controls\MainMenuListView.resx">
-      <DependentUpon>MainMenuListView.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MessageBoxView.resx">
-      <DependentUpon>MessageBoxView.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\Arrow.gif" />
-    <EmbeddedResource Include="Resources\SelectedArrow.gif" />
-    <EmbeddedResource Include="Resources\Shield.gif" />
-    <EmbeddedResource Include="Startup\DefaultSplashScreen.resx">
-      <DependentUpon>DefaultSplashScreen.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Testing\SelectViewTestNodeForm.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>SelectViewTestNodeForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Testing\ViewTestForm.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>ViewTestForm.cs</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -271,9 +124,16 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup Condition=" '$(FormalBuild)' == 'true' ">
-    <!-- include NAnt-generated assembly info during a formal build -->
-    <Compile Include="..\CommonAssemblyInfo.cs" />
+  <ItemGroup>
+    <Folder Include="Commands\" />
+    <Folder Include="Components\" />
+    <Folder Include="Controls\" />
+    <Folder Include="Interfaces\" />
+    <Folder Include="Internal\" />
+    <Folder Include="Regions\" />
+    <Folder Include="Resources\" />
+    <Folder Include="Startup\" />
+    <Folder Include="Testing\" />
   </ItemGroup>
   <PropertyGroup>
     <DontImportPostSharp>True</DontImportPostSharp>

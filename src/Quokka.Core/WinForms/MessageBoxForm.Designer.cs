@@ -81,7 +81,7 @@ namespace Quokka.WinForms
 			// 
 			// pictureBox
 			// 
-			this.pictureBox.Image = global::Quokka.WinForms.Properties.Resources.Information;
+			this.pictureBox.Image = global::Quokka.Properties.Resources.Information;
 			this.pictureBox.Location = new System.Drawing.Point(12, 15);
 			this.pictureBox.Name = "pictureBox";
 			this.pictureBox.Size = new System.Drawing.Size(48, 48);
