@@ -11,11 +11,10 @@ namespace Quokka.Diagnostics
 		}
 
 		[Test]
-		[ExpectedException(typeof (ArgumentNullException))]
 		public void ArgumentNullThrowsArgumentNullException()
 		{
 			object obj = null;
-			Verify.ArgumentNotNull(obj, "paramName");
+			Assert.Throws<ArgumentNullException>(() => Verify.ArgumentNotNull(obj, "paramName"));
 		}
 
 		[Test]
@@ -37,13 +36,12 @@ namespace Quokka.Diagnostics
 		}
 
 		[Test]
-		[ExpectedException(typeof (ArgumentNullException))]
 		public void GenericVersionThrowsExceptionWhenNull()
 		{
 			TestObject obj1 = null;
 			TestObject obj2;
 
-			Verify.ArgumentNotNull(obj1, "paramName", out obj2);
+			Assert.Throws<ArgumentNullException>(() => Verify.ArgumentNotNull(obj1, "paramName", out obj2));
 		}
 	}
 }

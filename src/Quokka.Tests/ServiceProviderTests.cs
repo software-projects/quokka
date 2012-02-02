@@ -220,12 +220,13 @@ namespace Quokka
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentException))]
         public void NoSuitableConstructor() {
             ServiceContainer container = new ServiceContainer();
 
             // this should throw an exception, because there is no suitable exception for Class3a
-			ServiceContainerUtil.AddService(container, typeof(IInterface3), typeof(Class3a));
+#pragma warning disable 612,618
+			Assert.Throws<ArgumentNullException>(() => ServiceContainerUtil.AddService(container, typeof(IInterface3), typeof(Class3a)));
+#pragma warning restore 612,618
         }
 
         [Test]

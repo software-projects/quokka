@@ -3,6 +3,7 @@ using System.Reflection;
 
 using NUnit.Framework;
 
+// ReSharper disable InconsistentNaming
 namespace Quokka.Reflection
 {
     [TestFixture]
@@ -49,23 +50,20 @@ namespace Quokka.Reflection
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void FindType_ArgumentNull_1() {
-            Type type = TypeUtil.FindType(null, null, Assembly.GetExecutingAssembly());
+            Assert.Throws<ArgumentNullException>(() => TypeUtil.FindType(null, null, Assembly.GetExecutingAssembly()));
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void FindType_ArgumentNull_3a() {
             Assembly assembly = null;
-            Type type = TypeUtil.FindType("XYZ", null, assembly);
+            Assert.Throws<ArgumentNullException>(() => TypeUtil.FindType("XYZ", null, assembly));
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void FindType_ArgumentNull_3b() {
             Assembly[] assemblies = null;
-            Type type = TypeUtil.FindType("XYZ", null, assemblies);
+            Assert.Throws<ArgumentNullException>(() => TypeUtil.FindType("XYZ", null, assemblies));
         }
 
 		private class TestClass1

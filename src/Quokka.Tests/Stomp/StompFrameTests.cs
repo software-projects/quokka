@@ -70,10 +70,9 @@ namespace Quokka.Stomp
 		}
 
 		[Test]
-		[ExpectedException(typeof (ArgumentNullException))]
 		public void Headers_cannot_be_set_to_null()
 		{
-			new StompFrame {Headers = null};
+			Assert.Throws<ArgumentNullException>(() => new StompFrame {Headers = null});
 		}
 
 		[Test]

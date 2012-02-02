@@ -46,12 +46,12 @@ namespace Quokka.Util
 		}
 
 		[Test]
-		[ExpectedException(typeof (QuokkaException))]
 		public void ThrowsExceptionIfCompanyOrProductNotDefined()
 		{
 			RegistryUtil.CompanyName = null;
 			RegistryUtil.ProductName = null;
-			Assert.Fail(RegistryUtil.KeyPath);
+			string s;
+			Assert.Throws<QuokkaException>(() => s = RegistryUtil.KeyPath);
 		}
 	}
 }

@@ -129,8 +129,9 @@ namespace Quokka
 			Assert.IsInstanceOfType(typeof(Class3), container.GetService(typeof(IInterface3)));
 		}
 
+		// testing obsolete class
+#pragma warning disable 612,618
 		[Test]
-		[ExpectedException(typeof(ArgumentException))]
 		public void AddServicesFailsIfOddNumberOfItems()
 		{
 			ServiceContainer container = new ServiceContainer();
@@ -139,7 +140,8 @@ namespace Quokka
 					typeof(IInterface2), typeof(Class2),
 					typeof(IInterface3), 
 			};
-			ServiceContainerUtil.AddServices(container, types);
+			Assert.Throws<ArgumentNullException>(() => ServiceContainerUtil.AddServices(container, types));
+#pragma warning restore 612,618
 		}
 
         #region Test interfaces

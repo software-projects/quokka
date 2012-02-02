@@ -175,38 +175,33 @@ namespace Quokka.DynamicCodeGeneration
 		}
 
 		[Test]
-		[ExpectedException(typeof(InvalidOperationException))]
 		public void NavigatorWithProperties()
 		{
-			ProxyFactory.CreateNavigatorProxy<INavigatorWithProperties>(_inner);
+			Assert.Throws<InvalidOperationException>(() => ProxyFactory.CreateNavigatorProxy<INavigatorWithProperties>(_inner));
 		}
 
 		[Test]
-		[ExpectedException(typeof(InvalidOperationException))]
 		public void NavigatorWithEvent()
 		{
-			ProxyFactory.CreateNavigatorProxy<INavigatorWithEvent>(_inner);
+			Assert.Throws<InvalidOperationException>(() => ProxyFactory.CreateNavigatorProxy<INavigatorWithEvent>(_inner));
 		}
 
 		[Test]
-		[ExpectedException(typeof(InvalidOperationException))]
 		public void NavigatorWithWrongReturnType()
 		{
-			ProxyFactory.CreateNavigatorProxy<INavigatorWithWrongReturnType>(_inner);
+			Assert.Throws<InvalidOperationException>(() => ProxyFactory.CreateNavigatorProxy<INavigatorWithWrongReturnType>(_inner));
 		}
 
 		[Test]
-		[ExpectedException(typeof(InvalidOperationException))]
 		public void NavigatorWithWrongMethodSignature()
 		{
-			ProxyFactory.CreateNavigatorProxy<INavigatorWithWrongMethodSignature>(_inner);
+			Assert.Throws<InvalidOperationException>(() => ProxyFactory.CreateNavigatorProxy<INavigatorWithWrongMethodSignature>(_inner));
 		}
 
 		[Test]
-		[ExpectedException(typeof(InvalidOperationException))]
 		public void NavigatorWithMissingMethod()
 		{
-			ProxyFactory.CreateNavigatorProxy<INavigatorNextBack>(new NavigatorWithMissingNavigateMethod());
+			Assert.Throws<InvalidOperationException>(() => ProxyFactory.CreateNavigatorProxy<INavigatorNextBack>(new NavigatorWithMissingNavigateMethod()));
 		}
 
 
@@ -216,7 +211,5 @@ namespace Quokka.DynamicCodeGeneration
 				Console.WriteLine(errorMessage);
 			}
 		}
-
-
 	}
 }

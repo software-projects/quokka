@@ -122,27 +122,24 @@ namespace Quokka.Uip
         }
 
         [Test]
-        [ExpectedException(typeof(QuokkaException))]
         public void ViewWithMissingMethod() {
             ViewWithoutSetController view = new ViewWithoutSetController();
             Controller1 controller = new Controller1();
-            UipUtil.SetController(view, controller, true);
+            Assert.Throws<QuokkaException>(() => UipUtil.SetController(view, controller, true));
         }
 
         [Test]
-        [ExpectedException(typeof(QuokkaException))]
         public void ViewWithTooManyParametersForSetController() {
             ViewWithIncorrectNumberOfParametersForSetController view = new ViewWithIncorrectNumberOfParametersForSetController();
             Controller1 controller = new Controller1();
-            UipUtil.SetController(view, controller, true);
+            Assert.Throws<QuokkaException>(() => UipUtil.SetController(view, controller, true));
         }
 
         [Test]
-        [ExpectedException(typeof(QuokkaException))]
         public void IncorrectControllerType() {
             ViewRequiringController2 view = new ViewRequiringController2();
             Controller1 controller = new Controller1();
-            UipUtil.SetController(view, controller, true);
+            Assert.Throws<QuokkaException>(() => UipUtil.SetController(view, controller, true));
         }
 
         [Test]
