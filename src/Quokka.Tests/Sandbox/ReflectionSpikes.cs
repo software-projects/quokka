@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using NUnit.Framework;
 
 namespace Quokka.Sandbox
@@ -9,10 +6,18 @@ namespace Quokka.Sandbox
 	[TestFixture]
 	public class ReflectionSpikes
 	{
+		private Type _type;
+		[SetUp]
+		public void SetUp()
+		{
+			// ensure castle.core assembly is loaded in the app domain
+			_type = typeof (global::Castle.Core.Logging.ILogger);
+		}
+
 		[Test]
 		public void Get_type_from_text()
 		{
-			string typeName = "Castle.Core.CollectionExtensions,Castle.Core";
+			string typeName = "Castle.Core.IServiceProviderEx,Castle.Core";
 			Type type = Type.GetType(typeName);
 			Assert.IsNotNull(type);
 
@@ -27,8 +32,8 @@ namespace Quokka.Sandbox
 		[Test]
 		public void Create_type_without_assembly_name()
 		{
-			var expectedType = typeof (global::Castle.Core.CollectionExtensions);
-			string typeName = "Castle.Core.CollectionExtensions";
+			var expectedType = typeof (global::Castle.Core.IServiceProviderEx);
+			string typeName = "Castle.Core.IServiceProviderEx";
 			Type type = null;
 
 			foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
