@@ -107,7 +107,6 @@
     <Compile Include="DynamicCodeGeneration\NavigatorProxyTests.cs" />
     <Compile Include="Events\EventBrokerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QuokkaContainerTests.cs" />
     <Compile Include="Reflection\PropertyUtilTests.cs" />
     <Compile Include="Reflection\TypeUtilTests.cs" />
     <Compile Include="Diagnostics\ExceptionExtensionsTests.cs" />

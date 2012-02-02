@@ -308,7 +308,10 @@ namespace Quokka.DynamicCodeGeneration
         [Test]
         public void MismatchedReturnType_2() {
             Inner7 inner = new Inner7();
-            Assert.Throws<NotSupportedException>(() => ProxyFactory.CreateDuckProxy<ITest7>(inner));
+
+			ITest7 i7 = ProxyFactory.CreateDuckProxy<ITest7>(inner);
+
+			Assert.Throws<NotSupportedException>(() => i7.ReturnSomething());
         }
 
         public interface Interface8

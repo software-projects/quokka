@@ -225,7 +225,7 @@ namespace Quokka
 
             // this should throw an exception, because there is no suitable exception for Class3a
 #pragma warning disable 612,618
-			Assert.Throws<ArgumentNullException>(() => ServiceContainerUtil.AddService(container, typeof(IInterface3), typeof(Class3a)));
+			Assert.Throws<ArgumentException>(() => ServiceContainerUtil.AddService(container, typeof(IInterface3), typeof(Class3a)));
 #pragma warning restore 612,618
         }
 
