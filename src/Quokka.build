@@ -198,7 +198,7 @@
 			<arg value="push"/>
 			<arg file="${output.artifacts.dir}/Quokka.Core.${product.version}.nupkg"/>
 			<arg value="-s"/>
-			<arg path="${nuget.server.url}"/>
+			<arg value="${nuget.server.url}"/>
 			<arg value="${nuget.apikey}"/>
 		</exec>
 	</target>
