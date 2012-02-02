@@ -166,6 +166,8 @@
 			<arg value="-Version"/>
 			<arg value="${product.version}"/>
 		</exec>
+		<!-- tell team city that the artifacts are ready, even though the build has not finished yet -->
+		<echo message="##teamcity[publishArtifacts '${output.artifacts.dir}/Quokka.Core.${product.version}.nupkg']"/>
 	</target>
 
 	<target name="msi" depends="artifacts.directory">
@@ -193,7 +195,7 @@
 	<target name="publish" depends="test" if="${nuget.canpush}">
 		<exec program="nuget.exe" basedir="${nuget.dir}" if="${nuget.canpush}">
 			<arg value="push"/>
-			<arg file="${output.artifacts.dir}Quokka.Core.${product.version}.nupkg"/>
+			<arg file="${output.artifacts.dir}/Quokka.Core.${product.version}.nupkg"/>
 			<arg value="-s"/>
 			<arg path="${nuget.server.url}"/>
 			<arg value="${nuget.apikey}"/>

@@ -140,7 +140,7 @@ namespace Quokka
 					typeof(IInterface2), typeof(Class2),
 					typeof(IInterface3), 
 			};
-			Assert.Throws<ArgumentNullException>(() => ServiceContainerUtil.AddServices(container, types));
+			Assert.Throws<ArgumentException>(() => ServiceContainerUtil.AddServices(container, types));
 #pragma warning restore 612,618
 		}
 
