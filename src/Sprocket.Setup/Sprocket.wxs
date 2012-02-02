@@ -64,9 +64,6 @@
 						<Component Id="Quokka.Krypton.dll" Guid="*">
 							<File Id="Quokka.Krypton.dll" KeyPath="yes"/>
 						</Component>
-						<Component Id="Quokka.WinForms.dll" Guid="*">
-							<File Id="Quokka.WinForms.dll" KeyPath="yes"/>
-						</Component>
 						<Component Id="Sprocket.Manager.exe" Guid="*">
 							<File Id="Sprocket.Manager.exe" KeyPath="yes"/>
 						</Component>
@@ -145,7 +142,6 @@
 			<ComponentRef Id="Quokka.Castle.dll"/>
 			<ComponentRef Id="Quokka.Core.dll"/>
 			<ComponentRef Id="Quokka.Krypton.dll"/>
-			<ComponentRef Id="Quokka.WinForms.dll"/>
 			<ComponentRef Id="Sprocket.Manager.exe"/>
 			<ComponentRef Id="Sprocket.Manager.exe.config"/>
 			<ComponentRef Id="Sprocket.Server.exe"/>

@@ -1,6 +1,5 @@
 <?xml version="1.0" ?>
-<project name="Quokka" default="test" xmlns="http://nant.sf.net/release/0.91/nant.xsd">
-	<property name="nant.settings.currentframework" value="net-3.5"/>
+<project name="Quokka" default="publish" xmlns="http://nant.sf.net/release/0.91/nant.xsd">
 	<property name="framework.dir" value="${framework::get-framework-directory(nant.settings.currentframework)}"/>
 
 	<property name="config" value="Release"/>
@@ -51,7 +50,7 @@
 
 	<property name="nuget.server.url" value="${environment::get-variable('SP_NUGET_URL')}" if="${environment::variable-exists('SP_NUGET_URL')}"/>
 	<property name="nuget.apikey" value="${environment::get-variable('SP_NUGET_APIKEY')}" if="${environment::variable-exists('SP_NUGET_APIKEY')}"/>
-	<property name="nuget.push" value="${environment::variable-exists('SP_NUGET_APIKEY')}"/>
+	<property name="nuget.canpush" value="${environment::variable-exists('SP_NUGET_URL')}"/>
 
 
 	<target name="clean">
@@ -167,13 +166,6 @@
 			<arg value="-Version"/>
 			<arg value="${product.version}"/>
 		</exec>
-		<exec program="nuget.exe" basedir="${nuget.dir}" if="${nuget.push}">
-			<arg value="push"/>
-			<arg file="${output.artifacts.dir}Quokka.Core.${product.version}.nupkg"/>
-			<arg value="-s"/>
-			<arg path="${nuget.server.url}"/>
-			<arg value="${nuget.apikey}"/>
-		</exec>		
 	</target>
 
 	<target name="msi" depends="artifacts.directory">
@@ -196,5 +188,15 @@
 			<formatter type="Plain"/>
 			<test assemblyname="${output.bin.dir}/Quokka.Tests.dll"/>
 		</nunit2>
+	</target>
+
+	<target name="publish" depends="test" if="${nuget.canpush}">
+		<exec program="nuget.exe" basedir="${nuget.dir}" if="${nuget.canpush}">
+			<arg value="push"/>
+			<arg file="${output.artifacts.dir}Quokka.Core.${product.version}.nupkg"/>
+			<arg value="-s"/>
+			<arg path="${nuget.server.url}"/>
+			<arg value="${nuget.apikey}"/>
+		</exec>
 	</target>
 </project>

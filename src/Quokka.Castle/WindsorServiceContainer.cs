@@ -1,9 +1,6 @@
 ﻿using System;
-using Castle.Core;
-using Castle.MicroKernel;
 using Castle.MicroKernel.Registration;
 using Castle.Windsor;
-using Common.Logging;
 using Microsoft.Practices.ServiceLocation;
 using Quokka.Diagnostics;
 using Quokka.ServiceLocation;
@@ -12,7 +9,6 @@ namespace Quokka.Castle
 {
 	internal class WindsorServiceContainer : ServiceContainer
 	{
-		private static readonly ILog log = LogManager.GetCurrentClassLogger();
 		private readonly IWindsorContainer _container;
 		private readonly IServiceLocator _locator;
 
@@ -38,21 +34,18 @@ namespace Quokka.Castle
 			{
 				name = to.FullName;
 			}
-			_container.AddComponentLifeStyle(name, from, to, MapLifecycle(lifecycle));
-		}
 
-		private static LifestyleType MapLifecycle(ServiceLifecycle lifecycle)
-		{
-			switch (lifecycle)
+			// ReSharper disable ConvertIfStatementToConditionalTernaryExpression
+			if (lifecycle == ServiceLifecycle.Singleton)
 			{
-				case ServiceLifecycle.PerRequest:
-					return LifestyleType.Transient;
-				case ServiceLifecycle.Singleton:
-					return LifestyleType.Singleton;
+				_container.Register(Component.For(from).ImplementedBy(to).Named(name).LifestyleSingleton());
 			}
-
-			throw new ArgumentException("Unknown ServiceLifecycle: " + lifecycle);
-		} 
+			else
+			{
+				_container.Register(Component.For(from).ImplementedBy(to).Named(name).LifestyleTransient());
+			}
+			// ReSharper restore ConvertIfStatementToConditionalTernaryExpression
+		}
 
 		protected override void DoRegisterInstance(Type type, string name, object instance)
 		{

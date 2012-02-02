@@ -5,6 +5,7 @@ using NUnit.Framework;
 namespace Quokka.Data
 {
 	[TestFixture]
+	[Ignore("This class will be obsolete soon")]
 	public class SqlExpressUtilTests
 	{
 		private string _dbFile;

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Castle.MicroKernel.Registration;
 using Castle.Windsor;
 using NUnit.Framework;
 
@@ -15,7 +16,7 @@ namespace Quokka.Castle
 		{
 			IWindsorContainer container = new WindsorContainer();
 			var testClass1 = new TestClass1();
-			container.Kernel.AddComponentInstance<ITestInterface1>(testClass1);
+			container.Kernel.Register(Component.For<ITestInterface1>().Instance(testClass1));
 			ITestInterface1 iti = container.Resolve<ITestInterface1>();
 			Assert.AreSame(iti, testClass1);
 		}
@@ -25,7 +26,8 @@ namespace Quokka.Castle
 		{
 			IWindsorContainer container = new WindsorContainer();
 			var testClass1 = new TestClass1();
-			container.Kernel.AddComponentInstance(typeof(ITestInterface1).FullName, typeof(ITestInterface1), testClass1);
+			container.Kernel.Register(
+				Component.For(typeof (ITestInterface1)).Named(typeof (ITestInterface1).FullName).Instance(testClass1));
 			ITestInterface1 iti = container.Resolve<ITestInterface1>();
 			Assert.AreSame(iti, testClass1);
 		}
