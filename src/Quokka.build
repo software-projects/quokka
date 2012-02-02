@@ -165,6 +165,7 @@
 			<arg path="${output.artifacts.dir}"/>
 			<arg value="-Version"/>
 			<arg value="${product.version}"/>
+			<arg value="-Verbose"/>
 		</exec>
 		<!-- tell team city that the artifacts are ready, even though the build has not finished yet -->
 		<echo message="##teamcity[publishArtifacts '${output.artifacts.dir}/Quokka.Core.${product.version}.nupkg']"/>
