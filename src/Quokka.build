@@ -155,7 +155,13 @@
 		<copy file="Quokka.Core/Quokka.Core.nuspec" todir="${temp.dir}/nuget/Quokka.Core"/>
 		<copy file="license.txt" todir="${temp.dir}/nuget/Quokka.Core"/>
 		<mkdir dir="${temp.dir}/nuget/Quokka.Core/lib/net35"/>
-		<copy file="${output.bin.dir}/Quokka.Core.dll" todir="${temp.dir}/nuget/Quokka.Core/lib/net35"/>
+		<copy todir="${temp.dir}/nuget/Quokka.Core/lib/net35">
+			<fileset basedir="${output.bin.dir}">
+				<include name="Quokka.Core.dll"/>
+				<include name="Quokka.Core.pdb"/>
+				<include name="Quokka.Core.xml"/>
+			</fileset>
+		</copy>
 		<exec program="nuget.exe" basedir="${nuget.dir}">
 			<arg value="pack"/>
 			<arg file="${temp.dir}/nuget/Quokka.Core/Quokka.Core.nuspec"/>
