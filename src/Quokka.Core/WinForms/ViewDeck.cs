@@ -211,7 +211,7 @@ namespace Quokka.WinForms
 
 			// view object may optionally be a Form, but it must be a control
 			Form form = view as Form;
-			Control control = (Control) view;
+			Control control = GetControl(view);
 
 			if (form != null)
 			{
@@ -238,7 +238,7 @@ namespace Quokka.WinForms
 				return;
 			}
 
-			Control control = (Control) view;
+			Control control = GetControl(view);
 			HideView(view);
 			_control.Controls.Remove(control);
 		}
@@ -250,7 +250,7 @@ namespace Quokka.WinForms
 				return;
 			}
 
-			Control control = (Control) view;
+			Control control = GetControl(view);
 			control.Visible = true;
 			foreach (Control c in _control.Controls)
 			{
@@ -274,7 +274,7 @@ namespace Quokka.WinForms
 				return;
 			}
 
-			Control control = (Control) view;
+			Control control = GetControl(view);
 			control.Visible = false;
 			if (CurrentVisibleView == control)
 			{
@@ -308,6 +308,15 @@ namespace Quokka.WinForms
 			{
 				uiTask.EndTask();
 			}
+		}
+
+		protected virtual Control GetControl(object view)
+		{
+			// Override this method if you want a more sophisticated
+			// implementation. For example you might be using the Castle 
+			// Synchronize facility, in which case you need to get the
+			// underlying control from a dynamic proxy.
+			return (Control) view;
 		}
 
 		#region Private methods
