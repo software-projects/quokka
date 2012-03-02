@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Threading;
 using System.Windows.Forms;
 using Quokka.Diagnostics;
 using Quokka.DynamicCodeGeneration;
@@ -12,6 +13,7 @@ namespace Quokka.WinForms.Commands
 	{
 		private readonly Control _control;
 		private readonly ICheckControl _checkControl;
+		private readonly SynchronizationContext _syncContext;
 		private static readonly PropertyChangedEventArgs EnabledChangedEventArgs;
 		private static readonly PropertyChangedEventArgs TextChangedEventArgs;
 		private static readonly PropertyChangedEventArgs CheckChangedEventArgs;
@@ -28,6 +30,7 @@ namespace Quokka.WinForms.Commands
 
 		public UICommand(Control control)
 		{
+			_syncContext = SynchronizationContext.Current;
 			_control = Verify.ArgumentNotNull(control, "control");
 			_control.EnabledChanged += ControlEnabledChanged;
 			_control.TextChanged += ControlTextChanged;
@@ -126,7 +129,14 @@ namespace Quokka.WinForms.Commands
 		{
 			if (_control.InvokeRequired)
 			{
-				_control.Invoke(action);
+				if (_control.Handle == IntPtr.Zero)
+				{
+					_syncContext.Send(state => action(), null);
+				}
+				else
+				{
+					_control.Invoke(action);
+				}
 			}
 			else
 			{
