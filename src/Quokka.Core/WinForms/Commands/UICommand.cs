@@ -52,14 +52,14 @@ namespace Quokka.WinForms.Commands
 				{
 					return false;
 				}
-				return _checkControl.Checked;
+				return PerformFunction(() => _checkControl.Checked);
 			}
 
 			set
 			{
 				if (CanCheck)
 				{
-					_checkControl.Checked = value;
+					PerformAction(() => _checkControl.Checked = value);
 				}
 				else
 				{
@@ -75,21 +75,21 @@ namespace Quokka.WinForms.Commands
 
 		public bool Enabled
 		{
-			get { return _control.Enabled; }
-			set { _control.Enabled = value; }
+			get { return PerformFunction(() => _control.Enabled); }
+			set { PerformAction(() => _control.Enabled = value); }
 		}
 
 		public string Text
 		{
-			get { return _control.Text; }
-			set { _control.Text = value; }
+			get { return PerformFunction(() => _control.Text); }
+			set { PerformAction(() => _control.Text = value); }
 		}
 
 		public void PerformExecute()
 		{
 			if (Execute != null)
 			{
-				Execute(this, EventArgs.Empty);
+				PerformAction(() => Execute(this, EventArgs.Empty));
 			}
 		}
 
@@ -97,7 +97,7 @@ namespace Quokka.WinForms.Commands
 		{
 			if (PropertyChanged != null)
 			{
-				PropertyChanged(this, e);
+				PerformAction(() => PropertyChanged(this, e));
 			}
 		}
 
@@ -120,6 +120,26 @@ namespace Quokka.WinForms.Commands
 		private void ControlClick(object sender, EventArgs e)
 		{
 			PerformExecute();
+		}
+
+		private void PerformAction(Action action)
+		{
+			if (_control.InvokeRequired)
+			{
+				_control.Invoke(action);
+			}
+			else
+			{
+				action();
+			}
+		}
+
+		private T PerformFunction<T>(Func<T> func)
+		{
+			T result = default(T);
+			Action action = () => result = func();
+			PerformAction(action);
+			return result;
 		}
 	}
 }
