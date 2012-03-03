@@ -13,7 +13,7 @@ namespace Quokka.WinForms.Commands
 	{
 		private readonly Control _control;
 		private readonly ICheckControl _checkControl;
-		private readonly SynchronizationContext _syncContext;
+		private readonly SynchronizationContext _synchronizationContext;
 		private static readonly PropertyChangedEventArgs EnabledChangedEventArgs;
 		private static readonly PropertyChangedEventArgs TextChangedEventArgs;
 		private static readonly PropertyChangedEventArgs CheckChangedEventArgs;
@@ -30,7 +30,11 @@ namespace Quokka.WinForms.Commands
 
 		public UICommand(Control control)
 		{
-			_syncContext = SynchronizationContext.Current;
+			if (control.InvokeRequired)
+			{
+				throw new InvalidOperationException("UICommand needs to be created on the same thread that created the control");
+			} 
+			_synchronizationContext = SynchronizationContext.Current;
 			_control = Verify.ArgumentNotNull(control, "control");
 			_control.EnabledChanged += ControlEnabledChanged;
 			_control.TextChanged += ControlTextChanged;
@@ -129,14 +133,13 @@ namespace Quokka.WinForms.Commands
 		{
 			if (_control.InvokeRequired)
 			{
-				if (_control.Handle == IntPtr.Zero)
-				{
-					_syncContext.Send(state => action(), null);
-				}
-				else
-				{
-					_control.Invoke(action);
-				}
+				// Using a synchronization context here because the
+				// Invoke method can fail if the control's underlying
+				// window handle has not been created yet. It is not
+				// possible to check for this, because accessing the
+				// Handle property on a cross-thread throws an exception,
+				// so synchronization context it is.
+				_synchronizationContext.Send(state => action(), null);
 			}
 			else
 			{
