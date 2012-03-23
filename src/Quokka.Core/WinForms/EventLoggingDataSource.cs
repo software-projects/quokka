@@ -65,7 +65,16 @@ namespace Quokka.WinForms
 			{
 				return null;
 			}
-			return _list[index];
+			try
+			{
+				return _list[index];
+			}
+			catch (ArgumentOutOfRangeException)
+			{
+				// race condition, where the list is truncated
+				// after the check
+				return null;
+			}
 		}
 
 		public void Sort()
