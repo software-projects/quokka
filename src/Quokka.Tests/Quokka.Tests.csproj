@@ -103,8 +103,6 @@
     <Compile Include="DynamicCodeGeneration\CodeBuilderTestBase.cs" />
     <Compile Include="DynamicCodeGeneration\DuckProxyTests.cs" />
     <Compile Include="DynamicCodeGeneration\MemberMappingTests.cs" />
-    <Compile Include="DynamicCodeGeneration\NavigatorProxyBuilderErrorTests.cs" />
-    <Compile Include="DynamicCodeGeneration\NavigatorProxyTests.cs" />
     <Compile Include="Events\EventBrokerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\PropertyUtilTests.cs" />
@@ -122,16 +120,6 @@
     <Compile Include="Stomp\StompSocketTests.cs" />
     <Compile Include="Threading\WorkerActionTests.cs" />
     <Compile Include="Threading\WorkerTests.cs" />
-    <Compile Include="Uip\Fakes\FakeViewManager.cs" />
-    <Compile Include="Uip\FakeAppTests2.cs" />
-    <Compile Include="Uip\MockApp2\MockTask2.cs" />
-    <Compile Include="Uip\MockAppTests.cs" />
-    <Compile Include="Uip\MockApp\MockControllers.cs" />
-    <Compile Include="Uip\MockApp\MockState.cs" />
-    <Compile Include="Uip\MockApp\MockTask.cs" />
-    <Compile Include="Uip\MockApp\MockViewManager.cs" />
-    <Compile Include="Uip\MockApp\MockViews.cs" />
-    <Compile Include="Uip\UipUtils_SetControllerTests.cs" />
     <Compile Include="UI\Fakes\FakeCommand.cs" />
     <Compile Include="UI\Fakes\FakeViewDeck.cs" />
     <Compile Include="UI\TestApp1\Presenter1.cs" />
@@ -193,6 +181,9 @@
     <Folder Include="DomainModel\" />
     <Folder Include="EnumTypes\" />
     <Folder Include="PresentationModel\" />
+    <Folder Include="Uip\Fakes\" />
+    <Folder Include="Uip\MockApp2\" />
+    <Folder Include="Uip\MockApp\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

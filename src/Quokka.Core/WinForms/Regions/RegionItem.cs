@@ -8,7 +8,6 @@ using Quokka.DynamicCodeGeneration;
 using Quokka.ServiceLocation;
 using Quokka.UI.Regions;
 using Quokka.UI.Tasks;
-using Quokka.Uip;
 
 namespace Quokka.WinForms.Regions
 {
@@ -17,7 +16,7 @@ namespace Quokka.WinForms.Regions
 	/// </summary>
 	/// <remarks>
 	/// Items added to a region can be either a Windows Forms
-	/// <see cref="ClientControl"/>, or a Quokka UI task (<see cref="UipTask"/>,
+	/// <see cref="ClientControl"/>, or a Quokka UI task (<see cref="UITask"/>,
 	/// which itself hosts windows forms controls.
 	/// </remarks>
 	public class RegionItem : IRegionInfo, INotifyPropertyChanged
@@ -27,7 +26,7 @@ namespace Quokka.WinForms.Regions
 		private readonly Control _clientControl;
 		private readonly Control _hostControl;
 		private readonly IUITask _task;
-		private readonly ViewManager _viewManager;
+		private readonly ViewDeck _viewManager;
 		private readonly Region _region;
 		private bool _isActive;
 		private static readonly PropertyChangedEventArgs IsActiveChanged = new PropertyChangedEventArgs("IsActive");
@@ -45,7 +44,7 @@ namespace Quokka.WinForms.Regions
 
 			if (_task != null)
 			{
-				_viewManager = new ViewManager(_hostControl);
+				_viewManager = new ViewDeck(_hostControl);
 				_task.ServiceContainer.RegisterInstance<IRegion>(_region);
 				_task.ServiceContainer.RegisterInstance<IRegionInfo>(this);
 				_task.TaskComplete += Task_TaskComplete;
@@ -110,7 +109,7 @@ namespace Quokka.WinForms.Regions
 		/// </summary>
 		/// <remarks>
 		/// If the item is a Windows Forms <see cref="Control"/>, then this property 
-		/// is the same as the item. If the item is a <see cref="UipTask"/>, then this
+		/// is the same as the item. If the item is a <see cref="UITask"/>, then this
 		/// property is <see langword="null"/>.
 		/// </remarks>
 		public Control ClientControl
@@ -129,7 +128,7 @@ namespace Quokka.WinForms.Regions
 		/// <summary>
 		/// The view manager used by the UI task.
 		/// </summary>
-		public ViewManager ViewManager
+		public ViewDeck ViewManager
 		{
 			get { return _viewManager; }
 		}

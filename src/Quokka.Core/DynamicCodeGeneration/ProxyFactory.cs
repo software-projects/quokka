@@ -37,18 +37,16 @@ namespace Quokka.DynamicCodeGeneration
 	public enum ProxyType
 	{
 		DuckProxy,
-		NavigatorProxy,
 	}
 
 	public static class ProxyFactory
 	{
 		private static readonly ProxyStore duckProxyStore;
-		private static readonly ProxyStore navigatorProxyStore;
 
 		static ProxyFactory()
 		{
 			duckProxyStore = new ProxyStore();
-			navigatorProxyStore = new ProxyStore();
+			new ProxyStore();
 		}
 
 		public static object CreateProxy(Type interfaceType, ProxyType proxyType, object inner)
@@ -56,8 +54,6 @@ namespace Quokka.DynamicCodeGeneration
 			switch (proxyType) {
 				case ProxyType.DuckProxy:
 					return CreateDuckProxy(interfaceType, inner);
-				case ProxyType.NavigatorProxy:
-					return CreateNavigatorProxy(interfaceType, inner);
 				default:
 					throw new NotSupportedException();
 			}
@@ -113,61 +109,6 @@ namespace Quokka.DynamicCodeGeneration
 			var className = DynamicAssembly.Instance.CreateClassName("DuckProxy");
 
 			DuckProxyBuilder builder = new DuckProxyBuilder(moduleBuilder, className, interfaceType, innerType);
-			return builder.CreateType();
-		}
-
-		#endregion
-
-		#region NavigatorProxy
-
-		public static T CreateNavigatorProxy<T>(object inner)
-		{
-			return (T)CreateNavigatorProxy(typeof(T), inner);
-		}
-
-		public static object CreateNavigatorProxy(Type interfaceType, object inner)
-		{
-			if (!interfaceType.IsInterface) {
-				throw new ArgumentException("Must be an interface", "interfaceType");
-			}
-
-			if (inner == null) {
-				return null;
-			}
-
-			if (interfaceType.IsInstanceOfType(inner)) {
-				// when the inner object already supports the interface, do
-				// not bother with a proxy
-				return inner;
-			}
-
-			// Find the proxy type
-			Type proxyType = GetNavigatorProxyType(interfaceType, inner.GetType());
-
-			// get the constructor that accepts inner as a parameter
-			ConstructorInfo constructor = proxyType.GetConstructor(new Type[] {inner.GetType()});
-
-			// construct an instance of the wrapper class and return
-			object proxy = constructor.Invoke(new object[] {inner});
-			return proxy;
-		}
-
-		public static Type GetNavigatorProxyType(Type interfaceType, Type innerType)
-		{
-			Type proxyType = navigatorProxyStore.Find(interfaceType, innerType);
-			if (proxyType == null) {
-				proxyType = CreateNavigatorProxyType(interfaceType, innerType);
-				navigatorProxyStore.Add(interfaceType, innerType, proxyType);
-			}
-			return proxyType;
-		}
-
-		private static Type CreateNavigatorProxyType(Type interfaceType, Type innerType)
-		{
-			var moduleBuilder = DynamicAssembly.Instance.ModuleBuilder;
-			var className = DynamicAssembly.Instance.CreateClassName("NavigatorProxy");
-
-			NavigatorProxyBuilder builder = new NavigatorProxyBuilder(moduleBuilder, className, interfaceType, innerType);
 			return builder.CreateType();
 		}
 

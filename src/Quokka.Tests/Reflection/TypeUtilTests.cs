@@ -22,13 +22,13 @@ namespace Quokka.Reflection
         [Test]
         public void FindType_Namespace() {
 			Assembly assembly = typeof(QuokkaException).Assembly;
-            string[] namespaces = new string[] { "Quokka", "Quokka.Uip" };
+            string[] namespaces = new string[] { "Quokka", "Quokka.UI.Tasks" };
 
             Type type = TypeUtil.FindType("Quokkaexception", namespaces, assembly);
 			Assert.AreEqual(typeof(QuokkaException), type);
 
-            type = TypeUtil.FindType("UipNode", namespaces, assembly);
-            Assert.AreEqual(typeof(Quokka.Uip.UipNode), type);
+            type = TypeUtil.FindType("UINode", namespaces, assembly);
+            Assert.AreEqual(typeof(Quokka.UI.Tasks.UINode), type);
 
             type = TypeUtil.FindType("UipNode3", namespaces, assembly);
             Assert.IsNull(type);
