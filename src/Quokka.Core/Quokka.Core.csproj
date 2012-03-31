@@ -74,10 +74,6 @@
     <Compile Include="Attributes\StringValueAttribute.cs" />
     <Compile Include="Data\SqlExpressUtil.cs" />
     <Compile Include="Data\SqlMapper.cs" />
-    <Compile Include="Diagnostics\ILogger.cs" />
-    <Compile Include="Diagnostics\ILogManager.cs" />
-    <Compile Include="Diagnostics\LogManager.cs" />
-    <Compile Include="Diagnostics\NullLogger.cs" />
     <Compile Include="Diagnostics\Verify.cs" />
     <Compile Include="DynamicCodeGeneration\AbstractProxyBuilder.cs" />
     <Compile Include="DynamicCodeGeneration\MemberMapping.cs" />
