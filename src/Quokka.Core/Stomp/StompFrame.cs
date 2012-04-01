@@ -132,7 +132,11 @@ namespace Quokka.Stomp
 				{
 					// We do not want to close the writer when we finish, because
 					// we do not want to close the underlying stream.
-					var writer = new StreamWriter(stream, Encoding.UTF8);
+					// Note also that the StreamWriter is created without specifying the encoding.
+					// This means that the stream will write UTF-8, which is what is wanted, but
+					// will not prepend a BOM (byte order mark), which is also what we want. If you
+					// explicitly specify UTF8, you will get the three byte BOM at the beginning.
+					var writer = new StreamWriter(stream);
 					writer.WriteLine(Command);
 					if (Headers != null)
 					{
