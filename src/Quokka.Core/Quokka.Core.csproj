@@ -133,6 +133,15 @@
     <Compile Include="UI\Regions\RegionExtensions.cs" />
     <Compile Include="UI\Regions\ViewsCollection.cs" />
     <Compile Include="UI\Binding\SortableBindingList.cs" />
+    <Compile Include="UI\WebBrowsers\ComSupport.cs" />
+    <Compile Include="UI\WebBrowsers\EmbeddedResourceMap.cs" />
+    <Compile Include="UI\WebBrowsers\QuokkaProtocolHandlerFactory.cs" />
+    <Compile Include="UI\WebBrowsers\QuokkaProtocolHandler.cs" />
+    <Compile Include="UI\WebBrowsers\IClassFactory.cs" />
+    <Compile Include="UI\WebBrowsers\IInternetSession.cs" />
+    <Compile Include="UI\WebBrowsers\PluggableProtocol.cs" />
+    <Compile Include="UI\WebBrowsers\ProtocolBase.cs" />
+    <Compile Include="UI\WebBrowsers\ProtocolSupport.cs" />
     <Compile Include="Util\RegistryUtil.cs" />
     <Compile Include="WinForms\CommandLink.cs">
       <SubType>Component</SubType>
