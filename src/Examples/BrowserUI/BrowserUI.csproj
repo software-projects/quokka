@@ -80,7 +80,7 @@
     <EmbeddedResource Include="Content\Index.html" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Quokka.Core\Quokka.Core.csproj">
+    <ProjectReference Include="..\..\Quokka.Core\Quokka.Core.csproj">
       <Project>{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}</Project>
       <Name>Quokka.Core</Name>
     </ProjectReference>

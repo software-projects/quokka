@@ -36,7 +36,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sprocket.Manager", "src\Spr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sprocket.Service", "src\Sprocket.Service\Sprocket.Service.csproj", "{E1C1FA24-05BC-4455-BD04-46AA10D2DF98}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrowserUI", "Examples\BrowserUI\BrowserUI.csproj", "{EDFF6293-8FD4-42E3-A3F2-F1C633AC5FED}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrowserUI", "src\Examples\BrowserUI\BrowserUI.csproj", "{EDFF6293-8FD4-42E3-A3F2-F1C633AC5FED}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
