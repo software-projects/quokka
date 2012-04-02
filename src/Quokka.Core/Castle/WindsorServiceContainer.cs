@@ -1,21 +1,22 @@
 ﻿using System;
 using Castle.MicroKernel.Registration;
 using Castle.Windsor;
-using Microsoft.Practices.ServiceLocation;
 using Quokka.Diagnostics;
 using Quokka.ServiceLocation;
 
 namespace Quokka.Castle
 {
-	internal class WindsorServiceContainer : ServiceContainer
+	public class WindsorServiceContainer : ServiceContainer
 	{
 		private readonly IWindsorContainer _container;
 		private readonly IServiceLocator _locator;
+		private readonly Func<IWindsorContainer> _createChildCallback; 
 
-		public WindsorServiceContainer(IWindsorContainer container)
+		public WindsorServiceContainer(IWindsorContainer container, Func<IWindsorContainer> createChildCallback)
 		{
-			Verify.ArgumentNotNull(container, "container", out _container);
+			_container = Verify.ArgumentNotNull(container, "container");
 			_locator = new WindsorServiceLocator(container);
+			_createChildCallback = Verify.ArgumentNotNull(createChildCallback, "createChildCallback");
 		}
 
 		protected override IServiceLocator GetServiceLocator()
@@ -77,9 +78,9 @@ namespace Quokka.Castle
 
 		protected override IServiceContainer DoCreateChildContainer()
 		{
-			IWindsorContainer childContainer = new WindsorContainer();
+			IWindsorContainer childContainer = _createChildCallback();
 			_container.AddChildContainer(childContainer);
-			return new WindsorServiceContainer(childContainer);
+			return new WindsorServiceContainer(childContainer, _createChildCallback);
 		}
 
 		protected override void DoDispose()

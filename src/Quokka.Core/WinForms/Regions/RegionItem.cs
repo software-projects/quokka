@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-using Common.Logging;
+using Castle.Core.Logging;
 using Quokka.Diagnostics;
 using Quokka.DynamicCodeGeneration;
 using Quokka.ServiceLocation;
@@ -21,7 +21,7 @@ namespace Quokka.WinForms.Regions
 	/// </remarks>
 	public class RegionItem : IRegionInfo, INotifyPropertyChanged
 	{
-		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+		private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
 		private readonly object _item;
 		private readonly Control _clientControl;
 		private readonly Control _hostControl;
@@ -68,7 +68,7 @@ namespace Quokka.WinForms.Regions
 			else
 			{
 				string message = String.Format("Cannot add object of type {0} to a Windows Forms region",
-											   item.GetType().FullName);
+				                               item.GetType().FullName);
 				Log.Error(message);
 				throw new ArgumentException(message);
 			}
@@ -89,7 +89,7 @@ namespace Quokka.WinForms.Regions
 			}
 		}
 
-		void Task_TaskComplete(object sender, EventArgs e)
+		private void Task_TaskComplete(object sender, EventArgs e)
 		{
 			// Clear any client controls in the view manager. They will be disposed elsewhere.
 			ViewManager.Clear();
@@ -176,11 +176,14 @@ namespace Quokka.WinForms.Regions
 		public string Text
 		{
 			get { return _text; }
-			set { if (value != _text)
+			set
 			{
-				_text = value;
-				OnPropertyChanged(TextPropertyChanged);
-			} }
+				if (value != _text)
+				{
+					_text = value;
+					OnPropertyChanged(TextPropertyChanged);
+				}
+			}
 		}
 
 		private Image _image;

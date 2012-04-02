@@ -28,8 +28,7 @@
 
 using System;
 using System.Collections.Generic;
-using Common.Logging;
-using Microsoft.Practices.ServiceLocation;
+using Castle.Core.Logging;
 using Quokka.Collections;
 using Quokka.Diagnostics;
 using Quokka.ServiceLocation;
@@ -39,7 +38,7 @@ namespace Quokka.UI.Tasks
 {
 	public abstract class UITask : IUITask, IDisposable
 	{
-		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+		private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
 		private IList<UINode> _nodes;
 		private TaskBuilder _taskBuilder;
 		private bool _canCreateNode;
@@ -318,7 +317,7 @@ namespace Quokka.UI.Tasks
 
 			try
 			{
-				serviceLocator = Microsoft.Practices.ServiceLocation.ServiceLocator.Current;
+				serviceLocator = Quokka.ServiceLocation.ServiceLocator.Current;
 			}
 			catch (NullReferenceException)
 			{

@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-using Common.Logging;
+using Castle.Core.Logging;
+using Quokka.Diagnostics;
 using Quokka.WinForms.Commands;
 using Quokka.WinForms.Interfaces;
 
@@ -13,7 +14,7 @@ namespace Quokka.WinForms.Controls
 	public partial class MainMenuListView : UserControl, IMainMenu
 	{
 		private readonly List<IImageCommand> _commands = new List<IImageCommand>();
-		private static readonly ILog log = LogManager.GetCurrentClassLogger();
+		private static readonly ILogger log = LoggerFactory.GetCurrentClassLogger();
 		private readonly Dictionary<Image, int> _imageIndexes = new Dictionary<Image, int>();
 
 		public MainMenuListView()

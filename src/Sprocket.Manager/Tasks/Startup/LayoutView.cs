@@ -1,5 +1,4 @@
 ﻿using System.Windows.Forms;
-using Microsoft.Practices.ServiceLocation;
 using Quokka.ServiceLocation;
 using Quokka.UI.Tasks;
 using Quokka.WinForms;

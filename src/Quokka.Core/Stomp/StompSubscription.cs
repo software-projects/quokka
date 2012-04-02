@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading;
-using Common.Logging;
+using Castle.Core.Logging;
 using Quokka.Diagnostics;
 
 namespace Quokka.Stomp
@@ -10,7 +10,7 @@ namespace Quokka.Stomp
 	///</summary>
 	public class StompSubscription : IDisposable
 	{
-		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+		private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
 		private readonly object _lockObject = new object();
 		private readonly string _subscriptionIdText;
 

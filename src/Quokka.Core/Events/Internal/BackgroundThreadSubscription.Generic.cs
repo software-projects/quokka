@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
-using Common.Logging;
+using Castle.Core.Logging;
+using Quokka.Diagnostics;
 
 namespace Quokka.Events.Internal
 {
@@ -10,7 +11,7 @@ namespace Quokka.Events.Internal
 	/// <typeparam name="TPayload"></typeparam>
 	internal class BackgroundThreadSubscription<TPayload> : EventSubscription<TPayload>
 	{
-		private static readonly ILog log = LogManager.GetCurrentClassLogger();
+		private static readonly ILogger log = LoggerFactory.GetCurrentClassLogger();
 
 		public BackgroundThreadSubscription(EventBase parentEvent,
 		                                    Action<TPayload> action,

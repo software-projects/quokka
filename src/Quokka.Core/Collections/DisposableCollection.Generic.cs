@@ -31,7 +31,8 @@
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using Common.Logging;
+using Castle.Core.Logging;
+using Quokka.Diagnostics;
 
 namespace Quokka.Collections
 {
@@ -53,7 +54,9 @@ namespace Quokka.Collections
 	public class DisposableCollection<T> : Collection<T>, IDisposableCollection<T>
 		where T : IDisposable
 	{
-		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+		// ReSharper disable StaticFieldInGenericType
+		private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
+		// ReSharper restore StaticFieldInGenericType
 
 		public void Dispose()
 		{

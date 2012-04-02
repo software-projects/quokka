@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading;
-using Microsoft.Practices.ServiceLocation;
+using Quokka.ServiceLocation;
 
 namespace Quokka.Events
 {

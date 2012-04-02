@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
-using Common.Logging;
+using Castle.Core.Logging;
 using Quokka.Diagnostics;
 using Quokka.Util;
 
@@ -13,7 +13,7 @@ namespace Quokka.Stomp.Transport
 	/// </summary>
 	public abstract class SocketTransport<TFrame> : ITransport<TFrame>
 	{
-		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+		private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
 		protected readonly object LockObject = new object();
 		private readonly IFrameBuilder<TFrame> _frameBuilder;
 		protected Socket Socket;

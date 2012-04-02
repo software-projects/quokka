@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Threading;
 using System.Windows.Forms;
-using Common.Logging;
-using Microsoft.Practices.ServiceLocation;
+using Castle.Core.Logging;
+using Castle.Windsor;
+using Quokka.Castle;
+using Quokka.Diagnostics;
 using Quokka.Events;
 using Quokka.Events.Internal;
 using Quokka.ServiceLocation;
@@ -19,8 +21,9 @@ namespace Quokka.WinForms.Startup
 	/// </summary>
 	public abstract class BootstrapperBase
 	{
-		private ILog _log;
-		private IServiceContainer _container;
+		private ILogger _log;
+		private IServiceContainer _serviceContainer;
+		private IWindsorContainer _windsorContainer;
 		private Form _shell;
 		private string _progressMessage = String.Empty;
 
@@ -58,14 +61,19 @@ namespace Quokka.WinForms.Startup
 			return Shell;
 		}
 
-		public IServiceContainer Container
+		public IWindsorContainer Container
 		{
-			get { return _container; }
+			get { return _windsorContainer; }
+		}
+
+		public IServiceContainer ServiceContainer
+		{
+			get { return _serviceContainer; }
 		}
 
 		public IServiceLocator Locator
 		{
-			get { return _container == null ? null : _container.Locator; }
+			get { return _serviceContainer == null ? null : _serviceContainer.Locator; }
 		}
 
 		/// <summary>
@@ -76,7 +84,6 @@ namespace Quokka.WinForms.Startup
 		/// </remarks>
 		protected virtual void ConfigureLogging()
 		{
-			// TODO: some simple logging defaults to go here. Perhaps a rolling log file in application data.
 		}
 
 		/// <summary>
@@ -92,18 +99,47 @@ namespace Quokka.WinForms.Startup
 		/// 		When this method is called, logging has been configured.
 		/// 	</para>
 		/// </remarks>
-		protected abstract IServiceContainer CreateServiceContainer();
+		private IServiceContainer CreateServiceContainer()
+		{
+			_windsorContainer = CreateContainer(false);
+
+			// Set up logging if it has not already been done.
+			// This is because the Windsor Container might have a logging facility defined.
+			if (!LoggerFactory.IsConfigured && _windsorContainer.Kernel.HasComponent(typeof (ILoggerFactory)))
+			{
+				LoggerFactory.SetLoggerFactory(_windsorContainer.Resolve<ILoggerFactory>());
+			}
+
+			var serviceContainer = new WindsorServiceContainer(_windsorContainer, CreateChildContainer);
+			return serviceContainer;
+		}
+
+		private IWindsorContainer CreateChildContainer()
+		{
+			return CreateContainer(true);
+		}
+
+		/// <summary>
+		///	Create a <see cref="IWindsorContainer" />. This method gets called at program startup,
+		/// and whenever Quokka needs to create a child container.
+		/// </summary>
+		/// <param name="isChildContainer">
+		/// Indicates whether the container is going to be used as a child container. In some cases
+		/// a child container may have a slightly different configuration to a parent container.
+		/// </param>
+		/// <returns>A Castle Windsor container.</returns>
+		protected abstract IWindsorContainer CreateContainer(bool isChildContainer);
 
 		/// <summary>
 		/// 	Configure services in the service container.
 		/// </summary>
 		/// <remarks>
 		/// 	<para>
-		/// 		Override this method to configure services in the service container. The service container
-		/// 		is available through the <see cref = "Container" /> property.
+		/// 		Override this method to configure services in the container. The container
+		/// 		is available through the <see cref="Container" /> property.
 		/// 	</para>
 		/// 	<para>
-		/// 		When this method is caled, logging has been configured and the service container has
+		/// 		When this method is caled, logging has been configured and the container has
 		/// 		been created.
 		/// 	</para>
 		/// </remarks>
@@ -116,12 +152,12 @@ namespace Quokka.WinForms.Startup
 		private void DoRun()
 		{
 			ConfigureLogging();
-			_log = LogManager.GetLogger(typeof (BootstrapperBase));
+
 			ProgressMessage("Program started");
 			ProgressMessage("Creating service container");
-			_container = CreateServiceContainer();
+			_serviceContainer = CreateServiceContainer();
 			ProgressMessage("Service container created");
-			ServiceLocator.SetLocatorProvider(() => _container.Locator);
+			ServiceLocator.SetLocatorProvider(() => _serviceContainer.Locator);
 			ProgressMessage("Configuring service container");
 			ConfigureServices();
 			ProgressMessage("Service container configured");
@@ -141,57 +177,61 @@ namespace Quokka.WinForms.Startup
 		/// </remarks>
 		protected virtual void ConfigureDefaultServices()
 		{
-			if (!Container.IsTypeRegistered<IEventBroker>())
+			if (!ServiceContainer.IsTypeRegistered<IEventBroker>())
 			{
-				Container.RegisterType<IEventBroker, EventBrokerImpl>(ServiceLifecycle.Singleton);
+				ServiceContainer.RegisterType<IEventBroker, EventBrokerImpl>(ServiceLifecycle.Singleton);
 			}
 
-			if (!Container.IsTypeRegistered<IDateTimeProvider>())
+			if (!ServiceContainer.IsTypeRegistered<IDateTimeProvider>())
 			{
-				Container.RegisterType<IDateTimeProvider, DateTimeProvider>(ServiceLifecycle.Singleton);
+				ServiceContainer.RegisterType<IDateTimeProvider, DateTimeProvider>(ServiceLifecycle.Singleton);
 			}
 
-			if (!Container.IsTypeRegistered<IGuidProvider>())
+			if (!ServiceContainer.IsTypeRegistered<IGuidProvider>())
 			{
-				Container.RegisterType<IGuidProvider, GuidProvider>(ServiceLifecycle.Singleton);
+				ServiceContainer.RegisterType<IGuidProvider, GuidProvider>(ServiceLifecycle.Singleton);
 			}
 
-			if (!Container.IsTypeRegistered<IRegionManager>())
+			if (!ServiceContainer.IsTypeRegistered<IRegionManager>())
 			{
-				Container.RegisterType<IRegionManager, RegionManager>(ServiceLifecycle.Singleton);
+				ServiceContainer.RegisterType<IRegionManager, RegionManager>(ServiceLifecycle.Singleton);
 			}
 
-			if (!Container.IsTypeRegistered<SynchronizationContext>())
+			if (!ServiceContainer.IsTypeRegistered<SynchronizationContext>())
 			{
 				if (SynchronizationContext.Current == null)
 				{
 					SynchronizationContext ctx = new WindowsFormsSynchronizationContext();
-					Container.RegisterInstance(ctx);
+					ServiceContainer.RegisterInstance(ctx);
 				}
 				else
 				{
-					Container.RegisterInstance(SynchronizationContext.Current);
+					ServiceContainer.RegisterInstance(SynchronizationContext.Current);
 				}
 			}
 
-			if (!Container.IsTypeRegistered<IModalWindowFactory>())
+			if (!ServiceContainer.IsTypeRegistered<IModalWindowFactory>())
 			{
-				Container.RegisterType<IModalWindowFactory, ModalWindowFactory>(ServiceLifecycle.Singleton);
+				ServiceContainer.RegisterType<IModalWindowFactory, ModalWindowFactory>(ServiceLifecycle.Singleton);
 			}
 
-			if (!Container.IsTypeRegistered<IUIMessageBoxView>())
+			if (!ServiceContainer.IsTypeRegistered<IUIMessageBoxView>())
 			{
-				Container.RegisterType<IUIMessageBoxView, MessageBoxView>(ServiceLifecycle.PerRequest);
+				ServiceContainer.RegisterType<IUIMessageBoxView, MessageBoxView>(ServiceLifecycle.PerRequest);
 			}
 
-			if (!Container.IsTypeRegistered<Worker>())
+			if (!ServiceContainer.IsTypeRegistered<Worker>())
 			{
-				Container.RegisterType<Worker>(ServiceLifecycle.PerRequest);
+				ServiceContainer.RegisterType<Worker>(ServiceLifecycle.PerRequest);
 			}
 		}
 
 		private void ProgressMessage(string message)
 		{
+			if (_log == null && LoggerFactory.IsConfigured)
+			{
+				_log = LoggerFactory.GetCurrentClassLogger();
+			}
 			if (_log != null)
 			{
 				_log.Debug(message);

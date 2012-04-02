@@ -55,11 +55,12 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Common.Logging, Version=2.0.0.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Common.Logging.2.0.0\lib\2.0\Common.Logging.dll</HintPath>
+    <Reference Include="Castle.Core, Version=3.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\..\packages\Castle.Core.3.0.0.4001\lib\net40-client\Castle.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\CommonServiceLocator.1.0\lib\NET35\Microsoft.Practices.ServiceLocation.dll</HintPath>
+    <Reference Include="Castle.Windsor">
+      <HintPath>..\..\packages\Castle.Windsor.3.0.0.4001\lib\net40-client\Castle.Windsor.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -72,8 +73,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\StringValueAttribute.cs" />
+    <Compile Include="Castle\WindsorServiceContainer.cs" />
+    <Compile Include="Castle\WindsorServiceLocator.cs" />
     <Compile Include="Data\SqlExpressUtil.cs" />
     <Compile Include="Data\SqlMapper.cs" />
+    <Compile Include="Diagnostics\LoggerFactory.cs" />
     <Compile Include="Diagnostics\Verify.cs" />
     <Compile Include="DynamicCodeGeneration\AbstractProxyBuilder.cs" />
     <Compile Include="DynamicCodeGeneration\MemberMapping.cs" />
@@ -114,12 +118,16 @@
     <Compile Include="Reflection\TypeUtil.cs" />
     <Compile Include="Security\MD5Crypt.cs" />
     <Compile Include="ServiceContainerUtil.cs" />
+    <Compile Include="ServiceLocation\ActivationException.cs" />
+    <Compile Include="ServiceLocation\IServiceLocator.cs" />
     <Compile Include="ServiceLocation\PerRequestAttribute.cs" />
     <Compile Include="ServiceLocation\RegisterTypeAttribute.cs" />
     <Compile Include="ServiceLocation\ServiceContainer.cs" />
     <Compile Include="ServiceLocation\ServiceLifecycle.cs" />
     <Compile Include="ServiceLocation\IServiceContainer.cs" />
     <Compile Include="ServiceLocation\ServiceContainerExtensions.cs" />
+    <Compile Include="ServiceLocation\ServiceLocator.cs" />
+    <Compile Include="ServiceLocation\ServiceLocatorImplBase.cs" />
     <Compile Include="ServiceLocation\SingletonAttribute.cs" />
     <Compile Include="Services\DateTimeProvider.cs" />
     <Compile Include="Services\GuidProvider.cs" />

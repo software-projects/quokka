@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Common.Logging;
+using Castle.Core.Logging;
 using Quokka.Diagnostics;
 using Quokka.Stomp.Server.Messages;
 
@@ -10,7 +10,7 @@ namespace Quokka.Stomp.Internal
 {
 	internal class MessageQueue : IDisposable
 	{
-		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+		private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
 		private readonly object _lockObject = new object();
 		// it's not really necessary to have a list of subscriptions here anymore -- it could be removed pretty easily
 		private readonly List<ServerSideSubscription> _subscriptions = new List<ServerSideSubscription>();

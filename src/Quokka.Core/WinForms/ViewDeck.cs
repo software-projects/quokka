@@ -32,8 +32,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Windows.Forms;
-using Microsoft.Practices.ServiceLocation;
 using Quokka.Diagnostics;
+using Quokka.ServiceLocation;
 using Quokka.UI.Tasks;
 
 namespace Quokka.WinForms

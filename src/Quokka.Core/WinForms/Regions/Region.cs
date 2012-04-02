@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
-using Common.Logging;
-using Microsoft.Practices.ServiceLocation;
+using Castle.Core.Logging;
 using Quokka.Diagnostics;
+using Quokka.ServiceLocation;
 using Quokka.UI.Regions;
 
 namespace Quokka.WinForms.Regions
 {
 	public abstract class Region : IRegion
 	{
-		private static readonly ILog _log = LogManager.GetCurrentClassLogger();
+		private static readonly ILogger _log = LoggerFactory.GetCurrentClassLogger();
 		private readonly ViewsCollection _views = new ViewsCollection();
 		private readonly ViewsCollection _activeViews = new ViewsCollection();
 		private readonly List<RegionItem> _regionItems = new List<RegionItem>();

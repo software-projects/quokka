@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-using Microsoft.Practices.ServiceLocation;
+using Quokka.ServiceLocation;
 
 namespace Quokka.WinForms.Regions
 {

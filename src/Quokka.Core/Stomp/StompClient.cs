@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Threading;
-using Common.Logging;
+using Castle.Core.Logging;
 using Quokka.Diagnostics;
 using Quokka.Stomp.Internal;
 using Quokka.Stomp.Transport;
@@ -16,7 +16,7 @@ namespace Quokka.Stomp
 	/// </summary>
 	public class StompClient : IDisposable
 	{
-		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+		private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
 		private readonly object _lockObject = new object();
 		private StompClientTransport _transport;
 		private readonly Queue<StompFrame> _pendingSendMessages = new Queue<StompFrame>();

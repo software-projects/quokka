@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Common.Logging;
+using Castle.Core.Logging;
 using Quokka.Diagnostics;
 using Quokka.Stomp.Server.Messages;
 
@@ -11,7 +11,7 @@ namespace Quokka.Stomp.Internal
 	/// </summary>
 	internal class ServerSideSession : IDisposable
 	{
-		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+		private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
 		private readonly object _lockObject = GlobalLock.Instance;
 		private readonly ServerData _serverData;
 		private ServerSideConnection _clientConnection;

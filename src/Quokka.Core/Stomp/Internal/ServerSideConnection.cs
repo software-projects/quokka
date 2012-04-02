@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading;
-using Common.Logging;
+using Castle.Core.Logging;
 using Quokka.Diagnostics;
 using Quokka.Stomp.Transport;
 
@@ -8,7 +8,7 @@ namespace Quokka.Stomp.Internal
 {
 	internal class ServerSideConnection
 	{
-		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+		private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
 
 		private readonly ITransport<StompFrame> _transport;
 		private readonly ServerData _serverData;

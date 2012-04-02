@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using Common.Logging;
+using Castle.Core.Logging;
+using Quokka.Diagnostics;
 using Quokka.Stomp.Server.Messages;
 using Quokka.Util;
 
@@ -10,7 +11,7 @@ namespace Quokka.Stomp.Internal
 	// Not a great name at present. Provides access to queues, sessions, etc.
 	internal class ServerData : IDisposable
 	{
-		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+		private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
 		private readonly object _lockObject = GlobalLock.Instance;
 		private readonly Dictionary<string, ServerSideSession> _sessions = new Dictionary<string, ServerSideSession>();
 		private readonly Dictionary<string, MessageQueue> _messageQueues = new Dictionary<string, MessageQueue>();

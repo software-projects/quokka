@@ -31,7 +31,7 @@
 using System;
 using System.Diagnostics;
 using System.Reflection;
-using Common.Logging;
+using Castle.Core.Logging;
 
 namespace Quokka.Diagnostics
 {
@@ -40,7 +40,7 @@ namespace Quokka.Diagnostics
 	/// </summary>
 	public static class Verify
 	{
-		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+		private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
 
 		public static T ArgumentNotNull<T>(T param, string paramName) where T : class
 		{
@@ -78,7 +78,7 @@ namespace Quokka.Diagnostics
 				// Log details using the logger of the calling type. This will make it much easier to diagnose where
 				// the NullReferenceException is thrown from.
 				string message = String.Format("Verify.IsNotNull failed in method {0}, type {1}", method.Name, type.FullName);
-				ILog log = LogManager.GetLogger(type);
+				ILogger log = LoggerFactory.GetLogger(type);
 				log.Error(message);
 			}
 			catch (Exception ex)

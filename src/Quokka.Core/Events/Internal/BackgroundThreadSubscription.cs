@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
-using Common.Logging;
+using Castle.Core.Logging;
+using Quokka.Diagnostics;
 
 namespace Quokka.Events.Internal
 {
@@ -9,7 +10,7 @@ namespace Quokka.Events.Internal
 	/// </summary>
 	internal class BackgroundThreadSubscription : EventSubscription
 	{
-		private static readonly ILog log = LogManager.GetCurrentClassLogger();
+		private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
 
 		public BackgroundThreadSubscription(EventBase parentEvent,
 											Action action,
@@ -35,7 +36,7 @@ namespace Quokka.Events.Internal
 		{
 			if (e.Error != null)
 			{
-				log.Error("Unexpected exception in background event publish", e.Error);
+				Log.Error("Unexpected exception in background event publish", e.Error);
 			}
 		}
 	}
