@@ -1,0 +1,27 @@
+﻿<?xml version="1.0"?>
+<package >
+	<metadata>
+		<id>Quokka.Krypton</id>
+		<version>0.0</version>
+		<title>Quokka Krypton Extension Library</title>
+		<authors>John Jeffery</authors>
+		<owners>Software Projects Pty Ltd</owners>
+		<licenseUrl>http://www.apache.org/licenses/LICENSE-2.0.html</licenseUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>Use ComponentFactory Krypton toolkit with Quokka.</description>
+		<copyright>Copyright 2004-2012 Software Projects Pty Ltd. All rights reserved</copyright>
+		<dependencies>
+			<dependency id="Quokka.Core"/>
+			<dependency id="ComponentFactory.Krypton.Toolkit"/>
+			<dependency id="ComponentFactory.Krypton.Navigator"/>
+		</dependencies>
+		<frameworkAssemblies>
+			<frameworkAssembly assemblyName="System"/>
+			<frameworkAssembly assemblyName="System.Core"/>
+			<frameworkAssembly assemblyName="System.Data"/>
+			<frameworkAssembly assemblyName="System.Drawing"/>
+			<frameworkAssembly assemblyName="System.Windows.Forms"/>
+			<frameworkAssembly assemblyName="System.Xml"/>
+		</frameworkAssemblies>
+	</metadata>
+</package>

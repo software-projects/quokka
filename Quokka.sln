@@ -38,6 +38,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sprocket.Service", "src\Spr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrowserUI", "src\Examples\BrowserUI\BrowserUI.csproj", "{EDFF6293-8FD4-42E3-A3F2-F1C633AC5FED}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{3FC2F66F-1AAE-4712-B7E2-9E61F93057FC}"
+	ProjectSection(SolutionItems) = preProject
+		build\Quokka.build = build\Quokka.build
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
