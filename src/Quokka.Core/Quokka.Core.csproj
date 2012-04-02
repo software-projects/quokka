@@ -342,7 +342,9 @@
     <Compile Include="UI\Tasks\ViewClosedEventArgs.cs" />
     <Compile Include="Util\DisposeUtils.cs" />
     <None Include="packages.config" />
-    <None Include="Quokka.Core.nuspec" />
+    <None Include="Quokka.Core.nuspec">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Quokka.snk" />
     <Compile Include="Sprocket\SprocketClient.Channel.cs" />
     <Compile Include="Sprocket\SprocketClient.Publisher.cs" />

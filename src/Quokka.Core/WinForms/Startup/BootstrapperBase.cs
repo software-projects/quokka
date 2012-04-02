@@ -21,11 +21,17 @@ namespace Quokka.WinForms.Startup
 	/// </summary>
 	public abstract class BootstrapperBase
 	{
+		protected ILogger Logger { get; set; }
 		private ILogger _log;
 		private IServiceContainer _serviceContainer;
 		private IWindsorContainer _windsorContainer;
 		private Form _shell;
 		private string _progressMessage = String.Empty;
+
+		protected BootstrapperBase()
+		{
+			Logger = NullLogger.Instance;
+		}
 
 		/// <summary>
 		/// 	Shell form created during <see cref = "Run" />
@@ -228,9 +234,16 @@ namespace Quokka.WinForms.Startup
 
 		private void ProgressMessage(string message)
 		{
+			// Create the logger for this (base) class to use
 			if (_log == null && LoggerFactory.IsConfigured)
 			{
-				_log = LoggerFactory.GetCurrentClassLogger();
+				_log = LoggerFactory.GetLogger(typeof (BootstrapperBase));
+
+				// Create the logger for the derived class code to use
+				if (Logger == NullLogger.Instance)
+				{
+					Logger = LoggerFactory.GetLogger(GetType());	
+				}
 			}
 			if (_log != null)
 			{
