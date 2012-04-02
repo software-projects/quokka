@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Security;
 using System.Windows.Forms;
 
 
@@ -26,6 +27,7 @@ namespace Quokka.WinForms
 			SendMessage(window, WM_SETREDRAW, redraw ? 1 : 0, 0);
 		}
 
+		[SecuritySafeCritical]
 		public static void SetWindowCloseButtonEnabled(IWin32Window window, bool enable)
 		{
 			if (window == null)
@@ -46,6 +48,7 @@ namespace Quokka.WinForms
 			User32.EnableMenuItem(hmenu, SC_CLOSE, flags);
 		}
 
+		[SecuritySafeCritical]
 		public static int SendMessage(IWin32Window window, int msg, int wparam, int lparam)
 		{
 			if (window.Handle == IntPtr.Zero)
@@ -55,6 +58,7 @@ namespace Quokka.WinForms
 			return User32.SendMessage(window.Handle, msg, wparam, lparam);
 		}
 
+		[SecuritySafeCritical]
 		public static int SendMessage(IWin32Window window, int msg, int wparam, string lparam)
 		{
 			if (window.Handle == IntPtr.Zero) {
