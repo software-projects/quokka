@@ -90,7 +90,7 @@
     <EmbeddedResource Include="Content\css\bootstrap-responsive-min.css" />
     <EmbeddedResource Include="Content\css\bootstrap-min.css" />
     <Content Include="Content\img\glyphicons-halflings-white.png" />
-    <Content Include="Content\img\glyphicons-halflings.png" />
+    <EmbeddedResource Include="Content\img\glyphicons-halflings.png" />
     <Content Include="Content\js\bootstrap.min.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
