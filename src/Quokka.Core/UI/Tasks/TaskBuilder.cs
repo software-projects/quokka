@@ -85,7 +85,7 @@ namespace Quokka.UI.Tasks
 
 		public NodeBuilder CreateNode(string nodeName)
 		{
-			var node = new NodeBuilder(this, nodeName);
+			var node = new NodeBuilder(this, nodeName, _nodes.Count);
 			_nodes.Add(node);
 			return node;
 		}

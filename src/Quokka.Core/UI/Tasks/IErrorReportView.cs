@@ -6,7 +6,7 @@ namespace Quokka.UI.Tasks
 	/// <summary>
 	/// View interface suitable for displaying an error message.
 	/// </summary>
-	public interface IErrorView
+	public interface IErrorReportView
 	{
 		IUICommand AbortCommand { get; }
 		IUICommand CancelCommand { get; }

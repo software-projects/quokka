@@ -8,9 +8,9 @@ using Quokka.WinForms.Commands;
 namespace Quokka.WinForms
 {
 	[ToolboxItem(false)]
-	public partial class ErrorView : UserControl, IErrorView
+	public partial class ErrorReportView : UserControl, IErrorReportView
 	{
-		public ErrorView()
+		public ErrorReportView()
 		{
 			InitializeComponent();
 			Load += ViewLoad;

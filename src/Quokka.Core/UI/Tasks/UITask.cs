@@ -182,7 +182,8 @@ namespace Quokka.UI.Tasks
 				}
 				catch (Exception ex)
 				{
-					_errorReport.ReportError("Exception thrown during task CreateState method", ex);
+					var msg = string.Format("Exception thrown during CreateState method for UITask {0}", GetType());
+					_errorReport.ReportError(msg, ex);
 					throw;
 				}
 
@@ -322,6 +323,14 @@ namespace Quokka.UI.Tasks
 				try
 				{
 					CreateNodes();
+				}
+				catch (Exception ex)
+				{
+					// Report error message as close to catching the exception as possible.
+					// This will appear on the IErrorView view.
+					var message = string.Format("Exception thrown in CreateNodes method for UITask {0}", GetType());
+					_errorReport.ReportError(message, ex);
+					throw;
 				}
 				finally
 				{
@@ -495,16 +504,19 @@ namespace Quokka.UI.Tasks
 		// Display an error view. This is the end of the line for the UI task in question.
 		private void ShowErrorView()
 		{
-			var errorView = ServiceContainer.Locator.GetInstance<IErrorView>();
-			errorView.AbortCommand.Enabled = false;
-			errorView.CancelCommand.Enabled = false;
-			errorView.RetryCommand.Enabled = false;
-			errorView.ErrorReport = _errorReport;
-
-			using (var transition = _viewDeck.BeginTransition(this))
+			if (_viewDeck != null)
 			{
-				transition.AddView(errorView);
-				transition.ShowView(errorView);
+				var errorView = ServiceContainer.Locator.GetInstance<IErrorReportView>();
+				errorView.AbortCommand.Enabled = false;
+				errorView.CancelCommand.Enabled = false;
+				errorView.RetryCommand.Enabled = false;
+				errorView.ErrorReport = _errorReport;
+
+				using (var transition = _viewDeck.BeginTransition(this))
+				{
+					transition.AddView(errorView);
+					transition.ShowView(errorView);
+				}
 			}
 		}
 

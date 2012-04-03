@@ -1,6 +1,6 @@
 ﻿namespace Quokka.WinForms
 {
-	partial class ErrorView
+	partial class ErrorReportView
 	{
 		/// <summary> 
 		/// Required designer variable.

@@ -232,9 +232,9 @@ namespace Quokka.WinForms.Startup
 				ServiceContainer.RegisterType<Worker>(ServiceLifecycle.PerRequest);
 			}
 
-			if (!ServiceContainer.IsTypeRegistered<IErrorView>())
+			if (!ServiceContainer.IsTypeRegistered<IErrorReportView>())
 			{
-				ServiceContainer.RegisterType<IErrorView, ErrorView>(ServiceLifecycle.PerRequest);
+				ServiceContainer.RegisterType<IErrorReportView, ErrorReportView>(ServiceLifecycle.PerRequest);
 			}
 		}
 

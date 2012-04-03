@@ -11,6 +11,7 @@ namespace Quokka.UI.Tasks
 	{
 		public TaskBuilder Task { get; private set; }
 		public string Name { get; private set; }
+		public int Index { get; private set; }
 		public Type PresenterType { get; protected set; }
 		public Type DeclaredViewType { get; protected set; }
 		public Type InferredViewType { get; protected set; }
@@ -26,11 +27,13 @@ namespace Quokka.UI.Tasks
 		public IList<ConditionalNodeTransitionBuilder> NestedTaskTransitions = new List<ConditionalNodeTransitionBuilder>();
 
 		private bool _isValidated;
+		private int _nodeNumber;
 
-		public NodeBuilder(TaskBuilder task, string name)
+		public NodeBuilder(TaskBuilder task, string name, int index)
 		{
 			Task = task;
 			Name = name;
+			Index = index;
 		}
 
 		public void Validate()
@@ -41,15 +44,15 @@ namespace Quokka.UI.Tasks
 			}
 			_isValidated = true;
 
+			if (string.IsNullOrEmpty(Name))
+			{
+				Name = InferName();
+			}
+
 			if (PresenterType == null && DeclaredViewType == null && NestedTaskType == null)
 			{
 				AddError("No presenter, view or nested task defined");
 				return;
-			}
-
-			if (string.IsNullOrEmpty(Name))
-			{
-				Name = InferName();
 			}
 
 			if (DeclaredViewType != null
@@ -172,6 +175,10 @@ namespace Quokka.UI.Tasks
 				{
 					inferredName = taskName + nodeSuffix;
 				}
+			}
+			else
+			{
+				inferredName = string.Format("Node[{0}]", Index);
 			}
 
 			return inferredName;

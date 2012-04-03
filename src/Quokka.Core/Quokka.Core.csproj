@@ -141,7 +141,8 @@
     <Compile Include="UI\Regions\RegionExtensions.cs" />
     <Compile Include="UI\Regions\ViewsCollection.cs" />
     <Compile Include="UI\Binding\SortableBindingList.cs" />
-    <Compile Include="UI\Tasks\IErrorView.cs" />
+    <Compile Include="UI\Tasks\ErrorReportPresenter.cs" />
+    <Compile Include="UI\Tasks\IErrorReportView.cs" />
     <Compile Include="UI\WebBrowsers\ComSupport.cs" />
     <Compile Include="UI\WebBrowsers\EmbeddedResourceMap.cs" />
     <Compile Include="UI\WebBrowsers\QuokkaProtocolHandlerFactory.cs" />
@@ -173,11 +174,11 @@
     </Compile>
     <Compile Include="WinForms\DisplaySettings.cs" />
     <Compile Include="WinForms\DisplaySettingsExtensions.cs" />
-    <Compile Include="WinForms\ErrorView.cs">
+    <Compile Include="WinForms\ErrorReportView.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="WinForms\ErrorView.Designer.cs">
-      <DependentUpon>ErrorView.cs</DependentUpon>
+    <Compile Include="WinForms\ErrorReportView.Designer.cs">
+      <DependentUpon>ErrorReportView.cs</DependentUpon>
     </Compile>
     <Compile Include="WinForms\EventLoggingDataSource.cs" />
     <Compile Include="WinForms\IModalWindowFactory.cs" />
@@ -394,8 +395,8 @@
     <EmbeddedResource Include="WinForms\Controls\MainMenuListView.resx">
       <DependentUpon>MainMenuListView.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="WinForms\ErrorView.resx">
-      <DependentUpon>ErrorView.cs</DependentUpon>
+    <EmbeddedResource Include="WinForms\ErrorReportView.resx">
+      <DependentUpon>ErrorReportView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WinForms\MessageBoxView.resx">
       <DependentUpon>MessageBoxView.cs</DependentUpon>
