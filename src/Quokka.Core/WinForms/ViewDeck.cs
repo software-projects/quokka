@@ -32,6 +32,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Windows.Forms;
+using Castle.DynamicProxy;
 using Quokka.Diagnostics;
 using Quokka.ServiceLocation;
 using Quokka.UI.Tasks;
@@ -312,11 +313,21 @@ namespace Quokka.WinForms
 
 		protected virtual Control GetControl(object view)
 		{
-			// Override this method if you want a more sophisticated
-			// implementation. For example you might be using the Castle 
-			// Synchronize facility, in which case you need to get the
-			// underlying control from a dynamic proxy.
-			return (Control) view;
+			var proxy = view as IProxyTargetAccessor;
+			if (proxy != null)
+			{
+				view = proxy.DynProxyGetTarget();
+			}
+
+			var control = view as Control;
+			if (control == null)
+			{
+				var msg = string.Format("The ViewDeck is expecting a view to be of type System.Windows.Forms.Control"
+				                        + ", but it is of type {0}", view.GetType());
+				throw new QuokkaException(msg);
+			}
+
+			return control;
 		}
 
 		#region Private methods
