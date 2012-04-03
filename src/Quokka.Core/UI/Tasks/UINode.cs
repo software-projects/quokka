@@ -594,5 +594,10 @@ namespace Quokka.UI.Tasks
 				}
 			}
 		}
+
+		public override string ToString()
+		{
+			return Name;
+		}
 	}
 }

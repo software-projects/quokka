@@ -12,6 +12,7 @@ using Quokka.Services;
 using Quokka.Threading;
 using Quokka.UI.Messages;
 using Quokka.UI.Regions;
+using Quokka.UI.Tasks;
 using Quokka.WinForms.Regions;
 
 namespace Quokka.WinForms.Startup
@@ -229,6 +230,11 @@ namespace Quokka.WinForms.Startup
 			if (!ServiceContainer.IsTypeRegistered<Worker>())
 			{
 				ServiceContainer.RegisterType<Worker>(ServiceLifecycle.PerRequest);
+			}
+
+			if (!ServiceContainer.IsTypeRegistered<IErrorView>())
+			{
+				ServiceContainer.RegisterType<IErrorView, ErrorView>(ServiceLifecycle.PerRequest);
 			}
 		}
 

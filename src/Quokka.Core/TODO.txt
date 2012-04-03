@@ -3,5 +3,5 @@
 * Define a general-purpose interface for reporting error conditions (eg IErrorCondition), and inject it 
   into each UITask container.
   
-* Replace dependencies on Microsoft.Practices.ServiceLocation with Castle.Windsor, and Common.Logging with Castle.Core.
+* [DONE] Replace dependencies on Microsoft.Practices.ServiceLocation with Castle.Windsor, and Common.Logging with Castle.Core.
 

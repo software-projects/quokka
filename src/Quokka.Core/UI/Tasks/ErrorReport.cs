@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Text;
 
-namespace Quokka.Diagnostics
+namespace Quokka.UI.Tasks
 {
 	///<summary>
 	///	Used for reporting error conditions that occur during processing of a task.
@@ -13,7 +15,7 @@ namespace Quokka.Diagnostics
 	{
 		public ErrorReport()
 		{
-			Properties = new NameValueCollection();
+			Properties = new Dictionary<string, object>();
 		}
 
 		///<summary>
@@ -55,7 +57,7 @@ namespace Quokka.Diagnostics
 		///<summary>
 		///	A collection of name/value pairs that may help with diagnostics.
 		///</summary>
-		public NameValueCollection Properties { get; private set; }
+		public IDictionary<string, object> Properties { get; private set; }
 
 		///<summary>
 		///	Report an error condition
@@ -123,6 +125,47 @@ namespace Quokka.Diagnostics
 			Context = null;
 			Detail = null;
 			Properties.Clear();
+		}
+
+		public override string ToString()
+		{
+			var sb = new StringBuilder();
+
+			sb.AppendFormat("Context: {0}", Context);
+			sb.AppendLine();
+			sb.AppendFormat("Detail:  {0}", Detail);
+			sb.AppendLine();
+			if (!string.IsNullOrWhiteSpace(Source))
+			{
+				sb.AppendFormat("Source: {0}", Source);
+				sb.AppendLine();
+			}
+			if (!string.IsNullOrEmpty(Resolution))
+			{
+				sb.AppendFormat("Resolution: {0}", Resolution);
+				sb.AppendLine();
+			}
+			if (Properties.Count > 0)
+			{
+				var names = new List<string>(Properties.Keys);
+				names.Sort();
+				sb.AppendLine("Properties:");
+				foreach (var name in names)
+				{
+					sb.AppendFormat("  {0} = {1}", name, Properties[name] ?? "(null)");
+					sb.AppendLine();
+				}
+			}
+			if (Exception != null)
+			{
+				sb.AppendLine();
+				sb.AppendLine("Exception type: " + Exception.GetType().FullName);
+				sb.AppendLine("Exception message: " + Exception.Message);
+				sb.AppendLine();
+				sb.AppendLine(Exception.ToString());
+			}
+
+			return sb.ToString();
 		}
 	}
 }
