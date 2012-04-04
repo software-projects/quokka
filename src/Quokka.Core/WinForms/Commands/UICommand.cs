@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Threading;
 using System.Windows.Forms;
-using Quokka.Diagnostics;
 using Quokka.DynamicCodeGeneration;
 using Quokka.UI.Commands;
 using Quokka.WinForms.Internal;
@@ -21,6 +20,10 @@ namespace Quokka.WinForms.Commands
 		public event PropertyChangedEventHandler PropertyChanged;
 		public event EventHandler Execute;
 
+		private string _text;
+		private bool _checked;
+		private bool _enabled;
+
 		static UICommand()
 		{
 			EnabledChangedEventArgs = new PropertyChangedEventArgs("Enabled");
@@ -28,68 +31,103 @@ namespace Quokka.WinForms.Commands
 			CheckChangedEventArgs = new PropertyChangedEventArgs("Checked");
 		}
 
-		public UICommand(Control control)
+		public UICommand(Control control = null)
 		{
-			if (control.InvokeRequired)
-			{
-				throw new InvalidOperationException("UICommand needs to be created on the same thread that created the control");
-			} 
 			_synchronizationContext = SynchronizationContext.Current;
-			_control = Verify.ArgumentNotNull(control, "control");
-			_control.EnabledChanged += ControlEnabledChanged;
-			_control.TextChanged += ControlTextChanged;
-			_control.Click += ControlClick;
-
-			var checkControl = ProxyFactory.CreateDuckProxy<ICheckControl>(control);
-			if (checkControl.IsCheckedSupported)
+			if (control == null)
 			{
-				_checkControl = checkControl;
-				if (checkControl.IsCheckedChangedSupported)
+				_text = string.Empty;
+			}
+			else
+			{
+				if (control.InvokeRequired)
 				{
-					_checkControl.CheckedChanged += ControlCheckedChanged;
+					throw new InvalidOperationException("UICommand needs to be created on the same thread that created the control");
+				}
+				_control = control;
+				_control.EnabledChanged += ControlEnabledChanged;
+				_control.TextChanged += ControlTextChanged;
+				_control.Click += ControlClick;
+				_text = _control.Text;
+				_enabled = _control.Enabled;
+
+				var checkControl = ProxyFactory.CreateDuckProxy<ICheckControl>(control);
+				if (checkControl.IsCheckedSupported)
+				{
+					_checkControl = checkControl;
+					if (checkControl.IsCheckedChangedSupported)
+					{
+						_checkControl.CheckedChanged += ControlCheckedChanged;
+					}
+					_checked = _checkControl.Checked;
 				}
 			}
 		}
 
 		public bool Checked
 		{
-			get
-			{
-				if (_checkControl == null)
-				{
-					return false;
-				}
-				return PerformFunction(() => _checkControl.Checked);
-			}
+			get { return _checked; }
 
 			set
 			{
-				if (CanCheck)
+				if (_checkControl != null)
 				{
 					PerformAction(() => _checkControl.Checked = value);
 				}
 				else
 				{
-					throw new NotSupportedException("Checked property is not supported");
+					if (_checked != value)
+					{
+						_checked = value;
+						RaisePropertyChanged("Checked");
+					}
 				}
 			}
 		}
 
-		public bool CanCheck
-		{
-			get { return _checkControl != null; }
-		}
-
 		public bool Enabled
 		{
-			get { return PerformFunction(() => _control.Enabled); }
-			set { PerformAction(() => _control.Enabled = value); }
+			get { return _enabled; }
+			set
+			{
+				if (_control != null)
+				{
+					PerformAction(() => _control.Enabled = value);
+				}
+				else
+				{
+					if (_enabled != value)
+					{
+						_enabled = value;
+						RaisePropertyChanged("Enabled");
+					}
+				}
+			}
 		}
 
 		public string Text
 		{
-			get { return PerformFunction(() => _control.Text); }
-			set { PerformAction(() => _control.Text = value); }
+			get { return _text; }
+			set
+			{
+				// never allow null text, convert to empty text
+				if (value == null)
+				{
+					value = string.Empty;
+				}
+				if (_control != null)
+				{
+					PerformAction(() => _control.Text = value);
+				}
+				else
+				{
+					if (_text != value)
+					{
+						_text = value;
+						RaisePropertyChanged("Text");
+					}
+				}
+			}
 		}
 
 		public void PerformExecute()
@@ -108,19 +146,31 @@ namespace Quokka.WinForms.Commands
 			}
 		}
 
+		private void RaisePropertyChanged(string propertyName)
+		{
+			if (PropertyChanged != null)
+			{
+				var e = new PropertyChangedEventArgs(propertyName);
+				OnPropertyChanged(e);
+			}
+		}
+
 		private void ControlEnabledChanged(object sender, EventArgs e)
 		{
+			_enabled = _control.Enabled;
 			OnPropertyChanged(EnabledChangedEventArgs);
 		}
 
 		private void ControlTextChanged(object sender, EventArgs e)
 		{
+			_text = _control.Text;
 			OnPropertyChanged(TextChangedEventArgs);
 		}
 
 
 		private void ControlCheckedChanged(object sender, EventArgs e)
 		{
+			_checked = _checkControl.Checked;
 			OnPropertyChanged(CheckChangedEventArgs);
 		}
 
@@ -131,28 +181,20 @@ namespace Quokka.WinForms.Commands
 
 		private void PerformAction(Action action)
 		{
-			if (_control.InvokeRequired)
-			{
-				// Using a synchronization context here because the
-				// Invoke method can fail if the control's underlying
-				// window handle has not been created yet. It is not
-				// possible to check for this, because accessing the
-				// Handle property on a cross-thread throws an exception,
-				// so synchronization context it is.
-				_synchronizationContext.Send(state => action(), null);
-			}
-			else
+			// Using a synchronization context here because the
+			// Invoke method can fail if the control's underlying
+			// window handle has not been created yet. It is not
+			// possible to check for this, because accessing the
+			// Handle property on a cross-thread throws an exception,
+			// so synchronization context it is.
+			if (_synchronizationContext == null)
 			{
 				action();
 			}
-		}
-
-		private T PerformFunction<T>(Func<T> func)
-		{
-			T result = default(T);
-			Action action = () => result = func();
-			PerformAction(action);
-			return result;
+			else
+			{
+				_synchronizationContext.Send(state => action(), null);
+			}
 		}
 	}
 }

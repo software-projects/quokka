@@ -43,19 +43,23 @@ namespace Quokka.WinForms.Commands
 		public void ButtonCheckNotSupported()
 		{
 			var button = new Button();
-			var command = new UICommand(button);
-			Assert.AreEqual(false, command.CanCheck);
-			Assert.AreEqual(false, command.Checked);
+			var checkBoxInterface = ProxyFactory.CreateDuckProxy<ICheckControl>(button);
 
-			try
-			{
-				command.Checked = true;
-				Assert.Fail("Expected NotSupportedException");
-			}
-			catch (NotSupportedException ex)
-			{
-				Assert.AreEqual("Checked property is not supported", ex.Message);
-			}
+			Assert.AreEqual(false, checkBoxInterface.IsCheckedSupported);
+			Assert.AreEqual(false, checkBoxInterface.IsCheckedChangedSupported);
+
+			var command = new UICommand(button);
+			Assert.AreEqual(false, command.Checked);
+			bool checkChangedRaised = false;
+			command.PropertyChanged += (o, e) =>
+			                           	{
+			                           		if (e.PropertyName == "Checked")
+			                           		{
+			                           			checkChangedRaised = true;
+			                           		}
+			                           	};
+			command.Checked = true;
+			Assert.IsTrue(checkChangedRaised);
 		}
 
 		[Test]
@@ -92,6 +96,56 @@ namespace Quokka.WinForms.Commands
 			checkBox.Checked = false;
 			Assert.AreEqual(false, checkBoxInterface.Checked);
 			Assert.IsTrue(checkChangedRaised);
+		}
+
+		[Test]
+		public void NoControl()
+		{
+			var command = new UICommand();
+
+			Assert.IsFalse(command.Checked);
+			Assert.IsFalse(command.Enabled);
+			Assert.AreEqual(string.Empty, command.Text);
+
+			bool enabledChanged = false;
+			bool textChanged = false;
+			bool checkedChanged = false;
+
+			command.PropertyChanged += (o, e) => {
+				switch (e.PropertyName)
+				{
+					case "Checked":
+						checkedChanged = true;
+						break;
+					case "Enabled":
+						enabledChanged = true;
+						break;
+					case "Text":
+						textChanged = true;
+						break;
+					default:
+						Assert.Fail("Unknown property name: " + e.PropertyName);
+						break;
+				}
+			};
+
+			command.Enabled = true;
+			Assert.IsTrue(enabledChanged);
+			Assert.IsFalse(textChanged);
+			Assert.IsFalse(checkedChanged);
+			enabledChanged = false;
+
+			command.Checked = true;
+			Assert.IsFalse(enabledChanged);
+			Assert.IsFalse(textChanged);
+			Assert.IsTrue(checkedChanged);
+			checkedChanged = false;
+
+			command.Text = "X";
+			Assert.IsFalse(enabledChanged);
+			Assert.IsTrue(textChanged);
+			Assert.IsFalse(checkedChanged);
+			textChanged = false;
 		}
 	}
 }
