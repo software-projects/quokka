@@ -85,6 +85,10 @@ namespace Quokka.Castle
 
 		protected override void DoDispose()
 		{
+			if (_container.Parent != null)
+			{
+				_container.Parent.RemoveChildContainer(_container);
+			}
 			_container.Dispose();
 		}
 

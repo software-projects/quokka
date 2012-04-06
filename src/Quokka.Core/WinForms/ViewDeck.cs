@@ -91,7 +91,7 @@ namespace Quokka.WinForms
 
 		public event EventHandler<ViewClosedEventArgs> ViewClosed;
 
-		public IViewTransition BeginTransition(UITask task)
+		public virtual IViewTransition BeginTransition(UITask task)
 		{
 			if (task != null)
 			{
@@ -120,15 +120,22 @@ namespace Quokka.WinForms
 		public virtual IModalWindow CreateModalWindow()
 		{
 			var factory = ServiceLocator.Current.GetInstance<IModalWindowFactory>();
-			var window = factory.CreateModalWindow(Control);
-			return window;
+			try
+			{
+				var window = factory.CreateModalWindow(Control);
+				return window;
+			}
+			finally
+			{
+				ServiceLocator.Current.Release(factory);
+			}
 		}
 
 		#endregion
 
-		#region Public methods for IUipViewManager backwards compatibility
+		#region Public methods for IUipViewManager backwards compatibility (now protected virtuals)
 
-		public void BeginTask(object task)
+		protected virtual void BeginTask(object task)
 		{
 			if (task != null)
 			{
@@ -139,7 +146,7 @@ namespace Quokka.WinForms
 			}
 		}
 
-		public void EndTask(object task)
+		protected virtual void EndTask(object task)
 		{
 			if (task != null)
 			{
@@ -154,7 +161,7 @@ namespace Quokka.WinForms
 			}
 		}
 
-		public void BeginTransition()
+		protected virtual void BeginTransition()
 		{
 			// Use reference counts, because as of Quokka 0.6, it is possible for 
 			// calls to this method to be nested. (This happens when nested tasks are
@@ -173,7 +180,7 @@ namespace Quokka.WinForms
 			}
 		}
 
-		public void EndTransition()
+		protected virtual void EndTransition()
 		{
 			// Use reference counts, because as of Quokka 0.6, it is possible for 
 			// calls to this method to be nested. (This happens when nested tasks are
@@ -203,7 +210,7 @@ namespace Quokka.WinForms
 			}
 		}
 
-		public virtual void AddView(object view)
+		protected virtual void AddView(object view)
 		{
 			if (_control.IsDisposed || _control.Disposing || view == null)
 			{
@@ -211,8 +218,8 @@ namespace Quokka.WinForms
 			}
 
 			// view object may optionally be a Form, but it must be a control
-			Form form = view as Form;
 			Control control = GetControl(view);
+			Form form = control as Form;
 
 			if (form != null)
 			{
@@ -226,13 +233,13 @@ namespace Quokka.WinForms
 			_control.Controls.Add(control);
 		}
 
-		public void ViewClosedHandler(object sender, EventArgs e)
+		private void ViewClosedHandler(object sender, EventArgs e)
 		{
 			ViewClosedEventArgs eventArgs = new ViewClosedEventArgs(sender);
 			OnViewClosed(eventArgs);
 		}
 
-		public virtual void RemoveView(object view)
+		protected virtual void RemoveView(object view)
 		{
 			if (_control.IsDisposed || _control.Disposing || view == null)
 			{
@@ -244,7 +251,7 @@ namespace Quokka.WinForms
 			_control.Controls.Remove(control);
 		}
 
-		public virtual void ShowView(object view)
+		protected virtual void ShowView(object view)
 		{
 			if (_control.IsDisposed || _control.Disposing || view == null)
 			{
@@ -268,7 +275,7 @@ namespace Quokka.WinForms
 			CurrentVisibleView = control;
 		}
 
-		public virtual void HideView(object view)
+		protected virtual void HideView(object view)
 		{
 			if (_control.IsDisposed || _control.Disposing || view == null)
 			{
