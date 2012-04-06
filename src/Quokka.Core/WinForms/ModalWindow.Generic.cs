@@ -122,7 +122,7 @@ namespace Quokka.WinForms
 				EndTasksWhenDisposed = false;
 			}
 
-			public override void AddView(object view)
+			protected override void AddView(object view)
 			{
 				if (!_viewAdded)
 				{
