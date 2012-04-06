@@ -524,7 +524,8 @@ namespace Quokka.UI.Tasks
 		{
 			if (View != null)
 			{
-				DisposeUtils.DisposeOf(View);
+				// The container will call the view's Dispose method
+				Container.Locator.Release(View);
 				View = null;
 			}
 		}
@@ -543,6 +544,8 @@ namespace Quokka.UI.Tasks
 		{
 			if (Presenter != null)
 			{
+				// The container will call the presenter's Dispose method
+				Container.Locator.Release(Presenter);
 				DisposeUtils.DisposeOf(Presenter);
 				Presenter = null;
 			}
@@ -556,7 +559,8 @@ namespace Quokka.UI.Tasks
 				{
 					NestedTask.EndTask();
 				}
-				DisposeUtils.DisposeOf(NestedTask);
+				// The container will call the task's dispose method
+				Container.Locator.Release(NestedTask);
 				NestedTask = null;
 			}
 		}
