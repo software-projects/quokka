@@ -40,7 +40,7 @@ using Quokka.UI.Tasks;
 namespace Quokka.WinForms
 {
 	/// <summary>
-	/// 	Handles views inside a Windows Forms <see cref = "Control" />
+	/// 	Handles views inside a Windows Forms <see cref="Control" />
 	/// </summary>
 	/// <remarks>
 	/// 	Views are arranged in a 'deck' view, so that only one is visible at a time.
@@ -49,10 +49,10 @@ namespace Quokka.WinForms
 	{
 		private readonly Control _control;
 		private int _transitionReferenceCount;
-		protected readonly HashSet<object> CurrentTasks = new HashSet<object>();
 		private readonly HashSet<UITask> _currentUITasks = new HashSet<UITask>();
 		protected Control CurrentVisibleView;
 		protected readonly List<Control> VisibleViews = new List<Control>();
+		private readonly HashSet<Control> _viewControls = new HashSet<Control>();
 
 		public event EventHandler AllTasksComplete;
 
@@ -77,12 +77,17 @@ namespace Quokka.WinForms
 
 		public virtual void Clear()
 		{
-			// Clear the controls displayed, but do not dispose of them.
+			// Remove all the view controls that we added.
+			// (Leaving behind any controls that we did not create).
 			// The controls were created in the service container, and the
 			// container will dispose of them.
-			_control.Controls.Clear();
+			foreach (var control in _viewControls)
+			{
+				_control.Controls.Remove(control);
+			}
 
-			CurrentTasks.Clear();
+			_viewControls.Clear();
+			_currentUITasks.Clear();
 			VisibleViews.Clear();
 			CurrentVisibleView = null;
 		}
@@ -99,11 +104,12 @@ namespace Quokka.WinForms
 				{
 					_currentUITasks.Add(task);
 					task.TaskComplete += TaskCompleteHandler;
+					BeginTask(task);
 				}
 			}
 
 			BeginTransition();
-			return new ViewTransition(this, task);
+			return new ViewTransition(this);
 		}
 
 		private void TaskCompleteHandler(object sender, EventArgs e)
@@ -114,6 +120,11 @@ namespace Quokka.WinForms
 				task.TaskComplete -= TaskCompleteHandler;
 				_currentUITasks.Remove(task);
 				EndTask(task);
+
+				if (_currentUITasks.Count == 0)
+				{
+					OnAllTasksComplete(EventArgs.Empty);
+				}
 			}
 		}
 
@@ -135,30 +146,12 @@ namespace Quokka.WinForms
 
 		#region Public methods for IUipViewManager backwards compatibility (now protected virtuals)
 
-		protected virtual void BeginTask(object task)
+		protected virtual void BeginTask(UITask task)
 		{
-			if (task != null)
-			{
-				if (!CurrentTasks.Contains(task))
-				{
-					CurrentTasks.Add(task);
-				}
-			}
 		}
 
-		protected virtual void EndTask(object task)
+		protected virtual void EndTask(UITask task)
 		{
-			if (task != null)
-			{
-				if (CurrentTasks.Contains(task))
-				{
-					CurrentTasks.Remove(task);
-					if (CurrentTasks.Count == 0)
-					{
-						OnAllTasksComplete(EventArgs.Empty);
-					}
-				}
-			}
 		}
 
 		protected virtual void BeginTransition()
@@ -219,7 +212,7 @@ namespace Quokka.WinForms
 
 			// view object may optionally be a Form, but it must be a control
 			Control control = GetControl(view);
-			Form form = control as Form;
+			var form = control as Form;
 
 			if (form != null)
 			{
@@ -230,12 +223,13 @@ namespace Quokka.WinForms
 
 			control.Dock = DockStyle.Fill;
 			control.Visible = false;
+			_viewControls.Add(control);
 			_control.Controls.Add(control);
 		}
 
 		private void ViewClosedHandler(object sender, EventArgs e)
 		{
-			ViewClosedEventArgs eventArgs = new ViewClosedEventArgs(sender);
+			var eventArgs = new ViewClosedEventArgs(sender);
 			OnViewClosed(eventArgs);
 		}
 
@@ -248,6 +242,7 @@ namespace Quokka.WinForms
 
 			Control control = GetControl(view);
 			HideView(view);
+			_viewControls.Remove(control);
 			_control.Controls.Remove(control);
 		}
 
@@ -260,11 +255,12 @@ namespace Quokka.WinForms
 
 			Control control = GetControl(view);
 			control.Visible = true;
-			foreach (Control c in _control.Controls)
+			foreach (Control c in _viewControls)
 			{
 				if (!ReferenceEquals(c, control))
 				{
 					c.Visible = false;
+					VisibleViews.Remove(c);
 				}
 			}
 
@@ -309,21 +305,21 @@ namespace Quokka.WinForms
 			}
 		}
 
-		protected virtual void TryEndTask(object task)
+		protected virtual void TryEndTask(UITask task)
 		{
-			var uiTask = task as UITask;
-			if (uiTask != null && uiTask.IsRunning)
+			if (task != null && task.IsRunning)
 			{
-				uiTask.EndTask();
+				task.EndTask();
 			}
 		}
 
 		protected virtual Control GetControl(object view)
 		{
 			var proxy = view as IProxyTargetAccessor;
-			if (proxy != null)
+			while (proxy != null)
 			{
 				view = proxy.DynProxyGetTarget();
+				proxy = view as IProxyTargetAccessor;
 			}
 
 			var control = view as Control;
@@ -343,14 +339,14 @@ namespace Quokka.WinForms
 		{
 			if (EndTasksWhenDisposed)
 			{
-				if (CurrentTasks.Count > 0)
+				if (_currentUITasks.Count > 0)
 				{
 					// Take a copy of the CurrentTasks collection.
 					// This is necessary because we are going to end the tasks,
 					// which will cause them to remove themselves from the CurrentTasks
 					// collection. Because that collection is being modified, we cannot use
 					// an enumerator on it.
-					var tasks = new List<object>(CurrentTasks);
+					var tasks = new List<UITask>(_currentUITasks);
 					foreach (var task in tasks)
 					{
 						TryEndTask(task);
@@ -368,10 +364,9 @@ namespace Quokka.WinForms
 			private readonly ViewDeck _viewDeck;
 			private bool _disposed;
 
-			public ViewTransition(ViewDeck viewDeck, UITask uiTask)
+			public ViewTransition(ViewDeck viewDeck)
 			{
 				_viewDeck = Verify.ArgumentNotNull(viewDeck, "viewDeck");
-				_viewDeck.BeginTask(uiTask);
 			}
 
 			public void Dispose()
@@ -385,22 +380,34 @@ namespace Quokka.WinForms
 
 			public void AddView(object view)
 			{
+				CheckDisposed();
 				_viewDeck.AddView(view);
 			}
 
 			public void RemoveView(object view)
 			{
+				CheckDisposed();
 				_viewDeck.RemoveView(view);
 			}
 
 			public void ShowView(object view)
 			{
+				CheckDisposed();
 				_viewDeck.ShowView(view);
 			}
 
 			public void HideView(object view)
 			{
+				CheckDisposed();
 				_viewDeck.HideView(view);
+			}
+
+			private void CheckDisposed()
+			{
+				if (_disposed)
+				{
+					throw new ObjectDisposedException("Attempt to use a ViewDeck transition after it has been disposed");
+				}
 			}
 		}
 
