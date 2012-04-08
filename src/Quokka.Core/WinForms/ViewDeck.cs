@@ -316,10 +316,9 @@ namespace Quokka.WinForms
 		protected virtual Control GetControl(object view)
 		{
 			var proxy = view as IProxyTargetAccessor;
-			while (proxy != null)
+			if (proxy != null)
 			{
 				view = proxy.DynProxyGetTarget();
-				proxy = view as IProxyTargetAccessor;
 			}
 
 			var control = view as Control;
