@@ -55,6 +55,7 @@ namespace Quokka.WinForms
 		private readonly HashSet<Control> _viewControls = new HashSet<Control>();
 
 		public event EventHandler AllTasksComplete;
+		public event EventHandler<UITaskEventArgs> TaskStarted;
 
 		public ViewDeck(Control control)
 		{
@@ -104,7 +105,7 @@ namespace Quokka.WinForms
 				{
 					_currentUITasks.Add(task);
 					task.TaskComplete += TaskCompleteHandler;
-					BeginTask(task);
+					OnTaskStarted(task);
 				}
 			}
 
@@ -119,7 +120,6 @@ namespace Quokka.WinForms
 			{
 				task.TaskComplete -= TaskCompleteHandler;
 				_currentUITasks.Remove(task);
-				EndTask(task);
 
 				if (_currentUITasks.Count == 0)
 				{
@@ -145,14 +145,6 @@ namespace Quokka.WinForms
 		#endregion
 
 		#region Public methods for IUipViewManager backwards compatibility (now protected virtuals)
-
-		protected virtual void BeginTask(UITask task)
-		{
-		}
-
-		protected virtual void EndTask(UITask task)
-		{
-		}
 
 		protected virtual void BeginTransition()
 		{
@@ -288,6 +280,14 @@ namespace Quokka.WinForms
 		}
 
 		#endregion
+
+		protected virtual void OnTaskStarted(UITask task)
+		{
+			if (TaskStarted != null)
+			{
+				TaskStarted(this, new UITaskEventArgs(task));
+			}
+		}
 
 		protected virtual void OnAllTasksComplete(EventArgs e)
 		{
