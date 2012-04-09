@@ -388,6 +388,21 @@ namespace Quokka.UI.Tasks
 			}
 		}
 
+		internal void NavigationNotDefined(object sender, EventArgs e)
+		{
+			var navigateCommand = (NavigateCommand) sender;
+			var context = string.Format("Navigating from node " + navigateCommand.FromNode.Name);
+			var detail = string.Format("An attempt has been made to navigate from node {0}"
+			                           + " using a NavigateCommand whose transition has not been defined.",
+			                           navigateCommand.FromNode.Name);
+			var resolution = "Check for an INavigateCommand in your presenter or view that has not had a"
+			                 + " transition defined in the UITask.";
+			_errorReport.ReportError(context, detail);
+			_errorReport.Resolution = resolution;
+			AddErrorReportPropertiesForNode(navigateCommand.FromNode);
+			ShowErrorView();
+		}
+
 		internal void Navigating(object sender, EventArgs e)
 		{
 			var navigateCommand = (NavigateCommand) sender;
@@ -504,6 +519,14 @@ namespace Quokka.UI.Tasks
 		// Display an error view. This is the end of the line for the UI task in question.
 		private void ShowErrorView()
 		{
+			// Set the current node to null, and cleanup all nodes. This should get
+			// rid of any modal windows being displayed.
+			CurrentNode = null;
+			foreach (var node in Nodes)
+			{
+				node.CleanupNode();
+			}
+
 			if (_viewDeck != null)
 			{
 				var errorView = ServiceContainer.Locator.GetInstance<IErrorReportView>();
@@ -531,7 +554,7 @@ namespace Quokka.UI.Tasks
 
 				if (nextNode != null)
 				{
-					using (var transition = nextNode.ViewDeck.BeginTransition(this))
+					using (var transition = nextNode.GetViewDeck(createIfNecessary:true).BeginTransition(this))
 					{
 						try {
 							do
@@ -579,7 +602,6 @@ namespace Quokka.UI.Tasks
 							Log.Error("Unexpected error in transition: " + ex.Message, ex);
 							throw;
 						}
-
 					}
 				}
 				if (_endTaskRequested)
@@ -596,11 +618,11 @@ namespace Quokka.UI.Tasks
 
 			if (showModalView && CurrentNode != null)
 			{
-				using (var transition = CurrentNode.ViewDeck.BeginTransition(this))
+				using (var transition = CurrentNode.GetViewDeck(createIfNecessary:true).BeginTransition(this))
 				{
 					transition.ShowView(CurrentNode.View);
 				}
-				CurrentNode.ModalWindow.ShowModal(false);
+				CurrentNode.GetModalWindow(createIfNecessary:true).ShowModal(false);
 			}
 		}
 
