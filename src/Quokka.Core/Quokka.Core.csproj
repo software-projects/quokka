@@ -106,6 +106,8 @@
     <Compile Include="Events\ReferenceOption.cs" />
     <Compile Include="Events\ThreadOption.cs" />
     <Compile Include="Modules\IModule.cs" />
+    <Compile Include="NH\IdHelpers.cs" />
+    <Compile Include="NH\NHEntity.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

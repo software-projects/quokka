@@ -90,6 +90,8 @@
     <Compile Include="DynamicCodeGeneration\DuckProxyTests.cs" />
     <Compile Include="DynamicCodeGeneration\MemberMappingTests.cs" />
     <Compile Include="Events\EventBrokerTests.cs" />
+    <Compile Include="NH\IdHelperTests.cs" />
+    <Compile Include="NH\NHEntityTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\PropertyUtilTests.cs" />
     <Compile Include="Reflection\TypeUtilTests.cs" />
