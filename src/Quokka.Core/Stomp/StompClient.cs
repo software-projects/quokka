@@ -362,24 +362,21 @@ namespace Quokka.Stomp
 
 		private void ProcessNextFrame()
 		{
-			Log.Debug("BEGIN ProcessNextFrame");
-			StompSubscription subscription = null;
-			StompFrame frame;
 
 			for (;;)
 			{
+				StompSubscription subscription = null;
+				StompFrame frame;
 				using (Lock.Lock())
 				{
 					if (_transport == null)
 					{
-						Log.Debug("END ProcessNextFrame: _transport==null");
 						return;
 					}
 
 					frame = _transport.GetNextFrame();
 					if (frame == null)
 					{
-						Log.Debug("END ProcessNextFrame: fram==null");
 						return;
 					}
 
@@ -389,7 +386,6 @@ namespace Quokka.Stomp
 					if (frame.IsHeartBeat)
 					{
 						// received a heart beat frame -- all we want to do is restart the timer
-						Log.Debug("frame.IsHeartBeat");
 						continue;
 					}
 
