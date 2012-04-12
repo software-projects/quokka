@@ -15,7 +15,7 @@ namespace Quokka.Sprocket
 			private readonly StompSubscription _subscription;
 			private readonly string _queueName = Guid.NewGuid().ToString();
 			private bool _isDisposed;
-			private readonly object _lockObject = new object();
+			private readonly LockObject _lock;
 			private readonly Dictionary<Type, Action<object>> _actions = new Dictionary<Type, Action<object>>();
 			private readonly Timer _timer;
 			private bool _timerStarted;
@@ -23,6 +23,7 @@ namespace Quokka.Sprocket
 			public Channel(SprocketClient sprocket)
 			{
 				_sprocket = Verify.ArgumentNotNull(sprocket, "client");
+				_lock = sprocket.Client.Lock;
 				SynchronizationContext = _sprocket.SynchronizationContext;
 				_subscription = _sprocket.Client.CreateSubscription(_queueName);
 				_subscription.MessageArrived += SubscriptionMessageArrived;
@@ -33,7 +34,7 @@ namespace Quokka.Sprocket
 
 			public void Dispose()
 			{
-				lock (_lockObject)
+				using (_lock.Lock())
 				{
 					if (_isDisposed)
 					{
@@ -57,7 +58,7 @@ namespace Quokka.Sprocket
 
 			public void Send(object message)
 			{
-				lock (_lockObject)
+				using (_lock.Lock())
 				{
 					if (_isDisposed)
 					{
@@ -97,7 +98,7 @@ namespace Quokka.Sprocket
 
 			public IChannel HandleResponse<T>(Action<T> action)
 			{
-				lock (_lockObject)
+				using (_lock.Lock())
 				{
 					if (_isDisposed)
 					{
@@ -111,7 +112,7 @@ namespace Quokka.Sprocket
 
 			private void TimerCallback(object state)
 			{
-				lock (_lockObject)
+				using (_lock.Lock())
 				{
 					if (!_isDisposed && _timerStarted)
 					{
@@ -120,25 +121,28 @@ namespace Quokka.Sprocket
 
 						if (TimeoutAction != null)
 						{
-							if (SynchronizationContext == null)
-							{
-								TimeoutAction();
-							}
-							else
-							{
-								SynchronizationContext.Send(delegate { TimeoutAction(); }, null);
-							}
+							var action = TimeoutAction;
+							_lock.AfterUnlock(() => InvokeAction(action));
 						}
 					}
 				}
 			}
 
+			private void InvokeAction(Action action)
+			{
+				if (SynchronizationContext == null)
+				{
+					action();
+				}
+				else
+				{
+					SynchronizationContext.Send(delegate { action(); }, null);
+				}
+			}
+
 			private void SubscriptionMessageArrived(object sender, StompMessageEventArgs e)
 			{
-				Action<object> action;
-				object message;
-
-				lock (_lockObject)
+				using (_lock.Lock())
 				{
 					if (_isDisposed)
 					{
@@ -150,9 +154,10 @@ namespace Quokka.Sprocket
 					_timerStarted = false;
 
 					var frame = e.Message;
-					message = frame.Deserialize();
+					object message = frame.Deserialize();
 					var type = message.GetType();
 
+					Action<object> action;
 					if (!_actions.TryGetValue(type, out action))
 					{
 						type = typeof (object);
@@ -161,12 +166,11 @@ namespace Quokka.Sprocket
 							// TODO: could not figure out what to do with this message
 						}
 					}
-					
-				}
 
-				if (action != null)
-				{
-					action(message);
+					if (action != null)
+					{
+						_lock.AfterUnlock(() => action(message));
+					}
 				}
 			}
 

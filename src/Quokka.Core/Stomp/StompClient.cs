@@ -8,6 +8,7 @@ using Castle.Core.Logging;
 using Quokka.Diagnostics;
 using Quokka.Stomp.Internal;
 using Quokka.Stomp.Transport;
+using Quokka.Util;
 
 namespace Quokka.Stomp
 {
@@ -17,7 +18,7 @@ namespace Quokka.Stomp
 	public class StompClient : IDisposable
 	{
 		private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
-		private readonly object _lockObject = new object();
+		internal readonly LockObject Lock = new LockObject();
 		private StompClientTransport _transport;
 		private readonly Queue<StompFrame> _pendingSendMessages = new Queue<StompFrame>();
 		private readonly Dictionary<int, StompSubscription> _subscriptions = new Dictionary<int, StompSubscription>();
@@ -86,7 +87,7 @@ namespace Quokka.Stomp
 
 		public void Dispose()
 		{
-			lock (_lockObject)
+			using (Lock.Lock())
 			{
 				if (!_isDisposed)
 				{
@@ -111,7 +112,7 @@ namespace Quokka.Stomp
 		{
 			get
 			{
-				lock (_lockObject)
+				using (Lock.Lock())
 				{
 					return _connected;
 				}
@@ -149,7 +150,7 @@ namespace Quokka.Stomp
 		public void ConnectTo(EndPoint endPoint)
 		{
 			Verify.ArgumentNotNull(endPoint, "endPoint");
-			lock (_lockObject)
+			using (Lock.Lock())
 			{
 				CheckDisposed();
 				if (_transport != null)
@@ -169,7 +170,7 @@ namespace Quokka.Stomp
 
 		private void DisconnectAndReconnect()
 		{
-			lock (_lockObject)
+			using (Lock.Lock())
 			{
 				if (_transport != null)
 				{
@@ -185,13 +186,13 @@ namespace Quokka.Stomp
 			// releases it for callbacks
 			CheckConnected();
 
-			lock (_lockObject)
+			using (Lock.Lock())
 			{
 				if (_transport == null)
 				{
 					_transport = new StompClientTransport();
 					SubscribeTransportEvents();
-					_transport.Connect((IPEndPoint)RemoteEndPoint);
+					_transport.Connect((IPEndPoint) RemoteEndPoint);
 				}
 			}
 		}
@@ -199,11 +200,11 @@ namespace Quokka.Stomp
 		public StompSubscription CreateSubscription(string destination)
 		{
 			Verify.ArgumentNotNull(destination, "destination");
-			lock (_lockObject)
+			using (Lock.Lock())
 			{
 				CheckDisposed();
 				var subscriptionId = ++_lastSubscriptionId;
-				var subscription = new StompSubscription(this, subscriptionId, destination);
+				var subscription = new StompSubscription(this, Lock, subscriptionId, destination);
 				_subscriptions.Add(subscriptionId, subscription);
 				subscription.StateChanged += SubscriptionStateChanged;
 				return subscription;
@@ -215,7 +216,7 @@ namespace Quokka.Stomp
 			var subscription = (StompSubscription) sender;
 			if (subscription.State == StompSubscriptionState.Disposed)
 			{
-				lock (_lockObject)
+				using (Lock.Lock())
 				{
 					_subscriptions.Remove(subscription.SubscriptionId);
 				}
@@ -224,7 +225,7 @@ namespace Quokka.Stomp
 
 		internal void SendRawMessage(StompFrame message, bool receiptRequired)
 		{
-			lock (_lockObject)
+			using (Lock.Lock())
 			{
 				if (!_isDisposed)
 				{
@@ -265,15 +266,13 @@ namespace Quokka.Stomp
 			Verify.ArgumentNotNull(destination, "destination");
 			Verify.ArgumentNotNull(text, "text");
 			CheckDisposed();
-			var frame = new StompFrame(StompCommand.Send)
-			            	{
-			            		Headers =
-			            			{
-			            				{StompHeader.Destination, destination},
-			            				{StompHeader.ContentType, "text/plain"}
-			            			},
-			            		BodyText = text
-			            	};
+			var frame = new StompFrame(StompCommand.Send) {
+			                                              	Headers = {
+			                                              	          	{StompHeader.Destination, destination},
+			                                              	          	{StompHeader.ContentType, "text/plain"}
+			                                              	          },
+			                                              	BodyText = text
+			                                              };
 			SendRawMessage(frame, false);
 		}
 
@@ -290,11 +289,9 @@ namespace Quokka.Stomp
 			CheckConnected();
 		}
 
-		private void CheckConnected() {
-
-			bool raiseConnectedChanged = false;
-
-			lock (_lockObject)
+		private void CheckConnected()
+		{
+			using (Lock.Lock())
 			{
 				if (!_isDisposed)
 				{
@@ -304,7 +301,7 @@ namespace Quokka.Stomp
 						{
 							_connected = false;
 							Log.Debug("Client is now disconnected from server");
-							raiseConnectedChanged = true;
+							Lock.AfterUnlock(() => OnConnectedChanged(EventArgs.Empty));
 						}
 						StopOutgoingHeartBeatTimer();
 						StopIncomingHeartBeatTimer();
@@ -318,7 +315,7 @@ namespace Quokka.Stomp
 							var passcode = Passcode ?? string.Empty;
 
 							// the client id provides some help with diagnostics by identifying the client process
-							var processName = Path.GetFileNameWithoutExtension(Process.GetCurrentProcess().MainModule.FileName) ;
+							var processName = Path.GetFileNameWithoutExtension(Process.GetCurrentProcess().MainModule.FileName);
 							var clientId = Environment.MachineName
 							               + "/" + processName
 							               + "/" + Process.GetCurrentProcess().Id;
@@ -326,17 +323,15 @@ namespace Quokka.Stomp
 							_sentHeartBeatValues = new HeartBeatValues(OutgoingHeartBeat, IncomingHeartBeat);
 
 							// time to send a CONNECT message
-							var frame = new StompFrame
-							            	{
-							            		Command = StompCommand.Connect,
-							            		Headers =
-							            			{
-							            				{StompHeader.Login, login},
-							            				{StompHeader.Passcode, passcode},
-														{StompHeader.HeartBeat, _sentHeartBeatValues.ToString()},
-														{StompHeader.NonStandard.ClientId, clientId}
-							            			}
-							            	};
+							var frame = new StompFrame {
+							                           	Command = StompCommand.Connect,
+							                           	Headers = {
+							                           	          	{StompHeader.Login, login},
+							                           	          	{StompHeader.Passcode, passcode},
+							                           	          	{StompHeader.HeartBeat, _sentHeartBeatValues.ToString()},
+							                           	          	{StompHeader.NonStandard.ClientId, clientId}
+							                           	          }
+							                           };
 
 							// a little enhancement, if we are re-connecting a previous session,
 							// include the session id so that we can resume
@@ -353,11 +348,6 @@ namespace Quokka.Stomp
 					}
 				}
 			}
-
-			if (raiseConnectedChanged)
-			{
-				OnConnectedChanged(EventArgs.Empty);
-			}
 		}
 
 		private static void TransportExceptionHandler(object sender, ExceptionEventArgs e)
@@ -372,22 +362,24 @@ namespace Quokka.Stomp
 
 		private void ProcessNextFrame()
 		{
-			var connectedChanged = false;
+			Log.Debug("BEGIN ProcessNextFrame");
 			StompSubscription subscription = null;
 			StompFrame frame;
 
 			for (;;)
 			{
-				lock (_lockObject)
+				using (Lock.Lock())
 				{
 					if (_transport == null)
 					{
+						Log.Debug("END ProcessNextFrame: _transport==null");
 						return;
 					}
 
 					frame = _transport.GetNextFrame();
 					if (frame == null)
 					{
+						Log.Debug("END ProcessNextFrame: fram==null");
 						return;
 					}
 
@@ -397,13 +389,14 @@ namespace Quokka.Stomp
 					if (frame.IsHeartBeat)
 					{
 						// received a heart beat frame -- all we want to do is restart the timer
+						Log.Debug("frame.IsHeartBeat");
 						continue;
 					}
 
 					switch (frame.Command)
 					{
 						case StompCommand.Connected:
-							connectedChanged = true;
+							Lock.AfterUnlock(() => OnConnectedChanged(EventArgs.Empty));
 							HandleConnected(frame);
 							break;
 						case StompCommand.Message:
@@ -421,11 +414,6 @@ namespace Quokka.Stomp
 					}
 				}
 
-				// Always raise the events without having a lock in place
-				if (connectedChanged)
-				{
-					OnConnectedChanged(EventArgs.Empty);
-				}
 				if (subscription != null)
 				{
 					subscription.ReceiveMessage(frame);
@@ -442,7 +430,7 @@ namespace Quokka.Stomp
 			Log.DebugFormat("Received {0} response, {1}={2}", frame.Command, StompHeader.Session, _sessionId);
 
 			var serverHeartBeatValues = new HeartBeatValues(frame.Headers[StompHeader.HeartBeat]);
-			_negotiatedHeartBeatValues= _sentHeartBeatValues.CombineWith(serverHeartBeatValues);
+			_negotiatedHeartBeatValues = _sentHeartBeatValues.CombineWith(serverHeartBeatValues);
 
 			StartIncomingHeartBeatTimer();
 			StartOutgoingHeartBeatTimer();
@@ -494,77 +482,77 @@ namespace Quokka.Stomp
 			}
 		}
 
-        private void HandleReceipt(StompFrame message)
-        {
-            var receiptIdText = message.Headers[StompHeader.ReceiptId];
-            if (Log.IsDebugEnabled)
-            {
-                Log.DebugFormat("{0} received, {1}={2}", message.Command, StompHeader.ReceiptId, receiptIdText);
-            }
-            if (receiptIdText == null)
-            {
-                // TODO: what do we do here, disconnect?
-                Log.ErrorFormat("Missing {0} header in {1} command", StompHeader.ReceiptId, message.Command);
-                _transport.Shutdown();
-                return;
-            }
-
-            long receiptId;
-            if (!long.TryParse(receiptIdText, out receiptId))
-            {
-                // TODO: what to we do here, disconnect?
-                Log.ErrorFormat("Invalid value for {0} header: {1}", StompHeader.ReceiptId, receiptIdText);
-                _transport.Shutdown();
-                return;
-            }
-
-            if (_pendingSendMessages.Count == 0)
-            {
-                Log.ErrorFormat("Received RECEIPT {0} but nothing asked for it", receiptId);
-                _transport.Shutdown();
-                return;
-            }
-
-            var sentMessage = _pendingSendMessages.Peek();
-            var idText = sentMessage.Headers[StompHeader.Receipt];
-            if (idText == null)
-            {
-                Log.ErrorFormat("Received RECEIPT {0} but nothing asked for it (and there is a message queued)",
-                               receiptId);
-                _transport.Shutdown();
-                return;
-            }
-
-            // the current implementation never sends more than one message requiring receipt without receiving a receipt
-            var id = long.Parse(sentMessage.Headers[StompHeader.Receipt]);
-            if (id != receiptId)
-            {
-                Log.ErrorFormat("Received RECEIPT {0} but expected RECEIPT {1}", id, receiptId);
-                _transport.Shutdown();
-            }
-
-            _pendingSendMessages.Dequeue();
-            _sendInProgress = false;
-
-            if (sentMessage.Command == StompCommand.Subscribe)
-            {
-                int subscriptionId = int.Parse(sentMessage.Headers[StompHeader.Id]);
-                StompSubscription subscription;
-                if (_subscriptions.TryGetValue(subscriptionId, out subscription))
-                {
-                    subscription.Confirm();
-                }
-            }
-
-            SendNextMessage();
-        }
-
-	    private void SendNextMessage()
+		private void HandleReceipt(StompFrame message)
 		{
-			while (!_sendInProgress 
-				&& _connected && 
-				_pendingSendMessages.Count > 0 
-				&& _transport != null)
+			var receiptIdText = message.Headers[StompHeader.ReceiptId];
+			if (Log.IsDebugEnabled)
+			{
+				Log.DebugFormat("{0} received, {1}={2}", message.Command, StompHeader.ReceiptId, receiptIdText);
+			}
+			if (receiptIdText == null)
+			{
+				// TODO: what do we do here, disconnect?
+				Log.ErrorFormat("Missing {0} header in {1} command", StompHeader.ReceiptId, message.Command);
+				_transport.Shutdown();
+				return;
+			}
+
+			long receiptId;
+			if (!long.TryParse(receiptIdText, out receiptId))
+			{
+				// TODO: what to we do here, disconnect?
+				Log.ErrorFormat("Invalid value for {0} header: {1}", StompHeader.ReceiptId, receiptIdText);
+				_transport.Shutdown();
+				return;
+			}
+
+			if (_pendingSendMessages.Count == 0)
+			{
+				Log.ErrorFormat("Received RECEIPT {0} but nothing asked for it", receiptId);
+				_transport.Shutdown();
+				return;
+			}
+
+			var sentMessage = _pendingSendMessages.Peek();
+			var idText = sentMessage.Headers[StompHeader.Receipt];
+			if (idText == null)
+			{
+				Log.ErrorFormat("Received RECEIPT {0} but nothing asked for it (and there is a message queued)",
+				                receiptId);
+				_transport.Shutdown();
+				return;
+			}
+
+			// the current implementation never sends more than one message requiring receipt without receiving a receipt
+			var id = long.Parse(sentMessage.Headers[StompHeader.Receipt]);
+			if (id != receiptId)
+			{
+				Log.ErrorFormat("Received RECEIPT {0} but expected RECEIPT {1}", id, receiptId);
+				_transport.Shutdown();
+			}
+
+			_pendingSendMessages.Dequeue();
+			_sendInProgress = false;
+
+			if (sentMessage.Command == StompCommand.Subscribe)
+			{
+				int subscriptionId = int.Parse(sentMessage.Headers[StompHeader.Id]);
+				StompSubscription subscription;
+				if (_subscriptions.TryGetValue(subscriptionId, out subscription))
+				{
+					subscription.Confirm();
+				}
+			}
+
+			SendNextMessage();
+		}
+
+		private void SendNextMessage()
+		{
+			while (!_sendInProgress
+			       && _connected &&
+			       _pendingSendMessages.Count > 0
+			       && _transport != null)
 			{
 				var frame = _pendingSendMessages.Peek();
 				try
@@ -594,7 +582,8 @@ namespace Quokka.Stomp
 					_sendInProgress = true;
 					if (Log.IsDebugEnabled)
 					{
-						Log.DebugFormat("{0} command sent: {1}={2}", frame.Command, StompHeader.Receipt, frame.Headers[StompHeader.Receipt]);
+						Log.DebugFormat("{0} command sent: {1}={2}", frame.Command, StompHeader.Receipt,
+						                frame.Headers[StompHeader.Receipt]);
 					}
 				}
 			}
@@ -619,7 +608,7 @@ namespace Quokka.Stomp
 
 		private void StartConnectTimer()
 		{
-			int milliseconds = (int)ConnectTimeout.TotalMilliseconds;
+			int milliseconds = (int) ConnectTimeout.TotalMilliseconds;
 			_connectTimer.Change(milliseconds, Timeout.Infinite);
 		}
 
@@ -656,7 +645,7 @@ namespace Quokka.Stomp
 
 		private void OutgoingHeartBeatTimerCallback(object state)
 		{
-			lock (_lockObject)
+			using (Lock.Lock())
 			{
 				if (!_isDisposed && Connected)
 				{
@@ -675,6 +664,60 @@ namespace Quokka.Stomp
 		{
 			Log.Error("Timeout waiting for " + StompCommand.Connected + " response from server");
 			DisconnectAndReconnect();
+		}
+	}
+
+	internal class LockObject
+	{
+		private int _count;
+		private List<Action> _actions = new List<Action>();
+		private readonly IDisposable _disposable;
+
+		public LockObject()
+		{
+			_disposable = new DisposableAction(Unlock);
+		}
+
+		public IDisposable Lock()
+		{
+			Monitor.Enter(this);
+			++_count;
+
+			return _disposable;
+		}
+
+		public void AfterUnlock(Action action)
+		{
+			if (action != null)
+			{
+				if (_actions == null)
+				{
+					_actions = new List<Action>();
+				}
+				_actions.Add(action);
+			}
+		}
+
+		private void Unlock()
+		{
+			List<Action> actions = null;
+			--_count;
+			if (_count == 0)
+			{
+				actions = _actions;
+				_actions = null;
+			}
+			Monitor.Exit(this);
+
+			if (actions == null)
+			{
+				return;
+			}
+
+			foreach (var action in actions)
+			{
+				action();
+			}
 		}
 	}
 }

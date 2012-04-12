@@ -155,6 +155,7 @@
     <Compile Include="UI\WebBrowsers\PluggableProtocol.cs" />
     <Compile Include="UI\WebBrowsers\ProtocolBase.cs" />
     <Compile Include="UI\WebBrowsers\ProtocolSupport.cs" />
+    <Compile Include="Util\DisposableAction.cs" />
     <Compile Include="Util\RegistryUtil.cs" />
     <Compile Include="WinForms\CommandLink.cs">
       <SubType>Component</SubType>
