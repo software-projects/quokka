@@ -1,3 +1,5 @@
+using System.Globalization;
+using Quokka.Diagnostics;
 using Quokka.Util;
 
 namespace Quokka.WinForms
@@ -52,27 +54,6 @@ namespace Quokka.WinForms
 			}
 		}
 
-		[Obsolete("Use RegistryUtil instead")]
-		public static string CompanyName
-		{
-			get { return RegistryUtil.CompanyName; }
-			set { RegistryUtil.CompanyName = value; }
-		}
-
-		[Obsolete("Use RegistryUtil instead")]
-		public static string ProductName
-		{
-			get { return RegistryUtil.ProductName; }
-			set { RegistryUtil.ProductName = value; }
-		}
-
-		[Obsolete("Use RegistryUtil instead")]
-		public static string MajorVersion
-		{
-			get { return RegistryUtil.MajorVersion; }
-			set { RegistryUtil.MajorVersion = value; }
-		}
-
 		/// <summary>
 		/// Deletes the entire display settings tree for all forms. Useful for testing.
 		/// </summary>
@@ -103,8 +84,8 @@ namespace Quokka.WinForms
                 throw new ArgumentNullException();
 
             _form = form;
-            _form.Load += new EventHandler(form_Load);
-            _form.FormClosed += new FormClosedEventHandler(form_FormClosed);
+            _form.Load += new EventHandler(HandleFormLoad);
+            _form.FormClosed += new FormClosedEventHandler(HandleFormClosed);
         }
 
 		public DisplaySettings(Form form) : this(form, form.Name) {}
@@ -123,12 +104,12 @@ namespace Quokka.WinForms
         #endregion
 
 
-        private void form_FormClosed(object sender, FormClosedEventArgs e) {
+        private void HandleFormClosed(object sender, FormClosedEventArgs e) {
             SavePosition(_form);
             Dispose();
         }
 
-        private void form_Load(object sender, EventArgs e) {
+        private void HandleFormLoad(object sender, EventArgs e) {
             LoadPosition(_form);
         }
 
@@ -212,7 +193,7 @@ namespace Quokka.WinForms
 
         public void SetInt(string valueName, int value) {
 			CheckDisposed();
-			SetString(valueName, value.ToString());
+        	SetString(valueName, value.ToString(CultureInfo.InvariantCulture));
         }
 
         public int GetInt(string valueName, int defaultValue) {
@@ -223,7 +204,7 @@ namespace Quokka.WinForms
             }
 
             int value;
-            if (!Int32.TryParse(s, out value)) {
+            if (!System.Int32.TryParse(s, out value)) {
             	value = defaultValue;
             }
             return value;
@@ -234,5 +215,95 @@ namespace Quokka.WinForms
 			CheckDisposed();
 			_key.DeleteValue(valueName, false);
 		}
+
+		public DisplaySetting<string> StringSetting(string name, string defaultValue)
+		{
+			return new DisplaySettingString(this, name, defaultValue);
+		} 
+
+		public DisplaySetting<int> Int32Setting(string name, int defaultValue)
+		{
+			return new DisplaySettingInt32(this, name, defaultValue);
+		}
+
+		public DisplaySetting<bool> BooleanSetting(string name, bool defaultValue)
+		{
+			return new DisplaySettingBoolean(this, name, defaultValue);
+		}
+
+		#region Subclasses of DisplaySetting<T>
+
+		private class DisplaySettingString : DisplaySetting<string>
+		{
+			public DisplaySettingString(DisplaySettings displaySettings, string name, string defaultValue) : base(displaySettings, name, defaultValue)
+			{
+			}
+
+			public override string GetValue()
+			{
+				return DisplaySettings.GetString(Name, DefaultValue);
+			}
+
+			public override void SetValue(string value)
+			{
+				DisplaySettings.SetString(Name, value);
+			}
+		}
+
+		private class DisplaySettingInt32 : DisplaySetting<int>
+		{
+			public DisplaySettingInt32(DisplaySettings displaySettings, string name, int defaultValue) : base(displaySettings, name, defaultValue)
+			{
+			}
+
+			public override int GetValue()
+			{
+				return DisplaySettings.GetInt(Name, DefaultValue);
+			}
+
+			public override void SetValue(int value)
+			{
+				DisplaySettings.SetInt(Name, DefaultValue);
+			}
+		}
+
+		private class DisplaySettingBoolean : DisplaySetting<bool>
+		{
+			public DisplaySettingBoolean(DisplaySettings displaySettings, string name, bool defaultValue) : base(displaySettings, name, defaultValue)
+			{
+			}
+
+			public override bool GetValue()
+			{
+				var intDefault = DefaultValue ? 1 : 0;
+				var intValue = DisplaySettings.GetInt(Name, intDefault);
+				return intValue != 0;
+			}
+
+			public override void SetValue(bool value)
+			{
+				var intValue = value ? 1 : 0;
+				DisplaySettings.SetInt(Name, intValue);
+			}
+		}
+
+		#endregion
+	}
+
+	public abstract class DisplaySetting<T>
+	{
+		protected readonly DisplaySettings DisplaySettings;
+		protected readonly string Name;
+		protected readonly T DefaultValue;
+
+		protected DisplaySetting(DisplaySettings displaySettings, string name, T defaultValue)
+		{
+			DisplaySettings = Verify.ArgumentNotNull(displaySettings, "displaySettings");
+			Name = Verify.ArgumentNotNull(name, "name");
+			DefaultValue = defaultValue;
+		}
+
+		public abstract T GetValue();
+		public abstract void SetValue(T value);
 	}
 }
