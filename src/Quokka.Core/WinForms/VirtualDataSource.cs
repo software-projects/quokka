@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using Quokka.Diagnostics;
 
 namespace Quokka.WinForms
 {
@@ -23,8 +24,14 @@ namespace Quokka.WinForms
 	/// 	Used as an in-memory store useful for a store against lists and data grids that use virtual mode.
 	/// </summary>
 	/// <typeparam name = "T">The view model object in the store</typeparam>
-	public abstract class VirtualDataSource<T> : VirtualDataSource<int, T> where T : class
+	public class VirtualDataSource<T> : VirtualDataSource<int, T> where T : class
 	{
+		/// <summary>
+		/// Default constructor only available for sub-classes, which should override the <see cref="GetId"/> method.
+		/// </summary>
+		protected VirtualDataSource() { }
+
+		public VirtualDataSource(Func<T, int> getIdCallback) : base(getIdCallback) {}
 	}
 
 	/// <summary>
@@ -32,7 +39,7 @@ namespace Quokka.WinForms
 	/// </summary>
 	/// <typeparam name = "TId">The type of unique identifier used for type <typeparamref name = "TItem" /></typeparam>
 	/// <typeparam name = "TItem">The view model object in the store</typeparam>
-	public abstract class VirtualDataSource<TId, TItem> : IVirtualDataSource<TItem> where TItem : class
+	public class VirtualDataSource<TId, TItem> : IVirtualDataSource<TItem> where TItem : class
 	{
 		private static readonly Predicate<TItem> DefaultFilter = (t => true);
 		private readonly Dictionary<TId, TItem> _dict = new Dictionary<TId, TItem>();
@@ -43,8 +50,19 @@ namespace Quokka.WinForms
 		private Predicate<TItem> _filter = DefaultFilter;
 		private bool _sortRequired = true;
 		private bool _buildListRequired = true;
+		private readonly Func<TItem, TId> _getIdCallback; 
 
 		public event EventHandler ListChanged;
+
+		/// <summary>
+		/// Default constructor only available for sub-classes, which should override the <see cref="GetId"/> method.
+		/// </summary>
+		protected VirtualDataSource() {}
+
+		public VirtualDataSource(Func<TItem, TId> getIdCallback)
+		{
+			_getIdCallback = Verify.ArgumentNotNull(getIdCallback, "getIdCallback");
+		}
 
 		public bool BuildListRequired
 		{
@@ -436,11 +454,19 @@ namespace Quokka.WinForms
 		}
 
 		/// <summary>
-		/// 	Implemented by the derived class. Provides a unique integer that describes the item.
+		/// 	Implemented by the derived class. Provides a unique identifier that describes the item.
 		/// </summary>
 		/// <param name = "obj">Item in the store, or about to be added to the store.</param>
 		/// <returns>Unique value across all items.</returns>
-		protected abstract TId GetId(TItem obj);
+		protected virtual TId GetId(TItem obj)
+		{
+			if (_getIdCallback == null)
+			{
+				throw new InvalidOperationException(
+					"Need to specify getIdCallback, or derive from this class and override GetId() method");
+			}
+			return _getIdCallback(obj);
+		}
 
 		private void BuildList()
 		{
