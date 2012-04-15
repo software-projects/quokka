@@ -263,7 +263,7 @@ namespace Quokka.WinForms
 
 			public override void SetValue(int value)
 			{
-				DisplaySettings.SetInt(Name, DefaultValue);
+				DisplaySettings.SetInt(Name, value);
 			}
 		}
 
