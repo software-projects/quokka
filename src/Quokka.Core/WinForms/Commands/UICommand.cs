@@ -19,6 +19,8 @@ namespace Quokka.WinForms.Commands
 
 		public event PropertyChangedEventHandler PropertyChanged;
 		public event EventHandler Execute;
+		public event CancelEventHandler Validating;
+		public event EventHandler Validated;
 
 		private string _text;
 		private bool _checked;
@@ -132,6 +134,21 @@ namespace Quokka.WinForms.Commands
 
 		public void PerformExecute()
 		{
+			if (Validating != null)
+			{
+				var cancelEventArgs = new CancelEventArgs();
+				PerformAction(() => Validating(this, cancelEventArgs));
+				if (cancelEventArgs.Cancel)
+				{
+					return;
+				}
+			}
+
+			if (Validated != null)
+			{
+				PerformAction(() => Validated(this, EventArgs.Empty));
+			}
+
 			if (Execute != null)
 			{
 				PerformAction(() => Execute(this, EventArgs.Empty));
