@@ -440,7 +440,7 @@ namespace Quokka.UI.Tasks
 
 		internal void Navigate(UINode nextNode)
 		{
-			_errorReport.Clear();
+			var errorReportedPriorToNavigation = _errorReport.HasErrorOccurred;
 			var fromNode = CurrentNode;
 
 			try
@@ -506,8 +506,9 @@ namespace Quokka.UI.Tasks
 				}
 			}
 
-			if (_errorReport.HasErrorOccurred)
+			if (_errorReport.HasErrorOccurred && !errorReportedPriorToNavigation)
 			{
+				// An error report was generated during this method.
 				ShowErrorView();
 			}
 			else

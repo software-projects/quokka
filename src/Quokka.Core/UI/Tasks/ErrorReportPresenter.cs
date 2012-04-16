@@ -19,13 +19,22 @@ namespace Quokka.UI.Tasks
 		{
 			View.ErrorReport = ErrorReport;
 
-			View.AbortCommand.Execute += (o, e) => AbortCommand.Navigate();
+			View.AbortCommand.Execute += (o, e) => {
+				ErrorReport.Clear();
+				AbortCommand.Navigate();
+			};
 			View.AbortCommand.Enabled = AbortCommand.CanNavigate;
 
-			View.CancelCommand.Execute += (o, e) => RetryCommand.Navigate();
+			View.CancelCommand.Execute += (o, e) => {
+				ErrorReport.Clear();
+				CancelCommand.Navigate();
+			};
 			View.CancelCommand.Enabled = CancelCommand.CanNavigate;
 
-			View.RetryCommand.Execute += (o, e) => RetryCommand.Navigate();
+			View.RetryCommand.Execute += (o, e) => {
+				ErrorReport.Clear();
+				RetryCommand.Navigate();
+			};
 			View.RetryCommand.Enabled = RetryCommand.CanNavigate;
 		}
 	}

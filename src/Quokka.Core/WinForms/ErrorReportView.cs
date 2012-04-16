@@ -25,6 +25,17 @@ namespace Quokka.WinForms
 
 		private void ViewLoad(object sender, EventArgs e)
 		{
+			UpdateView();
+		}
+
+		private void UpdateVisibility(Control control, IUICommand command)
+		{
+			control.Visible = command.Enabled;
+			buttonPanel.Visible = AbortCommand.Enabled || CancelCommand.Enabled || RetryCommand.Enabled;
+		}
+
+		private void UpdateView()
+		{
 			if (ErrorReport == null)
 			{
 				errorDetailTextBox.Text = "No error information available.";
@@ -39,19 +50,21 @@ namespace Quokka.WinForms
 			buttonPanel.Visible = AbortCommand.Enabled || CancelCommand.Enabled || RetryCommand.Enabled;
 		}
 
-		private void UpdateVisibility(Control control, IUICommand command)
-		{
-			control.Visible = command.Enabled;
-			buttonPanel.Visible = AbortCommand.Enabled || CancelCommand.Enabled || RetryCommand.Enabled;
-		}
-
-
 		public IUICommand AbortCommand { get; private set; }
 
 		public IUICommand CancelCommand { get; private set; }
 
 		public IUICommand RetryCommand { get; private set; }
 
-		public ErrorReport ErrorReport { get; set; }
+		private ErrorReport _errorReport;
+		public ErrorReport ErrorReport
+		{
+			get { return _errorReport; }
+			set
+			{
+				_errorReport = value;
+				UpdateView();
+			}
+		}
 	}
 }
