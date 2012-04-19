@@ -53,15 +53,27 @@ namespace Quokka.WinForms.Commands
 				_text = _control.Text;
 				_enabled = _control.Enabled;
 
-				var checkControl = ProxyFactory.CreateDuckProxy<ICheckControl>(control);
-				if (checkControl.IsCheckedSupported)
+				// We are getting NREs and it seems to be coming from this code (happens inside the VS2010 designer
+				// so it is difficult to debug). Try catching and ignoring error here to see if the problem in the
+				// designer goes away.
+				// TODO: come up with a better way to handle check controls, or find why this is throwing NREs.
+				try
 				{
-					_checkControl = checkControl;
-					if (checkControl.IsCheckedChangedSupported)
+					var checkControl = ProxyFactory.CreateDuckProxy<ICheckControl>(control);
+					if (checkControl.IsCheckedSupported)
 					{
-						_checkControl.CheckedChanged += ControlCheckedChanged;
+						_checkControl = checkControl;
+						if (checkControl.IsCheckedChangedSupported)
+						{
+							_checkControl.CheckedChanged += ControlCheckedChanged;
+						}
+						_checked = _checkControl.Checked;
 					}
-					_checked = _checkControl.Checked;
+				}
+				catch (NullReferenceException ex)
+				{
+					_checkControl = null;
+					_checked = false;
 				}
 			}
 		}
