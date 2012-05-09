@@ -383,6 +383,10 @@ namespace Quokka.UI.Tasks
 		internal void CreateNestedTask()
 		{
 			var task = (UITask) Container.Locator.GetInstance(NestedTaskType);
+			foreach (var taskInitialization in NodeBuilder.NestedTaskInitializations)
+			{
+				taskInitialization(task);
+			}
 			task.TaskComplete += NestedTaskComplete;
 			var viewDeck = GetViewDeck(createIfNecessary: true);
 			task.Start(viewDeck);
