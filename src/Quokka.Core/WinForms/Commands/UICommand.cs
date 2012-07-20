@@ -23,6 +23,11 @@ namespace Quokka.WinForms.Commands
 		public event CancelEventHandler Validating;
 		public event EventHandler Validated;
 
+		// property values when no control is supplied
+		private string _noControlText;
+		private bool _noControlEnabled;
+		private bool _noControlChecked;
+
 		static UICommand()
 		{
 			EnabledChangedEventArgs = new PropertyChangedEventArgs("Enabled");
@@ -30,37 +35,46 @@ namespace Quokka.WinForms.Commands
 			CheckChangedEventArgs = new PropertyChangedEventArgs("Checked");
 		}
 
-		public UICommand(Control control)
+		public UICommand(Control control = null)
 		{
-			if (control.InvokeRequired)
+			if (control == null)
 			{
-				throw new InvalidOperationException("UICommand needs to be created on the same thread that created the control");
-			} 
-			_synchronizationContext = SynchronizationContext.Current;
-			_control = Verify.ArgumentNotNull(control, "control");
-			_control.EnabledChanged += ControlEnabledChanged;
-			_control.TextChanged += ControlTextChanged;
-			_control.Click += ControlClick;
-
-			// We are getting NREs and it seems to be coming from this code (happens inside the VS2010 designer
-			// so it is difficult to debug). Try catching and ignoring error here to see if the problem in the
-			// designer goes away.
-			// TODO: come up with a better way to handle check controls, or find why this is throwing NREs.
-			try
+				_noControlText = string.Empty;
+				_noControlEnabled = false;
+				_noControlChecked = false;
+			}
+			else
 			{
-				var checkControl = ProxyFactory.CreateDuckProxy<ICheckControl>(control);
-				if (checkControl != null && checkControl.IsCheckedSupported)
+				if (control.InvokeRequired)
 				{
-					_checkControl = checkControl;
-					if (checkControl.IsCheckedChangedSupported)
+					throw new InvalidOperationException("UICommand needs to be created on the same thread that created the control");
+				}
+				_synchronizationContext = SynchronizationContext.Current;
+				_control = Verify.ArgumentNotNull(control, "control");
+				_control.EnabledChanged += ControlEnabledChanged;
+				_control.TextChanged += ControlTextChanged;
+				_control.Click += ControlClick;
+
+				// We are getting NREs and it seems to be coming from this code (happens inside the VS2010 designer
+				// so it is difficult to debug). Try catching and ignoring error here to see if the problem in the
+				// designer goes away.
+				// TODO: come up with a better way to handle check controls, or find why this is throwing NREs.
+				try
+				{
+					var checkControl = ProxyFactory.CreateDuckProxy<ICheckControl>(control);
+					if (checkControl != null && checkControl.IsCheckedSupported)
 					{
-						_checkControl.CheckedChanged += ControlCheckedChanged;
+						_checkControl = checkControl;
+						if (checkControl.IsCheckedChangedSupported)
+						{
+							_checkControl.CheckedChanged += ControlCheckedChanged;
+						}
 					}
 				}
-			}
-			catch (NullReferenceException)
-			{
-				_checkControl = null;
+				catch (NullReferenceException)
+				{
+					_checkControl = null;
+				}
 			}
 		}
 
@@ -70,20 +84,24 @@ namespace Quokka.WinForms.Commands
 			{
 				if (_checkControl == null)
 				{
-					return false;
+					return _noControlChecked;
 				}
 				return PerformFunction(() => _checkControl.Checked);
 			}
 
 			set
 			{
-				if (CanCheck)
+				if (_checkControl == null)
 				{
-					PerformAction(() => _checkControl.Checked = value);
+					if (_noControlChecked != value)
+					{
+						_noControlChecked = value;
+						OnPropertyChanged(CheckChangedEventArgs);
+					}
 				}
 				else
 				{
-					throw new NotSupportedException("Checked property is not supported");
+					PerformAction(() => _checkControl.Checked = value);
 				}
 			}
 		}
@@ -95,14 +113,57 @@ namespace Quokka.WinForms.Commands
 
 		public bool Enabled
 		{
-			get { return PerformFunction(() => _control.Enabled); }
-			set { PerformAction(() => _control.Enabled = value); }
+			get
+			{
+				if (_control == null)
+				{
+					return _noControlEnabled;
+				}
+
+				return PerformFunction(() => _control.Enabled);
+			}
+			set
+			{
+				if (_control == null)
+				{
+					if (_noControlEnabled != value)
+					{
+						_noControlEnabled = value;
+						OnPropertyChanged(EnabledChangedEventArgs);
+					}
+				}
+				else
+				{
+					PerformAction(() => _control.Enabled = value);
+				}
+			}
 		}
 
 		public string Text
 		{
-			get { return PerformFunction(() => _control.Text); }
-			set { PerformAction(() => _control.Text = value); }
+			get
+			{
+				if (_control == null)
+				{
+					return _noControlText;
+				}
+				return PerformFunction(() => _control.Text);
+			}
+			set
+			{
+				if (_control == null)
+				{
+					if (_noControlText != value)
+					{
+						_noControlText = value;
+						OnPropertyChanged(TextChangedEventArgs);
+					}
+				}
+				else
+				{
+					PerformAction(() => _control.Text = value);
+				}
+			}
 		}
 
 		public void PerformExecute()
@@ -159,19 +220,13 @@ namespace Quokka.WinForms.Commands
 
 		private void PerformAction(Action action)
 		{
-			if (_control.InvokeRequired)
+			if (_synchronizationContext == null)
 			{
-				// Using a synchronization context here because the
-				// Invoke method can fail if the control's underlying
-				// window handle has not been created yet. It is not
-				// possible to check for this, because accessing the
-				// Handle property on a cross-thread throws an exception,
-				// so synchronization context it is.
-				_synchronizationContext.Send(state => action(), null);
+				action();
 			}
 			else
 			{
-				action();
+				_synchronizationContext.Send(state => action(), null);
 			}
 		}
 
