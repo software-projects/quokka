@@ -117,6 +117,18 @@ namespace Quokka.UI.Tasks
 
 		public bool IsComplete { get; private set; }
 
+		/// <summary>
+		/// The current <see cref="UITask"/>. This value is non-null only if
+		/// a task is currently starting or navigating in the current call context.
+		/// </summary>
+		/// <remarks>
+		/// Used for implementing UITask-aware services, such as NHibernate session management.
+		/// </remarks>
+		public static UITask Current
+		{
+			get { return UICurrentTask.CurrentTask; }
+		}
+
 		#endregion
 
 		#region Internal properties
@@ -132,7 +144,7 @@ namespace Quokka.UI.Tasks
 
 		public void Start(IViewDeck viewDeck)
 		{
-			using (UITaskContext.SetCurrentTask(this))
+			using (UICurrentTask.SetCurrentTask(this))
 			{
 				Verify.ArgumentNotNull(viewDeck, "viewDeck");
 				if (IsRunning)
@@ -282,15 +294,10 @@ namespace Quokka.UI.Tasks
 			Navigate(null);
 		}
 
-		#endregion
-
-		#region Internal methods
-
 		/// <summary>
-		/// Used for storing arbitrary data against the the UITask. Used by <see cref="UITaskContext"/>,
-		/// but I'm not sure I want to make this a public interface yet.
+		/// Used for storing arbitrary data against the the UITask. Used by <see cref="UICurrentTask"/>
 		/// </summary>
-		internal void SetData(string slotName, object data)
+		public void SetData(string slotName, object data)
 		{
 			Verify.ArgumentNotNull(slotName, "slotName");
 			lock (_taskContext)
@@ -307,10 +314,9 @@ namespace Quokka.UI.Tasks
 		}
 
 		/// <summary>
-		/// Used for storing arbitrary data against the the UITask. Used by <see cref="UITaskContext"/>,
-		/// but I'm not sure I want to make this a public interface yet.
+		/// Used for storing arbitrary data against the the UITask. Used by <see cref="UICurrentTask"/>.
 		/// </summary>
-		internal object GetData(string slotName)
+		public object GetData(string slotName)
 		{
 			Verify.ArgumentNotNull(slotName, "slotName");
 			object result;
@@ -502,7 +508,7 @@ namespace Quokka.UI.Tasks
 
 		internal void Navigate(UINode nextNode)
 		{
-			using (UITaskContext.SetCurrentTask(this))
+			using (UICurrentTask.SetCurrentTask(this))
 			{
 				var errorReportedPriorToNavigation = _errorReport.HasErrorOccurred;
 				var fromNode = CurrentNode;

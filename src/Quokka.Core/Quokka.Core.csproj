@@ -145,7 +145,7 @@
     <Compile Include="UI\Binding\SortableBindingList.cs" />
     <Compile Include="UI\Tasks\ErrorReportPresenter.cs" />
     <Compile Include="UI\Tasks\IErrorReportView.cs" />
-    <Compile Include="UI\Tasks\UITaskContext.cs" />
+    <Compile Include="UI\Tasks\UICurrentTask.cs" />
     <Compile Include="UI\Tasks\UITaskEventArgs.cs" />
     <Compile Include="UI\WebBrowsers\ComSupport.cs" />
     <Compile Include="UI\WebBrowsers\EmbeddedResourceMap.cs" />

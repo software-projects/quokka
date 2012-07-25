@@ -9,7 +9,7 @@ namespace Quokka.UI.Tasks
 	/// This class is used to record the current <see cref="UITask"/>. 
 	/// It is for internal use by Quokka.
 	/// </summary>
-	public static class UITaskContext
+	internal static class UICurrentTask
 	{
 		private static readonly string Key = Guid.NewGuid().ToString();
 
@@ -24,7 +24,7 @@ namespace Quokka.UI.Tasks
 		/// <summary>
 		/// Returns the current <see cref="UITask"/>
 		/// </summary>
-		private static UITask CurrentTask
+		internal static UITask CurrentTask
 		{
 			get { return CallContext.GetData(Key) as UITask; }
 		}
@@ -37,41 +37,6 @@ namespace Quokka.UI.Tasks
 			{
 				CallContext.FreeNamedDataSlot(Key);
 			}
-		}
-
-		/// <summary>
-		/// Is there a <see cref="UITask"/> bound to the current context.
-		/// </summary>
-		public static bool HasTask
-		{
-			get { return CurrentTask != null; }
-		}
-
-		/// <summary>
-		/// Retrieve data stored in the current <see cref="UITask"/> context.
-		/// </summary>
-		public static object GetData(string key)
-		{
-			var task = CurrentTask;
-			if (task == null)
-			{
-				return null;
-			}
-			return task.GetData(key);
-		}
-
-		/// <summary>
-		/// Save data to the current <see cref="UITask"/> context.
-		/// </summary>
-		public static bool SetData(string key, object value)
-		{
-			var task = CurrentTask;
-			if (task == null)
-			{
-				return false;
-			}
-			task.SetData(key, value);
-			return true;
 		}
 	}
 }

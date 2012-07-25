@@ -2,6 +2,7 @@
 using Quokka.Castle;
 using Quokka.ServiceLocation;
 using Quokka.UI.Fakes;
+using Quokka.UI.Tasks;
 using Quokka.UI.TestApp1;
 
 // ReSharper disable InconsistentNaming
@@ -35,6 +36,18 @@ namespace Quokka.UI
 			var task = new TestTask1();
 			Assert.IsNotNull(task.Nodes);
 			Assert.AreEqual(3, task.Nodes.Count);
+		}
+
+		[Test]
+		public void Current_is_null_when_not_running()
+		{
+			var task = new TestTask1();
+			Assert.IsNull(UITask.Current);
+			task.Start(_viewDeck);
+			// not navigating, so should be null again
+			Assert.IsNull(UITask.Current);
+
+			// Presenter1 has a check that UITask.Current is non-null when it is initializing.
 		}
 
 		[Test]

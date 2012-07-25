@@ -62,7 +62,7 @@ namespace Quokka.UI.TestApp1
 
 		public override void InitializePresenter()
 		{
-			Assert.IsTrue(UITaskContext.HasTask);
+			Assert.IsNotNull(UITask.Current);
 			View.Button1Click += (sender, args) => Next.Navigate();
 		}
 	}
