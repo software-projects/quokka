@@ -1,4 +1,5 @@
 ﻿using System;
+using NUnit.Framework;
 using Quokka.UI.Tasks;
 
 namespace Quokka.UI.TestApp1
@@ -61,6 +62,7 @@ namespace Quokka.UI.TestApp1
 
 		public override void InitializePresenter()
 		{
+			Assert.IsTrue(UITaskContext.HasTask);
 			View.Button1Click += (sender, args) => Next.Navigate();
 		}
 	}
