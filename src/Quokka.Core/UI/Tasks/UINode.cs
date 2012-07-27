@@ -29,6 +29,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Castle.MicroKernel.Registration;
 using Castle.Windsor;
@@ -201,6 +202,40 @@ namespace Quokka.UI.Tasks
 			}
 
 			return _modalWindow;
+		}
+
+		private Dictionary<string, object> _nodeData;
+
+		public object GetData(string slotId)
+		{
+			Verify.ArgumentNotNull(slotId, "slotId");
+			object result = null;
+			if (_nodeData != null)
+			{
+				_nodeData.TryGetValue(slotId, out result);
+			}
+			return result;
+		}
+
+		public void SetData(string slotId, object value)
+		{
+			Verify.ArgumentNotNull(slotId, "slotId");
+			if (value == null)
+			{
+				if (_nodeData != null)
+				{
+					_nodeData.Remove(slotId);
+				}
+			}
+			else
+			{
+				if (_nodeData == null)
+				{
+					_nodeData = new Dictionary<string, object>();
+				}
+
+				_nodeData[slotId] = value;
+			}
 		}
 
 		private IModalWindow _modalWindow;
@@ -548,6 +583,7 @@ namespace Quokka.UI.Tasks
 				DisposeView();
 				DisposePresenter();
 				DisposeNestedTask();
+				DisposeNodeData();
 				DisposeContainer();
 			}
 		}
@@ -594,6 +630,29 @@ namespace Quokka.UI.Tasks
 				// The container will call the task's dispose method
 				Container.Locator.Release(NestedTask);
 				NestedTask = null;
+			}
+		}
+
+		private void DisposeNodeData()
+		{
+			if (_nodeData != null)
+			{
+				foreach (var value in _nodeData.Values)
+				{
+					var disposable = value as IDisposable;
+					if (disposable != null)
+					{
+						try
+						{
+							disposable.Dispose();
+						}
+						catch (Exception ex)
+						{
+							// TODO: should log a message here.
+						}
+					}
+				}
+				_nodeData = null;
 			}
 		}
 
