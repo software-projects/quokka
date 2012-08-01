@@ -10,6 +10,7 @@ using Quokka.Events.Internal;
 using Quokka.ServiceLocation;
 using Quokka.Services;
 using Quokka.Threading;
+using Quokka.UI;
 using Quokka.UI.Messages;
 using Quokka.UI.Regions;
 using Quokka.UI.Tasks;
@@ -158,6 +159,7 @@ namespace Quokka.WinForms.Startup
 
 		private void DoRun()
 		{
+			UIThread.SynchronizationContext = SynchronizationContext.Current;
 			ConfigureLogging();
 
 			ProgressMessage("Program started");

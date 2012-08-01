@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using Quokka.UI;
 
 namespace Quokka.Events.Internal
 {
@@ -21,14 +22,13 @@ namespace Quokka.Events.Internal
 
 		protected override void InvokeAction(Action<TPayload> action, TPayload payload)
 		{
-			SendOrPostCallback callback = delegate { action(payload); };
 			if (ThreadOption == ThreadOption.UIThread)
 			{
-				Event.EventBroker.UIThreadContext.Send(callback, null);
+				UIThread.Send(() => action(payload));
 			}
 			else
 			{
-				Event.EventBroker.UIThreadContext.Post(callback, null);
+				UIThread.Post(() => action(payload));
 			}
 		}
 	}

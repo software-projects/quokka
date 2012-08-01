@@ -103,6 +103,7 @@
     <Compile Include="Events\Internal\PublisherThreadSubscription.Generic.cs" />
     <Compile Include="Events\Internal\UIThreadSubscription.cs" />
     <Compile Include="Events\Internal\UIThreadSubscription.Generic.cs" />
+    <Compile Include="UI\UIThread.cs" />
     <Compile Include="Events\ReferenceOption.cs" />
     <Compile Include="Events\ThreadOption.cs" />
     <Compile Include="Modules\IModule.cs" />
