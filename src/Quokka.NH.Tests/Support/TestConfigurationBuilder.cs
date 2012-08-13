@@ -43,10 +43,10 @@ namespace Castle.Facilities.NH.Tests.Support
 			// Attempt to get the test database connection string from the environment.
 			// If not available use a default connection string. The teamcity agents
 			// have this environment variable set if necessary.
-			ConnectionString = System.Environment.GetEnvironmentVariable("C2_TEST_DATABASE");
+			ConnectionString = System.Environment.GetEnvironmentVariable("QUOKKA_TEST_DATABASE");
 			if (string.IsNullOrEmpty(ConnectionString))
 			{
-				ConnectionString = "Data Source=.;Initial Catalog=test;Integrated Security=SSPI";
+				ConnectionString = "Data Source=.;Initial Catalog=QuokkaTest;Integrated Security=SSPI";
 			}
 
 		}
