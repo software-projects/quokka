@@ -1,12 +1,12 @@
 <?xml version="1.0" ?>
-<project name="Quokka" default="publish" xmlns="http://nant.sf.net/release/0.91/nant.xsd">
+<project name="Quokka" default="test" xmlns="http://nant.sf.net/release/0.91/nant.xsd">
 	<property name="framework.dir" value="${framework::get-framework-directory(nant.settings.currentframework)}"/>
 
 	<property name="config" value="Release"/>
 
 	<property name="root.dir" value="${path::get-full-path('..')}" overwrite="false"/>
-	<property name="output.bin.dir" value="${root.dir}/bin" overwrite="false"/>
-	<property name="output.artifacts.dir" value="${root.dir}/artifacts" overwrite="false"/>
+	<property name="bin.dir" value="${root.dir}/bin/${config}" overwrite="false"/>
+	<property name="artifacts.dir" value="${root.dir}/artifacts" overwrite="false"/>
 	<property name="src.dir" value="${root.dir}/src" overwrite="false"/>
 	<property name="temp.dir" value="${root.dir}/temp" overwrite="false"/>
 
@@ -24,22 +24,22 @@
 		The version number is acquired from an environment variable BUILD_NUMBER, which is set
 		by the TeamCity build agent.
 	-->
-	
+
 	<property name="product.version" value="${environment::get-variable('BUILD_NUMBER')}" if="${environment::variable-exists('BUILD_NUMBER')}"/>
 	<property name="product.version" value="0.1.0.0" overwrite="false"/>
 	<echo message="product.version: ${product.version}"/>
 
-	<!-- parse the product.version for the major, minor, build and revision -->	
+	<!-- parse the product.version for the major, minor, build and revision -->
 	<property name="version.major" value="${version::get-major(version::parse(product.version))}"/>
 	<property name="version.minor" value="${version::get-minor(version::parse(product.version))}"/>
 	<property name="version.build" value="${version::get-build(version::parse(product.version))}"/>
 	<property name="version.revision" value="${version::get-revision(version::parse(product.version))}"/>
-	
+
 	<!-- full product version, always has 4 parts (major, minor, build, revision) -->
 	<property name="full.product.version" value="${version.major}.${version.minor}.${version.build}.${version.revision}"/>
 	<echo message="full.product.version: ${full.product.version}"/>
 	<property name="zip.file.name" value="Quokka-${full.product.version}.zip"/>
-	<property name="zip.file.path" value="${path::get-full-path(output.artifacts.dir)}\${zip.file.name}"/>
+	<property name="zip.file.path" value="${path::get-full-path(artifacts.dir)}\${zip.file.name}"/>
 
 	<!-- nuget repository details
 	     ======================== -->
@@ -51,10 +51,11 @@
 	<target name="clean">
 		<delete>
 			<fileset>
+				<include name="${bin.dir}/**"/>
 				<include name="${src.dir}/Quokka.*/bin/**"/>
 				<include name="${src.dir}/Quokka.*/obj/**"/>
 				<include name="${temp.dir}/**"/>
-				<include name="${output.artifacts.dir}/**"/>
+				<include name="${artifacts.dir}/**"/>
 				<include name="CommonAssemblyInfo.cs"/>
 			</fileset>
 		</delete>
@@ -73,8 +74,9 @@
 			<formatter property="build.day.hour" pattern="ddHH"/>
 			<formatter property="build.minute.second" pattern="mmss"/>
 		</tstamp>
+		<property name="copyright" value="Copyright (c) 2004-${build.year} John Jeffery. All rights reserved."/>
 	</target>
-	
+
 	<target name="CommonAssemblyInfo.cs" depends="timestamp">
 		<asminfo language="CSharp" output="${src.dir}/CommonAssemblyInfo.cs">
 			<imports>
@@ -86,7 +88,7 @@
 				<attribute type="AssemblyConfigurationAttribute" value="${config}"/>
 				<attribute type="AssemblyCompanyAttribute" value="Quokka.org"/>
 				<attribute type="AssemblyProductAttribute" value="Quokka"/>
-				<attribute type="AssemblyCopyrightAttribute" value="Copyright 2004-${build.year}. All Rights Reserved."/>
+				<attribute type="AssemblyCopyrightAttribute" value="${copyright}"/>
 			</attributes>
 		</asminfo>
 	</target>
@@ -95,23 +97,9 @@
 		<exec program="msbuild.exe" basedir="${msbuild.dir}">
 			<arg value="/property:Configuration=${config}"/>
 			<arg value="/property:FormalBuild=true"/>
+			<arg value="/verbosity:Minimal"/>
 			<arg file="${root.dir}/Quokka.sln"/>
 		</exec>
-
-		<copy todir="${output.bin.dir}">
-			<fileset basedir="${src.dir}/Quokka.Tests/bin/${config}">
-				<include name="*.dll"/>
-				<include name="*.pdb"/>
-				<include name="*.xml"/>
-			</fileset>
-		</copy>
-		<copy todir="${output.bin.dir}">
-			<fileset basedir="${src.dir}/Quokka.Krypton/bin/${config}">
-				<include name="Quokka.Krypton.dll"/>
-				<include name="Quokka.Krypton.pdb"/>
-				<include name="Quokka.Krypton.xml"/>
-			</fileset>
-		</copy>	
 	</target>
 
 	<target name="codesign.assemblies" depends="compile">
@@ -121,99 +109,72 @@
 			<arg value="${cert.subject.name}"/>
 			<arg value="/t"/>
 			<arg value="${timestamp.service.url}"/>
-			<arg file="${output.bin.dir}/Quokka.Core.dll"/>
-			<arg file="${output.bin.dir}/Quokka.Krypton.dll"/>
+			<arg file="${bin.dir}/Quokka.Core.dll"/>
+			<arg file="${bin.dir}/Quokka.Krypton.dll"/>
+			<arg file="${bin.dir}/Quokka.NH.dll"/>
 		</exec>
 	</target>
 
 	<target name="artifacts.directory" depends="init">
-		<mkdir dir="${output.artifacts.dir}"/>
+		<mkdir dir="${artifacts.dir}"/>
 	</target>
 
 	<target name="zipfile" depends="artifacts.directory,codesign.assemblies">
 		<zip zipfile="${zip.file.path}">
-		  <fileset basedir="${output.bin.dir}">
-			<include name="Quokka**.dll" />
-			<include name="Quokka**.pdb" />
-			<exclude name="*Tests*"/>
-		  </fileset>
+			<fileset basedir="${bin.dir}">
+				<include name="Quokka**.dll" />
+				<include name="Quokka**.pdb" />
+				<include name="Quokka**.xml"/>
+				<exclude name="*Tests*"/>
+			</fileset>
 		</zip>
 		<!-- tell team city that the artifacts are ready, even though the build has not finished yet -->
 		<echo message="##teamcity[publishArtifacts '${zip.file.path}']"/>
 	</target>
 
 	<target name="nuget" depends="artifacts.directory,codesign.assemblies">
-		<mkdir dir="${temp.dir}/nuget/Quokka.Core"/>
-		<copy file="${src.dir}/Quokka.Core/Quokka.Core.nuspec" todir="${temp.dir}/nuget/Quokka.Core"/>
-		<copy file="${root.dir}/license.txt" todir="${temp.dir}/nuget/Quokka.Core"/>
-		<mkdir dir="${temp.dir}/nuget/Quokka.Core/lib/net40-client"/>
-		<copy todir="${temp.dir}/nuget/Quokka.Core/lib/net40-client">
-			<fileset basedir="${output.bin.dir}">
-				<include name="Quokka.Core.dll"/>
-				<include name="Quokka.Core.pdb"/>
-				<include name="Quokka.Core.xml"/>
-			</fileset>
-		</copy>
-		<exec program="nuget.exe" basedir="${nuget.dir}">
-			<arg value="pack"/>
-			<arg file="${temp.dir}/nuget/Quokka.Core/Quokka.Core.nuspec"/>
-			<arg value="-BasePath"/>
-			<arg path="${temp.dir}/nuget/Quokka.Core/"/>
-			<arg value="-OutputDirectory"/>
-			<arg path="${output.artifacts.dir}"/>
-			<arg value="-Version"/>
-			<arg value="${product.version}"/>
-			<arg value="-Verbose"/>
-		</exec>
-		<!-- tell team city that the artifacts are ready, even though the build has not finished yet -->
-		<echo message="##teamcity[publishArtifacts '${output.artifacts.dir}/Quokka.Core.${product.version}.nupkg']"/>
-
-		<mkdir dir="${temp.dir}/nuget/Quokka.Krypton"/>
-		<copy file="${src.dir}/Quokka.Krypton/Quokka.Krypton.nuspec" todir="${temp.dir}/nuget/Quokka.Krypton"/>
-		<copy file="${root.dir}/license.txt" todir="${temp.dir}/nuget/Quokka.Krypton"/>
-		<mkdir dir="${temp.dir}/nuget/Quokka.Krypton/lib/net40-client"/>
-		<copy todir="${temp.dir}/nuget/Quokka.Krypton/lib/net40-client">
-			<fileset basedir="${output.bin.dir}">
-				<include name="Quokka.Krypton.dll"/>
-				<include name="Quokka.Krypton.pdb"/>
-				<include name="Quokka.Krypton.xml"/>
-			</fileset>
-		</copy>
-		<exec program="nuget.exe" basedir="${nuget.dir}">
-			<arg value="pack"/>
-			<arg file="${temp.dir}/nuget/Quokka.Krypton/Quokka.Krypton.nuspec"/>
-			<arg value="-BasePath"/>
-			<arg path="${temp.dir}/nuget/Quokka.Krypton/"/>
-			<arg value="-OutputDirectory"/>
-			<arg path="${output.artifacts.dir}"/>
-			<arg value="-Version"/>
-			<arg value="${product.version}"/>
-			<arg value="-Verbose"/>
-		</exec>
-		<!-- tell team city that the artifacts are ready, even though the build has not finished yet -->
-		<echo message="##teamcity[publishArtifacts '${output.artifacts.dir}/Quokka.Krypton.${product.version}.nupkg']"/>
+		<nant buildfile="nuget/nuget.build" target="pack">
+			<properties>
+				<property name="project.name" value="Quokka.Core"/>
+			</properties>
+		</nant>
+		<nant buildfile="nuget/nuget.build" target="pack">
+			<properties>
+				<property name="project.name" value="Quokka.Krypton"/>
+			</properties>
+		</nant>
+		<nant buildfile="nuget/nuget.build" target="pack">
+			<properties>
+				<property name="project.name" value="Quokka.NH"/>
+			</properties>
+		</nant>
 	</target>
 
 	<target name="artifacts" depends="zipfile,nuget"/>
-	
+
 	<target name="test" depends="artifacts">
 		<nunit2>
+			<formatter type="Xml" usefile="true" extension=".xml"/>
 			<formatter type="Plain"/>
-			<test assemblyname="${output.bin.dir}/Quokka.Tests.dll"/>
+			<test>
+				<assemblies>
+					<include name="${bin.dir}/Quokka*.Tests.dll"/>
+				</assemblies>
+			</test>
 		</nunit2>
 	</target>
 
 	<target name="publish" depends="test" if="${nuget.canpush}">
 		<exec program="nuget.exe" basedir="${nuget.dir}" if="${nuget.canpush}">
 			<arg value="push"/>
-			<arg file="${output.artifacts.dir}/Quokka.Core.${product.version}.nupkg"/>
+			<arg file="${artifacts.dir}/Quokka.Core.${product.version}.nupkg"/>
 			<arg value="-s"/>
 			<arg value="${nuget.server.url}"/>
 			<arg value="${nuget.apikey}"/>
 		</exec>
 		<exec program="nuget.exe" basedir="${nuget.dir}" if="${nuget.canpush}">
 			<arg value="push"/>
-			<arg file="${output.artifacts.dir}/Quokka.Krypton.${product.version}.nupkg"/>
+			<arg file="${artifacts.dir}/Quokka.Krypton.${product.version}.nupkg"/>
 			<arg value="-s"/>
 			<arg value="${nuget.server.url}"/>
 			<arg value="${nuget.apikey}"/>
