@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using Quokka.NH.Implementations;
 
 namespace Quokka.NH
 {
@@ -12,7 +13,7 @@ namespace Quokka.NH
 	/// </typeparam>
 	/// <typeparam name="TId">
 	/// Type of the identifier that uniquely identifies the entity. This is usually one of
-	/// <see cref="Int32"/>, <see cref="String"/> or perhaps <see cref="Guid"/>.
+	/// <see cref="Int32"/>, <see cref="Int64"/>, <see cref="String"/> or perhaps <see cref="Guid"/>.
 	/// </typeparam>
 	/// <remarks>
 	/// <para>

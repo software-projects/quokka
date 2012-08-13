@@ -1,5 +1,6 @@
 ﻿using System;
 using NUnit.Framework;
+using Quokka.NH.Implementations;
 
 // ReSharper disable InconsistentNaming
 namespace Quokka.NH
@@ -92,6 +93,7 @@ namespace Quokka.NH
 			Assert.AreEqual(true, helper.IsDefaultValue(null));
 			Assert.AreEqual(false, helper.IsDefaultValue("XX"));
 			Assert.AreEqual(true, helper.AreEqual(null, null));
+			Assert.AreEqual(false, helper.AreEqual(null, "X"));
 			Assert.AreEqual(true, helper.AreEqual("ABCD", "abcd"));
 			Assert.AreEqual(true, helper.AreEqual("ABCDE", "ABCDE"));
 			Assert.AreEqual(-1, helper.Compare(null, "AAA"));

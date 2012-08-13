@@ -39,7 +39,6 @@
 			<arg value="-Verbose"/>
 		</exec>
 		<!-- tell team city that the artifacts are ready, even though the build has not finished yet -->
-		<echo message="##teamcity[publishArtifacts '${artifacts.dir}/Quokka.Core.${product.version}.nupkg']"/>
+		<echo message="##teamcity[publishArtifacts '${artifacts.dir}/${project.name}.${product.version}.nupkg']"/>
 	</target>
-
 </project>

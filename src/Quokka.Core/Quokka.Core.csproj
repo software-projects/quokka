@@ -104,11 +104,16 @@
     <Compile Include="Events\Internal\PublisherThreadSubscription.Generic.cs" />
     <Compile Include="Events\Internal\UIThreadSubscription.cs" />
     <Compile Include="Events\Internal\UIThreadSubscription.Generic.cs" />
+    <Compile Include="NH\Implementations\IdHelperForClassType.cs" />
+    <Compile Include="NH\Implementations\IdHelperForInt32.cs" />
+    <Compile Include="NH\Implementations\IdHelperForInt64.cs" />
+    <Compile Include="NH\Implementations\IdHelperForValueType.cs" />
+    <Compile Include="NH\Implementations\IIdHelper.cs" />
     <Compile Include="UI\UIThread.cs" />
     <Compile Include="Events\ReferenceOption.cs" />
     <Compile Include="Events\ThreadOption.cs" />
     <Compile Include="Modules\IModule.cs" />
-    <Compile Include="NH\IdHelpers.cs" />
+    <Compile Include="NH\Implementations\IdHelperForString.cs" />
     <Compile Include="NH\NHEntity.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
