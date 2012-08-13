@@ -64,7 +64,7 @@ namespace Quokka.NH
 		}
 
 		[Test]
-		public void ClassTypeTests()
+		public void GuidTests()
 		{
 			var guid1 = Guid.NewGuid();
 			var guid2 = Guid.NewGuid();

@@ -1,7 +1,6 @@
 ﻿using System;
-using Quokka.NH.Implementations;
 
-namespace Quokka.NH 
+namespace Quokka.NH.Implementations 
 {
 	/// <summary>
 	/// Implementation of <see cref="IIdHelper{T}"/> that is optimised for <see cref="Int64"/>.
