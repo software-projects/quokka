@@ -119,13 +119,10 @@
 		<mkdir dir="${artifacts.dir}"/>
 	</target>
 
-	<target name="zipfile" depends="artifacts.directory,codesign.assemblies">
+	<target name="zipfile" depends="nuget">
 		<zip zipfile="${zip.file.path}">
-			<fileset basedir="${bin.dir}">
-				<include name="Quokka**.dll" />
-				<include name="Quokka**.pdb" />
-				<include name="Quokka**.xml"/>
-				<exclude name="*Tests*"/>
+			<fileset basedir="${temp.dir}/nuget">
+				<include name="**" />
 			</fileset>
 		</zip>
 		<!-- tell team city that the artifacts are ready, even though the build has not finished yet -->
