@@ -1,5 +1,8 @@
 ﻿#region License
 
+//  Notice: Some of the code in this file may have been adapted from code
+//  in the Castle Project.
+//
 // Copyright 2004-2012 Castle Project - http://www.castleproject.org/
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +22,7 @@
 using System;
 using System.Data;
 
-namespace Castle.Facilities.NH
+namespace Quokka.NH
 {
 	/// <summary>
 	/// Indicates that an NHibernate transaction is required 

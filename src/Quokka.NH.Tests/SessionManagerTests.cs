@@ -1,6 +1,6 @@
 ﻿#region License
 
-// Copyright 2004-2012 Castle Project - http://www.castleproject.org/
+// Copyright 2004-2012 John Jeffery
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,14 +17,14 @@
 #endregion
 
 using System;
-using Castle.Facilities.NH.Tests.Model;
-using Castle.Facilities.NH.Tests.Support;
 using Castle.MicroKernel.Registration;
 using Castle.Windsor;
 using NHibernate;
 using NUnit.Framework;
 using Quokka.NH.Implementations;
 using Quokka.NH.Startup;
+using Quokka.NH.Tests.Model;
+using Quokka.NH.Tests.Support;
 
 // ReSharper disable InconsistentNaming
 

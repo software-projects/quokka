@@ -1,6 +1,6 @@
 ﻿#region License
 
-// Copyright 2004-2012 Castle Project - http://www.castleproject.org/
+// Copyright 2004-2012 John Jeffery
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,15 +20,15 @@ using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq.Expressions;
-using Castle.Facilities.NH.Tests.Model;
 using Moq;
 using NHibernate;
 using NHibernate.Engine;
 using NHibernate.Type;
 using NUnit.Framework;
 using Quokka.NH.Implementations;
+using Quokka.NH.Tests.Model;
 
-namespace Castle.Facilities.NH.Tests
+namespace Quokka.NH.Tests
 {
 
 	// Lots of the following tests declare local variables that are not

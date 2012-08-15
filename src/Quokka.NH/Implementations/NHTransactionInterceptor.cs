@@ -24,7 +24,6 @@ using System.Data;
 using Castle.Core;
 using Castle.Core.Interceptor;
 using Castle.DynamicProxy;
-using Castle.Facilities.NH;
 using Castle.MicroKernel;
 using NHibernate;
 using Quokka.Diagnostics;

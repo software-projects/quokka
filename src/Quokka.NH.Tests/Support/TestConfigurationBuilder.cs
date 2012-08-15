@@ -1,6 +1,6 @@
 ﻿#region License
 
-// Copyright 2004-2012 Castle Project - http://www.castleproject.org/
+// Copyright 2004-2012 John Jeffery
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ using NHibernate.Tool.hbm2ddl;
 using Quokka.NH.Startup;
 using Environment = NHibernate.Cfg.Environment;
 
-namespace Castle.Facilities.NH.Tests.Support
+namespace Quokka.NH.Tests.Support
 {
 	public class TestConfigurationBuilder : IConfigurationBuilder, IDisposable
 	{

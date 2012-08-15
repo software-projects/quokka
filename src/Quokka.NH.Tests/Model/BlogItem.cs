@@ -1,6 +1,6 @@
 ﻿#region License
 
-// Copyright 2004-2012 Castle Project - http://www.castleproject.org/
+// Copyright 2004-2012 John Jeffery
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ using System;
 using NHibernate.Mapping.ByCode;
 using NHibernate.Mapping.ByCode.Conformist;
 
-namespace Castle.Facilities.NH.Tests.Model
+namespace Quokka.NH.Tests.Model
 {
 	public class BlogItem
 	{
