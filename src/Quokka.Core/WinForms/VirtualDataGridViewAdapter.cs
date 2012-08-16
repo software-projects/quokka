@@ -76,6 +76,11 @@ namespace Quokka.WinForms
 			// TODO: unsubscribe events
 		}
 
+		public bool IsDisposed
+		{
+			get { return _isDisposed; }
+		}
+
 		public T Current
 		{
 			get

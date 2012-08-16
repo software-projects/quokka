@@ -9,7 +9,34 @@ namespace Quokka.UI.WebBrowsers
 	public class EmbeddedResourceMap
 	{
 		private readonly HashSet<Assembly> _assemblies = new HashSet<Assembly>();
+
+#if NET40
 		private Lazy<Dictionary<string, EmbeddedResource>> _lazy;
+		private Dictionary<string, EmbeddedResource> GetDictionary()
+		{
+			return _lazy.Value;
+		} 
+		private void ClearDict()
+		{
+			_lazy = new Lazy<Dictionary<string, EmbeddedResource>>(ClearDict(), true);
+		}
+#endif
+
+#if NET35 
+		private Dictionary<string, EmbeddedResource> _dict;
+		private Dictionary<string, EmbeddedResource> GetDictionary() 
+		{
+			if (_dict == null) 
+			{
+				_dict = CreateDict();
+			}
+			return _dict;
+		}
+		private void ClearDict() 
+		{
+			_dict = null;
+		}
+#endif
 
 
 		public EmbeddedResourceMap()
@@ -35,16 +62,11 @@ namespace Quokka.UI.WebBrowsers
 			var fileName = pieces[pieces.Length - 1];
 
 			EmbeddedResource manifestInfo = null;
-			if (_lazy.Value.TryGetValue(fileName, out manifestInfo))
+			if (GetDictionary().TryGetValue(fileName, out manifestInfo))
 			{
 				return manifestInfo.Assembly.GetManifestResourceStream(manifestInfo.ResourceName);
 			}
 			return null;
-		}
-
-		private void ClearDict()
-		{
-			_lazy = new Lazy<Dictionary<string, EmbeddedResource>>(CreateDict, true);
 		}
 
 		private static readonly string[] Suffixes = new[]

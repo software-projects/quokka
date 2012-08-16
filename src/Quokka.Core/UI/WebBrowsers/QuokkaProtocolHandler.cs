@@ -59,7 +59,6 @@ namespace Quokka.UI.WebBrowsers
 						}
 					}
 
-
 					string StrResponseHeaders = string.Format("HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length:{0}\r\n\r\n", Stream.Length);
 					string strNewResponseHeaders;
 					Negotiate.OnResponse(200, StrResponseHeaders, strNewHeaders, out strNewResponseHeaders);
@@ -84,10 +83,10 @@ namespace Quokka.UI.WebBrowsers
 			pcchResult = 0;
 			return HRESULT.INET_E_DEFAULT_ACTION;
 
-			byte[] bytes = Encoding.Unicode.GetBytes(pwzUrl);
-			Marshal.Copy(bytes, 0, pwzResult, bytes.Length);
-			pcchResult = (uint)pwzUrl.Length;
-			return HRESULT.S_OK;
+//			byte[] bytes = Encoding.Unicode.GetBytes(pwzUrl);
+//			Marshal.Copy(bytes, 0, pwzResult, bytes.Length);
+//			pcchResult = (uint)pwzUrl.Length;
+//			return HRESULT.S_OK;
 		}
 
 		public uint CombineUrl(string pwzBaseUrl, string pwzRelativeUrl, uint dwCombineFlags, IntPtr pwzResult, uint cchResult, out uint pcchResult, uint dwReserved)

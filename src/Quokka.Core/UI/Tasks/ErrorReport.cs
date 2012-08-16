@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Text;
+using Quokka.Util;
 
 namespace Quokka.UI.Tasks
 {
@@ -135,7 +136,7 @@ namespace Quokka.UI.Tasks
 			sb.AppendLine();
 			sb.AppendFormat("Detail:  {0}", Detail);
 			sb.AppendLine();
-			if (!string.IsNullOrWhiteSpace(Source))
+			if (!StringUtils.IsNullOrWhiteSpace(Source))
 			{
 				sb.AppendFormat("Source: {0}", Source);
 				sb.AppendLine();

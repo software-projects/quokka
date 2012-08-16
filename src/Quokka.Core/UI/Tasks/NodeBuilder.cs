@@ -27,7 +27,6 @@ namespace Quokka.UI.Tasks
 		public IList<ConditionalNodeTransitionBuilder> NestedTaskTransitions = new List<ConditionalNodeTransitionBuilder>();
 
 		private bool _isValidated;
-		private int _nodeNumber;
 
 		public NodeBuilder(TaskBuilder task, string name, int index)
 		{

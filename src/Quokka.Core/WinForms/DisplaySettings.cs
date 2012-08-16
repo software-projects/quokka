@@ -353,7 +353,7 @@ namespace Quokka.WinForms
 			public override double GetValue()
 			{
 				var stringValue = DisplaySettings.GetString(Name, null);
-				if (string.IsNullOrWhiteSpace(stringValue))
+				if (StringUtils.IsNullOrWhiteSpace(stringValue))
 				{
 					return DefaultValue;
 				}
@@ -394,7 +394,7 @@ namespace Quokka.WinForms
 			public override float GetValue()
 			{
 				var stringValue = DisplaySettings.GetString(Name, null);
-				if (string.IsNullOrWhiteSpace(stringValue))
+				if (StringUtils.IsNullOrWhiteSpace(stringValue))
 				{
 					return DefaultValue;
 				}
@@ -435,7 +435,7 @@ namespace Quokka.WinForms
 			public override DateTime GetValue()
 			{
 				var stringValue = DisplaySettings.GetString(Name, null);
-				if (string.IsNullOrWhiteSpace(stringValue))
+				if (StringUtils.IsNullOrWhiteSpace(stringValue))
 				{
 					return DefaultValue;
 				}
