@@ -166,6 +166,8 @@
     <Compile Include="Util\DisposableAction.cs" />
     <Compile Include="Util\DisposableExtensions.cs" />
     <Compile Include="Util\RegistryUtil.cs" />
+    <Compile Include="Util\StreamExtensions.cs" />
+    <Compile Include="Util\StringUtils.cs" />
     <Compile Include="WinForms\CommandLink.cs">
       <SubType>Component</SubType>
     </Compile>

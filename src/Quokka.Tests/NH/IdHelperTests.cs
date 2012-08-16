@@ -106,6 +106,7 @@ namespace Quokka.NH
 			Assert.AreEqual(helper.GetHashCode("XXX"), helper.GetHashCode("xxx"));
 		}
 
+#if NET40
 		[Test]
 		public void Value_type_tuple()
 		{
@@ -131,5 +132,6 @@ namespace Quokka.NH
 			Assert.AreEqual(tuple1.GetHashCode(), helper.GetHashCode(tuple1));
 			Assert.AreEqual(0, helper.GetHashCode(null));
 		}
+#endif
 	}
 }

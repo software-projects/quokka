@@ -18,7 +18,7 @@ namespace Quokka.UI.WebBrowsers
 		} 
 		private void ClearDict()
 		{
-			_lazy = new Lazy<Dictionary<string, EmbeddedResource>>(ClearDict(), true);
+			_lazy = new Lazy<Dictionary<string, EmbeddedResource>>(CreateDict, true);
 		}
 #endif
 
