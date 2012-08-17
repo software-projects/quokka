@@ -32,7 +32,14 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("Quokka.NH")]
+#if NET40
+[assembly: AssemblyTitle("Quokka.NH (.NET 4.0)")]
+#endif
+
+#if NET35
+[assembly: AssemblyTitle("Quokka.NH (.NET 3.5)")]
+#endif
+
 [assembly: AssemblyCulture("")]
 
 [assembly: ComVisible(false)]

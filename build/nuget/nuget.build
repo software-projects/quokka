@@ -2,6 +2,8 @@
 <project name="nuget" default="pack" xmlns="http://nant.sf.net/release/0.91/nant.xsd">
 
 	<!--
+	bin.dir
+	bin35.dir
 	temp.dir
 	src.dir
 	artifacts.dir
@@ -18,6 +20,14 @@
 		<mkdir dir="${temp.dir}/nuget/${project.name}/lib/net40-client"/>
 		<copy todir="${temp.dir}/nuget/${project.name}/lib/net40-client">
 			<fileset basedir="${bin.dir}">
+				<include name="${project.name}.dll"/>
+				<include name="${project.name}.pdb"/>
+				<include name="${project.name}.xml"/>
+			</fileset>
+		</copy>
+		<mkdir dir="${temp.dir}/nuget/${project.name}/lib/net35"/>
+		<copy todir="${temp.dir}/nuget/${project.name}/lib/net35">
+			<fileset basedir="${bin35.dir}">
 				<include name="${project.name}.dll"/>
 				<include name="${project.name}.pdb"/>
 				<include name="${project.name}.xml"/>

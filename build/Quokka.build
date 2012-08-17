@@ -6,6 +6,7 @@
 
 	<property name="root.dir" value="${path::get-full-path('..')}" overwrite="false"/>
 	<property name="bin.dir" value="${root.dir}/bin/${config}" overwrite="false"/>
+	<property name="bin35.dir" value="${root.dir}/bin/${config}.Net35" overwrite="false"/>
 	<property name="artifacts.dir" value="${root.dir}/artifacts" overwrite="false"/>
 	<property name="src.dir" value="${root.dir}/src" overwrite="false"/>
 	<property name="temp.dir" value="${root.dir}/temp" overwrite="false"/>
@@ -52,6 +53,7 @@
 		<delete>
 			<fileset>
 				<include name="${bin.dir}/**"/>
+				<include name="${bin35.dir}/**"/>
 				<include name="${src.dir}/Quokka.*/bin/**"/>
 				<include name="${src.dir}/Quokka.*/obj/**"/>
 				<include name="${temp.dir}/**"/>
@@ -93,13 +95,34 @@
 		</asminfo>
 	</target>
 
-	<target name="compile" depends="CommonAssemblyInfo.cs">
+	<target name="compile.40" depends="CommonAssemblyInfo.cs">
 		<exec program="msbuild.exe" basedir="${msbuild.dir}">
 			<arg value="/property:Configuration=${config}"/>
 			<arg value="/property:FormalBuild=true"/>
 			<arg value="/verbosity:Minimal"/>
 			<arg file="${root.dir}/Quokka.sln"/>
 		</exec>
+	</target>
+
+	<target name="convert.35" depends="init">
+		<!-- copies solution file and project files and converts to .NET 3.5 -->
+		<exec program="vproj.exe" basedir="${tools.dir}/vproj">
+			<arg value="--project"/>
+			<arg file="${root.dir}/Quokka.sln"/>
+		</exec>
+	</target>
+
+	<target name="compile.35" depends="convert.35,CommonAssemblyInfo.cs">
+		<exec program="msbuild.exe" basedir="${msbuild.dir}">
+			<arg value="/property:Configuration=${config}"/>
+			<arg value="/property:FormalBuild=true"/>
+			<arg value="/verbosity:Minimal"/>
+			<arg file="${root.dir}/Quokka.Net35.sln"/>
+		</exec>
+	</target>
+
+	<target name="compile" depends="compile.40,compile.35">
+		
 	</target>
 
 	<target name="codesign.assemblies" depends="compile">
@@ -112,6 +135,9 @@
 			<arg file="${bin.dir}/Quokka.Core.dll"/>
 			<arg file="${bin.dir}/Quokka.Krypton.dll"/>
 			<arg file="${bin.dir}/Quokka.NH.dll"/>
+			<arg file="${bin35.dir}/Quokka.Core.dll"/>
+			<arg file="${bin35.dir}/Quokka.Krypton.dll"/>
+			<arg file="${bin35.dir}/Quokka.NH.dll"/>
 		</exec>
 	</target>
 
@@ -156,6 +182,7 @@
 			<test>
 				<assemblies>
 					<include name="${bin.dir}/Quokka*.Tests.dll"/>
+					<include name="${bin35.dir}/Quokka*.Tests.dll"/>
 				</assemblies>
 			</test>
 		</nunit2>
