@@ -49,7 +49,7 @@ namespace Quokka.WinForms
 	{
 		private readonly Control _control;
 		private int _transitionReferenceCount;
-		private readonly HashSet<UITask> _currentUITasks = new HashSet<UITask>();
+		private readonly HashSet<IUITask> _currentUITasks = new HashSet<IUITask>();
 		protected Control CurrentVisibleView;
 		protected readonly List<Control> VisibleViews = new List<Control>();
 		private readonly HashSet<Control> _viewControls = new HashSet<Control>();
@@ -97,7 +97,7 @@ namespace Quokka.WinForms
 
 		public event EventHandler<ViewClosedEventArgs> ViewClosed;
 
-		public virtual IViewTransition BeginTransition(UITask task)
+		public virtual IViewTransition BeginTransition(IUITask task)
 		{
 			if (task != null)
 			{
@@ -115,7 +115,7 @@ namespace Quokka.WinForms
 
 		private void TaskCompleteHandler(object sender, EventArgs e)
 		{
-			var task = sender as UITask;
+			var task = sender as IUITask;
 			if (task != null)
 			{
 				task.TaskComplete -= TaskCompleteHandler;
@@ -281,7 +281,7 @@ namespace Quokka.WinForms
 
 		#endregion
 
-		protected virtual void OnTaskStarted(UITask task)
+		protected virtual void OnTaskStarted(IUITask task)
 		{
 			if (TaskStarted != null)
 			{
@@ -305,7 +305,7 @@ namespace Quokka.WinForms
 			}
 		}
 
-		protected virtual void TryEndTask(UITask task)
+		protected virtual void TryEndTask(IUITask task)
 		{
 			if (task != null && task.IsRunning)
 			{
@@ -345,7 +345,7 @@ namespace Quokka.WinForms
 					// which will cause them to remove themselves from the CurrentTasks
 					// collection. Because that collection is being modified, we cannot use
 					// an enumerator on it.
-					var tasks = new List<UITask>(_currentUITasks);
+					var tasks = new List<IUITask>(_currentUITasks);
 					foreach (var task in tasks)
 					{
 						TryEndTask(task);

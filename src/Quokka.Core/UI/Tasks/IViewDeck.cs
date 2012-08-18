@@ -62,7 +62,7 @@ namespace Quokka.UI.Tasks
 		///		}
 		///	</code>
 		///</remarks>
-		IViewTransition BeginTransition(UITask task);
+		IViewTransition BeginTransition(IUITask task);
 
 		/// <summary>
 		/// 	Creates a <see cref = "IModalWindow" /> object, which can be used to host

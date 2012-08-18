@@ -7,9 +7,9 @@ namespace Quokka.UI.Tasks
 	/// </summary>
 	public class UITaskEventArgs : EventArgs
 	{
-		public UITask Task { get; private set; }
+		public IUITask Task { get; private set; }
 
-		public UITaskEventArgs(UITask task)
+		public UITaskEventArgs(IUITask task)
 		{
 			Task = task;
 		}
