@@ -44,6 +44,8 @@ namespace Quokka.Stomp.Transport
 				DisposeUtils.DisposeOf(ref _listenSocket);
 				DisposeUtils.DisposeOf(ref _timer);
 				_isDisposed = true;
+				ClientConnected = null;
+				ListenException = null;
 			}
 		}
 
