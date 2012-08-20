@@ -104,6 +104,7 @@
     <Compile Include="Events\Internal\PublisherThreadSubscription.Generic.cs" />
     <Compile Include="Events\Internal\UIThreadSubscription.cs" />
     <Compile Include="Events\Internal\UIThreadSubscription.Generic.cs" />
+    <Compile Include="INotifyDisposed.cs" />
     <Compile Include="NH\Implementations\IdHelperForClassType.cs" />
     <Compile Include="NH\Implementations\IdHelperForInt32.cs" />
     <Compile Include="NH\Implementations\IdHelperForInt64.cs" />

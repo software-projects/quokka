@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using Common.Logging;
 using Quokka.Diagnostics;
 
 namespace Quokka.Util
@@ -26,7 +27,17 @@ namespace Quokka.Util
 			{
 				return;
 			}
+			Verify.ArgumentNotNull(component, "component");
+			component.Disposed += (sender, args) => DisposeOf(disposable);
+		}
 
+		public static void DisposeWith(this IDisposable disposable, INotifyDisposed component)
+		{
+			if (disposable == null)
+			{
+				return;
+			}
+			Verify.ArgumentNotNull(component, "component");
 			component.Disposed += (sender, args) => DisposeOf(disposable);
 		}
 
@@ -39,14 +50,14 @@ namespace Quokka.Util
 			catch (ObjectDisposedException ex)
 			{
 				// not supposed to happen, but sometimes does
-				var logger = LoggerFactory.GetCurrentClassLogger();
+				var logger = LogManager.GetCurrentClassLogger();
 				var msg = string.Format("Object of type {0} raised ObjectDisposedException during disposal",
 				                        disposable.GetType());
 				logger.Warn(msg, ex);
 			}
 			catch (Exception ex)
 			{
-				var logger = LoggerFactory.GetCurrentClassLogger();
+				var logger = LogManager.GetCurrentClassLogger();
 				var msg = string.Format("Object of type {0} raised an exception during disposal: {1}",
 				                        disposable.GetType(),
 				                        ex.Message);

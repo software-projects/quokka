@@ -123,6 +123,7 @@
     <Compile Include="UI\TestApp2\TestApp2.cs" />
     <Compile Include="UI\TestApp3\TestApp3.cs" />
     <Compile Include="UI\UITaskTests.cs" />
+    <Compile Include="Util\DisposableExtensionsTests.cs" />
     <Compile Include="Util\RegistryUtilTests.cs" />
     <Compile Include="WinForms\Commands\UICommandTests.cs" />
   </ItemGroup>
