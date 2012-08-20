@@ -94,6 +94,8 @@ namespace Quokka.Stomp
 					}
 				}
 			}
+			MessageArrived = null;
+			StateChanged = null;
 		}
 
 		internal void ReceiveMessage(StompFrame message)

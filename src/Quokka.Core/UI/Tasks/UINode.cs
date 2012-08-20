@@ -627,6 +627,7 @@ namespace Quokka.UI.Tasks
 				{
 					NestedTask.EndTask();
 				}
+
 				// The container will call the task's dispose method
 				Container.Locator.Release(NestedTask);
 				NestedTask = null;
@@ -646,7 +647,7 @@ namespace Quokka.UI.Tasks
 						{
 							disposable.Dispose();
 						}
-						catch (Exception ex)
+						catch (Exception)
 						{
 							// TODO: should log a message here.
 						}

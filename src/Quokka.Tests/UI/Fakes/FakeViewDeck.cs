@@ -33,7 +33,7 @@ namespace Quokka.UI.Fakes
 		public void BeginTask(object task)
 		{
 			Assert.IsNotNull(task);
-			Assert.IsInstanceOfType(typeof(IUITask), task);
+			Assert.IsInstanceOf<IUITask>(task);
 			var uitask = (IUITask) task;
 			_tasks.Add(uitask);
 		}
@@ -42,7 +42,7 @@ namespace Quokka.UI.Fakes
 		{
 			Assert.IsNotNull(task);
 			Assert.IsNotNull(task);
-			Assert.IsInstanceOfType(typeof(IUITask), task);
+			Assert.IsInstanceOf<IUITask>(task);
 			var uitask = (IUITask)task;
 			Assert.IsTrue(_tasks.Contains(uitask));
 			_tasks.Remove(uitask);

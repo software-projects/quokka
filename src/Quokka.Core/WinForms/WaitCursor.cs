@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Windows.Forms;
+using Quokka.Events;
 
 namespace Quokka.WinForms
 {
@@ -26,13 +27,17 @@ namespace Quokka.WinForms
 	internal static class WaitCursor
 	{
 		private static readonly IDisposable restoreCursor = new RestoreCursor();
-		private static int referenceCount;
+		private static int _referenceCount;
+
+		public static readonly Event WaitCursorNowHidden = new Event();
+		public static readonly Event WaitCursorNowShowing = new Event();
 
 		public static IDisposable Show()
 		{
-			if (Interlocked.Increment(ref referenceCount) == 1)
+			if (Interlocked.Increment(ref _referenceCount) == 1)
 			{
 				Cursor.Current = Cursors.WaitCursor;
+				WaitCursorNowShowing.Publish();
 			}
 			return restoreCursor;
 		}
@@ -41,9 +46,10 @@ namespace Quokka.WinForms
 		{
 			public void Dispose()
 			{
-				if (Interlocked.Decrement(ref referenceCount) == 0)
+				if (Interlocked.Decrement(ref _referenceCount) == 0)
 				{
 					Cursor.Current = Cursors.Default;
+					WaitCursorNowHidden.Publish();
 				}
 			}
 		}

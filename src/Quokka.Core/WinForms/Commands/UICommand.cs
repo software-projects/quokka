@@ -9,7 +9,7 @@ using Quokka.WinForms.Internal;
 
 namespace Quokka.WinForms.Commands
 {
-	public class UICommand : IUICommand, INotifyPropertyChanged
+	public class UICommand : IUICommand, INotifyPropertyChanged, INotifyDisposed
 	{
 		private readonly Control _control;
 		private readonly ICheckControl _checkControl;
@@ -22,6 +22,7 @@ namespace Quokka.WinForms.Commands
 		public event EventHandler Execute;
 		public event CancelEventHandler Validating;
 		public event EventHandler Validated;
+		public event EventHandler Disposed;
 
 		// property values when no control is supplied
 		private string _noControlText;
@@ -54,6 +55,7 @@ namespace Quokka.WinForms.Commands
 				_control.EnabledChanged += ControlEnabledChanged;
 				_control.TextChanged += ControlTextChanged;
 				_control.Click += ControlClick;
+				_control.Disposed += (sender, args) => Dispose();
 
 				// We are getting NREs and it seems to be coming from this code (happens inside the VS2010 designer
 				// so it is difficult to debug). Try catching and ignoring error here to see if the problem in the
@@ -75,6 +77,21 @@ namespace Quokka.WinForms.Commands
 				{
 					_checkControl = null;
 				}
+			}
+		}
+
+		public void Dispose()
+		{
+			Execute = null;
+			Validated = null;
+			Validating = null;
+
+			var disposed = Disposed;
+			Disposed = null;
+
+			if (disposed != null)
+			{
+				disposed(this, EventArgs.Empty);
 			}
 		}
 

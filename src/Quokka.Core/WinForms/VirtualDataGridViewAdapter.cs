@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using Quokka.Diagnostics;
+using Quokka.Events;
 
 namespace Quokka.WinForms
 {
@@ -21,6 +22,7 @@ namespace Quokka.WinForms
 		private Comparison<T> _sortComparison;
 		private bool _refreshPending;
 		private ColumnInfo _checkColumn;
+		private IEventSubscription _waitCursorNowSubscription;
 
 		public event EventHandler ListChanged;
 
@@ -61,6 +63,9 @@ namespace Quokka.WinForms
 			DataGridView.ColumnWidthChanged += DataGridView_ColumnWidthChanged;
 			DataGridView.HandleCreated += DataGridView_HandleCreated;
 
+			_waitCursorNowSubscription = WaitCursor.WaitCursorNowHidden.Subscribe(HandleWaitCursorHidden, ThreadOption.UIThread);
+
+			DataGridView.Disposed += (sender, args) => Dispose();
 			if (_sortComparison != null)
 			{
 				DataSource.SetComparer(_sortComparison);
@@ -73,7 +78,12 @@ namespace Quokka.WinForms
 		public void Dispose()
 		{
 			_isDisposed = true;
-			// TODO: unsubscribe events
+			if (_waitCursorNowSubscription != null)
+			{
+				_waitCursorNowSubscription.Dispose();
+				_waitCursorNowSubscription = null;
+			}
+			ListChanged = null;
 		}
 
 		public bool IsDisposed
@@ -536,6 +546,17 @@ namespace Quokka.WinForms
 			// This callback is necessary to kick off the redraw process in the event
 			// that the store is populated with data prior to the view being loaded.
 			RefreshRequired();
+		}
+
+		// Gets around a known limitation of the DataGridView, where it can get stuck with a wait cursor.
+		private void HandleWaitCursorHidden()
+		{
+			if (DataGridView != null && !DataGridView.IsDisposed)
+			{
+				Control parent = DataGridView.Parent;
+				if (parent != null && !parent.IsDisposed)
+					DataGridView.Cursor = parent.Cursor;
+			}
 		}
 
 		private ColumnInfo GetColumnInfo(int columnIndex)

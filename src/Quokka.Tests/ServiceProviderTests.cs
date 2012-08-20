@@ -196,7 +196,10 @@ namespace Quokka
             Assert.IsNull(parentContainer.GetService(typeof(IInterface1)));
         }
 
-        [Test]
+// suppress obsolete warning
+#pragma warning disable 612,618
+
+		[Test]
         public void CustomAddService() {
             ServiceContainer container = new ServiceContainer();
 
@@ -219,14 +222,16 @@ namespace Quokka
             Assert.AreSame(i2, i2a);
         }
 
-        [Test]
+// suppress warning about obsolete
+#pragma warning disable 612,618
+
+		[Test]
         public void NoSuitableConstructor() {
             ServiceContainer container = new ServiceContainer();
 
             // this should throw an exception, because there is no suitable exception for Class3a
-#pragma warning disable 612,618
+
 			Assert.Throws<ArgumentException>(() => ServiceContainerUtil.AddService(container, typeof(IInterface3), typeof(Class3a)));
-#pragma warning restore 612,618
         }
 
         [Test]
