@@ -173,7 +173,6 @@
     <Folder Include="Collections\" />
     <Folder Include="DomainModel\" />
     <Folder Include="EnumTypes\" />
-    <Folder Include="Obsolete\Uip\MockApp2\" />
     <Folder Include="PresentationModel\" />
     <Folder Include="Uip\Fakes\" />
     <Folder Include="Uip\MockApp2\" />

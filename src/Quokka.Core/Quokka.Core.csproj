@@ -121,6 +121,7 @@
     <Compile Include="Obsolete\Uip\UipTransition.cs" />
     <Compile Include="Obsolete\Uip\UipUtil.cs" />
     <Compile Include="Obsolete\Uip\UipViewEventArgs.cs" />
+    <Compile Include="Obsolete\Uip\UipViewManager.cs" />
     <Compile Include="UI\UIThread.cs" />
     <Compile Include="Events\ReferenceOption.cs" />
     <Compile Include="Events\ThreadOption.cs" />

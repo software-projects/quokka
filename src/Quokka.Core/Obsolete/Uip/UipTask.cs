@@ -301,6 +301,9 @@ namespace Quokka.Uip
 			_viewManager = viewManager;
 			_serviceContainer.RegisterInstance(_viewManager);
 
+			// For backwards compatible UipQuestion calls.
+			_serviceContainer.RegisterType<IUipViewManager, UipViewManager>(ServiceLifecycle.Singleton);
+
 			// Register the nested interfaces one time only. Wait until the first run
 			// to do this, as the controller and view types are not available in the constructor.
 			if (!_taskInitialized)
