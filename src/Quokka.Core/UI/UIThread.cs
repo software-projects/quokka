@@ -19,6 +19,14 @@ namespace Quokka.UI
 		/// </remarks>
 		public static SynchronizationContext SynchronizationContext { get; set; }
 
+		static UIThread()
+		{
+			// Start off with the current thread's synchronization context.
+			// The calling program should initialize this with the sync context
+			// of the UI thread.
+			SynchronizationContext = SynchronizationContext.Current ?? new SynchronizationContext();
+		}
+
 		/// <summary>
 		/// Perform an action on the UI thread synchronously.
 		/// </summary>
