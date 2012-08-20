@@ -85,6 +85,7 @@ namespace Quokka.Sprocket
 		void IDisposable.Dispose()
 		{
 			Close();
+			ConnectedChanged = null;
 		}
 
 		public SynchronizationContext SynchronizationContext { get; set; }

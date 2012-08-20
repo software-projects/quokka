@@ -44,6 +44,8 @@ namespace Quokka.Stomp.Internal
 			{
 				// Does nothing at present. Would be useful if the queues were persisted.
 				_isDisposed = true;
+				MessageReceived = null;
+				MessagePublished = null;
 			}
 		}
 

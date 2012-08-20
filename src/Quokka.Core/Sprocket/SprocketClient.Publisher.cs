@@ -22,7 +22,7 @@ namespace Quokka.Sprocket
 
 			public void Dispose()
 			{
-				
+				SubscribedChanged = null;
 			}
 
 			public ISprocket Sprocket

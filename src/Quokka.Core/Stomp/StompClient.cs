@@ -104,6 +104,14 @@ namespace Quokka.Stomp
 					_connectTimer.Dispose();
 					_connected = false;
 					_waitingForConnectedFrame = false;
+					foreach (var pair in _subscriptions)
+					{
+						var subscription = pair.Value;
+						subscription.StateChanged -= SubscriptionStateChanged;
+						subscription.Dispose();
+					}
+					_subscriptions.Clear();
+					ConnectedChanged = null;
 				}
 			}
 		}
