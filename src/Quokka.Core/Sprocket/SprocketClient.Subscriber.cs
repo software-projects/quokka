@@ -33,6 +33,7 @@ namespace Quokka.Sprocket
 			{
 				_isDisposed = true;
 				_subscription.Dispose();
+				_action = null;
 			}
 
 			public Type SubscriptionType
