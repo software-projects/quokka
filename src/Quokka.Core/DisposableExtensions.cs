@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using Common.Logging;
 using Quokka.Diagnostics;
 
 namespace Quokka
@@ -50,14 +49,14 @@ namespace Quokka
 			catch (ObjectDisposedException ex)
 			{
 				// not supposed to happen, but sometimes does
-				var logger = LogManager.GetCurrentClassLogger();
+				var logger = LoggerFactory.GetCurrentClassLogger();
 				var msg = string.Format("Object of type {0} raised ObjectDisposedException during disposal",
 				                        disposable.GetType());
 				logger.Warn(msg, ex);
 			}
 			catch (Exception ex)
 			{
-				var logger = LogManager.GetCurrentClassLogger();
+				var logger = LoggerFactory.GetCurrentClassLogger();
 				var msg = string.Format("Object of type {0} raised an exception during disposal: {1}",
 				                        disposable.GetType(),
 				                        ex.Message);
