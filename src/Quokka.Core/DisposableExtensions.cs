@@ -3,7 +3,7 @@ using System.ComponentModel;
 using Common.Logging;
 using Quokka.Diagnostics;
 
-namespace Quokka.Util
+namespace Quokka
 {
 	public static class DisposableExtensions
 	{

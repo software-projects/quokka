@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -177,8 +177,8 @@
     <Compile Include="UI\WebBrowsers\PluggableProtocol.cs" />
     <Compile Include="UI\WebBrowsers\ProtocolBase.cs" />
     <Compile Include="UI\WebBrowsers\ProtocolSupport.cs" />
-    <Compile Include="Util\DisposableAction.cs" />
-    <Compile Include="Util\DisposableExtensions.cs" />
+    <Compile Include="DisposableAction.cs" />
+    <Compile Include="DisposableExtensions.cs" />
     <Compile Include="Util\RegistryUtil.cs" />
     <Compile Include="Util\StreamExtensions.cs" />
     <Compile Include="Util\StringUtils.cs" />
