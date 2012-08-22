@@ -252,7 +252,6 @@ namespace Quokka.WinForms
 				if (!ReferenceEquals(c, control))
 				{
 					c.Visible = false;
-					VisibleViews.Remove(c);
 				}
 			}
 
@@ -272,11 +271,19 @@ namespace Quokka.WinForms
 
 			Control control = GetControl(view);
 			control.Visible = false;
+			VisibleViews.Remove(control);
 			if (CurrentVisibleView == control)
 			{
+				// We just hid the current visible control, so
+				// find the next view that wants to be visible
+				// and show it.
 				CurrentVisibleView = null;
+				if (VisibleViews.Count > 0)
+				{
+					CurrentVisibleView = VisibleViews[VisibleViews.Count - 1];
+					CurrentVisibleView.Visible = true;
+				}
 			}
-			VisibleViews.Remove(control);
 		}
 
 		#endregion
