@@ -96,6 +96,9 @@
 	</target>
 
 	<target name="compile.40" depends="CommonAssemblyInfo.cs">
+		<setenv>
+			<variable name="EnableNuGetPackageRestore" value="true"/>
+		</setenv>
 		<exec program="msbuild.exe" basedir="${msbuild.dir}">
 			<arg value="/property:Configuration=${config}"/>
 			<arg value="/property:FormalBuild=true"/>
@@ -113,6 +116,9 @@
 	</target>
 
 	<target name="compile.35" depends="convert.35,CommonAssemblyInfo.cs">
+		<setenv>
+			<variable name="EnableNuGetPackageRestore" value="true"/>
+		</setenv>
 		<exec program="msbuild.exe" basedir="${msbuild.dir}">
 			<arg value="/property:Configuration=${config}"/>
 			<arg value="/property:FormalBuild=true"/>
