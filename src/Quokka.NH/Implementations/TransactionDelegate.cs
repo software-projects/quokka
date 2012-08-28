@@ -28,6 +28,12 @@ using Quokka.Diagnostics;
 
 namespace Quokka.NH.Implementations
 {
+	/// <summary>
+	/// Proxies an ITransaction so that the transaction will not be committed
+	/// or rolled-back if the transaction was created by a scope higher
+	/// up on the calling stack.
+	/// </summary>
+	[Serializable]
 	public class TransactionDelegate : ITransaction
 	{
 		// Used to communicate that a transaction has been rolled back.
@@ -90,10 +96,7 @@ namespace Quokka.NH.Implementations
 			}
 
 			// Don't need rolled back notifications anymore.
-			if (_subscribedToRolledBack)
-			{
-				RolledBack -= HandleRolledBack;
-			}
+			UnsubscribeFromRollback();
 
 			try
 			{
@@ -114,24 +117,20 @@ namespace Quokka.NH.Implementations
 
 		public void Begin()
 		{
-			if (!_begun)
-			{
-				var wasActive = _session.Transaction.IsActive;
-				_session.Transaction.Begin();
-				_begun = true;
-				_rollbackCount = 0;
-				_transaction = _session.Transaction;
-				CanCommit = !wasActive;
-				SubscribeToRolledBack();
-			}
+			BeginHelper(() => _session.Transaction.Begin());
 		}
 
 		public void Begin(IsolationLevel isolationLevel)
 		{
+			BeginHelper(() => _session.Transaction.Begin(isolationLevel));
+		}
+
+		private void BeginHelper(Action beginTransactionAction)
+		{
 			if (!_begun)
 			{
 				var wasActive = _session.Transaction.IsActive;
-				_session.Transaction.Begin(isolationLevel);
+				beginTransactionAction();
 				_begun = true;
 				_rollbackCount = 0;
 				_transaction = _session.Transaction;
@@ -160,17 +159,6 @@ namespace Quokka.NH.Implementations
 						}
 						throw new TransactionException("Cannot commit transaction as it has been rolled-back in a nested transaction");
 					}
-				}
-				else
-				{
-					// We do not commit at this point, but we do flush to the
-					// database, unless the session is configured so that all
-					// flushes must be manual.
-					if (_session.FlushMode != FlushMode.Never)
-					{
-						_session.Flush();
-					}
-
 				}
 			}
 			finally
@@ -232,6 +220,15 @@ namespace Quokka.NH.Implementations
 					RolledBack += HandleRolledBack;
 					_subscribedToRolledBack = true;
 				}
+			}
+		}
+
+		private void UnsubscribeFromRollback()
+		{
+			if (_subscribedToRolledBack)
+			{
+				RolledBack -= HandleRolledBack;
+				_subscribedToRolledBack = false;
 			}
 		}
 
