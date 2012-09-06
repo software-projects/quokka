@@ -24,7 +24,7 @@ namespace Quokka.WinForms
 	/// <remarks>
 	///     Multiple calls to <c>WaitCursor.Show</c> can be nested.
 	/// </remarks>
-	internal static class WaitCursor
+	public static class WaitCursor
 	{
 		private static readonly IDisposable restoreCursor = new RestoreCursor();
 		private static int _referenceCount;
