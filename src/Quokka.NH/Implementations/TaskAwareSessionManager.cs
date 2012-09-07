@@ -1,6 +1,8 @@
 ﻿using System;
 using Castle.Core;
 using NHibernate;
+using NHibernate.Context;
+using NHibernate.Engine;
 using Quokka.Diagnostics;
 using Quokka.NH.Interfaces;
 using Quokka.NH.Startup;
@@ -183,6 +185,25 @@ namespace Quokka.NH.Implementations
 			if (removeOnClose)
 			{
 				sessionDelegate.Closed += (o, e) => _sessionStore.Remove(session, alias);
+			}
+
+			// Bind the (real) ISession to the session factory's current context.
+			// This is going to go really, really wrong if the current session context
+			// defined for the NHibernate configuration is not compatibile with the
+			// session store.
+			//
+			// TODO: need to work out what to do here -- it would be nice to ditch
+			// the session store in favour of the NHibernate current session context,
+			// but that only works for ISession, not ISession store.
+			var sessionFactoryImplementor = session.SessionFactory as ISessionFactoryImplementor;
+			if (sessionFactoryImplementor != null
+				&& (sessionFactoryImplementor.CurrentSessionContext as CurrentSessionContext) != null)
+			{
+				if (!CurrentSessionContext.HasBind(session.SessionFactory))
+				{
+					CurrentSessionContext.Bind(session);
+					sessionDelegate.Closed += (o, e) => CurrentSessionContext.Unbind(session.SessionFactory);
+				}
 			}
 
 			return sessionDelegate;
