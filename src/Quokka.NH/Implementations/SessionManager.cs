@@ -44,7 +44,7 @@ namespace Quokka.NH.Implementations
 			_sessionFactoryResolver = Verify.ArgumentNotNull(sessionFactoryResolver, "sessionFactoryResolver");
 		}
 
-		public ISession OpenSession(string alias)
+		public ISession OpenSession(string alias = null)
 		{
 			alias = NormaliseAlias(alias);
 			var canClose = false;
@@ -85,7 +85,7 @@ namespace Quokka.NH.Implementations
 			return sessionDelegate;
 		}
 
-		public IStatelessSession OpenStatelessSession(string alias)
+		public IStatelessSession OpenStatelessSession(string alias = null)
 		{
 			alias = NormaliseAlias(alias);
 			var canClose = false;

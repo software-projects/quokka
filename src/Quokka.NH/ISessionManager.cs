@@ -39,7 +39,7 @@ namespace Quokka.NH
 		/// <param name="alias">
 		/// Connection alias. If <c>null</c>, then the default alias is used.
 		/// </param>
-		ISession OpenSession(String alias);
+		ISession OpenSession(String alias = null);
 
 		/// <summary>
 		/// Returns a valid opened and connected <see cref="IStatelessSession"/> instance
@@ -47,27 +47,6 @@ namespace Quokka.NH
 		/// </summary>
 		/// <param name="alias"></param>
 		/// <returns></returns>
-		IStatelessSession OpenStatelessSession(String alias);
-	}
-
-	public static class SessionManagerOptionalExtensions
-	{
-		/// <summary>
-		/// Returns a valid opened and connected <see cref="ISession"/> instance
-		/// for the default connection alias
-		/// </summary>
-		public static ISession OpenSession(this ISessionManager sessionManager)
-		{
-			return sessionManager.OpenSession(null);
-		}
-
-		/// <summary>
-		/// Returns a valid opened and connected <see cref="IStatelessSession"/> instance
-		/// for the default connection alias
-		/// </summary>
-		public static IStatelessSession OpenStatelessSession(this ISessionManager sessionManager)
-		{
-			return sessionManager.OpenStatelessSession(null);
-		}
+		IStatelessSession OpenStatelessSession(String alias = null);
 	}
 }
