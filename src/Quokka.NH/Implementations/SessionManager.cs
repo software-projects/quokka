@@ -1,9 +1,7 @@
 ﻿#region License
 
-//  Notice: Some of the code in this file may have been adapted from code
-//  in the Castle Project.
 //
-// Copyright 2004-2012 Castle Project - http://www.castleproject.org/
+// Copyright 2004-2012 John Jeffery <john@jeffery.id.au>
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +19,6 @@
 
 using NHibernate;
 using NHibernate.Context;
-using NHibernate.Engine;
 using Quokka.Diagnostics;
 using Quokka.NH.Interfaces;
 using Quokka.NH.Startup;
@@ -30,17 +27,10 @@ namespace Quokka.NH.Implementations
 {
 	public class SessionManager : ISessionManager
 	{
-		private readonly ISessionStore<ISession> _sessionStore;
-		private readonly ISessionStore<IStatelessSession> _statelessSessionStore;
 		private readonly ISessionFactoryResolver _sessionFactoryResolver;
 
-		public SessionManager(
-			ISessionStore<ISession> sessionStore, 
-			ISessionStore<IStatelessSession> statelessSessionStore,
-			ISessionFactoryResolver sessionFactoryResolver)
+		public SessionManager(ISessionFactoryResolver sessionFactoryResolver)
 		{
-			_sessionStore = Verify.ArgumentNotNull(sessionStore, "sessionStore");
-			_statelessSessionStore = Verify.ArgumentNotNull(statelessSessionStore, "statelessSessionStore");
 			_sessionFactoryResolver = Verify.ArgumentNotNull(sessionFactoryResolver, "sessionFactoryResolver");
 		}
 
@@ -48,76 +38,88 @@ namespace Quokka.NH.Implementations
 		{
 			alias = NormaliseAlias(alias);
 			var canClose = false;
-			var session = _sessionStore.FindCompatibleSession(alias);
-			if (session == null)
+			var unbindOnClose = false;
+			var sessionFactory = _sessionFactoryResolver.GetSessionFactory(alias);
+			ISession session;
+
+			// First rule is that if there is a session in the current context, use it.
+			if (CurrentSessionContext.HasBind(sessionFactory))
 			{
-				var sessionFactory = _sessionFactoryResolver.GetSessionFactory(alias);
-				session = sessionFactory.OpenSession();
-				canClose = true;
-				_sessionStore.Add(session, alias);
+				session = sessionFactory.GetCurrentSession();
+			}
+			else
+			{
+				// Second rule is try to find from dervived class's storage mechanism (if any exists).
+				session = FindCompatibleSession(alias, sessionFactory);
+				if (session != null)
+				{
+					// want to unbind when the session delegate is closed,
+					// but do not close the session as it is pre-existing
+					unbindOnClose = true;
+					CurrentSessionContext.Bind(session);
+				}
+				else
+				{
+					session = CreateNewSession(alias, sessionFactory);
+					CurrentSessionContext.Bind(session);
+					canClose = true;
+					unbindOnClose = true;
+				}
 			}
 
 			var sessionDelegate = new SessionDelegate(canClose, session);
-			if (canClose)
+			if (unbindOnClose)
 			{
-				sessionDelegate.Closed += (o, e) => _sessionStore.Remove(sessionDelegate.InnerSession, alias);
-			}
-
-			// Bind the (real) ISession to the session factory's current context.
-			// This is going to go really, really wrong if the current session context
-			// defined for the NHibernate configuration is not compatibile with the
-			// session store.
-			//
-			// TODO: need to work out what to do here -- it would be nice to ditch
-			// the session store in favour of the NHibernate current session context,
-			// but that only works for ISession, not ISession store.
-			var sessionFactoryImplementor = session.SessionFactory as ISessionFactoryImplementor;
-			if (sessionFactoryImplementor != null
-				&& (sessionFactoryImplementor.CurrentSessionContext as CurrentSessionContext) != null)
-			{
-				if (!CurrentSessionContext.HasBind(session.SessionFactory))
-				{
-					CurrentSessionContext.Bind(session);
-					sessionDelegate.Closed += (o, e) => CurrentSessionContext.Unbind(session.SessionFactory);
-				}
+				sessionDelegate.Closed += (o, e) => CurrentSessionContext.Unbind(sessionFactory);
 			}
 
 			return sessionDelegate;
 		}
 
+		/// <summary>
+		/// Opens a stateless session. No fancy sharing performed here. Each call returns a new
+		/// <see cref="IStatelessSession"/>.
+		/// </summary>
 		public IStatelessSession OpenStatelessSession(string alias = null)
 		{
 			alias = NormaliseAlias(alias);
-			var canClose = false;
-			var session = _statelessSessionStore.FindCompatibleSession(alias);
-			if (session == null)
-			{
-				var sessionFactory = _sessionFactoryResolver.GetSessionFactory(alias);
-				session = sessionFactory.OpenStatelessSession();
-				canClose = true;
-				_statelessSessionStore.Add(session, alias);
-			}
-
-			var sessionDelegate = new StatelessSessionDelegate(canClose, session);
-			if (canClose)
-			{
-				sessionDelegate.Closed += (o, e) => _statelessSessionStore.Remove(sessionDelegate.InnerSession, alias);
-			}
-
-			return sessionDelegate;
+			var sessionFactory = _sessionFactoryResolver.GetSessionFactory(alias);
+			return sessionFactory.OpenStatelessSession();
 		}
+
+		/// <summary>
+		/// Provides a mechanism for a derived class to find sessions from a separate context.
+		/// </summary>
+		/// <param name="alias"></param>
+		/// <param name="sessionFactory"></param>
+		/// <returns>
+		/// Returns a compatible <see cref="ISession"/> whose lifetime is controlled externally.
+		/// </returns>
+		protected virtual ISession FindCompatibleSession(string alias, ISessionFactory sessionFactory)
+		{
+			return null;
+		}
+
+		/// <summary>
+		/// Creates a new <see cref="ISession"/> from the <see cref="ISessionFactory"/>. Allows
+		/// a derived class to 
+		/// </summary>
+		/// <param name="alias"></param>
+		/// <param name="sessionFactory"></param>
+		/// <returns></returns>
+		/// <remarks>
+		/// One use for overriding this method is to create sessions with an <see cref="IInterceptor"/>
+		/// implementation.
+		/// </remarks>
+		protected virtual ISession CreateNewSession(string alias, ISessionFactory sessionFactory)
+		{
+			return sessionFactory.OpenSession();
+		}
+
 
 		private string NormaliseAlias(string alias)
 		{
-			if (alias == null)
-			{
-				alias = _sessionFactoryResolver.DefaultAlias;
-				if (alias == null)
-				{
-					throw new NHibernateFacilityException("No default alias is defined");
-				}
-			}
-			return alias;
+			return alias ?? _sessionFactoryResolver.DefaultAlias;
 		}
 	}
 }

@@ -19,208 +19,103 @@
 
 #endregion
 
-using System.Collections.Generic;
-using System.Linq;
-using Castle.Core.Logging;
+using Castle.Core.Internal;
 using Castle.MicroKernel;
-using Castle.MicroKernel.Context;
 using NHibernate;
 using NHibernate.Cfg;
 using Quokka.Diagnostics;
 using Quokka.NH.Interfaces;
 using Quokka.NH.Startup;
-using ILoggerFactory = Castle.Core.Logging.ILoggerFactory;
 
 namespace Quokka.NH.Implementations
 {
+	// TODO: needs to be threadsafe
 	public class SessionFactoryResolver : ISessionFactoryResolver
 	{
-		public ILogger Logger { get; set; }
-
+		private readonly AliasDictionary<ISessionFactory> _sessionFactories = new AliasDictionary<ISessionFactory>();
+		private readonly IConfigurationResolver _configurationResolver;
 		private readonly IKernel _kernel;
-		private readonly IList<IHandler> _waitList = new List<IHandler>();
-		private readonly Dictionary<string, DatabaseSettings> _databaseMap = new Dictionary<string, DatabaseSettings>();
-		private DatabaseSettings _defaultDatabaseSettings;
+		private readonly Lock _lock = Lock.Create();
 
-		public SessionFactoryResolver(IKernel kernel)
+		public SessionFactoryResolver(IKernel kernel, IConfigurationResolver configurationResolver)
 		{
 			_kernel = Verify.ArgumentNotNull(kernel, "kernel");
-			if (_kernel.HasComponent(typeof(ILoggerFactory)))
-			{
-				var loggerFactory = _kernel.Resolve<ILoggerFactory>();
-				Logger = loggerFactory.Create(typeof(SessionFactoryResolver));
-			}
-			else
-			{
-				Logger = NullLogger.Instance;
-			}
-
-			foreach (var builder in _kernel.ResolveAll<IConfigurationBuilder>())
-			{
-				AddBuilder(builder);
-			}
-
-			_kernel.ComponentRegistered += KernelOnComponentRegistered;
+			_configurationResolver = Verify.ArgumentNotNull(configurationResolver, "configurationResolver");
 		}
 
-		private void KernelOnComponentRegistered(string key, IHandler handler)
+		public ISessionFactory GetSessionFactory(string alias)
 		{
-			if (typeof(IConfigurationBuilder).IsAssignableFrom(handler.ComponentModel.Implementation))
+			alias = alias ?? DefaultAlias;
+
+			using (_lock.ForReading())
 			{
-				if (!TryAddBuilder(handler))
+				ISessionFactory sessionFactory = _sessionFactories.Find(alias);
+				if (sessionFactory != null)
 				{
-					_waitList.Add(handler);
+					// already created
+					return sessionFactory;
 				}
 			}
 
-			CheckWaitList();
-		}
+			// TODO: this will hold up two threads trying to create session factories for two different
+			// database aliases, but the code is simple. Need to improve later.
 
-		private bool TryAddBuilder(IHandler handler)
-		{
-			var builder = (IConfigurationBuilder)handler.TryResolve(CreationContext.CreateEmpty());
-			if (builder == null)
+			using (_lock.ForWriting())
 			{
-				return false;
-			}
-
-			AddBuilder(builder);
-			return true;
-		}
-
-		private void CheckWaitList()
-		{
-			var handlers = _waitList.ToArray();
-			foreach (var handler in handlers)
-			{
-				if (TryAddBuilder(handler))
+				// look again while we have the write lock, just to check that another thread
+				// has not already created the session factory.
+				ISessionFactory sessionFactory = _sessionFactories.Find(alias);
+				if (sessionFactory != null)
 				{
-					_waitList.Remove(handler);
+					// already created
+					return sessionFactory;
 				}
-			}
-		}
 
-		private void AddBuilder(IConfigurationBuilder builder)
-		{
-			Verify.ArgumentNotNull(builder, "builder");
+				// this will throw an exception if unsuccessful
+				var configuration = _configurationResolver.GetConfiguration(alias);
+				sessionFactory = configuration.BuildSessionFactory();
+				CallContributors(alias, sessionFactory, configuration);
+				_sessionFactories.Save(alias, sessionFactory);
 
-			if (_databaseMap.ContainsKey(builder.Alias))
-			{
-				var msg = string.Format("Multiple IConfigurationBuilders have alias of {0}: {1}, {2}",
-				                        builder.Alias, builder.GetType(),
-				                        _databaseMap[builder.Alias].Builder.GetType());
-				throw new NHibernateFacilityException(msg);
-			}
-
-			var databaseSettings = new DatabaseSettings(builder, _kernel);
-
-			_databaseMap.Add(builder.Alias, databaseSettings);
-
-			if (builder.IsDefault)
-			{
-				if (_defaultDatabaseSettings != null)
-				{
-					var msg = string.Format("Multiple IConfigurationBuilders have IsDefault=true: {0}, {1}",
-					                        builder.GetType(), _defaultDatabaseSettings.Builder.GetType());
-					throw new NHibernateFacilityException(msg);
-				}
-				_defaultDatabaseSettings = databaseSettings;
+				return sessionFactory;
 			}
 		}
 
 		public bool IsAliasDefined(string alias)
 		{
-			return _databaseMap.ContainsKey(alias);
+			using (_lock.ForReading())
+			{
+				if (_sessionFactories.Find(alias) != null)
+				{
+					return true;
+				}
+			}
+			return _configurationResolver.IsAliasDefined(alias);
 		}
 
-		public string DefaultAlias
+		// auto-populated by the NHibernate facility
+		public string DefaultAlias { get; set; }
+
+		/// <summary>
+		/// Once a session factory has been created, call all registered contributors
+		/// </summary>
+		private void CallContributors(string alias, ISessionFactory sessionFactory, Configuration configuration)
 		{
-			get
+			var contributors = _kernel.ResolveAll<ISessionFactoryContributor>();
+			try
 			{
-				if (_defaultDatabaseSettings == null)
+				foreach (var contributor in contributors)
 				{
-					return null;
-				}
-				return _defaultDatabaseSettings.Builder.Alias;
-			}
-		}
-
-		public ISessionFactory GetSessionFactory(string alias)
-		{
-			DatabaseSettings databaseSettings;
-
-			if (string.IsNullOrEmpty(alias))
-			{
-				databaseSettings = _defaultDatabaseSettings;
-				if (databaseSettings == null)
-				{
-					throw new NHibernateFacilityException("No default session factory defined");
+					contributor.Contribute(alias, sessionFactory, configuration);
 				}
 			}
-			else
+			finally
 			{
-				if (!_databaseMap.TryGetValue(alias, out databaseSettings))
+				foreach (var contributor in contributors)
 				{
-					throw new NHibernateFacilityException("Unknown session factory alias: " + alias);
-				}
-			}
-
-			return databaseSettings.SessionFactory;
-		}
-
-		#region class DatabaseSettings
-
-		private class DatabaseSettings
-		{
-			public DatabaseSettings(IConfigurationBuilder builder, IKernel kernel)
-			{
-				Builder = builder;
-				_kernel = kernel;
-			}
-
-			private readonly object _lockObject = new object();
-			private volatile ISessionFactory _sessionFactory;
-			private readonly IKernel _kernel;
-
-			public IConfigurationBuilder Builder { get; private set; }
-
-			public ISessionFactory SessionFactory
-			{
-				get
-				{
-					if (_sessionFactory != null)
-					{
-						return _sessionFactory;
-					}
-
-					lock (_lockObject)
-					{
-						if (_sessionFactory == null)
-						{
-							var cfg = GetConfiguration();
-							var sessionFactory = cfg.BuildSessionFactory();
-							Builder.Registered(sessionFactory, cfg);
-							_sessionFactory = sessionFactory;
-						}
-					}
-
-					return _sessionFactory;
-				}
-			}
-
-			private Configuration GetConfiguration()
-			{
-				var configuration = Builder.BuildConfiguration();
-				foreach (var contributor in _kernel.ResolveAll<IConfigurationContributor>())
-				{
-					contributor.Contribute(Builder.Alias, Builder.IsDefault, configuration);
 					_kernel.ReleaseComponent(contributor);
 				}
-
-				return configuration;
 			}
 		}
-
-		#endregion
 	}
 }

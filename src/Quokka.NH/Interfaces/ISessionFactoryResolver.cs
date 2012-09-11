@@ -24,7 +24,7 @@ using Quokka.NH.Startup;
 
 namespace Quokka.NH.Interfaces
 {
-	public interface ISessionFactoryResolver
+	public interface ISessionFactoryResolver : IDefaultAlias
 	{
 		/// <summary>
 		/// Returns the <see cref="ISessionFactory"/> associated with the specified alias.
@@ -44,10 +44,5 @@ namespace Quokka.NH.Interfaces
 		/// </summary>
 		/// <param name="alias">Alias</param>
 		bool IsAliasDefined(string alias);
-
-		/// <summary>
-		/// Returns the default alias.
-		/// </summary>
-		string DefaultAlias { get; }
 	}
 }

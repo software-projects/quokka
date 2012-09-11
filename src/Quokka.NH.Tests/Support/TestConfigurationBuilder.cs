@@ -32,12 +32,11 @@ using Environment = NHibernate.Cfg.Environment;
 
 namespace Quokka.NH.Tests.Support
 {
-	public class TestConfigurationBuilder : IConfigurationBuilder, IDisposable
+	public class TestConfigurationBuilder : IConfigurationBuilder, ISessionFactoryContributor, IDisposable
 	{
 		public TestConfigurationBuilder()
 		{
 			Alias = "testdb";
-			IsDefault = true;
 			CreateDatabaseSchema = true;
 
 			// Attempt to get the test database connection string from the environment.
@@ -51,7 +50,6 @@ namespace Quokka.NH.Tests.Support
 
 		}
 
-		public bool IsDefault { get; set; }
 		public string Alias { get; set; }
 		public string ConnectionString { get; set; }
 		public bool CreateDatabaseSchema { get; set; }
@@ -59,13 +57,19 @@ namespace Quokka.NH.Tests.Support
 		public Configuration Configuration { get; private set; }
 		public ISessionFactory SessionFactory { get; private set; }
 
-		public Configuration BuildConfiguration()
+		public bool CanBuildConfiguration(string alias)
+		{
+			return alias == Alias || alias == null;
+		}
+
+		public Configuration BuildConfiguration(string alias)
 		{
 			var cfg = new Configuration();
 			cfg.SetProperty(Environment.ConnectionProvider, typeof (DriverConnectionProvider).AssemblyQualifiedName);
 			cfg.SetProperty(Environment.Dialect, typeof (MsSql2005Dialect).AssemblyQualifiedName);
 			cfg.SetProperty(Environment.ConnectionDriver, typeof(SqlClientDriver).AssemblyQualifiedName);
 			cfg.SetProperty(Environment.ConnectionString, ConnectionString);
+			cfg.SetProperty(Environment.CurrentSessionContextClass, "thread_static");
 
 			var modelMapper = new ModelMapper();
 			modelMapper.AddMappings(Assembly.GetExecutingAssembly().GetExportedTypes());
@@ -75,7 +79,7 @@ namespace Quokka.NH.Tests.Support
 			return cfg;
 		}
 
-		public void Registered(ISessionFactory factory, Configuration cfg)
+		public void Contribute(string alias, ISessionFactory factory, Configuration cfg)
 		{
 			Configuration = cfg;
 			SessionFactory = factory;

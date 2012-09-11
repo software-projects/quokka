@@ -65,6 +65,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConfigurationResolverTests.cs" />
+    <Compile Include="DefaultAliasContributorTests.cs" />
     <Compile Include="Model\Blog.cs" />
     <Compile Include="Model\BlogItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -34,6 +34,11 @@ namespace Quokka.NH.Startup
 		private ILogger _logger;
 		private ILoggerFactory _loggerFactory = new NullLogFactory();
 
+		/// <summary>
+		/// The alias to use when opening a session and no alias is supplied.
+		/// </summary>
+		public string DefaultAlias { get; set; }
+
 		protected override void Init()
 		{
 			// Create a logger if there is a logger factory.
@@ -46,15 +51,31 @@ namespace Quokka.NH.Startup
 
 			_logger.Debug("Initializing NHibernateFacility");
 
+			RegisterDefaultAliasContributor();
+
 			RegisterTransactionalInfoStore();
 			RegisterTransactionInterceptor();
 			RegisterSessionStoreContext();
 			RegisterSessionStores();
+			RegisterConfigurationResolver();
 			RegisterSessionFactoryResolver();
 			RegisterSessionManager();
 			AddContributors();
 
 			_logger.Debug("NHibernateFacility is initialized");
+		}
+
+		private void RegisterDefaultAliasContributor()
+		{
+			// This contributor will populate the DefaultAlias property of any component created that
+			// implements the IDefaultAlias interface.
+			Kernel.ComponentModelBuilder.AddContributor(new DefaultAliasContributor(GetDefaultAlias));
+		}
+
+
+		private string GetDefaultAlias()
+		{
+			return DefaultAlias;
 		}
 
 		private void RegisterTransactionalInfoStore()
@@ -96,10 +117,22 @@ namespace Quokka.NH.Startup
 			}
 		}
 
+		private void RegisterConfigurationResolver()
+		{
+			if (!Kernel.HasComponent(typeof(IConfigurationResolver)))
+			{
+				var configurationResolver = new ConfigurationResolver(Kernel);
+				Kernel.Register(Component.For<IConfigurationResolver>().Instance(configurationResolver));
+			}
+		}
+
 		private void RegisterSessionFactoryResolver()
 		{
-			var sessionFactoryResolver = new SessionFactoryResolver(Kernel);
-			Kernel.Register(Component.For<ISessionFactoryResolver>().Instance(sessionFactoryResolver));
+			if (!Kernel.HasComponent(typeof(ISessionFactoryResolver)))
+			{
+				var sessionFactoryResolver = new SessionFactoryResolver(Kernel, Kernel.Resolve<IConfigurationResolver>());
+				Kernel.Register(Component.For<ISessionFactoryResolver>().Instance(sessionFactoryResolver));
+			}
 		}
 
 		private void RegisterSessionManager()

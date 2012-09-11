@@ -43,10 +43,10 @@ namespace Quokka.NH.Startup
 		/// </summary>
 		/// <param name="alias">
 		/// The alias of the database configuration being created. This value
-		/// comes from the <see cref="IConfigurationBuilder.Alias"/> property.
+		/// comes from the <see cref="ISessionManager.OpenSession"/> method.
+		/// Note that this might be <c>null</c> if no default alias has been specified.
 		/// </param>
-		/// <param name="isDefault">Is this the default configuration.</param>
 		/// <param name="configuration">NHibernate <see cref="Configuration"/> object.</param>
-		void Contribute(string alias, bool isDefault, Configuration configuration);
+		void Contribute(string alias, Configuration configuration);
 	}
 }

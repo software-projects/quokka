@@ -1,4 +1,5 @@
-﻿#region License
+﻿#if NO
+#region License
 
 // Copyright 2004-2012 John Jeffery
 // 
@@ -344,3 +345,4 @@ namespace Quokka.NH.Tests
 		#endregion
 	}
 }
+#endif

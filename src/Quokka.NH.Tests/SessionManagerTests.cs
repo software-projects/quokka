@@ -42,7 +42,7 @@ namespace Quokka.NH.Tests
 			_container = new WindsorContainer();
 			_container.AddFacility<NHibernateFacility>();
 			_container.Register(
-				Component.For<IConfigurationBuilder>()
+				Component.For<IConfigurationBuilder, ISessionFactoryContributor>()
 					.ImplementedBy<TestConfigurationBuilder>());
 
 			_sessionManager = _container.Resolve<ISessionManager>();
@@ -145,10 +145,12 @@ namespace Quokka.NH.Tests
 				{
 					using (var session2 = _sessionManager.OpenSession())
 					{
+						// ReSharper disable UnusedVariable
 						using (var tx2 = session2.BeginTransaction())
 						{
 							// do not commit, will cause an implicit rollback
 						}
+						// ReSharper restore UnusedVariable
 					}
 
 					// An attempt to commit the transaction will result in an exception.
@@ -191,14 +193,11 @@ namespace Quokka.NH.Tests
 					var b3 = new Blog();
 					session1.Save(b3);
 
-					try
-					{
-						tx1.Commit();
-						Assert.Fail("Expected exception");
-					}
-					catch (TransactionException)
-					{
-					}
+					// ReSharper disable AccessToDisposedClosure
+					// ReSharper disable ConvertClosureToMethodGroup
+					Assert.Throws<TransactionException>(() => tx1.Commit());
+					// ReSharper restore ConvertClosureToMethodGroup
+					// ReSharper restore AccessToDisposedClosure
 				}
 			}
 
@@ -252,7 +251,7 @@ namespace Quokka.NH.Tests
 		}
 
 		[Test]
-		public void Nested_stateless_sessions()
+		public void Nested_stateless_sessions_are_different()
 		{
 			using (var session1 = _sessionManager.OpenStatelessSession())
 			{
@@ -260,13 +259,13 @@ namespace Quokka.NH.Tests
 				{
 					using (var session3 = _sessionManager.OpenStatelessSession("testdb"))
 					{
-						var sessionDelegate1 = (StatelessSessionDelegate) session1;
-						var sessionDelegate2 = (StatelessSessionDelegate) session2;
-						var sessionDelegate3 = (StatelessSessionDelegate) session3;
+						var sessionId1 = session1.GetSessionImplementation().SessionId;
+						var sessionId2 = session2.GetSessionImplementation().SessionId;
+						var sessionId3 = session3.GetSessionImplementation().SessionId;
 
-						Assert.AreSame(sessionDelegate1.InnerSession, sessionDelegate2.InnerSession);
-						Assert.AreSame(sessionDelegate1.InnerSession, sessionDelegate3.InnerSession);
-						Assert.AreSame(sessionDelegate2.InnerSession, sessionDelegate3.InnerSession);
+						Assert.AreNotEqual(sessionId1, sessionId2);
+						Assert.AreNotEqual(sessionId1, sessionId3);
+						Assert.AreNotEqual(sessionId2, sessionId3);
 					}
 				}
 			}

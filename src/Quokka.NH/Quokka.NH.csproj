@@ -64,7 +64,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Implementations\AliasDictionary.cs" />
     <Compile Include="Implementations\CallContextSessionStoreContext.cs" />
+    <Compile Include="Implementations\DefaultAliasConcern.cs" />
+    <Compile Include="Implementations\DefaultAliasContributor.cs" />
+    <Compile Include="Implementations\ConfigurationResolver.cs" />
     <Compile Include="Implementations\NHTransactionalComponentInspector.cs" />
     <Compile Include="Implementations\NHTransactionInterceptor.cs" />
     <Compile Include="Implementations\SessionDelegate.cs" />
@@ -76,6 +80,8 @@
     <Compile Include="Implementations\TransactionDelegate.cs" />
     <Compile Include="Implementations\TransactionMetaInfo.cs" />
     <Compile Include="Implementations\TransactionMetaInfoStore.cs" />
+    <Compile Include="Interfaces\IConfigurationResolver.cs" />
+    <Compile Include="Interfaces\IDefaultAlias.cs" />
     <Compile Include="Interfaces\ISessionFactoryResolver.cs" />
     <Compile Include="Interfaces\ISessionStore.cs" />
     <Compile Include="Interfaces\ISessionStoreContext.cs" />
@@ -87,6 +93,8 @@
     <Compile Include="SessionExtensions.cs" />
     <Compile Include="Startup\IConfigurationBuilder.cs" />
     <Compile Include="Startup\IConfigurationContributor.cs" />
+    <Compile Include="Startup\IConfigurationSerializer.cs" />
+    <Compile Include="Startup\ISessionFactoryContributor.cs" />
     <Compile Include="Startup\NHibernateFacility.cs" />
     <Compile Include="Startup\NHibernateFacilityException.cs" />
   </ItemGroup>

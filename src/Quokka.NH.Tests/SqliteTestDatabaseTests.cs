@@ -44,9 +44,9 @@ namespace Quokka.NH.Tests
 		public void SetUp()
 		{
 			NHibernateInstaller = new TestConfigurationBuilder();
-			Configuration = NHibernateInstaller.BuildConfiguration();
+			Configuration = NHibernateInstaller.BuildConfiguration("testdb");
 			SessionFactory = Configuration.BuildSessionFactory();
-			NHibernateInstaller.Registered(SessionFactory, Configuration);
+			NHibernateInstaller.Contribute("testdb", SessionFactory, Configuration);
 			Session = SessionFactory.OpenSession();
 		}
 
