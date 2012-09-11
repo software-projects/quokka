@@ -126,7 +126,7 @@ namespace Quokka.WinForms
 			{
 				if (!_viewAdded)
 				{
-					var control = (Control) view;
+					var control = GetControl(view);
 					_form.ClientSize = control.Size;
 					if (control.MinimumSize == control.MaximumSize 
 						&& control.MinimumSize.Width > 0
