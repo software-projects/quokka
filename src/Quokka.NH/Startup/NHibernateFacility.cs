@@ -39,6 +39,11 @@ namespace Quokka.NH.Startup
 		/// </summary>
 		public string DefaultAlias { get; set; }
 
+		public NHibernateFacility()
+		{
+			DefaultAlias = "default";
+		}
+
 		protected override void Init()
 		{
 			// Create a logger if there is a logger factory.

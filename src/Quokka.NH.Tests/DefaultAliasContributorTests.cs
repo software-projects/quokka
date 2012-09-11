@@ -67,7 +67,7 @@ namespace Quokka.NH.Tests
 		{
 			using (var container = new WindsorContainer())
 			{
-				container.AddFacility<NHibernateFacility>();
+				container.AddFacility<NHibernateFacility>(f => f.DefaultAlias = null);
 				container.Register(
 					Component.For<WantDefaultAlias>()
 						.LifestyleTransient());
