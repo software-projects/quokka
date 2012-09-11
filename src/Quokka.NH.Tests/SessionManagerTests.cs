@@ -40,7 +40,7 @@ namespace Quokka.NH.Tests
 		public void TestFixtureSetUp()
 		{
 			_container = new WindsorContainer();
-			_container.AddFacility<NHibernateFacility>();
+			_container.AddFacility<NHibernateFacility>(f => f.DefaultAlias = TestConfigurationBuilder.Alias);
 			_container.Register(
 				Component.For<IConfigurationBuilder, ISessionFactoryContributor>()
 					.ImplementedBy<TestConfigurationBuilder>());
@@ -75,7 +75,7 @@ namespace Quokka.NH.Tests
 			{
 				using (var session2 = _sessionManager.OpenSession())
 				{
-					using (var session3 = _sessionManager.OpenSession("testdb"))
+					using (var session3 = _sessionManager.OpenSession(TestConfigurationBuilder.Alias))
 					{
 						var sessionDelegate1 = (SessionDelegate) session1;
 						var sessionDelegate2 = (SessionDelegate) session2;
@@ -106,7 +106,7 @@ namespace Quokka.NH.Tests
 						using (var tx2 = session2.BeginTransaction())
 						{
 							session2.AfterCommit(() => tx2Committed = true);
-							using (var session3 = _sessionManager.OpenSession("testdb"))
+							using (var session3 = _sessionManager.OpenSession(TestConfigurationBuilder.Alias))
 							{
 								using (var tx3 = session3.BeginTransaction())
 								{
@@ -257,7 +257,7 @@ namespace Quokka.NH.Tests
 			{
 				using (var session2 = _sessionManager.OpenStatelessSession())
 				{
-					using (var session3 = _sessionManager.OpenStatelessSession("testdb"))
+					using (var session3 = _sessionManager.OpenStatelessSession(TestConfigurationBuilder.Alias))
 					{
 						var sessionId1 = session1.GetSessionImplementation().SessionId;
 						var sessionId2 = session2.GetSessionImplementation().SessionId;

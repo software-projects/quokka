@@ -18,12 +18,14 @@
 
 using System;
 using System.Collections.Generic;
+using Castle.MicroKernel;
 using Castle.MicroKernel.Registration;
 using Castle.Windsor;
 using NHibernate;
 using NHibernate.Cfg;
 using NUnit.Framework;
 using Quokka.NH.Implementations;
+using Quokka.NH.Interfaces;
 using Quokka.NH.Startup;
 using Quokka.NH.Tests.Support;
 
@@ -33,6 +35,47 @@ namespace Quokka.NH.Tests
 	[TestFixture]
 	public class ConfigurationResolverTests
 	{
+		// Verify that windsor container resolves IKernel, because the configuration resolver implementation needs it.
+		[Test]
+		public void Castle_windsor_resolves_IKernel()
+		{
+			var container = new WindsorContainer();
+			container.Register(Component.For<ITestClass>().ImplementedBy<TestClass>());
+
+			var testClass = container.Resolve<ITestClass>();
+			Assert.IsNotNull(testClass.GetKernel());
+			Assert.AreSame(container.Kernel, testClass.GetKernel());
+		}
+
+		private interface ITestClass
+		{
+			IKernel GetKernel();
+		}
+
+		public class TestClass : ITestClass
+		{
+			private IKernel _kernel;
+
+			public TestClass(IKernel kernel)
+			{
+				_kernel = kernel;
+			}
+
+			public IKernel GetKernel()
+			{
+				return _kernel;
+			}
+		}
+
+		[Test]
+		public void DefaultAlias_comes_from_facility()
+		{
+			var container = new WindsorContainer();
+			container.AddFacility<NHibernateFacility>(f => f.DefaultAlias = "NAX-677");
+			var configurationResolver = container.Resolve<IConfigurationResolver>();
+			Assert.AreEqual("NAX-677", configurationResolver.DefaultAlias);
+		}
+
 		[Test]
 		public void Installers_defined_before_ConfigurationResolver_are_processed()
 		{
@@ -118,7 +161,7 @@ namespace Quokka.NH.Tests
 		{
 			using (var container = new WindsorContainer())
 			{
-				var configurationResolver = new ConfigurationResolver(container.Kernel) {DefaultAlias = "testdb"};
+				var configurationResolver = new ConfigurationResolver(container.Kernel) {DefaultAlias = TestConfigurationBuilder.Alias};
 
 				// Register installer prior to registering 
 				container.Register(
@@ -130,7 +173,7 @@ namespace Quokka.NH.Tests
 						.ImplementedBy<TestSerializer>()
 					);
 
-				var testdbConfiguration = configurationResolver.GetConfiguration("testdb");
+				var testdbConfiguration = configurationResolver.GetConfiguration(TestConfigurationBuilder.Alias);
 				var defaultConfiguration = configurationResolver.GetConfiguration(null);
 
 				Assert.AreSame(testdbConfiguration, defaultConfiguration);

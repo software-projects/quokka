@@ -34,9 +34,10 @@ namespace Quokka.NH.Tests.Support
 {
 	public class TestConfigurationBuilder : IConfigurationBuilder, ISessionFactoryContributor, IDisposable
 	{
+		public const string Alias = "default";
+
 		public TestConfigurationBuilder()
 		{
-			Alias = "testdb";
 			CreateDatabaseSchema = true;
 
 			// Attempt to get the test database connection string from the environment.
@@ -50,7 +51,6 @@ namespace Quokka.NH.Tests.Support
 
 		}
 
-		public string Alias { get; set; }
 		public string ConnectionString { get; set; }
 		public bool CreateDatabaseSchema { get; set; }
 		public bool DatabaseSchemaCreated { get; private set; }

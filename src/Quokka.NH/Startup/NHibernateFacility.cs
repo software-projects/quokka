@@ -126,8 +126,7 @@ namespace Quokka.NH.Startup
 		{
 			if (!Kernel.HasComponent(typeof(IConfigurationResolver)))
 			{
-				var configurationResolver = new ConfigurationResolver(Kernel);
-				Kernel.Register(Component.For<IConfigurationResolver>().Instance(configurationResolver));
+				Kernel.Register(Component.For<IConfigurationResolver>().ImplementedBy<ConfigurationResolver>());
 			}
 		}
 
@@ -135,8 +134,7 @@ namespace Quokka.NH.Startup
 		{
 			if (!Kernel.HasComponent(typeof(ISessionFactoryResolver)))
 			{
-				var sessionFactoryResolver = new SessionFactoryResolver(Kernel, Kernel.Resolve<IConfigurationResolver>());
-				Kernel.Register(Component.For<ISessionFactoryResolver>().Instance(sessionFactoryResolver));
+				Kernel.Register(Component.For<ISessionFactoryResolver>().ImplementedBy<SessionFactoryResolver>());
 			}
 		}
 
