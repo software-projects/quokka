@@ -96,18 +96,59 @@ namespace Quokka.NH
 		public override bool Equals(object obj)
 		{
 			var other = obj as TEntity;
-			return other != null && Equals(other);
+			return !IsNull(other) && Equals(other);
 		}
+
+		// used to check that the value of Id does not change after the first call to GetHashCode().
+		private int? _firstHashCode;
 
 		public override int GetHashCode()
 		{
 			var id = GetId();
-			return IdHelper.GetHashCode(id);
+			var hashCode = IdHelper.GetHashCode(id);
+
+			// Resharper does not like us referencing a non-readonly variable inside
+			// GetHashCode(). This is quite clever, but in this case we are justified,
+			// as it forms part of our consistency check.
+			// ReSharper disable NonReadonlyFieldInGetHashCode
+			if (_firstHashCode == null)
+			{
+				// First time GetHashCode() has been called.
+				_firstHashCode = hashCode;
+			}
+			else
+			{
+				if (_firstHashCode.Value != hashCode)
+				{
+					var message = string.Format(
+						"Object of type {0} (Id={1}) has changed identity since the first call to GetHashCode()."
+						+ "\r\nThis will cause problems if this object has been added to a collection that depends on GetHashCode()"
+						+ " returning the same value every time.", typeof(TEntity).FullName, id);
+					throw new InvalidOperationException(message);
+				}
+			}
+			// ReSharper restore NonReadonlyFieldInGetHashCode
+
+			return hashCode;
+		}
+
+		/// <summary>
+		/// Test for null without triggering a fetch
+		/// </summary>
+		/// <remarks>
+		/// Remembering that entity is probably an NHibernate object,
+		/// convert to object and test for null. If entity is an
+		/// NHibernate proxy, we want to be careful not to trigger
+		/// an unnecessary fetch from the database.
+		/// </remarks>
+		private static bool IsNull(object entity)
+		{
+			return entity == null;
 		}
 
 		public virtual bool Equals(TEntity other)
 		{
-			if (other == null)
+			if (IsNull(other))
 			{
 				return false;
 			}
@@ -132,26 +173,77 @@ namespace Quokka.NH
 
 		public static bool operator ==(TEntity entity1, NHEntity<TEntity, TId> entity2)
 		{
-			object o1 = entity1;
-			if (o1 == null)
+			// Perform 'safe' tests for null first. Safe means that an NHibernate
+			// proxy will not cause a fetch from the database. We want to get null
+			// tests out of the way first.
+			if (IsNull(entity1))
 			{
-				object o2 = entity2;
-				return o2 == null;
+				// null == null
+				return IsNull(entity2);
 			}
 
-			return entity1.Equals(entity2);
+			if (IsNull(entity2))
+			{
+				return false;
+			}
+
+			if (ReferenceEquals(entity1, entity2))
+			{
+				return true;
+			}
+
+			// Resharper thinks that there is a possible null exception, because
+			// it does not know about IsNull()
+			// ReSharper disable PossibleNullReferenceException
+			var id1 = entity1.GetId();
+			var id2 = entity2.GetId();
+			// ReSharper restore PossibleNullReferenceException
+
+			if (IdHelper.IsDefaultValue(id1) || IdHelper.IsDefaultValue(id2))
+			{
+				// If two different objects have the same default ID value, they
+				// are considered non-equal.
+				return false;
+			}
+
+			return IdHelper.AreEqual(id1, id2);
 		}
 
 		public static bool operator !=(TEntity entity1, NHEntity<TEntity, TId> entity2)
 		{
-			object o1 = entity1;
-			if (o1 == null)
+			// Perform 'safe' tests for null first. Safe means that an NHibernate
+			// proxy will not cause a fetch from the database. We want to get null
+			// tests out of the way first.
+			if (IsNull(entity1))
 			{
-				object o2 = entity2;
-				return o2 != null;
+				// null == null
+				return !IsNull(entity2);
+			}
+			if (IsNull(entity2))
+			{
+				return true;
 			}
 
-			return !entity1.Equals(entity2);
+			if (ReferenceEquals(entity1, entity2))
+			{
+				return false;
+			}
+
+			// Resharper thinks that there is a possible null exception, because
+			// it does not know about IsNull()
+			// ReSharper disable PossibleNullReferenceException
+			var id1 = entity1.GetId();
+			var id2 = entity2.GetId();
+			// ReSharper restore PossibleNullReferenceException
+
+			if (IdHelper.IsDefaultValue(id1) || IdHelper.IsDefaultValue(id2))
+			{
+				// If two different objects have the same default ID value, they
+				// are considered non-equal.
+				return true;
+			}
+
+			return !IdHelper.AreEqual(id1, id2);
 		}
 
 		public virtual int CompareTo(TEntity other)
