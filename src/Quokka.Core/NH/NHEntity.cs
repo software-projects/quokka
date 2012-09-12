@@ -248,7 +248,7 @@ namespace Quokka.NH
 
 		public virtual int CompareTo(TEntity other)
 		{
-			if (other == null)
+			if (IsNull(other))
 			{
 				return 1;
 			}
