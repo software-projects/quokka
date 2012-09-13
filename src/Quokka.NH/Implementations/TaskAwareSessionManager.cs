@@ -27,61 +27,8 @@ namespace Quokka.NH.Implementations
 	{
 		private UITask _currentTaskAtCreation;
 
-		protected override ISession FindCompatibleSession(string alias, ISessionFactory sessionFactory)
-		{
-			ISession session = null;
-			var slotId = SlotId(alias);
-
-			var task = GetCurrentTask();
-			if (task != null)
-			{
-				var taskSessionHolder = GetSessionHolder(task, slotId);
-				if (taskSessionHolder.ShouldHaveSession)
-				{
-					if (taskSessionHolder.Session == null)
-					{
-						taskSessionHolder.Session = CreateNewSession(alias, sessionFactory);
-					}
-					session = taskSessionHolder.Session;
-				}
-				else if (task.CurrentNode != null)
-				{
-					var nodeSessionHolder = GetSessionHolder(task.CurrentNode, slotId);
-					if (nodeSessionHolder.ShouldHaveSession)
-					{
-						if (nodeSessionHolder.Session == null)
-						{
-							nodeSessionHolder.Session = CreateNewSession(alias, sessionFactory);
-						}
-						session = nodeSessionHolder.Session;
-					}
-				}
-			}
-
-			return session;
-		}
-
-		private string SlotId(string alias)
-		{
-			// Key for storing ISession in the UITask or UINode context. We use a constant
-			// value, because multiple instances of this class want to be able to
-			// access the same session.
-			const string suffix = "-NHibernate-ISession-8344f95b-5b8d-48dd-8843-52b83fdb1bde";
-			return alias + suffix;
-		}
-
-		private UITask GetCurrentTask()
-		{
-			if (_currentTaskAtCreation != null && !_currentTaskAtCreation.IsComplete)
-			{
-				return _currentTaskAtCreation;
-			}
-			return null;
-		}
-
-		// Returns the slot for storing task-scope sessions for the given alias.
-
-		public TaskAwareSessionManager(ISessionFactoryResolver sessionFactoryResolver) : base(sessionFactoryResolver)
+		public TaskAwareSessionManager(ISessionFactoryResolver sessionFactoryResolver)
+			: base(sessionFactoryResolver)
 		{
 			// Keep track of the task that was current when this object was created.
 			// For this reason this class needs to be registered as Transient with the
@@ -94,70 +41,26 @@ namespace Quokka.NH.Implementations
 			}
 		}
 
-		private SessionHolder GetSessionHolder(UITask task, string slotId)
+		protected override ISession FindCompatibleSession(string alias, ISessionFactory sessionFactory)
 		{
-			var sessionHolder = task.GetData(slotId) as SessionHolder;
-			if (sessionHolder == null)
+			ISession session = null;
+
+			var task = GetCurrentTask();
+			if (task != null)
 			{
-				sessionHolder = new SessionHolder {
-				                                  	ShouldHaveSession = HasSessionAttribute(task)
-				                                  };
-				task.SetData(slotId, sessionHolder);
+				session = task.FindCompatibleSession(alias, () => CreateNewSession(alias, sessionFactory));
 			}
 
-			return sessionHolder;
+			return session;
 		}
 
-		private SessionHolder GetSessionHolder(UINode node, string slotId)
+		private UITask GetCurrentTask()
 		{
-			var sessionHolder = node.GetData(slotId) as SessionHolder;
-			if (sessionHolder == null)
+			if (_currentTaskAtCreation != null && !_currentTaskAtCreation.IsComplete)
 			{
-				sessionHolder = new SessionHolder {
-				                                  	ShouldHaveSession = HasSessionAttribute(node.View)
-				                                  	                    || HasSessionAttribute(node.Presenter)
-				                                  	                    || HasSessionAttribute(node.ViewType)
-				                                  	                    || HasSessionAttribute(node.PresenterType)
-				                                  };
-				node.SetData(slotId, sessionHolder);
+				return _currentTaskAtCreation;
 			}
-			return sessionHolder;
-		}
-
-		/// <summary>
-		/// Work out whether an object's type definition has a session attribute associated with it.
-		/// </summary>
-		private bool HasSessionAttribute(object obj)
-		{
-			if (obj == null)
-			{
-				return false;
-			}
-
-			var type = obj as Type;
-			if (type == null)
-			{
-				type = obj.GetType();
-			}
-
-			var attributes = type.GetCustomAttributes(typeof (NHSessionAttribute), true);
-			return attributes.Length > 0;
-		}
-
-		/// <summary>
-		/// Stores a session against a <see cref="UITask"/> or <see cref="UINode"/>.
-		/// </summary>
-		private class SessionHolder
-		{
-			/// <summary>
-			/// Should the task/node have a session associated with it.
-			/// </summary>
-			public bool ShouldHaveSession;
-
-			/// <summary>
-			/// The session associated with the task/node.
-			/// </summary>
-			public ISession Session;
+			return null;
 		}
 	}
 }

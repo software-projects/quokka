@@ -1,6 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
 
+// ReSharper disable InconsistentNaming
 namespace Quokka.NH
 {
 	[TestFixture]
@@ -12,13 +13,20 @@ namespace Quokka.NH
 			var id1A = new Int32Entity(1);
 			var id1B = new Int32Entity(1);
 			Assert.AreEqual(id1A, id1B);
+			Assert.IsFalse(id1A != id1B);
+			Assert.IsTrue(id1A == id1B);
 
 			// default values mean entities are not equal
 			var id0A = new Int32Entity(0);
 			var id0B = new Int32Entity(0);
 			Assert.AreNotEqual(id0A, id0B);
+			Assert.IsTrue(id0A != id0B);
+			Assert.IsFalse(id0A == id0B);
 
 			var id2 = new Int32Entity(2);
+			Assert.AreNotEqual(id1A, id2);
+			Assert.IsTrue(id1A != id2);
+			Assert.IsFalse(id1A == id2);
 
 			Assert.That(id0A.CompareTo(id1A), Is.LessThan(0));
 			Assert.That(id1A.CompareTo(id2), Is.LessThan(0));
@@ -31,13 +39,20 @@ namespace Quokka.NH
 			var id1A = new Int64Entity(1);
 			var id1B = new Int64Entity(1);
 			Assert.AreEqual(id1A, id1B);
+			Assert.IsFalse(id1A != id1B);
+			Assert.IsTrue(id1A == id1B);
 
 			// default values mean entities are not equal
 			var id0A = new Int64Entity(0);
 			var id0B = new Int64Entity(0);
 			Assert.AreNotEqual(id0A, id0B);
+			Assert.IsTrue(id0A != id0B);
+			Assert.IsFalse(id0A == id0B);
 
 			var id2 = new Int64Entity(2);
+			Assert.AreNotEqual(id1A, id2);
+			Assert.IsTrue(id1A != id2);
+			Assert.IsFalse(id1A == id2);
 
 			Assert.That(id0A.CompareTo(id1A), Is.LessThan(0));
 			Assert.That(id1A.CompareTo(id2), Is.LessThan(0));
@@ -50,13 +65,20 @@ namespace Quokka.NH
 			var id1A = new EnumEntity(EnumType.Enum1);
 			var id1B = new EnumEntity(EnumType.Enum1);
 			Assert.AreEqual(id1A, id1B);
+			Assert.IsFalse(id1A != id1B);
+			Assert.IsTrue(id1A == id1B);
 
 			// default values mean entities are not equal
 			var id0A = new EnumEntity(default(EnumType));
 			var id0B = new EnumEntity(default(EnumType));
 			Assert.AreNotEqual(id0A, id0B);
+			Assert.IsTrue(id0A != id0B);
+			Assert.IsFalse(id0A == id0B);
 
 			var id2 = new EnumEntity(EnumType.Enum2);
+			Assert.AreNotEqual(id1A, id2);
+			Assert.IsTrue(id1A != id2);
+			Assert.IsFalse(id1A == id2);
 
 			Assert.That(id0A.CompareTo(id1A), Is.LessThan(0));
 			Assert.That(id1A.CompareTo(id2), Is.LessThan(0));
@@ -81,13 +103,20 @@ namespace Quokka.NH
 			var id1A = new GuidEntity(guid1);
 			var id1B = new GuidEntity(guid1);
 			Assert.AreEqual(id1A, id1B);
+			Assert.IsFalse(id1A != id1B);
+			Assert.IsTrue(id1A == id1B);
 
 			// default values mean entities are not equal
 			var id0A = new GuidEntity(default(Guid));
 			var id0B = new GuidEntity(default(Guid));
 			Assert.AreNotEqual(id0A, id0B);
+			Assert.IsTrue(id0A != id0B);
+			Assert.IsFalse(id0A == id0B);
 
 			var id2 = new GuidEntity(guid2);
+			Assert.AreNotEqual(id1A, id2);
+			Assert.IsTrue(id1A != id2);
+			Assert.IsFalse(id1A == id2);
 
 			Assert.That(id0A.CompareTo(id1A), Is.LessThan(0));
 			Assert.That(id1A.CompareTo(id2), Is.LessThan(0));
@@ -100,17 +129,50 @@ namespace Quokka.NH
 			var id1A = new StringEntity("XX");
 			var id1B = new StringEntity("xx");
 			Assert.AreEqual(id1A, id1B);
+			Assert.IsFalse(id1A != id1B);
+			Assert.IsTrue(id1A == id1B);
 
 			// default values mean entities are not equal
 			var id0A = new StringEntity(null);
 			var id0B = new StringEntity(null);
 			Assert.AreNotEqual(id0A, id0B);
+			Assert.IsTrue(id0A != id0B);
+			Assert.IsFalse(id0A == id0B);
 
 			var id2 = new StringEntity("ZZ");
+			Assert.AreNotEqual(id1A, id2);
+			Assert.IsTrue(id1A != id2);
+			Assert.IsFalse(id1A == id2);
 
 			Assert.That(id0A.CompareTo(id1A), Is.LessThan(0));
 			Assert.That(id1A.CompareTo(id2), Is.LessThan(0));
 			Assert.That(id2.CompareTo(id1B), Is.GreaterThan(0));
+		}
+
+		[Test]
+		public void Throws_exception_if_id_changes_after_GetHashCode()
+		{
+			var entity = new EntityWhoseIdCanChange {Id = 1};
+
+			var hashCode1 = entity.GetHashCode();
+			var hashCode2 = entity.GetHashCode();
+
+			Assert.AreEqual(hashCode1, hashCode2);
+
+			entity.Id = 2;
+			// ReSharper disable ReturnValueOfPureMethodIsNotUsed
+			Assert.Throws<InvalidOperationException>(() => entity.GetHashCode());
+			// ReSharper restore ReturnValueOfPureMethodIsNotUsed
+		}
+
+		public class EntityWhoseIdCanChange : NHEntity<EntityWhoseIdCanChange, int>
+		{
+			public int Id;
+
+			protected override int GetId()
+			{
+				return Id;
+			}
 		}
 
 		public class Int32Entity : NHEntity<Int32Entity, int>

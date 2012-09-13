@@ -206,7 +206,8 @@ namespace Quokka.UI.Tasks
 
 		private Dictionary<string, object> _nodeData;
 
-		public object GetData(string slotId)
+		// TODO: this is not well thought out, internal for now
+		internal object GetData(string slotId)
 		{
 			Verify.ArgumentNotNull(slotId, "slotId");
 			object result = null;
@@ -217,7 +218,13 @@ namespace Quokka.UI.Tasks
 			return result;
 		}
 
-		public void SetData(string slotId, object value)
+		/// <summary>
+		/// Set arbitrary data against the node. Will be disposed when the node navigates.
+		/// TODO: this is not well thought out yet, internal for now
+		/// </summary>
+		/// <param name="slotId"></param>
+		/// <param name="value"></param>
+		internal void SetData(string slotId, object value)
 		{
 			Verify.ArgumentNotNull(slotId, "slotId");
 			if (value == null)

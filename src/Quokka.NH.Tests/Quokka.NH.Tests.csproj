@@ -77,7 +77,9 @@
     <Compile Include="SessionStoreTests.cs" />
     <Compile Include="SqliteTestDatabaseTests.cs" />
     <Compile Include="StatelessSessionDelegateTests.cs" />
+    <Compile Include="Support\FakeViewDeck.cs" />
     <Compile Include="Support\TestConfigurationBuilder.cs" />
+    <Compile Include="UITaskFindCompatibleSessionTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Quokka.Core\Quokka.Core.csproj">

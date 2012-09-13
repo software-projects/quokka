@@ -80,6 +80,7 @@
     <Compile Include="Implementations\TransactionDelegate.cs" />
     <Compile Include="Implementations\TransactionMetaInfo.cs" />
     <Compile Include="Implementations\TransactionMetaInfoStore.cs" />
+    <Compile Include="Implementations\UITaskExtensions.cs" />
     <Compile Include="Interfaces\IConfigurationResolver.cs" />
     <Compile Include="Interfaces\IDefaultAlias.cs" />
     <Compile Include="Interfaces\ISessionFactoryResolver.cs" />

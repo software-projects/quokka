@@ -33,6 +33,7 @@ using Quokka.Collections;
 using Quokka.Diagnostics;
 using Quokka.ServiceLocation;
 using Quokka.UI.Messages;
+using Quokka.Util;
 
 namespace Quokka.UI.Tasks
 {
@@ -51,7 +52,7 @@ namespace Quokka.UI.Tasks
 		private bool _raiseTaskStarted;
 		protected readonly DisposableCollection Disposables = new DisposableCollection();
 		private readonly ErrorReport _errorReport = new ErrorReport();
-		private readonly Dictionary<string, object> _taskContext = new Dictionary<string, object>(); 
+		private readonly Dictionary<string, object> _taskData = new Dictionary<string, object>(); 
 
 		protected UITask()
 		{
@@ -252,24 +253,7 @@ namespace Quokka.UI.Tasks
 				node.CleanupNode();
 			}
 
-			// Dispose of any objects stored in the UITask context that implement IDisposable.
-			foreach (var obj in _taskContext.Values)
-			{
-				var disposable = obj as IDisposable;
-				if (disposable != null)
-				{
-					try
-					{
-						disposable.Dispose();
-					}
-					catch (Exception ex)
-					{
-						var message = string.Format("Unexpected exception disposing of context object of type {0}: {1}",
-						                            obj.GetType(), ex.Message);
-						Log.Error(message, ex);
-					}
-				}
-			}
+			ClearTaskData();
 
 			CurrentNode = null;
 			IsComplete = true;
@@ -280,6 +264,26 @@ namespace Quokka.UI.Tasks
 		protected virtual void Dispose(bool disposing)
 		{
 			
+		}
+
+		private void ClearTaskData()
+		{
+			// Dispose of any objects stored in the UITask context that implement IDisposable.
+			foreach (var obj in _taskData.Values)
+			{
+				try
+				{
+					DisposeUtils.DisposeOf(obj);
+				}
+				catch (Exception ex)
+				{
+					var message = string.Format("Unexpected exception disposing of context object of type {0}: {1}",
+												obj.GetType(), ex.Message);
+					Log.Error(message, ex);
+				}
+			}
+
+			_taskData.Clear();
 		}
 
 		/// <summary>
@@ -296,35 +300,89 @@ namespace Quokka.UI.Tasks
 
 		/// <summary>
 		/// Used for storing arbitrary data against the the UITask. Used by <see cref="UICurrentTask"/>
+		/// TODO: not well thought out, internal for now.
 		/// </summary>
-		public void SetData(string slotName, object data)
+		internal void SetData(string slotName, object data)
 		{
 			Verify.ArgumentNotNull(slotName, "slotName");
-			lock (_taskContext)
+			lock (_taskData)
 			{
 				if (data == null)
 				{
-					_taskContext.Remove(slotName);
+					_taskData.Remove(slotName);
 				}
 				else
 				{
-					_taskContext[slotName] = data;
+					_taskData[slotName] = data;
 				}
 			}
 		}
 
 		/// <summary>
 		/// Used for storing arbitrary data against the the UITask. Used by <see cref="UICurrentTask"/>.
+		/// Will be disposed when the task completes. TODO: not well thought out, internal for now.
 		/// </summary>
-		public object GetData(string slotName)
+		internal object GetData(string slotName)
 		{
 			Verify.ArgumentNotNull(slotName, "slotName");
 			object result;
-			lock(_taskContext)
+			lock(_taskData)
 			{
-				_taskContext.TryGetValue(slotName, out result);
+				_taskData.TryGetValue(slotName, out result);
 			}
 			return result;
+		}
+
+
+		/// <summary>
+		/// Gets the object associated with the current node, or <c>null</c> if not found.
+		/// </summary>
+		public T GetTaskLifetimeObject<T>(string name) where T : class, IDisposable
+		{
+			return (T) GetData(SlotName<T>(name));
+		}
+
+		/// <summary>
+		/// Associates a disposable object with the current node. This object will be 
+		/// disposed when the current node changes.
+		/// </summary>
+		public void SetTaskLifetimeObject<T>(string name, T data) where T : class, IDisposable
+		{
+			SetData(SlotName<T>(name), data);
+		}
+
+		/// <summary>
+		/// Gets the object associated with the current node, or <c>null</c> if not found.
+		/// </summary>
+		public T GetNodeLifetimeObject<T>(string name) where T : class, IDisposable
+		{
+			if (CurrentNode == null)
+			{
+				throw new InvalidOperationException("No current node defined for task");
+			}
+			return (T) CurrentNode.GetData(SlotName<T>(name));
+		}
+
+		/// <summary>
+		/// Associates a disposable object with the current node. This object will be 
+		/// disposed when the current node changes.
+		/// </summary>
+		public void SetNodeLifetimeObject<T>(string name, T data) where T : class, IDisposable
+		{
+			if (CurrentNode == null)
+			{
+				throw new InvalidOperationException("No current node defined for task");
+			}
+			CurrentNode.SetData(SlotName<T>(name), data);
+		}
+
+		private static string SlotName<T>(string name)
+		{
+			if (name == null)
+			{
+				return "<NULL>-" + typeof(T).FullName;
+			}
+			return "(" + name + ")-" + typeof(T).FullName;
 		}
 
 		#endregion
@@ -680,6 +738,7 @@ namespace Quokka.UI.Tasks
 				{
 					CurrentNode = null;
 					IsComplete = true;
+					ClearTaskData();
 					_raiseTaskComplete = true;
 				}
 			}
