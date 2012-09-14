@@ -23,7 +23,7 @@
 
 using NHibernate.Cfg;
 
-namespace Quokka.NH.Startup
+namespace Quokka.NH.Interfaces
 {
 	/// <summary>
 	/// Registers an object which optionally contributes to the NHibernate <see cref="Configuration"/>,
@@ -31,7 +31,7 @@ namespace Quokka.NH.Startup
 	/// </summary>
 	/// <remarks>
 	/// The NHibernate facility creates NHibernate configurations by resolving all components that
-	/// implement the <see cref="IConfigurationBuilder"/> interface. After each <see cref="Configuration"/>
+	/// implement the <see cref="Configuration"/> interface. After each <see cref="IConfigurationBuilder"/>
 	/// object is created, the NHibernate facility calls each component registered to implement this
 	/// interface. This provides an opportunity to add additional class mappings, modify the configuration,
 	/// add interceptors and more.

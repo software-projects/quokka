@@ -22,6 +22,7 @@ using Castle.Windsor;
 using NHibernate;
 using NUnit.Framework;
 using Quokka.NH.Implementations;
+using Quokka.NH.Interfaces;
 using Quokka.NH.Startup;
 using Quokka.NH.Tests.Model;
 using Quokka.NH.Tests.Support;

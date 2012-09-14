@@ -74,7 +74,6 @@
     <Compile Include="SessionDelegateTests.cs" />
     <Compile Include="SessionFactoryResolverTests.cs" />
     <Compile Include="SessionManagerTests.cs" />
-    <Compile Include="SessionStoreTests.cs" />
     <Compile Include="SqliteTestDatabaseTests.cs" />
     <Compile Include="StatelessSessionDelegateTests.cs" />
     <Compile Include="Support\FakeViewDeck.cs" />

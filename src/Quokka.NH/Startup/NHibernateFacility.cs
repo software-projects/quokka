@@ -22,7 +22,7 @@
 using Castle.Core.Logging;
 using Castle.MicroKernel.Facilities;
 using Castle.MicroKernel.Registration;
-using NHibernate;
+using NHibernate.Context;
 using Quokka.NH.Implementations;
 using Quokka.NH.Interfaces;
 using ILoggerFactory = Castle.Core.Logging.ILoggerFactory;
@@ -60,11 +60,10 @@ namespace Quokka.NH.Startup
 
 			RegisterTransactionalInfoStore();
 			RegisterTransactionInterceptor();
-			RegisterSessionStoreContext();
-			RegisterSessionStores();
 			RegisterConfigurationResolver();
 			RegisterSessionFactoryResolver();
 			RegisterSessionManager();
+			RegisterCurrentSessionContext();
 			AddContributors();
 
 			_logger.Debug("NHibernateFacility is initialized");
@@ -95,38 +94,13 @@ namespace Quokka.NH.Startup
 			Kernel.Register(Component.For<NHTransactionInterceptor>().LifestyleTransient());
 		}
 
-		private void RegisterSessionStoreContext()
-		{
-			if (!Kernel.HasComponent(typeof(ISessionStoreContext)))
-			{
-				Kernel.Register(Component.For<ISessionStoreContext>()
-									.ImplementedBy<CallContextSessionStoreContext>()
-									.LifestyleSingleton());
-			}
-		}
-
-		private void RegisterSessionStores()
-		{
-			if (!Kernel.HasComponent(typeof(ISessionStore<ISession>)))
-			{
-				Kernel.Register(Component.For<ISessionStore<ISession>>()
-									.ImplementedBy<SessionStore<ISession>>()
-									.LifestyleSingleton());
-			}
-
-			if (!Kernel.HasComponent(typeof(ISessionStore<IStatelessSession>)))
-			{
-				Kernel.Register(Component.For<ISessionStore<IStatelessSession>>()
-									.ImplementedBy<SessionStore<IStatelessSession>>()
-									.LifestyleSingleton());
-			}
-		}
-
 		private void RegisterConfigurationResolver()
 		{
 			if (!Kernel.HasComponent(typeof(IConfigurationResolver)))
 			{
-				Kernel.Register(Component.For<IConfigurationResolver>().ImplementedBy<ConfigurationResolver>());
+				Kernel.Register(Component.For<IConfigurationResolver>()
+					.ImplementedBy<ConfigurationResolver>()
+					.LifestyleSingleton());
 			}
 		}
 
@@ -134,7 +108,9 @@ namespace Quokka.NH.Startup
 		{
 			if (!Kernel.HasComponent(typeof(ISessionFactoryResolver)))
 			{
-				Kernel.Register(Component.For<ISessionFactoryResolver>().ImplementedBy<SessionFactoryResolver>());
+				Kernel.Register(Component.For<ISessionFactoryResolver>()
+					.ImplementedBy<SessionFactoryResolver>()
+					.LifestyleSingleton());
 			}
 		}
 
@@ -143,7 +119,18 @@ namespace Quokka.NH.Startup
 			if (!Kernel.HasComponent(typeof(ISessionManager)))
 			{
 				Kernel.Register(Component.For<ISessionManager>()
-									.ImplementedBy<TaskAwareSessionManager>());
+									.ImplementedBy<TaskAwareSessionManager>()
+									.LifestyleTransient());
+			}
+		}
+
+		private void RegisterCurrentSessionContext()
+		{
+			if (!Kernel.HasComponent(typeof(ICurrentSessionContext)))
+			{
+				Kernel.Register(Component.For<ICurrentSessionContext>()
+				                	.ImplementedBy<CurrentSessionContextImpl>()
+									.LifestyleSingleton());
 			}
 		}
 

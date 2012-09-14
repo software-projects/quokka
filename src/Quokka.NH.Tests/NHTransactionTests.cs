@@ -19,6 +19,7 @@
 using Castle.MicroKernel.Registration;
 using Castle.Windsor;
 using NUnit.Framework;
+using Quokka.NH.Interfaces;
 using Quokka.NH.Startup;
 using Quokka.NH.Tests.Support;
 

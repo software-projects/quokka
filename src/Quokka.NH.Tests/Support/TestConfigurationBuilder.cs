@@ -27,6 +27,7 @@ using NHibernate.Driver;
 using NHibernate.Engine;
 using NHibernate.Mapping.ByCode;
 using NHibernate.Tool.hbm2ddl;
+using Quokka.NH.Interfaces;
 using Quokka.NH.Startup;
 using Environment = NHibernate.Cfg.Environment;
 

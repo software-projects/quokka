@@ -37,6 +37,12 @@ namespace Quokka.NH.Implementations
 		private readonly IKernel _kernel;
 		private readonly Lock _lock = Lock.Create();
 
+		/// <summary>
+		/// Optionally injected. Useful mainly to speed up automated tests. The idea is that a session factory
+		/// is created in the first test, and can be re-used for subsequent tests that have different containers.
+		/// </summary>
+		public ISessionFactoryCache SessionFactoryCache { get; set; }
+
 		public SessionFactoryResolver(IKernel kernel, IConfigurationResolver configurationResolver)
 		{
 			_kernel = Verify.ArgumentNotNull(kernel, "kernel");
@@ -46,6 +52,15 @@ namespace Quokka.NH.Implementations
 		public ISessionFactory GetSessionFactory(string alias)
 		{
 			alias = alias ?? DefaultAlias;
+
+			if (SessionFactoryCache != null)
+			{
+				var sessionFactory = SessionFactoryCache.Find(alias);
+				if (sessionFactory != null)
+				{
+					return sessionFactory;
+				}
+			}
 
 			using (_lock.ForReading())
 			{
@@ -76,6 +91,11 @@ namespace Quokka.NH.Implementations
 				sessionFactory = configuration.BuildSessionFactory();
 				CallContributors(alias, sessionFactory, configuration);
 				_sessionFactories.Save(alias, sessionFactory);
+
+				if (SessionFactoryCache != null)
+				{
+					SessionFactoryCache.Save(alias, sessionFactory);
+				}
 
 				return sessionFactory;
 			}

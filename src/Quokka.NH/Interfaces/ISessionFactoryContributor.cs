@@ -1,9 +1,8 @@
 ﻿using System;
 using NHibernate;
 using NHibernate.Cfg;
-using Quokka.NH.Interfaces;
 
-namespace Quokka.NH.Startup
+namespace Quokka.NH.Interfaces
 {
 	/// <summary>
 	/// Registers an object which optionally contributes to the NHibernate <see cref="ISessionFactory"/>,

@@ -21,7 +21,7 @@
 using NHibernate;
 using NHibernate.Cfg;
 
-namespace Quokka.NH.Startup
+namespace Quokka.NH.Interfaces
 {
 	/// <summary>
 	/// Interface implemented by classes that can create an NHibernate configuration for a database.

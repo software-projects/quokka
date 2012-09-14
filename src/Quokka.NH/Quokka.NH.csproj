@@ -65,7 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Implementations\AliasDictionary.cs" />
-    <Compile Include="Implementations\CallContextSessionStoreContext.cs" />
+    <Compile Include="Implementations\CurrentSessionContextImpl.cs" />
     <Compile Include="Implementations\DefaultAliasConcern.cs" />
     <Compile Include="Implementations\DefaultAliasContributor.cs" />
     <Compile Include="Implementations\ConfigurationResolver.cs" />
@@ -74,7 +74,6 @@
     <Compile Include="Implementations\SessionDelegate.cs" />
     <Compile Include="Implementations\SessionFactoryResolver.cs" />
     <Compile Include="Implementations\SessionManager.cs" />
-    <Compile Include="Implementations\SessionStore.cs" />
     <Compile Include="Implementations\StatelessSessionDelegate.cs" />
     <Compile Include="Implementations\TaskAwareSessionManager.cs" />
     <Compile Include="Implementations\TransactionDelegate.cs" />
@@ -83,19 +82,18 @@
     <Compile Include="Implementations\UITaskExtensions.cs" />
     <Compile Include="Interfaces\IConfigurationResolver.cs" />
     <Compile Include="Interfaces\IDefaultAlias.cs" />
+    <Compile Include="Interfaces\ISessionFactoryCache.cs" />
     <Compile Include="Interfaces\ISessionFactoryResolver.cs" />
-    <Compile Include="Interfaces\ISessionStore.cs" />
-    <Compile Include="Interfaces\ISessionStoreContext.cs" />
     <Compile Include="Interfaces\ITransactionMetaInfoStore.cs" />
     <Compile Include="ISessionManager.cs" />
     <Compile Include="NHSessionAttribute.cs" />
     <Compile Include="NHTransactionAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SessionExtensions.cs" />
-    <Compile Include="Startup\IConfigurationBuilder.cs" />
-    <Compile Include="Startup\IConfigurationContributor.cs" />
-    <Compile Include="Startup\IConfigurationSerializer.cs" />
-    <Compile Include="Startup\ISessionFactoryContributor.cs" />
+    <Compile Include="Interfaces\IConfigurationBuilder.cs" />
+    <Compile Include="Interfaces\IConfigurationContributor.cs" />
+    <Compile Include="Interfaces\IConfigurationSerializer.cs" />
+    <Compile Include="Interfaces\ISessionFactoryContributor.cs" />
     <Compile Include="Startup\NHibernateFacility.cs" />
     <Compile Include="Startup\NHibernateFacilityException.cs" />
   </ItemGroup>

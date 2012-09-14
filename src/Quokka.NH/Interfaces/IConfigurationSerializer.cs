@@ -1,7 +1,7 @@
 ﻿using System;
 using NHibernate.Cfg;
 
-namespace Quokka.NH.Startup
+namespace Quokka.NH.Interfaces
 {
 	/// <summary>
 	/// Interface implemented by classes that can serialize and deserialize an NHibernate <see cref="Configuration"/>
