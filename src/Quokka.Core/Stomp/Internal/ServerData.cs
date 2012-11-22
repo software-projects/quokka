@@ -12,7 +12,7 @@ namespace Quokka.Stomp.Internal
 	internal class ServerData : IDisposable
 	{
 		private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
-		private readonly object _lockObject = GlobalLock.Instance;
+		private readonly LockObject _lockObject = GlobalLock.LockObject;
 		private readonly Dictionary<string, ServerSideSession> _sessions = new Dictionary<string, ServerSideSession>();
 		private readonly Dictionary<string, MessageQueue> _messageQueues = new Dictionary<string, MessageQueue>();
 		private volatile MessageQueue _serverStatusMessageQueue;
@@ -40,7 +40,7 @@ namespace Quokka.Stomp.Internal
 
 		public void Dispose()
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				DisposeUtils.DisposeOf(ref _cleanupTimer);
 				_isDisposed = true;
@@ -49,7 +49,7 @@ namespace Quokka.Stomp.Internal
 
 		public ServerSideSession FindSession(string sessionId)
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				ServerSideSession session;
 				_sessions.TryGetValue(sessionId, out session);
@@ -59,7 +59,7 @@ namespace Quokka.Stomp.Internal
 
 		public void RemoveSession(string sessionId)
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				_sessions.Remove(sessionId);
 			}
@@ -67,7 +67,7 @@ namespace Quokka.Stomp.Internal
 
 		public MessageQueue FindMessageQueue(string messageQueueName)
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				MessageQueue mq;
 				if (!_messageQueues.TryGetValue(messageQueueName, out mq))
@@ -94,7 +94,7 @@ namespace Quokka.Stomp.Internal
 
 		public ServerSideSession CreateSession()
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				var session = new ServerSideSession(this);
 				_sessions.Add(session.SessionId, session);
@@ -106,7 +106,7 @@ namespace Quokka.Stomp.Internal
 		{
 			if (session != null)
 			{
-				lock (_lockObject)
+				using (_lockObject.Lock())
 				{
 					_sessions.Remove(session.SessionId);
 					session.Dispose();
@@ -120,7 +120,7 @@ namespace Quokka.Stomp.Internal
 
 			if (_messageLogMessageQueue != null)
 			{
-				lock(_lockObject)
+				using (_lockObject.Lock())
 				{
 // ReSharper disable ConditionIsAlwaysTrueOrFalse
 					if (_messageLogMessageQueue != null)
@@ -159,7 +159,7 @@ namespace Quokka.Stomp.Internal
 			List<ServerSideSession> sessions;
 			List<MessageQueue> messageQueues;
 
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				if (_serverStatusMessageQueue == null)
 				{
@@ -195,7 +195,7 @@ namespace Quokka.Stomp.Internal
 			frame.SetExpires(_config.ServerStatusPeriod);
 
 			MessageQueue queue;
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				queue = _serverStatusMessageQueue;
 			}
@@ -220,7 +220,7 @@ namespace Quokka.Stomp.Internal
 			// everything. What we do is get a list of all message queues and a list
 			// of all sessions, and rely on the locks for each during the cleanup
 			// process.
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				if (_isDisposed)
 				{
@@ -236,7 +236,7 @@ namespace Quokka.Stomp.Internal
 				messageQueue.RemoveExpired();
 				if (messageQueue.IsUnused)
 				{
-					lock (_lockObject)
+					using (_lockObject.Lock())
 					{
 						if (messageQueue.IsUnused)
 						{
@@ -283,7 +283,7 @@ namespace Quokka.Stomp.Internal
 				}
 			}
 
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 
 				if (_serverStatusMessageQueue != null && _serverStatusMessageQueue.IsDisposed)

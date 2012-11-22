@@ -2,6 +2,7 @@
 using System.Threading;
 using Castle.Core.Logging;
 using Quokka.Diagnostics;
+using Quokka.Stomp.Internal;
 
 namespace Quokka.Stomp
 {

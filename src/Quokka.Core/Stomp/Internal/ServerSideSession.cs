@@ -12,7 +12,7 @@ namespace Quokka.Stomp.Internal
 	internal class ServerSideSession : IDisposable
 	{
 		private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
-		private readonly object _lockObject = GlobalLock.Instance;
+		private readonly LockObject _lockObject = GlobalLock.LockObject;
 		private readonly ServerData _serverData;
 		private ServerSideConnection _clientConnection;
 		private readonly Dictionary<string, ServerSideSubscription> _subscriptions = new Dictionary<string, ServerSideSubscription>();
@@ -32,7 +32,7 @@ namespace Quokka.Stomp.Internal
 
 		public void Dispose()
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				_clientConnection = null;
 				foreach (var subscription in _subscriptions.Values)
@@ -51,7 +51,7 @@ namespace Quokka.Stomp.Internal
 								ClientId = ClientId,
 								Subscriptions = new List<SubscriptionStatus>(),
 			             	};
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				status.Connected = _clientConnection != null;
 				foreach (var subscription in _subscriptions.Values)
@@ -69,7 +69,7 @@ namespace Quokka.Stomp.Internal
 
 		public bool Cleanup()
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				if (_clientConnection == null)
 				{
@@ -93,7 +93,7 @@ namespace Quokka.Stomp.Internal
 			Verify.ArgumentNotNull(clientConnection, "clientConnection");
 			IEnumerable<ServerSideSubscription> subscriptions = null;
 
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				if (_clientConnection != null)
 				{
@@ -121,7 +121,7 @@ namespace Quokka.Stomp.Internal
 
 		private void ClientConnectionClosed(object sender, EventArgs e)
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				_clientConnection = null;
 
@@ -137,7 +137,7 @@ namespace Quokka.Stomp.Internal
 		/// <param name="frame"></param>
 		public void ProcessFrame(StompFrame frame)
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				ProcessFrameByCommand(frame);
 			}
@@ -369,7 +369,7 @@ namespace Quokka.Stomp.Internal
 
 		public void SendFrame(StompFrame frame)
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				if (_clientConnection != null)
 				{
@@ -380,7 +380,7 @@ namespace Quokka.Stomp.Internal
 
 		public void Disconnect()
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				if (_clientConnection != null)
 				{

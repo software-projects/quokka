@@ -12,7 +12,7 @@ namespace Quokka.Stomp.Internal
 
 		private readonly ITransport<StompFrame> _transport;
 		private readonly ServerData _serverData;
-		private readonly object _lockObject = GlobalLock.Instance;
+		private readonly LockObject _lockObject = GlobalLock.LockObject;
 
 		private delegate void StateAction(StompFrame frame);
 
@@ -42,7 +42,7 @@ namespace Quokka.Stomp.Internal
 
 		public void SendFrame(StompFrame frame)
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				if (_stateAction == ShuttingDown)
 				{
@@ -58,7 +58,7 @@ namespace Quokka.Stomp.Internal
 
 		public void Disconnect()
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				DisconnectWithoutLocking();
 			}
@@ -201,7 +201,7 @@ namespace Quokka.Stomp.Internal
 
 		private void Connected(StompFrame frame)
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				StartIncomingHeartBeatTimer();
 				if (frame.IsHeartBeat)
@@ -264,10 +264,14 @@ namespace Quokka.Stomp.Internal
 			}
 			else
 			{
-				Log.Debug("Transport disconnected");
-				if (ConnectionClosed != null)
+				using (_lockObject.Lock())
 				{
-					ConnectionClosed(this, EventArgs.Empty);
+					Log.Debug("Transport disconnected");
+					var connectionClosed = ConnectionClosed;
+					if (connectionClosed != null)
+					{
+						_lockObject.AfterUnlock(() => connectionClosed(this, EventArgs.Empty));
+					}
 				}
 			}
 		}
@@ -288,7 +292,7 @@ namespace Quokka.Stomp.Internal
 					return;
 				}
 
-				lock (_lockObject)
+				using (_lockObject.Lock())
 				{
 					try
 					{
@@ -333,7 +337,7 @@ namespace Quokka.Stomp.Internal
 
 		private void HandleIncomingHeartBeatTimeout(object state)
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				if (_stateAction == Connected)
 				{
@@ -345,7 +349,7 @@ namespace Quokka.Stomp.Internal
 
 		private void HandleOutgoingHeartBeatTimeout(object state)
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				if (_stateAction == Connected)
 				{
@@ -357,7 +361,7 @@ namespace Quokka.Stomp.Internal
 
 		private void HandleConnectTimeout(object state)
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				if (_connectTimer != null && _stateAction == ExpectingConnect)
 				{

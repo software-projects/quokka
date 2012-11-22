@@ -5,6 +5,6 @@
 	/// </summary>
 	public static class GlobalLock
 	{
-		public static readonly object Instance = new object();
+		public static readonly LockObject LockObject = new LockObject();
 	}
 }

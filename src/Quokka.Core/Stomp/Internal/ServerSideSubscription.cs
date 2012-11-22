@@ -16,7 +16,7 @@ namespace Quokka.Stomp.Internal
 		public bool AutoAcknowledge { get; private set; }
 		private long _lastMessageId;
 		private long _lastAcknowledgedMessageId;
-		private readonly object _lockObject = GlobalLock.Instance;
+		private readonly LockObject _lockObject = GlobalLock.LockObject;
 		private readonly Dictionary<long, StompFrame> _unacknowledgedFrames = new Dictionary<long, StompFrame>();
 
 		public ServerSideSubscription(ServerSideSession session, string subscriptionId, MessageQueue messageQueue,
@@ -66,7 +66,7 @@ namespace Quokka.Stomp.Internal
 
 		public void SendFrame(StompFrame frame)
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				var messageId = ++_lastMessageId;
 				frame.Headers[StompHeader.MessageId] = messageId.ToString();
@@ -82,7 +82,7 @@ namespace Quokka.Stomp.Internal
 
 		public void Acknowledge(long messageId)
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				for (long id = _lastAcknowledgedMessageId + 1; id <= messageId; ++id)
 				{
@@ -100,7 +100,7 @@ namespace Quokka.Stomp.Internal
 			             		AutoAcknowledge = AutoAcknowledge,
 			             		MessageQueueName = MessageQueue.Name,
 			             	};
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				status.UnacknowledgedFrameCount = _unacknowledgedFrames.Count;
 				status.TotalMessageCount = _lastMessageId;
