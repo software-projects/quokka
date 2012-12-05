@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using Quokka.Diagnostics;
 
 namespace Quokka.Stomp
@@ -219,6 +220,11 @@ namespace Quokka.Stomp
 			AppendContentLength(sb);
 			AppendHeaderIfPresent(sb, StompHeader.NonStandard.ClrType);
 
+			if (Command == StompCommand.Send || Command == StompCommand.Message)
+			{
+				AppendBodyIfText(sb);
+			}
+
 			return sb.ToString();
 		}
 
@@ -251,6 +257,27 @@ namespace Quokka.Stomp
 				sb.Append(StompHeader.ContentLength);
 				sb.Append(':');
 				sb.Append(value);
+			}
+		}
+
+		private void AppendBodyIfText(StringBuilder sb)
+		{
+			var contentType = Headers[StompHeader.ContentType];
+			if (contentType.StartsWith("text/")
+			    || contentType.StartsWith("application/xml")
+			    || contentType.StartsWith("application/json"))
+			{
+				var whiteSpaceRegex = new Regex(@"\s+");
+				var text = (BodyText ?? string.Empty);
+				text = whiteSpaceRegex.Replace(text, " ");
+
+				if (text.Length > 350)
+				{
+					text = text.Substring(0, 350) + "...";
+				}
+
+				sb.Append(' ');
+				sb.Append(text.Trim());
 			}
 		}
 	}

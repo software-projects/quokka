@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using NUnit.Framework;
@@ -191,6 +192,81 @@ namespace Quokka.Stomp
 			Assert.IsTrue(frame.IsHeartBeat);
 			frame.Command = "XXX";
 			Assert.IsFalse(frame.IsHeartBeat);
+		}
+		
+		[Test]
+		public void ToString_with_xml_body()
+		{
+			var frame = new StompFrame
+			{
+				Command = "MESSAGE",
+				Headers = new StompHeaderCollection
+			            		          	{
+			            		          		{"subscription", "1"},
+			            		          		{"content-length", "123"},
+												{"content-type", "application/xml"},
+												{"clr-type", "Test.Type,Test"},
+												{"message-id", "6"},
+			            		          	},
+				Body = new MemoryStream(),
+			};
+
+			var writer = new StreamWriter(frame.Body);
+			writer.WriteLine("<?xml version='1.0'>");
+			writer.WriteLine("<Test>");
+			writer.WriteLine("    <Name>This is the name</Name>");
+			writer.WriteLine("</Test>");
+			writer.Flush();
+
+			frame.Headers["content-length"] = frame.Body.Length.ToString(CultureInfo.InvariantCulture);
+
+			var actual = frame.ToString();
+			const string expected = "MESSAGE message-id:6 subscription:1 content-length:74 clr-type:Test.Type,Test "
+			                        + "<?xml version='1.0'> <Test> <Name>This is the name</Name> </Test>";
+			Assert.AreEqual(expected, actual);
+		}
+
+		[Test]
+		public void ToString_with_large_text_body()
+		{
+			var frame = new StompFrame
+			{
+				Command = "MESSAGE",
+				Headers = new StompHeaderCollection
+			            		          	{
+			            		          		{"subscription", "1"},
+			            		          		{"content-length", "123"},
+												{"content-type", "text/plain"},
+												{"message-id", "6"},
+			            		          	},
+				Body = new MemoryStream(),
+			};
+
+			var writer = new StreamWriter(frame.Body);
+			writer.WriteLine("12345678901234567890123456789012345678901234567890");
+			writer.WriteLine("12345678901234567890123456789012345678901234567890");
+			writer.WriteLine("12345678901234567890123456789012345678901234567890");
+			writer.WriteLine("12345678901234567890123456789012345678901234567890");
+			writer.WriteLine("12345678901234567890123456789012345678901234567890");
+			writer.WriteLine("12345678901234567890123456789012345678901234567890");
+			writer.WriteLine("12345678901234567890123456789012345678901234567890");
+			writer.WriteLine("12345678901234567890123456789012345678901234567890");
+			writer.WriteLine("12345678901234567890123456789012345678901234567890");
+			writer.WriteLine("12345678901234567890123456789012345678901234567890");
+			writer.Flush();
+
+			frame.Headers["content-length"] = frame.Body.Length.ToString(CultureInfo.InvariantCulture);
+
+			var actual = frame.ToString();
+			const string expected = "MESSAGE message-id:6 subscription:1 content-length:520 "
+			                        + "12345678901234567890123456789012345678901234567890 "
+			                        + "12345678901234567890123456789012345678901234567890 "
+									+ "12345678901234567890123456789012345678901234567890 "
+									+ "12345678901234567890123456789012345678901234567890 "
+									+ "12345678901234567890123456789012345678901234567890 "
+									+ "12345678901234567890123456789012345678901234567890 "
+									+ "12345678901234567890123456789012345678901234...";
+			Assert.AreEqual(expected, actual);
 		}
 	}
 }
