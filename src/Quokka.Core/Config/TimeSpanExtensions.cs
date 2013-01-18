@@ -46,8 +46,8 @@ namespace Quokka.Config
 			var match = regex.Match(s);
 			if (!match.Success)
 			{
-				// not a match, so try the default TryParse
-				return TimeSpan.TryParse(s, out result);
+				result = TimeSpan.Zero;
+				return false;
 			}
 
 			TimeSpan total = TimeSpan.Zero;

@@ -21,5 +21,14 @@ namespace Quokka.Config
 		{
 			return value.ToString();
 		}
+
+		public Int32Parameter WithValidRange(int lowerInclusive, int upperInclusive)
+		{
+			return WithValidation(n => n >= lowerInclusive && n <= upperInclusive
+				                           ? null
+				                           : string.Format("Value should be in the range {0} to {1} inclusive",
+				                                           lowerInclusive,
+				                                           upperInclusive));
+		}
 	}
 }
