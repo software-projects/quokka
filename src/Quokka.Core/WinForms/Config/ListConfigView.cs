@@ -3,6 +3,7 @@ using System.Windows.Forms;
 using Quokka.Config;
 using Quokka.UI.Commands;
 using Quokka.UI.Config;
+using Quokka.Util;
 using Quokka.WinForms.Commands;
 
 namespace Quokka.WinForms.Config
@@ -51,7 +52,7 @@ namespace Quokka.WinForms.Config
 
 		private void SearchTextBoxTextChanged(object sender, EventArgs e)
 		{
-			if (string.IsNullOrWhiteSpace(SearchTextBox.Text))
+			if (StringUtils.IsNullOrWhiteSpace(SearchTextBox.Text))
 			{
 				_adapter.DataSource.Filter = null;
 			}

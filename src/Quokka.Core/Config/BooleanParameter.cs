@@ -1,4 +1,5 @@
 ﻿using System;
+using Quokka.Util;
 
 namespace Quokka.Config
 {
@@ -33,7 +34,7 @@ namespace Quokka.Config
 				}
 			}
 
-			if (string.IsNullOrWhiteSpace(s))
+			if (StringUtils.IsNullOrWhiteSpace(s))
 			{
 				// Blank value is considered false
 				return false;
