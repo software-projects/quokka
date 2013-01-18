@@ -76,8 +76,21 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\StringValueAttribute.cs" />
+    <Compile Include="Castle\ConfigFacility.cs" />
     <Compile Include="Castle\WindsorServiceContainer.cs" />
     <Compile Include="Castle\WindsorServiceLocator.cs" />
+    <Compile Include="Config\BooleanParameter.cs" />
+    <Compile Include="Config\ConfigParameterType.cs" />
+    <Compile Include="Config\DateParameter.cs" />
+    <Compile Include="Config\IConfigRepo.cs" />
+    <Compile Include="Config\Int32Parameter.cs" />
+    <Compile Include="Config\Storage\IConfigStorage.cs" />
+    <Compile Include="Config\ConfigParameter.cs" />
+    <Compile Include="Config\Storage\MemoryStorage.cs" />
+    <Compile Include="Config\StringParameter.cs" />
+    <Compile Include="Config\TimeSpanExtensions.cs" />
+    <Compile Include="Config\TimeSpanParameter.cs" />
+    <Compile Include="Config\UrlParameter.cs" />
     <Compile Include="Data\SqlExpressUtil.cs" />
     <Compile Include="Data\SqlMapper.cs" />
     <Compile Include="Diagnostics\LoggerFactory.cs" />
@@ -126,6 +139,12 @@
     <Compile Include="Obsolete\Uip\UipViewEventArgs.cs" />
     <Compile Include="Obsolete\Uip\UipViewManager.cs" />
     <Compile Include="Stomp\Internal\LockObject.cs" />
+    <Compile Include="UI\Config\ConfigTaskState.cs" />
+    <Compile Include="UI\Config\ConfigTask.cs" />
+    <Compile Include="UI\Config\EditConfigPresenter.cs" />
+    <Compile Include="UI\Config\IEditConfigView.cs" />
+    <Compile Include="UI\Config\IListConfigView.cs" />
+    <Compile Include="UI\Config\ListConfigView.cs" />
     <Compile Include="UI\UIThread.cs" />
     <Compile Include="Events\ReferenceOption.cs" />
     <Compile Include="Events\ThreadOption.cs" />
@@ -194,6 +213,25 @@
     <Compile Include="WinForms\Commands\UICommand.cs" />
     <Compile Include="WinForms\Components\DisposableCollectionComponent.cs">
       <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WinForms\Config\EditConfigView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="WinForms\Config\EditConfigView.Designer.cs">
+      <DependentUpon>EditConfigView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WinForms\Config\IConfigParameterEditor.cs" />
+    <Compile Include="WinForms\Config\ListConfigView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="WinForms\Config\ListConfigView.Designer.cs">
+      <DependentUpon>ListConfigView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WinForms\Config\StringEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="WinForms\Config\StringEditor.Designer.cs">
+      <DependentUpon>StringEditor.cs</DependentUpon>
     </Compile>
     <Compile Include="WinForms\Controls\MainMenuListView.cs">
       <SubType>UserControl</SubType>
@@ -425,6 +463,15 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WinForms\Config\EditConfigView.resx">
+      <DependentUpon>EditConfigView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WinForms\Config\ListConfigView.resx">
+      <DependentUpon>ListConfigView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WinForms\Config\StringEditor.resx">
+      <DependentUpon>StringEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WinForms\Controls\MainMenuListView.resx">
       <DependentUpon>MainMenuListView.cs</DependentUpon>

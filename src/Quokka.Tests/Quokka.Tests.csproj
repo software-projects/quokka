@@ -84,6 +84,7 @@
     <Compile Include="Castle\ServiceContainerFactory.cs" />
     <Compile Include="Castle\WindsorContainerTests.cs" />
     <Compile Include="Castle\WindsorServiceContainerTests.cs" />
+    <Compile Include="Config\ConfigTests.cs" />
     <Compile Include="Data\TestQueries\NestedPropertyQuery.cs" />
     <Compile Include="Data\TestQueries\SimpleQuery.cs" />
     <Compile Include="Data\SqlExpressUtilTests.cs" />
