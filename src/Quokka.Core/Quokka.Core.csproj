@@ -217,6 +217,15 @@
     <Compile Include="WinForms\Components\DisposableCollectionComponent.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="WinForms\Config\DirectoryEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="WinForms\Config\DirectoryEditor.Designer.cs">
+      <DependentUpon>DirectoryEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WinForms\Config\ListConfigGridView.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="WinForms\Config\ReadOnlyViewer.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -235,6 +244,9 @@
     </Compile>
     <Compile Include="WinForms\Config\ListConfigView.Designer.cs">
       <DependentUpon>ListConfigView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WinForms\Config\SearchTextBox.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="WinForms\Config\StringEditor.cs">
       <SubType>UserControl</SubType>
@@ -472,6 +484,9 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WinForms\Config\DirectoryEditor.resx">
+      <DependentUpon>DirectoryEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WinForms\Config\ReadOnlyViewer.resx">
       <DependentUpon>ReadOnlyViewer.cs</DependentUpon>

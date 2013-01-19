@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
 using Quokka.Config;
-using Quokka.Config.Storage;
 using Quokka.UI.Commands;
 using Quokka.UI.Config;
 using Quokka.Util;
@@ -22,11 +21,17 @@ namespace Quokka.WinForms.Config
 				.DefineCellValue(NameColumn, p => p.Name)
 				.DefineCellValue(ParameterTypeColumn, p => p.ParameterType)
 				.DefineCellValue(ValueColumn, p => p.GetValueText())
-				.DefineCellValue(DescriptionColumn, p => p.Description)
+				.DefineCellValue(DescriptionColumn, p => p.Summary)
 				.SetDefaultSortOrder(NameColumn)
 				.SortBy(NameColumn);
 
 			EditCommand = new UICommand(EditButton);
+
+			Load += delegate {
+				BeginInvoke(new Action(() => SearchTextBox.Focus()));
+				DataGridView.ClearSelection();
+				DataGridView.CurrentCell = null;
+			};
 		}
 
 		public IUICommand EditCommand { get; private set; }
@@ -92,6 +97,50 @@ namespace Quokka.WinForms.Config
 			{
 				return configParameter.Name.ToLowerInvariant().Contains(_text) ||
 				       configParameter.Description.ToLowerInvariant().Contains(_text);
+			}
+		}
+
+		private void DataGridViewMoveUp(object sender, EventArgs e)
+		{
+			DataGridView.ClearSelection();
+			DataGridView.CurrentCell = null;
+			SearchTextBox.Focus();
+		}
+
+		private void DataGridViewEnterKeyPressed(object sender, EventArgs e)
+		{
+			EditButton.PerformClick();
+		}
+
+		private void SearchTextBoxDownKeyPressed(object sender, EventArgs e)
+		{
+			DataGridView.Focus();
+			if (DataGridView.SelectedRows.Count > 0 && DataGridView.SelectedRows[0].Selected)
+				SelectGridRow(1); // since first row is already highlighted
+			else
+				SelectGridRow(0);
+		}
+
+		private void SearchTextBoxEnterKeyPressed(object sender, EventArgs e)
+		{
+			EditButton.PerformClick();
+		}
+
+		public void SelectGridRow(int rowIndex)
+		{
+			// If row is greater than number of rows then set to the last row.
+			if (rowIndex >= DataGridView.Rows.Count)
+				rowIndex = DataGridView.Rows.Count - 1;
+
+			if (rowIndex < 0)
+			{
+				DataGridView.ClearSelection();
+				DataGridView.CurrentCell = null;
+			}
+			else
+			{
+				DataGridView.Rows[rowIndex].Selected = true;
+				DataGridView.CurrentCell = DataGridView[0, rowIndex];
 			}
 		}
 	}

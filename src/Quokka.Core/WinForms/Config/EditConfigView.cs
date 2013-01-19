@@ -97,6 +97,7 @@ namespace Quokka.WinForms.Config
 						CharCount = 32,
 					};
 				case ConfigParameterType.Directory:
+					return new DirectoryEditor();
 				case ConfigParameterType.FilePath:
 					// don't specify size and it will be as big as possible.
 					return new StringEditor();

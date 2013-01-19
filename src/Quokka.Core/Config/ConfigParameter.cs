@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using Quokka.Castle;
@@ -10,6 +11,8 @@ namespace Quokka.Config
 {
 	public abstract class ConfigParameter : IConfigParameter
 	{
+		private string _summary;
+
 		/// <summary>
 		/// The name of the parameter.
 		/// </summary>
@@ -25,9 +28,21 @@ namespace Quokka.Config
 		/// </summary>
 		public string Description { get; protected set; }
 
+		public string Summary
+		{
+			get
+			{
+				if (_summary == null)
+				{
+					_summary = GetSummary();
+				}
+				return _summary;
+			}
+		}
+
 		public override string ToString()
 		{
-			return Name + ": " + ((IConfigParameter)this).GetValueText();
+			return Name + ": " + ((IConfigParameter) this).GetValueText();
 		}
 
 		bool IConfigParameter.IsReadOnly
@@ -37,7 +52,7 @@ namespace Quokka.Config
 
 		bool IConfigParameter.IsDerived
 		{
-			get { throw new NotImplementedException();}
+			get { throw new NotImplementedException(); }
 		}
 
 		string IConfigParameter.ValidateText(string proposedValue)
@@ -60,6 +75,21 @@ namespace Quokka.Config
 			Name = Verify.ArgumentNotNull(paramName, "paramName");
 			ParameterType = Verify.ArgumentNotNull(paramType, "paramType");
 			Description = string.Empty;
+		}
+
+		private string GetSummary()
+		{
+			if (Description.Contains("\n"))
+			{
+				// Multi-line description, use the first line.
+				using (var reader = new StringReader(Description))
+				{
+					return (reader.ReadLine() ?? string.Empty).Trim();
+				}
+			}
+
+			// Single line description is the same as the summary.
+			return Description;
 		}
 
 		/// <summary>
@@ -87,10 +117,10 @@ namespace Quokka.Config
 		public static IList<ConfigParameter> Find(Assembly assembly)
 		{
 			var fields = from t in assembly.GetTypes()
-						 from f in t.GetFields()
-						 where f.IsStatic
-						 where typeof(ConfigParameter).IsAssignableFrom(f.FieldType)
-						 select f;
+			             from f in t.GetFields()
+			             where f.IsStatic
+			             where typeof (ConfigParameter).IsAssignableFrom(f.FieldType)
+			             select f;
 
 			List<string> warnings = null;
 			var configParams = new List<ConfigParameter>();
@@ -104,8 +134,9 @@ namespace Quokka.Config
 					{
 						warnings = new List<string>();
 					}
-					warnings.Add(string.Format("Ignoring parameter defined in {0}.{1} because its value is null", field.DeclaringType.FullName,
-									  field.Name));
+					warnings.Add(string.Format("Ignoring parameter defined in {0}.{1} because its value is null",
+					                           field.DeclaringType.FullName,
+					                           field.Name));
 					continue;
 				}
 
@@ -116,15 +147,15 @@ namespace Quokka.Config
 						warnings = new List<string>();
 					}
 					warnings.Add(string.Format("Ignoring parameter {0} defined in {1}.{2} because it is not defined as readonly",
-									  parameter.Name,
-									  field.DeclaringType.FullName,
-									  field.Name));
+					                           parameter.Name,
+					                           field.DeclaringType.FullName,
+					                           field.Name));
 					continue;
 				}
 
 				configParams.Add(parameter);
 			}
-			
+
 			if (warnings != null)
 			{
 				var logger = LoggerFactory.GetCurrentClassLogger();
@@ -173,7 +204,7 @@ namespace Quokka.Config
 			{
 				callback(new Builder(this));
 			}
-			return (TParameter)this;
+			return (TParameter) this;
 		}
 
 		private class Builder : IConfigParameterBuilder<T>
@@ -208,7 +239,7 @@ namespace Quokka.Config
 			{
 				_outer._derivedValueCallback = callback;
 				return this;
-			} 
+			}
 
 			public IConfigParameterBuilder<T> Validation(Func<T, string> callback)
 			{
@@ -260,7 +291,7 @@ namespace Quokka.Config
 			T value;
 			try
 			{
-				value = (T)ConvertFromString(proposedValue);
+				value = (T) ConvertFromString(proposedValue);
 			}
 			catch (Exception)
 			{
@@ -272,7 +303,7 @@ namespace Quokka.Config
 
 		void IConfigParameter.SetValueText(string textValue)
 		{
-			DoSetValue((T)ConvertFromString(textValue));
+			DoSetValue((T) ConvertFromString(textValue));
 		}
 
 		string IConfigParameter.GetValueText()

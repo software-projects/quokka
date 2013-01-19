@@ -18,6 +18,7 @@ namespace Quokka.Config
 		string Name { get; }
 		string ParameterType { get; }
 		string Description { get; }
+		string Summary { get; }
 
 		/// <summary>
 		/// Is this configuration parameter read only. A parameter is read only

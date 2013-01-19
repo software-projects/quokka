@@ -31,9 +31,9 @@
 			this.TopPanel = new System.Windows.Forms.FlowLayoutPanel();
 			this.EditButton = new System.Windows.Forms.Button();
 			this.SearchLabel = new System.Windows.Forms.Label();
-			this.SearchTextBox = new System.Windows.Forms.TextBox();
+			this.SearchTextBox = new Quokka.WinForms.Config.SearchTextBox();
 			this.ClearSearchTextButton = new System.Windows.Forms.Button();
-			this.DataGridView = new System.Windows.Forms.DataGridView();
+			this.DataGridView = new Quokka.WinForms.Config.ListConfigGridView();
 			this.NameColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.ValueColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.ParameterTypeColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -86,6 +86,8 @@
 			this.SearchTextBox.Name = "SearchTextBox";
 			this.SearchTextBox.Size = new System.Drawing.Size(255, 20);
 			this.SearchTextBox.TabIndex = 1;
+			this.SearchTextBox.DownKeyPressed += new System.EventHandler(this.SearchTextBoxDownKeyPressed);
+			this.SearchTextBox.EnterKeyPressed += new System.EventHandler(this.SearchTextBoxEnterKeyPressed);
 			this.SearchTextBox.TextChanged += new System.EventHandler(this.SearchTextBoxTextChanged);
 			// 
 			// ClearSearchTextButton
@@ -123,6 +125,8 @@
 			this.DataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
 			this.DataGridView.Size = new System.Drawing.Size(677, 350);
 			this.DataGridView.TabIndex = 1;
+			this.DataGridView.MoveUp += new System.EventHandler(this.DataGridViewMoveUp);
+			this.DataGridView.EnterKeyPressed += new System.EventHandler(this.DataGridViewEnterKeyPressed);
 			this.DataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DataGridViewCellDoubleClick);
 			// 
 			// NameColumn
@@ -171,10 +175,10 @@
 
 		public System.Windows.Forms.Button EditButton;
 		public System.Windows.Forms.Label SearchLabel;
-		public System.Windows.Forms.TextBox SearchTextBox;
+		public Quokka.WinForms.Config.SearchTextBox SearchTextBox;
 		public System.Windows.Forms.Button ClearSearchTextButton;
 		public System.Windows.Forms.FlowLayoutPanel TopPanel;
-		public System.Windows.Forms.DataGridView DataGridView;
+		public Quokka.WinForms.Config.ListConfigGridView DataGridView;
 		public System.Windows.Forms.DataGridViewTextBoxColumn DescriptionColumn;
 		public System.Windows.Forms.DataGridViewTextBoxColumn NameColumn;
 		public System.Windows.Forms.DataGridViewTextBoxColumn ParameterTypeColumn;
