@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Quokka.Config;
 using Quokka.Config.Storage;
 using Quokka.UI.Tasks;
@@ -6,7 +7,7 @@ using Quokka.WinForms;
 
 namespace Quokka.UI.Config
 {
-	public class ListConfigView : Presenter<IListConfigView>
+	public class ListConfigPresenter : Presenter<IListConfigView>
 	{
 		public INavigateCommand ErrorCommand { get; set; }
 		public INavigateCommand EditCommand { get; set; }
@@ -29,7 +30,9 @@ namespace Quokka.UI.Config
 			try
 			{
 				var list = ConfigRepo.FindAll();
-				_dataSource.ReplaceContents(list);
+
+				// casting is necessary for .NET 3.5
+				_dataSource.ReplaceContents(list.Select(c => (IConfigParameter)c));
 			}
 			catch (Exception ex)
 			{

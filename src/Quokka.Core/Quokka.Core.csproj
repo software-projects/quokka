@@ -147,7 +147,7 @@
     <Compile Include="UI\Config\EditConfigPresenter.cs" />
     <Compile Include="UI\Config\IEditConfigView.cs" />
     <Compile Include="UI\Config\IListConfigView.cs" />
-    <Compile Include="UI\Config\ListConfigView.cs" />
+    <Compile Include="UI\Config\ListConfigPresenter.cs" />
     <Compile Include="UI\UIThread.cs" />
     <Compile Include="Events\ReferenceOption.cs" />
     <Compile Include="Events\ThreadOption.cs" />

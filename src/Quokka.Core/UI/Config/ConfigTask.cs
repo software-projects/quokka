@@ -11,7 +11,7 @@ namespace Quokka.UI.Config
 			var errorNode = CreateNode();
 
 			listNode
-				.SetPresenter<ListConfigView>()
+				.SetPresenter<ListConfigPresenter>()
 				.NavigateTo(p=> p.EditCommand, editNode)
 				.NavigateTo(p => p.ErrorCommand, errorNode);
 
