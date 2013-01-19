@@ -80,6 +80,7 @@
     <Compile Include="Castle\WindsorServiceContainer.cs" />
     <Compile Include="Castle\WindsorServiceLocator.cs" />
     <Compile Include="Config\BooleanParameter.cs" />
+    <Compile Include="Config\ConfigException.cs" />
     <Compile Include="Config\ConfigParameterType.cs" />
     <Compile Include="Config\DateParameter.cs" />
     <Compile Include="Config\IConfigRepo.cs" />
@@ -215,6 +216,12 @@
     <Compile Include="WinForms\Commands\UICommand.cs" />
     <Compile Include="WinForms\Components\DisposableCollectionComponent.cs">
       <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WinForms\Config\ReadOnlyViewer.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="WinForms\Config\ReadOnlyViewer.Designer.cs">
+      <DependentUpon>ReadOnlyViewer.cs</DependentUpon>
     </Compile>
     <Compile Include="WinForms\Config\EditConfigView.cs">
       <SubType>UserControl</SubType>
@@ -465,6 +472,9 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WinForms\Config\ReadOnlyViewer.resx">
+      <DependentUpon>ReadOnlyViewer.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WinForms\Config\EditConfigView.resx">
       <DependentUpon>EditConfigView.cs</DependentUpon>

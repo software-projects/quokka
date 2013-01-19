@@ -2,12 +2,11 @@
 using System.Drawing;
 using System.Windows.Forms;
 using Quokka.Config;
-using Quokka.Config.Storage;
 using Quokka.Diagnostics;
 
 namespace Quokka.WinForms.Config
 {
-	public partial class StringEditor : UserControl, IConfigParameterEditor
+	public partial class ReadOnlyViewer : UserControl, IConfigParameterEditor
 	{
 		private Control _userControlParent;
 
@@ -16,7 +15,7 @@ namespace Quokka.WinForms.Config
 		/// </summary>
 		public int CharCount { get; set; }
 
-		public StringEditor()
+		public ReadOnlyViewer()
 		{
 			InitializeComponent();
 			Load += OnLoad;
@@ -24,24 +23,16 @@ namespace Quokka.WinForms.Config
 
 		private void OnLoad(object sender, EventArgs eventArgs)
 		{
-			if (CharCount > 0)
+			var parent = Parent;
+			while (parent != null && !(parent is UserControl))
 			{
-				textBox.Width = TextRenderer.MeasureText(new string('m', CharCount), textBox.Font).Width;
+				parent = parent.Parent;
 			}
-			else
-			{
-				// size not specified, use all available space
-				var parent = Parent;
-				while (parent != null && !(parent is UserControl))
-				{
-					parent = parent.Parent;
-				}
 
-				if (parent != null)
-				{
-					parent.SizeChanged += UserControlSizeChanged;
-					_userControlParent = parent;
-				}				
+			if (parent != null)
+			{
+				parent.SizeChanged += UserControlSizeChanged;
+				_userControlParent = parent;
 			}
 		}
 
@@ -57,6 +48,8 @@ namespace Quokka.WinForms.Config
 			Verify.ArgumentNotNull(parameter, "parameter");
 			Parameter = parameter;
 			textBox.Text = parameter.GetValueText();
+			// because we cannot edit, we don't want to select the contents
+			textBox.Select(0, 0);
 		}
 
 		public string TextValue

@@ -30,6 +30,16 @@ namespace Quokka.Config
 			return Name + ": " + ((IConfigParameter)this).GetValueText();
 		}
 
+		bool IConfigParameter.IsReadOnly
+		{
+			get { throw new NotImplementedException(); }
+		}
+
+		bool IConfigParameter.IsDerived
+		{
+			get { throw new NotImplementedException();}
+		}
+
 		string IConfigParameter.ValidateText(string proposedValue)
 		{
 			throw new NotImplementedException();
@@ -130,11 +140,12 @@ namespace Quokka.Config
 
 	public interface IConfigParameterBuilder<T>
 	{
+		IConfigParameterBuilder<T> ChangeAction(Action callback);
 		IConfigParameterBuilder<T> Description(string description);
 		IConfigParameterBuilder<T> DefaultValue(T defaultValue);
 		IConfigParameterBuilder<T> DefaultValue(Func<T> callback);
+		IConfigParameterBuilder<T> DerivedValue(Func<T> callback);
 		IConfigParameterBuilder<T> Validation(Func<T, string> callback);
-		IConfigParameterBuilder<T> ChangeAction(Action callback);
 	}
 
 	public abstract class ConfigParameter<T, TParameter> : ConfigParameter, IConfigParameter<T>
@@ -143,6 +154,7 @@ namespace Quokka.Config
 		private T _defaultValue;
 		private bool _defaultValueSet;
 		private Func<T> _defaultValueCallback;
+		private Func<T> _derivedValueCallback;
 		private Func<T, string> _validationCallback;
 		private Action _changedCallback;
 
@@ -192,6 +204,12 @@ namespace Quokka.Config
 				return this;
 			}
 
+			public IConfigParameterBuilder<T> DerivedValue(Func<T> callback)
+			{
+				_outer._derivedValueCallback = callback;
+				return this;
+			} 
+
 			public IConfigParameterBuilder<T> Validation(Func<T, string> callback)
 			{
 				_outer._validationCallback = callback;
@@ -214,6 +232,10 @@ namespace Quokka.Config
 		{
 			get
 			{
+				if (_derivedValueCallback != null)
+				{
+					return _derivedValueCallback();
+				}
 				var configValue = Storage.GetValue(this);
 				if (configValue.HasValue)
 				{
@@ -221,6 +243,16 @@ namespace Quokka.Config
 				}
 				return GetDefaultValue();
 			}
+		}
+
+		bool IConfigParameter.IsReadOnly
+		{
+			get { return Storage.IsReadOnly || _derivedValueCallback != null; }
+		}
+
+		bool IConfigParameter.IsDerived
+		{
+			get { return _derivedValueCallback != null; }
 		}
 
 		string IConfigParameter.ValidateText(string proposedValue)
@@ -270,6 +302,12 @@ namespace Quokka.Config
 
 		private void DoSetValue(T value)
 		{
+			if (Extra.IsReadOnly)
+			{
+				throw new ReadOnlyConfigException("Attempt to write to read only config parameter") {
+					ConfigParameter = this
+				};
+			}
 			var newValue = ConvertToString(value);
 			var oldValue = Storage.GetValue(this);
 			if (oldValue.HasValue && oldValue.Value == newValue)

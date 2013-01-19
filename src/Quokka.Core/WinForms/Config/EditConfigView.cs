@@ -32,6 +32,12 @@ namespace Quokka.WinForms.Config
 				NameValueLabel.Text = _configParameter.Name;
 				TypeValueLabel.Text = _configParameter.ParameterType;
 				DescriptionTextBox.Text = _configParameter.Description;
+				if (_configParameter.IsReadOnly)
+				{
+					HeadingLabel.Text = "View Read-only Configuration Parameter";
+					SaveButton.Visible = false;
+					CancelButton.Text = "Close";
+				}
 				CreateAndAddEditorControl();
 			}
 		}
@@ -75,6 +81,11 @@ namespace Quokka.WinForms.Config
 
 		protected virtual IConfigParameterEditor CreateEditor()
 		{
+			if (Parameter.IsReadOnly)
+			{
+				return new ReadOnlyViewer();
+			}
+
 			switch (Parameter.ParameterType)
 			{
 				case ConfigParameterType.Int32:
@@ -83,13 +94,12 @@ namespace Quokka.WinForms.Config
 					};
 				case ConfigParameterType.Password:
 					return new StringEditor {
-						CharCount = 16,
+						CharCount = 32,
 					};
 				case ConfigParameterType.Directory:
 				case ConfigParameterType.FilePath:
-					return new StringEditor {
-						CharCount = 40,
-					};
+					// don't specify size and it will be as big as possible.
+					return new StringEditor();
 				default:
 					return new StringEditor();
 			}

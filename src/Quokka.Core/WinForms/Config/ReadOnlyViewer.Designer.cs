@@ -1,6 +1,6 @@
 ﻿namespace Quokka.WinForms.Config
 {
-	partial class StringEditor
+	partial class ReadOnlyViewer
 	{
 		/// <summary> 
 		/// Required designer variable.
@@ -43,17 +43,20 @@
 			this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
 			this.flowLayoutPanel1.MinimumSize = new System.Drawing.Size(100, 25);
 			this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-			this.flowLayoutPanel1.Size = new System.Drawing.Size(165, 26);
+			this.flowLayoutPanel1.Size = new System.Drawing.Size(165, 25);
 			this.flowLayoutPanel1.TabIndex = 0;
 			// 
 			// textBox
 			// 
+			this.textBox.BackColor = System.Drawing.SystemColors.Window;
+			this.textBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
 			this.textBox.Location = new System.Drawing.Point(3, 3);
 			this.textBox.Name = "textBox";
-			this.textBox.Size = new System.Drawing.Size(159, 20);
+			this.textBox.ReadOnly = true;
+			this.textBox.Size = new System.Drawing.Size(159, 13);
 			this.textBox.TabIndex = 0;
 			// 
-			// StringEditor
+			// ReadOnlyViewer
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -62,8 +65,9 @@
 			this.BackColor = System.Drawing.Color.Transparent;
 			this.Controls.Add(this.flowLayoutPanel1);
 			this.MinimumSize = new System.Drawing.Size(100, 25);
-			this.Name = "StringEditor";
-			this.Size = new System.Drawing.Size(165, 26);
+			this.Name = "ReadOnlyViewer";
+			this.Size = new System.Drawing.Size(165, 25);
+			this.SizeChanged += new System.EventHandler(this.UserControlSizeChanged);
 			this.flowLayoutPanel1.ResumeLayout(false);
 			this.flowLayoutPanel1.PerformLayout();
 			this.ResumeLayout(false);

@@ -24,6 +24,16 @@ namespace Quokka.UI.Config
 
 		private void HandleSaveCommand(object sender, EventArgs e)
 		{
+			if (TaskState.ConfigParameter.IsReadOnly)
+			{
+				MessageBox.Show(new UIMessage {
+					MainInstruction = "Read only",
+					Content = "Cannot update this parameter, as it is read only",
+					MessageType = UIMessageType.Forbidden,
+				});
+				return;
+			}
+
 			try
 			{
 				var errorMessage = TaskState.ConfigParameter.ValidateText(View.Value);

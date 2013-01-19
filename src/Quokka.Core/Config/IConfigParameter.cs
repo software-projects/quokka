@@ -20,6 +20,19 @@ namespace Quokka.Config
 		string Description { get; }
 
 		/// <summary>
+		/// Is this configuration parameter read only. A parameter is read only
+		/// if its underlying configuration storage mechanism is read only, or 
+		/// it can also be read only if it is a derived value.
+		/// </summary>
+		bool IsReadOnly { get; }
+
+		/// <summary>
+		/// A derived configuration paramter never access the configuration storage,
+		/// it derives its value from another source (often other configuration paramters).
+		/// </summary>
+		bool IsDerived { get; }
+
+		/// <summary>
 		/// Perform validation on a proposed string value.
 		/// </summary>
 		/// <returns>

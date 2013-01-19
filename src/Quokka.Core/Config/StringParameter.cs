@@ -39,10 +39,19 @@ namespace Quokka.Config
 	/// String parameter that contains the full path of a directory in the filesystem. Allows the value to be displayed differently
 	/// in the maintenance UI, but it is really just a string parameter.
 	/// </summary>
-	public class DirectoryParameter : StringParameter
+	public class DirectoryParameter : ConfigParameter<string, DirectoryParameter>
 	{
 		public DirectoryParameter(string paramName) : base(paramName, ConfigParameterType.Directory)
 		{
+		}
+		protected override object ConvertFromString(string text)
+		{
+			return text;
+		}
+
+		protected override string ConvertToString(object value)
+		{
+			return value == null ? null : value.ToString();
 		}
 	}
 
@@ -50,10 +59,19 @@ namespace Quokka.Config
 	/// String parameter that contains the full path of a directory in the filesystem. Allows the value to be displayed differently
 	/// in the maintenance UI, but it is really just a string parameter.
 	/// </summary>
-	public class FilePathParameter : StringParameter
+	public class FilePathParameter : ConfigParameter<string, FilePathParameter>
 	{
 		public FilePathParameter(string paramName) : base(paramName, ConfigParameterType.FilePath)
 		{
+		}
+		protected override object ConvertFromString(string text)
+		{
+			return text;
+		}
+
+		protected override string ConvertToString(object value)
+		{
+			return value == null ? null : value.ToString();
 		}
 	}
 
@@ -61,10 +79,19 @@ namespace Quokka.Config
 	/// String parameter that contains a password. Essentially just a string parameter, but displayed slightly differently when listing
 	/// config parameters. (Value is elided).
 	/// </summary>
-	public class PasswordParameter : StringParameter
+	public class PasswordParameter : ConfigParameter<string, PasswordParameter>
 	{
 		public PasswordParameter(string paramName) : base(paramName, ConfigParameterType.Password)
 		{
+		}
+		protected override object ConvertFromString(string text)
+		{
+			return text;
+		}
+
+		protected override string ConvertToString(object value)
+		{
+			return value == null ? null : value.ToString();
 		}
 	}
 }

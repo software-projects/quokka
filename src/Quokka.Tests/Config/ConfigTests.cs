@@ -97,6 +97,26 @@ namespace Quokka.Config
 			Assert.AreEqual("Hello world!", stringValue);
 		}
 
+		[Test]
+		public void DerivedValue()
+		{
+			var derivedValue = new Uri("http://www.google.com");
+
+			var param = new UrlParameter("test")
+				.With(with => with.DerivedValue(() => derivedValue));
+
+			Assert.AreEqual(new Uri("http://www.google.com"), param.Value);
+			Assert.IsTrue(param.Extra.IsDerived);
+			Assert.IsTrue(param.Extra.IsReadOnly);
+
+			Assert.Throws<ReadOnlyConfigException>(() => param.Extra.SetValueText("http://example.com/"));
+
+			var anotherParam = new UrlParameter("test2");
+			Assert.IsFalse(anotherParam.Extra.IsDerived);
+			Assert.IsFalse(anotherParam.Extra.IsReadOnly);
+			anotherParam.Extra.SetValueText("http://example.com/");
+		}
+
 		public void ScratchPad()
 		{
 			Int32Parameter param = new Int32Parameter("name")
