@@ -1,4 +1,4 @@
-﻿using Quokka.Config;
+﻿using Quokka.Config.Storage;
 using Quokka.UI.Commands;
 using Quokka.WinForms;
 
@@ -7,7 +7,7 @@ namespace Quokka.UI.Config
 	public interface IListConfigView
 	{
 		IUICommand EditCommand { get; }
-		IVirtualDataSource<ConfigParameter> DataSource { set; }
-		ConfigParameter Current { get; }
+		IVirtualDataSource<IConfigParameter> DataSource { set; }
+		IConfigParameter Current { get; }
 	}
 }

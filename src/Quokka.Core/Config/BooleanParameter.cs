@@ -13,7 +13,7 @@ namespace Quokka.Config
 		{
 		}
 
-		public override object ConvertFromString(string s)
+		protected override object ConvertFromString(string s)
 		{
 			// check expected values first
 			if (s == "1")
@@ -60,7 +60,7 @@ namespace Quokka.Config
 		}
 
 
-		public override string ConvertToString(object value)
+		protected override string ConvertToString(object value)
 		{
 			return ((bool)value) ? "1" : "0";
 		}

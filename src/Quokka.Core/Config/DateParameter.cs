@@ -12,12 +12,12 @@ namespace Quokka.Config
 		{
 		}
 
-		public override object ConvertFromString(string text)
+		protected override object ConvertFromString(string text)
 		{
 			return DateTime.Parse(text);
 		}
 
-		public override string ConvertToString(object value)
+		protected override string ConvertToString(object value)
 		{
 			return ((DateTime) value).ToString("yyyy-MM-dd");
 		}

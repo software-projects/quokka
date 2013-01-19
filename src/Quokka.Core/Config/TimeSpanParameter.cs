@@ -11,12 +11,7 @@ namespace Quokka.Config
 		{
 		}
 
-		public string ConvertToString(TimeSpan timeSpan)
-		{
-			return timeSpan.ToReadableString();
-		}
-
-		public override object ConvertFromString(string text)
+		protected override object ConvertFromString(string text)
 		{
 			TimeSpan value;
 			if (!TimeSpanExtensions.TryParse(text, out value))
@@ -26,7 +21,7 @@ namespace Quokka.Config
 			return value;
 		}
 
-		public override string ConvertToString(object value)
+		protected override string ConvertToString(object value)
 		{
 			return ((TimeSpan) value).ToReadableString();
 		}

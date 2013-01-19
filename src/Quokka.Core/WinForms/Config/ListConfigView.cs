@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
-using Quokka.Config;
+using Quokka.Config.Storage;
 using Quokka.UI.Commands;
 using Quokka.UI.Config;
 using Quokka.Util;
@@ -10,13 +10,13 @@ namespace Quokka.WinForms.Config
 {
 	public partial class ListConfigView : UserControl, IListConfigView
 	{
-		private readonly VirtualDataGridViewAdapter<ConfigParameter> _adapter;
+		private readonly VirtualDataGridViewAdapter<IConfigParameter> _adapter;
 		private readonly DisplaySettings _displaySettings = new DisplaySettings(typeof (ListConfigView));
 
 		public ListConfigView()
 		{
 			InitializeComponent();
-			_adapter = new VirtualDataGridViewAdapter<ConfigParameter>(DataGridView)
+			_adapter = new VirtualDataGridViewAdapter<IConfigParameter>(DataGridView)
 				.WithDisplaySettings(_displaySettings)
 				.DefineCellValue(NameColumn, p => p.Name)
 				.DefineCellValue(ParameterTypeColumn, p => p.ParameterType)
@@ -30,12 +30,12 @@ namespace Quokka.WinForms.Config
 
 		public IUICommand EditCommand { get; private set; }
 
-		public IVirtualDataSource<ConfigParameter> DataSource
+		public IVirtualDataSource<IConfigParameter> DataSource
 		{
 			set { _adapter.Init(value); }
 		}
 
-		public ConfigParameter Current
+		public IConfigParameter Current
 		{
 			get { return _adapter.Current; }
 		}
@@ -87,7 +87,7 @@ namespace Quokka.WinForms.Config
 				_text = (text ?? string.Empty).Trim().ToLowerInvariant();
 			}
 
-			public bool Apply(ConfigParameter configParameter)
+			public bool Apply(IConfigParameter configParameter)
 			{
 				return configParameter.Name.ToLowerInvariant().Contains(_text) ||
 				       configParameter.Description.ToLowerInvariant().Contains(_text);

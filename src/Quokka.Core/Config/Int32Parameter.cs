@@ -12,23 +12,26 @@ namespace Quokka.Config
 		{
 		}
 
-		public override object ConvertFromString(string text)
+		protected override object ConvertFromString(string text)
 		{
 			return int.Parse(text);
 		}
 
-		public override string ConvertToString(object value)
+		protected override string ConvertToString(object value)
 		{
 			return value.ToString();
 		}
+	}
 
-		public Int32Parameter WithValidRange(int lowerInclusive, int upperInclusive)
+	public static class Int32ParameterExtensions
+	{
+		public static IConfigParameterBuilder<int> ValidRange(this IConfigParameterBuilder<int> @this, int lowerInclusive, int upperInclusive)
 		{
-			return WithValidation(n => n >= lowerInclusive && n <= upperInclusive
-				                           ? null
-				                           : string.Format("Value should be in the range {0} to {1} inclusive",
-				                                           lowerInclusive,
-				                                           upperInclusive));
+			return @this.Validation(n => n >= lowerInclusive && n <= upperInclusive
+										   ? null
+										   : string.Format("Value should be in the range {0} to {1} inclusive",
+														   lowerInclusive,
+														   upperInclusive));
 		}
 	}
 }

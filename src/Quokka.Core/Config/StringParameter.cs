@@ -24,12 +24,12 @@ namespace Quokka.Config
 		{
 		}
 
-		public override object ConvertFromString(string text)
+		protected override object ConvertFromString(string text)
 		{
 			return text;
 		}
 
-		public override string ConvertToString(object value)
+		protected override string ConvertToString(object value)
 		{
 			return value == null ? null : value.ToString();
 		}

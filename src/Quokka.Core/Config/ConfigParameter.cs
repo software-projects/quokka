@@ -8,7 +8,7 @@ using Quokka.Diagnostics;
 
 namespace Quokka.Config
 {
-	public abstract class ConfigParameter
+	public abstract class ConfigParameter : IConfigParameter
 	{
 		/// <summary>
 		/// The name of the parameter.
@@ -25,38 +25,20 @@ namespace Quokka.Config
 		/// </summary>
 		public string Description { get; protected set; }
 
-		/// <summary>
-		/// Convert a string value into the type required for this configuration parameter.
-		/// </summary>
-		/// <exception cref="FormatException">
-		/// Text is the wrong format for the configuration parameter type.
-		/// </exception>
-		public abstract object ConvertFromString(string text);
+		string IConfigParameter.ValidateText(string proposedValue)
+		{
+			throw new NotImplementedException();
+		}
 
-		/// <summary>
-		/// Convert the configuration value into a string suitable for persisting.
-		/// </summary>
-		public abstract string ConvertToString(object value);
+		void IConfigParameter.SetValueText(string value)
+		{
+			throw new NotImplementedException();
+		}
 
-		/// <summary>
-		/// Perform validation on a proposed string value.
-		/// </summary>
-		/// <returns>Returns <c>null</c> if value is valid for this parameter type, an error message otherwise.</returns>
-		public abstract string ValidateText(string proposedValue);
-
-		/// <summary>
-		/// Update the value of the parameter.
-		/// </summary>
-		/// <param name="value">
-		/// New value. This should be a valid text value for this type of parameter, otherwise an exception will be thrown.
-		/// Call <see cref="ValidateText"/> before calling this function, as this function does not perform any validation.
-		/// </param>
-		public abstract void SetValueText(string value);
-
-		/// <summary>
-		/// Gets the value of this parameter as a text string.
-		/// </summary>
-		public abstract string GetValueText();
+		string IConfigParameter.GetValueText()
+		{
+			throw new NotImplementedException();
+		}
 
 		protected ConfigParameter(string paramName, string paramType)
 		{
@@ -141,7 +123,16 @@ namespace Quokka.Config
 		}
 	}
 
-	public abstract class ConfigParameter<T, TParameter> : ConfigParameter
+	public interface IConfigParameterBuilder<T>
+	{
+		IConfigParameterBuilder<T> Description(string description);
+		IConfigParameterBuilder<T> DefaultValue(T defaultValue);
+		IConfigParameterBuilder<T> DefaultValue(Func<T> callback);
+		IConfigParameterBuilder<T> Validation(Func<T, string> callback);
+		IConfigParameterBuilder<T> ChangeAction(Action callback);
+	}
+
+	public abstract class ConfigParameter<T, TParameter> : ConfigParameter, IConfigParameter<T>
 		where TParameter : ConfigParameter<T, TParameter>
 	{
 		private T _defaultValue;
@@ -154,35 +145,59 @@ namespace Quokka.Config
 		{
 		}
 
-		public TParameter WithDescription(string description)
+		public TParameter With(Action<IConfigParameterBuilder<T>> callback)
 		{
-			Description = (description ?? string.Empty).Trim();
+			if (callback != null)
+			{
+				callback(new Builder(this));
+			}
 			return (TParameter)this;
 		}
 
-		public TParameter WithDefaultValue(T defaultValue)
+		private class Builder : IConfigParameterBuilder<T>
 		{
-			_defaultValue = defaultValue;
-			_defaultValueSet = true;
-			return (TParameter)this;
+			private readonly ConfigParameter<T, TParameter> _outer;
+
+			public Builder(ConfigParameter<T, TParameter> outer)
+			{
+				_outer = outer;
+			}
+
+			public IConfigParameterBuilder<T> Description(string description)
+			{
+				_outer.Description = (description ?? string.Empty).Trim();
+				return this;
+			}
+
+			public IConfigParameterBuilder<T> DefaultValue(T defaultValue)
+			{
+				_outer._defaultValue = defaultValue;
+				_outer._defaultValueSet = true;
+				return this;
+			}
+
+			public IConfigParameterBuilder<T> DefaultValue(Func<T> callback)
+			{
+				_outer._defaultValueCallback = callback;
+				return this;
+			}
+
+			public IConfigParameterBuilder<T> Validation(Func<T, string> callback)
+			{
+				_outer._validationCallback = callback;
+				return this;
+			}
+
+			public IConfigParameterBuilder<T> ChangeAction(Action callback)
+			{
+				_outer._changedCallback = callback;
+				return this;
+			}
 		}
 
-		public TParameter WithDefaultValue(Func<T> callback)
+		public static implicit operator T(ConfigParameter<T, TParameter> configParam)
 		{
-			_defaultValueCallback = callback;
-			return (TParameter)this;
-		}
-
-		public TParameter WithValidation(Func<T, string> callback)
-		{
-			_validationCallback = callback;
-			return (TParameter)this;
-		}
-
-		public TParameter WhenChanged(Action callback)
-		{
-			_changedCallback = callback;
-			return (TParameter)this;
+			return configParam.Value;
 		}
 
 		public T Value
@@ -198,7 +213,7 @@ namespace Quokka.Config
 			}
 		}
 
-		public override string ValidateText(string proposedValue)
+		string IConfigParameter.ValidateText(string proposedValue)
 		{
 			T value;
 			try
@@ -210,25 +225,25 @@ namespace Quokka.Config
 				return string.Format("Not a valid {0} value.", ParameterType);
 			}
 
-			return Validate(value);
+			return DoValidate(value);
 		}
 
-		public override void SetValueText(string textValue)
+		void IConfigParameter.SetValueText(string textValue)
 		{
-			SetValue((T)ConvertFromString(textValue));
+			DoSetValue((T)ConvertFromString(textValue));
 		}
 
-		public override string GetValueText()
+		string IConfigParameter.GetValueText()
 		{
 			return ConvertToString(Value);
 		}
 
-		/// <summary>
-		/// Check if the proposed value is valid for this configuration parameter.
-		/// </summary>
-		/// <param name="value">Proposed value</param>
-		/// <returns>Returns <c>null</c> if the value is valid, otherwise returns an error message.</returns>
-		public string Validate(T value)
+		string IConfigParameter<T>.Validate(T value)
+		{
+			return DoValidate(value);
+		}
+
+		private string DoValidate(T value)
 		{
 			string result = null;
 			if (_validationCallback != null)
@@ -238,12 +253,12 @@ namespace Quokka.Config
 			return result;
 		}
 
-		/// <summary>
-		/// Saves the new value. No validation is performed, it is assumed that the
-		/// caller has called <see cref="Validate"/> prior to calling this method.
-		/// </summary>
-		/// <param name="value"></param>
-		public void SetValue(T value)
+		void IConfigParameter<T>.SetValue(T value)
+		{
+			DoSetValue(value);
+		}
+
+		private void DoSetValue(T value)
 		{
 			var newValue = ConvertToString(value);
 			var oldValue = Storage.GetValue(this);
@@ -259,15 +274,12 @@ namespace Quokka.Config
 			}
 		}
 
-		/// <summary>
-		/// Gets the default value for this parameter.
-		/// </summary>
-		/// <remarks>
-		/// This is a method to indicate that there may be non-trivial
-		/// work in determining the default value.
-		/// </remarks>
-		/// <returns></returns>
-		public T GetDefaultValue()
+		T IConfigParameter<T>.DefaultValue
+		{
+			get { return GetDefaultValue(); }
+		}
+
+		private T GetDefaultValue()
 		{
 			if (!_defaultValueSet)
 			{
@@ -279,5 +291,18 @@ namespace Quokka.Config
 			}
 			return _defaultValue;
 		}
+
+		/// <summary>
+		/// Convert a string value into the type required for this configuration parameter.
+		/// </summary>
+		/// <exception cref="FormatException">
+		/// Text is the wrong format for the configuration parameter type.
+		/// </exception>
+		protected abstract object ConvertFromString(string text);
+
+		/// <summary>
+		/// Convert the configuration value into a string suitable for persisting.
+		/// </summary>
+		protected abstract string ConvertToString(object value);
 	}
 }

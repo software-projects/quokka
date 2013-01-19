@@ -1,5 +1,6 @@
 ﻿using System;
 using Quokka.Config;
+using Quokka.Config.Storage;
 using Quokka.UI.Tasks;
 using Quokka.WinForms;
 
@@ -13,8 +14,8 @@ namespace Quokka.UI.Config
 		public ConfigTaskState TaskState { get; set; }
 		public IConfigRepo ConfigRepo { get; set; }
 
-		private readonly VirtualDataSource<string, ConfigParameter> _dataSource =
-			new VirtualDataSource<string, ConfigParameter>(p => p.Name);
+		private readonly VirtualDataSource<string, IConfigParameter> _dataSource =
+			new VirtualDataSource<string, IConfigParameter>(p => p.Name);
 
 		public override void InitializePresenter()
 		{

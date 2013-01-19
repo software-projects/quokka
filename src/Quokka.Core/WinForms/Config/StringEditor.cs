@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 using Quokka.Config;
+using Quokka.Config.Storage;
 using Quokka.Diagnostics;
 
 namespace Quokka.WinForms.Config
@@ -31,9 +32,9 @@ namespace Quokka.WinForms.Config
 			get { return this; }
 		}
 
-		public ConfigParameter Parameter { get; private set; }
+		public IConfigParameter Parameter { get; private set; }
 
-		public void Initialize(ConfigParameter parameter)
+		public void Initialize(IConfigParameter parameter)
 		{
 			Verify.ArgumentNotNull(parameter, "parameter");
 			Parameter = parameter;

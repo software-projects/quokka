@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 using Quokka.Config;
+using Quokka.Config.Storage;
 
 namespace Quokka.WinForms.Config
 {
@@ -8,8 +9,8 @@ namespace Quokka.WinForms.Config
 	{
 		string TextValue { get; }
 		Control Control { get; }
-		ConfigParameter Parameter { get; }
+		IConfigParameter Parameter { get; }
 
-		void Initialize(ConfigParameter parameter);
+		void Initialize(IConfigParameter parameter);
 	}
 }

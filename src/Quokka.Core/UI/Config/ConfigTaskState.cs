@@ -1,4 +1,5 @@
 ﻿using Quokka.Config;
+using Quokka.Config.Storage;
 
 namespace Quokka.UI.Config
 {
@@ -7,6 +8,6 @@ namespace Quokka.UI.Config
 	/// </summary>
 	public class ConfigTaskState
 	{
-		public ConfigParameter ConfigParameter;
+		public IConfigParameter ConfigParameter;
 	}
 }

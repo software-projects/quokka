@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
-using Castle.Core;
 using Quokka.Config;
+using Quokka.Config.Storage;
 using Quokka.UI.Commands;
 using Quokka.UI.Config;
 using Quokka.WinForms.Commands;
@@ -11,7 +11,7 @@ namespace Quokka.WinForms.Config
 	public partial class EditConfigView : UserControl, IEditConfigView
 	{
 		private IConfigParameterEditor _editor;
-		private ConfigParameter _configParameter;
+		private IConfigParameter _configParameter;
 
 		public EditConfigView()
 		{
@@ -23,7 +23,7 @@ namespace Quokka.WinForms.Config
 		public IUICommand SaveCommand { get; private set; }
 		public IUICommand CancelCommand { get; private set; }
 
-		public ConfigParameter Parameter
+		public IConfigParameter Parameter
 		{
 			get { return _configParameter; }
 			set

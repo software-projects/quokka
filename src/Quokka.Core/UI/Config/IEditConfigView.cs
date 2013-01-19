@@ -1,4 +1,4 @@
-﻿using Quokka.Config;
+﻿using Quokka.Config.Storage;
 using Quokka.UI.Commands;
 
 namespace Quokka.UI.Config
@@ -7,7 +7,7 @@ namespace Quokka.UI.Config
 	{
 		IUICommand SaveCommand { get; }
 		IUICommand CancelCommand { get; }
-		ConfigParameter Parameter { get; set; }
+		IConfigParameter Parameter { get; set; }
 		string Value { get; }
 	}
 }

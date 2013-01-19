@@ -17,12 +17,12 @@ namespace Quokka.Config
 			return Uri.TryCreate(s, UriKind.RelativeOrAbsolute, out result);
 		}
 
-		public override object ConvertFromString(string text)
+		protected override object ConvertFromString(string text)
 		{
 			return new Uri(text);
 		}
 
-		public override string ConvertToString(object value)
+		protected override string ConvertToString(object value)
 		{
 			return value.ToString();
 		}
