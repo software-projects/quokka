@@ -1,4 +1,4 @@
-﻿using Quokka.Config.Storage;
+﻿using Quokka.Config;
 using Quokka.UI.Commands;
 using Quokka.WinForms;
 

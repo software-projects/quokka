@@ -1,11 +1,18 @@
 ﻿using System;
 
-namespace Quokka.Config.Storage
+namespace Quokka.Config
 {
 	/// <summary>
 	/// Interface which provides all information required to persist a configuration
 	/// parameter.
 	/// </summary>
+	/// <remarks>
+	/// This interface is implemented explicitly by <see cref="ConfigParameter"/>. The
+	/// reason for this is that the end user of <see cref="ConfigParameter"/> (and its
+	/// derived types) does not typically have use for the methods in this interface,
+	/// and explicit iterface implementation means that these methods do not show up
+	/// in Visual Studio's auto-completion list.
+	/// </remarks>
 	public interface IConfigParameter
 	{
 		string Name { get; }
@@ -35,6 +42,19 @@ namespace Quokka.Config.Storage
 		string GetValueText();
 	}
 
+	/// <summary>
+	/// Generic typed configuration parameter interface.
+	/// </summary>
+	/// <typeparam name="T">Parameter type</typeparam>
+	/// <remarks>
+	/// This interface is implemented explicitly by <see cref="ConfigParameter{T, TParameter}"/>, and 
+	/// all of its derived types. The reason for implementing explicitly is that the calling program will
+	/// usually be accessing config parameters in a read-only fashion, and it would clutter the auto-completion
+	/// to have methods for default value and changing the value. When a program does want extra control, it
+	/// just has to explicitly cast to <see cref="IConfigParameter{T}"/>. Because this is not entirely obvious,
+	/// the <see cref="ConfigParameter{T, TParameter}"/> class has a property which returns itself cast to
+	/// this interface.
+	/// </remarks>
 	public interface IConfigParameter<T> : IConfigParameter
 	{
 		/// <summary>

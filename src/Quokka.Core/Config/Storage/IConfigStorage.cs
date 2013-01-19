@@ -44,34 +44,4 @@ namespace Quokka.Config.Storage
 		/// </summary>
 		void Refresh();
 	}
-
-	/// <summary>
-	/// Represents a value obtained from the configuration storage.
-	/// </summary>
-	public struct ConfigValue
-	{
-		/// <summary>
-		/// Associated <see cref="ConfigParameter"/>.
-		/// </summary>
-		public readonly ConfigParameter Parameter;
-
-		/// <summary>
-		/// Value associated with the <see cref="ConfigParameter"/>
-		/// </summary>
-		public readonly string Value;
-
-		/// <summary>
-		/// When the <see cref="Value"/> is <c>null</c>, indicates whether the
-		/// value was explicitly set as <c>null</c>, or is missing from the configuration
-		/// storage all together.
-		/// </summary>
-		public readonly bool HasValue;
-
-		public ConfigValue(ConfigParameter param, string value, bool hasValue)
-		{
-			Parameter = param;
-			Value = value;
-			HasValue = hasValue;
-		}
-	}
 }

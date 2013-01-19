@@ -23,7 +23,7 @@ namespace Quokka.Config
 				                  .Description("The description"));
 
 			Assert.AreEqual("name", param.Name);
-			Assert.AreEqual("default-value", ((IConfigParameter<string>)param).DefaultValue);
+			Assert.AreEqual("default-value", param.Extra.DefaultValue);
 			Assert.AreEqual("The description", param.Description);
 		}
 
@@ -41,11 +41,11 @@ namespace Quokka.Config
 
 			var param2 = new Int32Parameter("p2");
 
-			Assert.IsNull(((IConfigParameter<int>)param1).Validate(1));
+			Assert.IsNull(param1.Extra.Validate(1));
 			Assert.AreEqual("valid values are in the range [1, 10]", ((IConfigParameter<int>)param1).Validate(11));
 
-			Assert.IsNull(((IConfigParameter<int>)param2).Validate(0));
-			Assert.IsNull(((IConfigParameter<int>)param2).Validate(int.MaxValue));
+			Assert.IsNull(param2.Extra.Validate(0));
+			Assert.IsNull(param2.Extra.Validate(int.MaxValue));
 		}
 
 		[Test]
@@ -103,10 +103,7 @@ namespace Quokka.Config
 				.With(p => p.Description("Some description")
 				            .ValidRange(1, 10)
 				            .DefaultValue(4)
-							.ChangeAction(DoSomething));
-
-			
-			
+							.ChangeAction(DoSomething));			
 		}
 
 		public static readonly Int32Parameter testParam = new Int32Parameter("test-param")

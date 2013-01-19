@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using Quokka.Config;
 using Quokka.Config.Storage;
 using Quokka.UI.Commands;
 using Quokka.UI.Config;

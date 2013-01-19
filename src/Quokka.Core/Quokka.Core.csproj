@@ -84,9 +84,10 @@
     <Compile Include="Config\DateParameter.cs" />
     <Compile Include="Config\IConfigRepo.cs" />
     <Compile Include="Config\Int32Parameter.cs" />
+    <Compile Include="Config\Storage\ConfigValue.cs" />
     <Compile Include="Config\Storage\IConfigStorage.cs" />
     <Compile Include="Config\ConfigParameter.cs" />
-    <Compile Include="Config\Storage\IConfigParameter.cs" />
+    <Compile Include="Config\IConfigParameter.cs" />
     <Compile Include="Config\Storage\MemoryStorage.cs" />
     <Compile Include="Config\StringParameter.cs" />
     <Compile Include="Config\TimeSpanExtensions.cs" />

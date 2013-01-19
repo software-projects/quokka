@@ -25,6 +25,11 @@ namespace Quokka.Config
 		/// </summary>
 		public string Description { get; protected set; }
 
+		public override string ToString()
+		{
+			return Name + ": " + ((IConfigParameter)this).GetValueText();
+		}
+
 		string IConfigParameter.ValidateText(string proposedValue)
 		{
 			throw new NotImplementedException();
@@ -143,6 +148,11 @@ namespace Quokka.Config
 
 		protected ConfigParameter(string paramName, string paramType) : base(paramName, paramType)
 		{
+		}
+
+		public IConfigParameter<T> Extra
+		{
+			get { return this; }
 		}
 
 		public TParameter With(Action<IConfigParameterBuilder<T>> callback)
