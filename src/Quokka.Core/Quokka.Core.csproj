@@ -304,6 +304,12 @@
     <Compile Include="WinForms\Startup\DefaultSplashScreen.Designer.cs">
       <DependentUpon>DefaultSplashScreen.cs</DependentUpon>
     </Compile>
+    <Compile Include="WinForms\Startup\ErrorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WinForms\Startup\ErrorForm.Designer.cs">
+      <DependentUpon>ErrorForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="WinForms\Startup\ISplashScreenView.cs" />
     <Compile Include="WinForms\Startup\SplashScreenApplication.cs" />
     <Compile Include="WinForms\Startup\SplashScreenPresenter.cs" />
@@ -513,6 +519,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="WinForms\Startup\DefaultSplashScreen.resx">
       <DependentUpon>DefaultSplashScreen.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WinForms\Startup\ErrorForm.resx">
+      <DependentUpon>ErrorForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WinForms\WizardButtonBar.resx">
       <DependentUpon>WizardButtonBar.cs</DependentUpon>

@@ -43,7 +43,8 @@ namespace Quokka.WinForms
 
 		public static string CopyrightText
 		{
-			get { return Value(_copyrightText, () => GetCopyrightText()); }
+			get { return Value(_copyrightText, GetCopyrightText); }
+			set { _copyrightText = Trim(value); }
 		}
 
 		/// <summary>

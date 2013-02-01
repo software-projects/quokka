@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using QChrome.Forms;
 
 // NOTE: Do not add any references to classes from other assemblies.
 // This class needs to load as quickly as possible during program startup.
@@ -85,7 +86,7 @@ namespace Quokka.WinForms.Startup
 			if (splashScreen == null)
 			{
 				// the application does not want a splash screen displayed, maybe it is in debug mode
-				OnSplashScreenDisplayed();
+				CreateMainForm();
 				ShowMainForm();
 			}
 			else
@@ -99,28 +100,46 @@ namespace Quokka.WinForms.Startup
 		{
 			if (MainForm == null)
 			{
-				MessageBox.Show("No Main Form Defined", ApplicationInfo.MessageBoxCaption, MessageBoxButtons.OK,
-				                MessageBoxIcon.Error);
-				Application.Exit();
+				MainForm = new ErrorForm("MainForm has not been assigned in the SplashScreenApplication.OnSplashScreenDisplayed method.");
 			}
-			else
+
+			try
 			{
 				if (!MainForm.IsHandleCreated)
 				{
 					MainForm.Show();
 				}
 			}
+			catch (Exception ex)
+			{
+				MainForm = new ErrorForm(ex);
+				MainForm.Show();
+			}
 		}
 
 		private void PresenterOnSplashScreenDisplayed(object sender, EventArgs e)
 		{
-			OnSplashScreenDisplayed();
+			CreateMainForm();
 			RaiseSplashScreenDisplayed(this, e);
 
-			if (MainForm != Presenter.SplashScreen)
+			if (MainForm == Presenter.SplashScreen)
 			{
-				ShowMainForm();
-				Presenter.FadeAway();
+				MainForm = null;
+			}
+
+			ShowMainForm();
+			Presenter.FadeAway();
+		}
+
+		private void CreateMainForm()
+		{
+			try
+			{
+				OnSplashScreenDisplayed();
+			}
+			catch (Exception ex)
+			{
+				MainForm = new ErrorForm(ex);
 			}
 		}
 
