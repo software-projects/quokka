@@ -207,6 +207,7 @@
     <Compile Include="Util\RegistryUtil.cs" />
     <Compile Include="Util\StreamExtensions.cs" />
     <Compile Include="Util\StringUtils.cs" />
+    <Compile Include="WinForms\ApplicationInfo.cs" />
     <Compile Include="WinForms\CommandLink.cs">
       <SubType>Component</SubType>
     </Compile>

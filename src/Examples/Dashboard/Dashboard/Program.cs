@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using Quokka.WinForms;
 using Quokka.WinForms.Startup;
 
 namespace Dashboard
@@ -29,8 +30,10 @@ namespace Dashboard
 
 		protected override Form CreateSplashScreen()
 		{
+			ApplicationInfo.ProductName = "Example Program";
+
 			// Default splashscreen for now.
-			return null;
+			return base.CreateSplashScreen();
 		}
 
 		protected override void OnSplashScreenDisplayed()

@@ -13,18 +13,19 @@ namespace Quokka.WinForms.Startup
 	{
 		public event EventHandler SplashScreenDisplayed;
 		public event EventHandler SplashScreenClosed;
+		public bool DisplaySplashScreen = true;
 
 		public SplashScreenApplication()
 		{
 			// Register for the application idle loop. This prevents the class from calling
 			// a virtual method (CreateSplashScreen) inside its constructor.
-			Application.Idle += Application_Idle;
+			Application.Idle += ApplicationOnIdle;
 
 			// Create the presenter and wire the events. By doing this in the constructor, it
 			// allows the derived class to set properties on the presenter (copyright, company name, etc).
 			Presenter = new SplashScreenPresenter();
-			Presenter.SplashScreenDisplayed += Presenter_SplashScreenDisplayed;
-			Presenter.SplashScreenClosed += Presenter_SplashScreenClosed;
+			Presenter.SplashScreenDisplayed += PresenterOnSplashScreenDisplayed;
+			Presenter.SplashScreenClosed += PresenterOnSplashScreenClosed;
 		}
 
 		/// <summary>
@@ -64,45 +65,73 @@ namespace Quokka.WinForms.Startup
 		/// </returns>
 		protected virtual Form CreateSplashScreen()
 		{
-			// null means display the default splash screen
-			return null;
+			// display the default splash screen
+			return new DefaultSplashScreen(); ;
 		}
 
 		/// <summary>
 		/// Gets run the first time that the application is idle -- displays the splash screen
 		/// </summary>
-		private void Application_Idle(object sender, EventArgs e)
+		private void ApplicationOnIdle(object sender, EventArgs e)
 		{
 			// Unsubscribe to the Application.Idle event
-			Application.Idle -= Application_Idle;
+			Application.Idle -= ApplicationOnIdle;
 
-			Presenter.DisplaySplashScreen(CreateSplashScreen());
-			MainForm = Presenter.SplashScreen;
+			Form splashScreen = null;
+			if (DisplaySplashScreen)
+			{
+				splashScreen = CreateSplashScreen();
+			}
+			if (splashScreen == null)
+			{
+				// the application does not want a splash screen displayed, maybe it is in debug mode
+				OnSplashScreenDisplayed();
+				ShowMainForm();
+			}
+			else
+			{
+				Presenter.DisplaySplashScreen(CreateSplashScreen());
+				MainForm = Presenter.SplashScreen;
+			}
 		}
 
-		private void Presenter_SplashScreenDisplayed(object sender, EventArgs e)
+		private void ShowMainForm()
+		{
+			if (MainForm == null)
+			{
+				MessageBox.Show("No Main Form Defined", ApplicationInfo.MessageBoxCaption, MessageBoxButtons.OK,
+				                MessageBoxIcon.Error);
+				Application.Exit();
+			}
+			else
+			{
+				if (!MainForm.IsHandleCreated)
+				{
+					MainForm.Show();
+				}
+			}
+		}
+
+		private void PresenterOnSplashScreenDisplayed(object sender, EventArgs e)
 		{
 			OnSplashScreenDisplayed();
 			RaiseSplashScreenDisplayed(this, e);
 
 			if (MainForm != Presenter.SplashScreen)
 			{
-				if (MainForm != null && !MainForm.IsHandleCreated)
-				{
-					MainForm.Show();
-				}
+				ShowMainForm();
 				Presenter.FadeAway();
 			}
 		}
 
-		private void Presenter_SplashScreenClosed(object sender, EventArgs e)
+		private void PresenterOnSplashScreenClosed(object sender, EventArgs e)
 		{
 			OnSplashScreenClosed();
 			RaiseSplashScreenClosed(this, e);
 
 			// unsubscribe events so that the presenter will be garbage collected
-			Presenter.SplashScreenDisplayed -= Presenter_SplashScreenDisplayed;
-			Presenter.SplashScreenClosed -= Presenter_SplashScreenClosed;
+			Presenter.SplashScreenDisplayed -= PresenterOnSplashScreenDisplayed;
+			Presenter.SplashScreenClosed -= PresenterOnSplashScreenClosed;
 			Presenter.Dispose();
 			Presenter = null;
 		}

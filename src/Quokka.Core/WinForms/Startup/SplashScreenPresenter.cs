@@ -174,19 +174,15 @@ namespace Quokka.WinForms.Startup
 
 				if (CompanyName == null)
 				{
-					CompanyName = Application.CompanyName;
+					CompanyName = ApplicationInfo.CompanyName;
 				}
 				if (ProductName == null)
 				{
-					ProductName = Application.ProductName;
+					ProductName = ApplicationInfo.ProductName;
 				}
 				if (CopyrightText == null)
 				{
-					var attributes = assembly.GetCustomAttributes(typeof (AssemblyCopyrightAttribute), false);
-					foreach (AssemblyCopyrightAttribute attribute in attributes)
-					{
-						view.CopyrightText = attribute.Copyright;
-					}
+					CopyrightText = ApplicationInfo.CopyrightText;
 				}
 				view.CompanyText = CompanyName;
 				view.ProductText = ProductName;
