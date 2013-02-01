@@ -74,7 +74,7 @@ namespace Quokka.WinForms
 
 		private static string Value(string value, Func<string> defaultCallback)
 		{
-			if (string.IsNullOrWhiteSpace(value))
+			if (StringUtils.IsNullOrWhiteSpace(value))
 			{
 				return defaultCallback();
 			}
@@ -99,7 +99,7 @@ namespace Quokka.WinForms
 				var attributes = assembly.GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false);
 				foreach (AssemblyCopyrightAttribute attribute in attributes)
 				{
-					if (!string.IsNullOrWhiteSpace(attribute.Copyright))
+					if (!StringUtils.IsNullOrWhiteSpace(attribute.Copyright))
 					{
 						result = attribute.Copyright;
 					}
