@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Windows.Forms;
 using Quokka.Properties;
-using Quokka.WinForms;
 
-namespace QChrome.Forms
+namespace Quokka.WinForms.Startup
 {
 	/// <summary>
 	/// Form that is displayed when an exception occurs very early in the program startup.

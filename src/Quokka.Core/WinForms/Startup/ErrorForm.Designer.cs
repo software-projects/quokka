@@ -1,4 +1,4 @@
-﻿namespace QChrome.Forms
+﻿namespace Quokka.WinForms.Startup
 {
 	partial class ErrorForm
 	{
