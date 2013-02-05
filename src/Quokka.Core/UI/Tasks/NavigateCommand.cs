@@ -73,6 +73,11 @@ namespace Quokka.UI.Tasks
 
 		public void Navigate()
 		{
+			UIThread.Send(NavigateOnUIThread);
+		}
+
+		private void NavigateOnUIThread()
+		{
 			// do not navigate if we have been disposed
 			if (!_isDisposed)
 			{
@@ -93,7 +98,7 @@ namespace Quokka.UI.Tasks
 				{
 					Navigating(this, EventArgs.Empty);
 				}
-			}
+			}			
 		}
 
 		private bool _isDisposed;

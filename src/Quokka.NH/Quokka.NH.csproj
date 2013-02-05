@@ -103,7 +103,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="Quokka.NH.nuspec" />
+    <None Include="Quokka.NH.nuspec">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Quokka.snk" />
   </ItemGroup>
   <ItemGroup>
