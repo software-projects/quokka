@@ -9,17 +9,19 @@ namespace Quokka.Security
 	{
 		/// <summary>
 		/// This is either the name of the individual (eg "John CITIZEN"), or else if the user does not correspond
-		/// to an individual, it is the description of the role (eg "Administration User").
+		/// to an individual, it is the description of the role (eg "Administration User"). Set to <c>null</c> if
+		/// no user is logged in.
 		/// </summary>
 		string Description { get; }
 
 		/// <summary>
-		/// This is normally the name that the user enters during login.
+		/// This is normally the name that the user enters during login. Set to <c>null</c> if no user is logged in.
 		/// </summary>
 		string Username { get; }
 
 		/// <summary>
 		/// Unique identification of the user. This can be any type. Common types include integer, string and Guid.
+		/// Set to <c>null</c> if no user is logged in.
 		/// </summary>
 		/// <remarks>
 		/// This might be the same as <see cref="Username"/>, or it might be the underlying identifier/guid that is used to 

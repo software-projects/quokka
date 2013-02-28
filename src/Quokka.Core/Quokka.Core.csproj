@@ -77,6 +77,7 @@
   <ItemGroup>
     <Compile Include="Attributes\StringValueAttribute.cs" />
     <Compile Include="Castle\ConfigFacility.cs" />
+    <Compile Include="Castle\DeferredStartableFacility.cs" />
     <Compile Include="Castle\WindsorServiceContainer.cs" />
     <Compile Include="Castle\WindsorServiceLocator.cs" />
     <Compile Include="Config\BooleanParameter.cs" />
