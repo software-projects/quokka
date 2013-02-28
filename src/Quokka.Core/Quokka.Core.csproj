@@ -141,6 +141,9 @@
     <Compile Include="Obsolete\Uip\UipUtil.cs" />
     <Compile Include="Obsolete\Uip\UipViewEventArgs.cs" />
     <Compile Include="Obsolete\Uip\UipViewManager.cs" />
+    <Compile Include="Security\DefaultRole.cs" />
+    <Compile Include="Security\ICurrentUser.cs" />
+    <Compile Include="Security\Permission.cs" />
     <Compile Include="Stomp\Internal\LockObject.cs" />
     <Compile Include="UI\Config\ConfigTaskState.cs" />
     <Compile Include="UI\Config\ConfigTask.cs" />
