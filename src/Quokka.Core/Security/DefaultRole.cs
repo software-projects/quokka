@@ -15,9 +15,9 @@ namespace Quokka.Security
 	///		// Default roles referenced by permissions.
 	///		public static class DefaultRoles
 	///		{
-	///			public static readonly Role Client = new Role("CLI", "Clients of the company");
-	///			public static readonly Role Staff = new Role("STF", "All current staff of the company");
-	///			public static readonly Role Supervisor = new Role("SUP", "Supervisors");
+	///			public static readonly Role Client = new Role("CLI", "Clients", "Clients of the company");
+	///			public static readonly Role Staff = new Role("STF", "Staff", "All current staff of the company");
+	///			public static readonly Role Supervisor = new Role("SUP", "Supervisors", "Staff supervisors in the company", Staff);
 	///		}
 	/// </code>
 	/// </example>
@@ -29,14 +29,26 @@ namespace Quokka.Security
 		public string Id { get; private set; }
 
 		/// <summary>
+		/// A short name for the role.
+		/// </summary>
+		public string Name { get; private set; }
+
+		/// <summary>
 		/// Describes the role briefly. Use a job description or similar (eg "Shift Supervisor")
 		/// </summary>
 		public string Description { get; private set; }
 
-		public DefaultRole(string id, string description)
+		/// <summary>
+		/// This role has all of the permissions of the role specified by this property.
+		/// </summary>
+		public DefaultRole Subrole { get; private set; }
+
+		public DefaultRole(string id, string name, string description, DefaultRole subrole = null)
 		{
 			Id = Verify.ArgumentNotNull(id, "id");
+			Name = Verify.ArgumentNotNull(name, "name");
 			Description = Verify.ArgumentNotNull(description, "description");
+			Subrole = subrole;
 		}
 	}
 }
