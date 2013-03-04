@@ -54,6 +54,11 @@ namespace Quokka.Config
 		/// Gets the value of this parameter as a text string.
 		/// </summary>
 		string GetValueText();
+
+		/// <summary>
+		/// Gets the default value of this parameter as a text string.
+		/// </summary>
+		string GetDefaultValueText();
 	}
 
 	/// <summary>

@@ -40,6 +40,27 @@ namespace Quokka.Config
 			}
 		}
 
+		public override int GetHashCode()
+		{
+			return Name.GetHashCode();
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (ReferenceEquals(this, obj))
+			{
+				return true;
+			}
+
+			var other = obj as ConfigParameter;
+			if (other == null)
+			{
+				return false;
+			}
+
+			return Name == other.Name && ParameterType == other.ParameterType;
+		}
+
 		public override string ToString()
 		{
 			return Name + ": " + ((IConfigParameter) this).GetValueText();
@@ -66,6 +87,11 @@ namespace Quokka.Config
 		}
 
 		string IConfigParameter.GetValueText()
+		{
+			throw new NotImplementedException();
+		}
+
+		string IConfigParameter.GetDefaultValueText()
 		{
 			throw new NotImplementedException();
 		}
@@ -309,6 +335,11 @@ namespace Quokka.Config
 		string IConfigParameter.GetValueText()
 		{
 			return ConvertToString(Value);
+		}
+
+		string IConfigParameter.GetDefaultValueText()
+		{
+			return ConvertToString(GetDefaultValue());
 		}
 
 		string IConfigParameter<T>.Validate(T value)

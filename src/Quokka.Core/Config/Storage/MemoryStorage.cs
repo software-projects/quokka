@@ -10,7 +10,8 @@ namespace Quokka.Config.Storage
 	/// </summary>
 	public class MemoryStorage : IConfigStorage
 	{
-		private readonly Dictionary<string, string> _values = new Dictionary<string, string>();
+		private readonly Dictionary<ConfigParameter, ConfigValue> _values 
+			= new Dictionary<ConfigParameter, ConfigValue>();
 
 		// TODO: make for better concurrency with read-write lock
 		private readonly object _lockObject = new object();
@@ -37,14 +38,7 @@ namespace Quokka.Config.Storage
 				{
 					foreach (var parentValue in parentValues)
 					{
-						if (parentValue.HasValue)
-						{
-							_values[parentValue.Parameter.Name] = parentValue.Value;
-						}
-						else
-						{
-							_values.Remove(parentValue.Parameter.Name);
-						}
+						_values[parentValue.Parameter] = parentValue;
 					}
 				}
 
@@ -83,7 +77,7 @@ namespace Quokka.Config.Storage
 				{
 					Parent.SetValue(parameter, value);
 				}
-				_values[parameter.Name] = value;
+				_values[parameter] = new ConfigValue(parameter, value, true);
 			}
 		}
 
@@ -108,19 +102,21 @@ namespace Quokka.Config.Storage
 
 		private ConfigValue GetValueWithoutLock(ConfigParameter parameter)
 		{
-			string value;
-			bool hasValue = _values.TryGetValue(parameter.Name, out value);
-			if (!hasValue && Parent != null)
+			ConfigValue value;
+			if (_values.TryGetValue(parameter, out value))
 			{
-				var configValue = Parent.GetValue(parameter);
-				if (configValue.HasValue)
-				{
-					_values.Add(parameter.Name, configValue.Value);
-					return configValue;
-				}
+				return value;
 			}
 
-			return new ConfigValue(parameter, value, hasValue);
+			if (Parent == null)
+			{
+				// No parent and no value
+				return new ConfigValue(parameter, null, false);
+			}
+
+			value = Parent.GetValue(parameter);
+			_values.Add(parameter, value);
+			return value;
 		}
 	}
 }
