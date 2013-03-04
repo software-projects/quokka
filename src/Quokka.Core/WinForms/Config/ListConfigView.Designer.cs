@@ -38,6 +38,7 @@
 			this.ValueColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.ParameterTypeColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.DescriptionColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.RefreshButton = new System.Windows.Forms.Button();
 			this.TopPanel.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.DataGridView)).BeginInit();
 			this.SuspendLayout();
@@ -45,10 +46,11 @@
 			// TopPanel
 			// 
 			this.TopPanel.AutoSize = true;
-			this.TopPanel.Controls.Add(this.EditButton);
 			this.TopPanel.Controls.Add(this.SearchLabel);
 			this.TopPanel.Controls.Add(this.SearchTextBox);
 			this.TopPanel.Controls.Add(this.ClearSearchTextButton);
+			this.TopPanel.Controls.Add(this.EditButton);
+			this.TopPanel.Controls.Add(this.RefreshButton);
 			this.TopPanel.Dock = System.Windows.Forms.DockStyle.Top;
 			this.TopPanel.Location = new System.Drawing.Point(0, 0);
 			this.TopPanel.MinimumSize = new System.Drawing.Size(100, 25);
@@ -60,7 +62,8 @@
 			// 
 			this.EditButton.Anchor = System.Windows.Forms.AnchorStyles.Left;
 			this.EditButton.AutoSize = true;
-			this.EditButton.Location = new System.Drawing.Point(3, 3);
+			this.EditButton.Location = new System.Drawing.Point(390, 3);
+			this.EditButton.Margin = new System.Windows.Forms.Padding(32, 3, 3, 3);
 			this.EditButton.MinimumSize = new System.Drawing.Size(75, 23);
 			this.EditButton.Name = "EditButton";
 			this.EditButton.Size = new System.Drawing.Size(75, 23);
@@ -72,8 +75,8 @@
 			// 
 			this.SearchLabel.Anchor = System.Windows.Forms.AnchorStyles.Left;
 			this.SearchLabel.AutoSize = true;
-			this.SearchLabel.Location = new System.Drawing.Point(113, 8);
-			this.SearchLabel.Margin = new System.Windows.Forms.Padding(32, 0, 3, 0);
+			this.SearchLabel.Location = new System.Drawing.Point(6, 8);
+			this.SearchLabel.Margin = new System.Windows.Forms.Padding(6, 0, 3, 0);
 			this.SearchLabel.Name = "SearchLabel";
 			this.SearchLabel.Size = new System.Drawing.Size(41, 13);
 			this.SearchLabel.TabIndex = 2;
@@ -82,7 +85,7 @@
 			// SearchTextBox
 			// 
 			this.SearchTextBox.Anchor = System.Windows.Forms.AnchorStyles.Left;
-			this.SearchTextBox.Location = new System.Drawing.Point(160, 4);
+			this.SearchTextBox.Location = new System.Drawing.Point(53, 4);
 			this.SearchTextBox.Name = "SearchTextBox";
 			this.SearchTextBox.Size = new System.Drawing.Size(255, 20);
 			this.SearchTextBox.TabIndex = 1;
@@ -95,7 +98,7 @@
 			this.ClearSearchTextButton.Anchor = System.Windows.Forms.AnchorStyles.Left;
 			this.ClearSearchTextButton.AutoSize = true;
 			this.ClearSearchTextButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-			this.ClearSearchTextButton.Location = new System.Drawing.Point(421, 3);
+			this.ClearSearchTextButton.Location = new System.Drawing.Point(314, 3);
 			this.ClearSearchTextButton.MinimumSize = new System.Drawing.Size(23, 23);
 			this.ClearSearchTextButton.Name = "ClearSearchTextButton";
 			this.ClearSearchTextButton.Size = new System.Drawing.Size(41, 23);
@@ -154,6 +157,18 @@
 			this.DescriptionColumn.Name = "DescriptionColumn";
 			this.DescriptionColumn.ReadOnly = true;
 			// 
+			// RefreshButton
+			// 
+			this.RefreshButton.Anchor = System.Windows.Forms.AnchorStyles.Left;
+			this.RefreshButton.AutoSize = true;
+			this.RefreshButton.Location = new System.Drawing.Point(471, 3);
+			this.RefreshButton.MinimumSize = new System.Drawing.Size(75, 23);
+			this.RefreshButton.Name = "RefreshButton";
+			this.RefreshButton.Size = new System.Drawing.Size(75, 23);
+			this.RefreshButton.TabIndex = 4;
+			this.RefreshButton.Text = "Refresh";
+			this.RefreshButton.UseVisualStyleBackColor = true;
+			// 
 			// ListConfigView
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -183,5 +198,6 @@
 		public System.Windows.Forms.DataGridViewTextBoxColumn NameColumn;
 		public System.Windows.Forms.DataGridViewTextBoxColumn ParameterTypeColumn;
 		public System.Windows.Forms.DataGridViewTextBoxColumn ValueColumn;
+		public System.Windows.Forms.Button RefreshButton;
 	}
 }

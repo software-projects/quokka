@@ -26,6 +26,7 @@ namespace Quokka.WinForms.Config
 				.SortBy(NameColumn);
 
 			EditCommand = new UICommand(EditButton);
+			RefreshCommand = new UICommand(RefreshButton);
 
 			Load += delegate {
 				BeginInvoke(new Action(() => SearchTextBox.Focus()));
@@ -35,6 +36,7 @@ namespace Quokka.WinForms.Config
 		}
 
 		public IUICommand EditCommand { get; private set; }
+		public IUICommand RefreshCommand { get; private set; }
 
 		public IVirtualDataSource<IConfigParameter> DataSource
 		{

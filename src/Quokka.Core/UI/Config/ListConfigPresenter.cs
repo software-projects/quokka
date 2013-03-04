@@ -21,6 +21,7 @@ namespace Quokka.UI.Config
 		public override void InitializePresenter()
 		{
 			View.EditCommand.Execute += HandleEditCommand;
+			View.RefreshCommand.Execute += HandleRefreshCommand;
 			View.DataSource = _dataSource;
 			Refresh();
 		}
@@ -41,6 +42,11 @@ namespace Quokka.UI.Config
 			}
 		}
 
+		private void HandleRefreshCommand(object sender, EventArgs e)
+		{
+			ConfigParameter.Storage.Refresh();
+			Refresh();
+		}
 
 		private void HandleEditCommand(object sender, EventArgs e)
 		{
