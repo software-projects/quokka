@@ -132,67 +132,7 @@ namespace Quokka.Config
 		/// </remarks>
 		public static IConfigStorage Storage = new MemoryStorage();
 
-		/// <summary>
-		/// Find all <see cref="ConfigParameter"/> parameters defined in an assembly.
-		/// </summary>
-		/// <param name="assembly">Assembly to look for config parameters.</param>
-		/// <returns>List of <see cref="ConfigParameter"/></returns>
-		/// <remarks>
-		/// A config parameter should be defined as a static, readonly field.
-		/// </remarks>
-		public static IList<ConfigParameter> Find(Assembly assembly)
-		{
-			var fields = from t in assembly.GetTypes()
-			             from f in t.GetFields()
-			             where f.IsStatic
-			             where typeof (ConfigParameter).IsAssignableFrom(f.FieldType)
-			             select f;
-
-			List<string> warnings = null;
-			var configParams = new List<ConfigParameter>();
-
-			foreach (var field in fields)
-			{
-				var parameter = field.GetValue(null) as ConfigParameter;
-				if (parameter == null)
-				{
-					if (warnings == null)
-					{
-						warnings = new List<string>();
-					}
-					warnings.Add(string.Format("Ignoring parameter defined in {0}.{1} because its value is null",
-					                           field.DeclaringType.FullName,
-					                           field.Name));
-					continue;
-				}
-
-				if (!field.IsInitOnly)
-				{
-					if (warnings == null)
-					{
-						warnings = new List<string>();
-					}
-					warnings.Add(string.Format("Ignoring parameter {0} defined in {1}.{2} because it is not defined as readonly",
-					                           parameter.Name,
-					                           field.DeclaringType.FullName,
-					                           field.Name));
-					continue;
-				}
-
-				configParams.Add(parameter);
-			}
-
-			if (warnings != null)
-			{
-				var logger = LoggerFactory.GetCurrentClassLogger();
-				foreach (var warning in warnings)
-				{
-					logger.Warn(warning);
-				}
-			}
-
-			return configParams;
-		}
+		public static readonly ConfigParameterCollection All = new ConfigParameterCollection();
 	}
 
 	public interface IConfigParameterBuilder<T>

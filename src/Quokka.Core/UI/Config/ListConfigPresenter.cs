@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using Quokka.Config;
-using Quokka.Config.Storage;
 using Quokka.UI.Tasks;
 using Quokka.WinForms;
 
@@ -13,7 +12,6 @@ namespace Quokka.UI.Config
 		public INavigateCommand EditCommand { get; set; }
 		public ErrorReport ErrorReport { get; set; }
 		public ConfigTaskState TaskState { get; set; }
-		public IConfigRepo ConfigRepo { get; set; }
 
 		private readonly VirtualDataSource<string, IConfigParameter> _dataSource =
 			new VirtualDataSource<string, IConfigParameter>(p => p.Name);
@@ -30,10 +28,8 @@ namespace Quokka.UI.Config
 		{
 			try
 			{
-				var list = ConfigRepo.FindAll();
-
 				// casting is necessary for .NET 3.5
-				_dataSource.ReplaceContents(list.Select(c => (IConfigParameter)c));
+				_dataSource.ReplaceContents(ConfigParameter.All.Select(c => (IConfigParameter)c));
 			}
 			catch (Exception ex)
 			{

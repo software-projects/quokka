@@ -82,9 +82,9 @@
     <Compile Include="Castle\WindsorServiceLocator.cs" />
     <Compile Include="Config\BooleanParameter.cs" />
     <Compile Include="Config\ConfigException.cs" />
+    <Compile Include="Config\ConfigParameterCollection.cs" />
     <Compile Include="Config\ConfigParameterType.cs" />
     <Compile Include="Config\DateParameter.cs" />
-    <Compile Include="Config\IConfigRepo.cs" />
     <Compile Include="Config\Int32Parameter.cs" />
     <Compile Include="Config\Storage\ConfigValue.cs" />
     <Compile Include="Config\Storage\IConfigStorage.cs" />
