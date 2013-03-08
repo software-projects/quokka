@@ -9,7 +9,7 @@ namespace Quokka.Config
 {
 	public class ConfigParameterCollection : ICollection<ConfigParameter>
 	{
-		private readonly SortedSet<ConfigParameter> _set = new SortedSet<ConfigParameter>();
+		private readonly HashSet<ConfigParameter> _set = new HashSet<ConfigParameter>();
 
 		public IEnumerator<ConfigParameter> GetEnumerator()
 		{
@@ -90,7 +90,7 @@ namespace Quokka.Config
 						warnings = new List<string>();
 					}
 					warnings.Add(string.Format("Ignoring parameter defined in {0}.{1} because its value is null",
-											   field.DeclaringType.FullName,
+											   GetFullName(field),
 											   field.Name));
 					continue;
 				}
@@ -103,7 +103,7 @@ namespace Quokka.Config
 					}
 					warnings.Add(string.Format("Ignoring parameter {0} defined in {1}.{2} because it is not defined as readonly",
 											   parameter.Name,
-											   field.DeclaringType.FullName,
+											   GetFullName(field),
 											   field.Name));
 					continue;
 				}
@@ -119,6 +119,16 @@ namespace Quokka.Config
 					logger.Warn(warning);
 				}
 			}
+		}
+
+		private static string GetFullName(FieldInfo field)
+		{
+			if (field.DeclaringType == null)
+			{
+				// shouldn't happen
+				return "(null)";
+			}
+			return field.DeclaringType.FullName;
 		}
 	}
 }
