@@ -119,6 +119,8 @@ namespace Quokka.Config
 					logger.Warn(warning);
 				}
 			}
+
+			AddRange(configParams);
 		}
 
 		private static string GetFullName(FieldInfo field)
