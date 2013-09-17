@@ -43,5 +43,3 @@ using System.Security;
 [assembly: ComVisible(false)]
 [assembly: Guid("ef3ec75b-20eb-4612-905d-fac42df22b71")]
 
-// Allows partially trusted callers for a web hosting environment
-//[assembly: AllowPartiallyTrustedCallers()]
