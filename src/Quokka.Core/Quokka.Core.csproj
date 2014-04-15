@@ -154,7 +154,6 @@
     <Compile Include="UI\UIThread.cs" />
     <Compile Include="Events\ReferenceOption.cs" />
     <Compile Include="Events\ThreadOption.cs" />
-    <Compile Include="Modules\IModule.cs" />
     <Compile Include="NH\Implementations\IdHelperForString.cs" />
     <Compile Include="NH\NHEntity.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -356,7 +355,6 @@
     <Compile Include="Stomp\Internal\QueueName.cs" />
     <Compile Include="Stomp\Server\Messages\MessageLogMessage.cs" />
     <Compile Include="Stomp\Transport\ExceptionEventArgs.cs" />
-    <Compile Include="Sandbox\IDataQuery.cs" />
     <Compile Include="Data\IgnoreParameterAttribute.cs" />
     <Compile Include="Data\Internal\DataConversionKey.cs" />
     <Compile Include="Data\Internal\DataRecordConverter.cs" />
@@ -527,7 +525,9 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Sandbox\" />
+  </ItemGroup>
   <PropertyGroup>
     <DontImportPostSharp>True</DontImportPostSharp>
   </PropertyGroup>

@@ -1,6 +1,6 @@
 ﻿#region License
 
-// Copyright 2004-2012 John Jeffery
+// Copyright 2004-2014 John Jeffery
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 // limitations under the License.
 
 #endregion
+
 
 using System;
 using System.Collections.Generic;
