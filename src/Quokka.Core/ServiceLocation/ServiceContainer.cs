@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Common.Logging;
-using Microsoft.Practices.ServiceLocation;
+using Castle.Core.Logging;
+using Quokka.Diagnostics;
 
 namespace Quokka.ServiceLocation
 {
@@ -15,7 +15,7 @@ namespace Quokka.ServiceLocation
 		private bool _disposing;
 		private IServiceLocator _locator;
 		private readonly HashSet<Assembly> _registeredAssemblies = new HashSet<Assembly>();
-		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+		private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
 
 		public void Dispose()
 		{
@@ -113,7 +113,7 @@ namespace Quokka.ServiceLocation
 					continue;
 				}
 
-				foreach (RegisterTypeAttribute attribute in type.GetCustomAttributes(typeof(RegisterTypeAttribute), false))
+				foreach (RegisterTypeAttribute attribute in type.GetCustomAttributes(typeof (RegisterTypeAttribute), false))
 				{
 					Type fromType = attribute.Type;
 					Type toType = type;

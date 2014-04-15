@@ -2,6 +2,7 @@
 using System.Configuration;
 using System.IO;
 using System.Net;
+using Quokka.Diagnostics;
 using log4net;
 using log4net.Config;
 using Quokka.Stomp;
@@ -26,6 +27,9 @@ namespace Sprocket.Server
 
             var logFile = new FileInfo(logFilePath);
             XmlConfigurator.ConfigureAndWatch(logFile);
+
+			// hook up castle logger factory 
+			LoggerFactory.SetLoggerFactory(new Castle.Services.Logging.Log4netIntegration.Log4netFactory(true));
         }
 
         public override void Start(string[] args)

@@ -1,4 +1,5 @@
 ﻿using System.Windows.Forms;
+using Castle.Windsor;
 using Quokka.Castle;
 using Quokka.ServiceLocation;
 using Quokka.Sprocket;
@@ -10,23 +11,24 @@ namespace Sprocket.Manager.Startup
 {
     public class Bootstrapper : BootstrapperBase
     {
-        protected override IServiceContainer CreateServiceContainer()
+        protected override IWindsorContainer CreateContainer(bool isChild)
         {
-            return ServiceContainerFactory.CreateContainer();
+        	var container = new WindsorContainer();
+        	return container;
         }
 
         protected override void ConfigureServices()
         {
             // register types in this assembly
-            Container.RegisterTypesInAssembly(typeof (Bootstrapper).Assembly);
+            ServiceContainer.RegisterTypesInAssembly(typeof (Bootstrapper).Assembly);
 
-            Container.RegisterType<ISprocket,SprocketClient>(ServiceLifecycle.Singleton);
+            ServiceContainer.RegisterType<ISprocket,SprocketClient>(ServiceLifecycle.Singleton);
         }
 
         protected override Form CreateShell()
         {
-            var form = Container.Locator.GetInstance<MainForm>();
-            var task = Container.Locator.GetInstance<StartupTask>();
+            var form = ServiceContainer.Locator.GetInstance<MainForm>();
+            var task = ServiceContainer.Locator.GetInstance<StartupTask>();
             task.Start(form.ViewDeck);
             return form;
         }

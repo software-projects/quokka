@@ -29,7 +29,10 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using Castle.MicroKernel.Registration;
+using Castle.Windsor;
 using Quokka.Diagnostics;
 using Quokka.ServiceLocation;
 using Quokka.Util;
@@ -173,29 +176,72 @@ namespace Quokka.UI.Tasks
 		/// <summary>
 		/// 	The view deck for the node
 		/// </summary>
-		public IViewDeck ViewDeck
+		public IViewDeck GetViewDeck(bool createIfNecessary)
 		{
-			get
+			if (IsViewModal)
 			{
-				var modalWindow = ModalWindow;
-				return modalWindow == null ? Task.ViewDeck : modalWindow.ViewDeck;
+				var modalWindow = GetModalWindow(createIfNecessary);
+				if (modalWindow == null)
+				{
+					return null;
+				}
+				return modalWindow.ViewDeck;
 			}
+			return Task.ViewDeck;
 		}
 
-		public IModalWindow ModalWindow
+		public IModalWindow GetModalWindow(bool createIfNecessary)
 		{
-			get
+			if (IsViewModal)
 			{
-				if (IsViewModal)
+				if (_modalWindow == null && createIfNecessary)
 				{
-					if (_modalWindow == null)
-					{
-						_modalWindow = Task.ViewDeck.CreateModalWindow();
-						_modalWindow.Closed += ModalWindowClosed;
-					}
+					_modalWindow = Task.ViewDeck.CreateModalWindow();
+					_modalWindow.Closed += ModalWindowClosed;
+				}
+			}
+
+			return _modalWindow;
+		}
+
+		private Dictionary<string, object> _nodeData;
+
+		// TODO: this is not well thought out, internal for now
+		internal object GetData(string slotId)
+		{
+			Verify.ArgumentNotNull(slotId, "slotId");
+			object result = null;
+			if (_nodeData != null)
+			{
+				_nodeData.TryGetValue(slotId, out result);
+			}
+			return result;
+		}
+
+		/// <summary>
+		/// Set arbitrary data against the node. Will be disposed when the node navigates.
+		/// TODO: this is not well thought out yet, internal for now
+		/// </summary>
+		/// <param name="slotId"></param>
+		/// <param name="value"></param>
+		internal void SetData(string slotId, object value)
+		{
+			Verify.ArgumentNotNull(slotId, "slotId");
+			if (value == null)
+			{
+				if (_nodeData != null)
+				{
+					_nodeData.Remove(slotId);
+				}
+			}
+			else
+			{
+				if (_nodeData == null)
+				{
+					_nodeData = new Dictionary<string, object>();
 				}
 
-				return _modalWindow;
+				_nodeData[slotId] = value;
 			}
 		}
 
@@ -210,6 +256,13 @@ namespace Quokka.UI.Tasks
 		// Called by the UITask when the task is starting.
 		internal void TaskStarting()
 		{
+		}
+
+		private INavigateCommand CreateNavigateCommand()
+		{
+			var navigateCommand = new NavigateCommand {FromNode = this};
+			navigateCommand.NavigationNotDefined += Task.NavigationNotDefined;
+			return navigateCommand;
 		}
 
 		// Called by the UITask when this node becomes the current node
@@ -230,8 +283,14 @@ namespace Quokka.UI.Tasks
 				// a node whose container is not fully initialised.
 				IServiceContainer nodeContainer = parentContainer.CreateChildContainer();
 
+				var windsorContainer = nodeContainer.Locator.GetInstance<IWindsorContainer>();
+
 				nodeContainer.RegisterInstance(this);
-				nodeContainer.RegisterType<INavigateCommand, NavigateCommand>(ServiceLifecycle.PerRequest);
+
+				windsorContainer.Register(
+					Component.For<INavigateCommand>()
+						.UsingFactoryMethod(CreateNavigateCommand)
+						.LifestyleTransient());
 
 				// If the presenter is a concrete type and has not been registered yet, then register it
 				// with the container.
@@ -366,8 +425,13 @@ namespace Quokka.UI.Tasks
 		internal void CreateNestedTask()
 		{
 			var task = (UITask) Container.Locator.GetInstance(NestedTaskType);
+			foreach (var taskInitialization in NodeBuilder.NestedTaskInitializations)
+			{
+				taskInitialization(task);
+			}
 			task.TaskComplete += NestedTaskComplete;
-			task.Start(ViewDeck);
+			var viewDeck = GetViewDeck(createIfNecessary: true);
+			task.Start(viewDeck);
 			NestedTask = task;
 		}
 
@@ -437,7 +501,7 @@ namespace Quokka.UI.Tasks
 			}
 			else
 			{
-				if (Task.IsComplete)
+				if (Task.IsComplete || Task.CurrentNode == null)
 				{
 					// The task is complete -- all nodes should dispose of their container
 					disposeContainer = true;
@@ -450,9 +514,17 @@ namespace Quokka.UI.Tasks
 					if (Task.CurrentNode != this)
 					{
 						// At this point we know that this node is not the current view
-						if (Task.CurrentNode != null && Task.CurrentNode.IsViewModal)
+						if (Task.CurrentNode.IsViewModal)
 						{
-							// if the current node is modal, then do not dispose of anything
+							// if the current node is modal, then only dispose of this node
+							// if it, too, is modal
+							if (IsViewModal)
+							{
+								disposeContainer = true;
+								removeView = true;
+								removeNestedTask = true;
+								disposeModalWindow = true;
+							}
 						}
 						else
 						{
@@ -476,11 +548,13 @@ namespace Quokka.UI.Tasks
 				}
 			}
 
-			if (ViewDeck != null && View != null)
+			var viewDeck = GetViewDeck(createIfNecessary: false);
+
+			if (viewDeck != null && View != null)
 			{
 				if (removeView)
 				{
-					using (var transition = ViewDeck.BeginTransition(Task))
+					using (var transition = viewDeck.BeginTransition(Task))
 					{
 						transition.HideView(View);
 						transition.RemoveView(View);
@@ -488,7 +562,7 @@ namespace Quokka.UI.Tasks
 				}
 				else if (hideView)
 				{
-					using (var transition = ViewDeck.BeginTransition(Task))
+					using (var transition = viewDeck.BeginTransition(Task))
 					{
 						transition.HideView(View);
 					}
@@ -516,6 +590,7 @@ namespace Quokka.UI.Tasks
 				DisposeView();
 				DisposePresenter();
 				DisposeNestedTask();
+				DisposeNodeData();
 				DisposeContainer();
 			}
 		}
@@ -524,7 +599,8 @@ namespace Quokka.UI.Tasks
 		{
 			if (View != null)
 			{
-				DisposeUtils.DisposeOf(View);
+				// The container will call the view's Dispose method
+				Container.Locator.Release(View);
 				View = null;
 			}
 		}
@@ -543,6 +619,8 @@ namespace Quokka.UI.Tasks
 		{
 			if (Presenter != null)
 			{
+				// The container will call the presenter's Dispose method
+				Container.Locator.Release(Presenter);
 				DisposeUtils.DisposeOf(Presenter);
 				Presenter = null;
 			}
@@ -556,8 +634,33 @@ namespace Quokka.UI.Tasks
 				{
 					NestedTask.EndTask();
 				}
-				DisposeUtils.DisposeOf(NestedTask);
+
+				// The container will call the task's dispose method
+				Container.Locator.Release(NestedTask);
 				NestedTask = null;
+			}
+		}
+
+		private void DisposeNodeData()
+		{
+			if (_nodeData != null)
+			{
+				foreach (var value in _nodeData.Values)
+				{
+					var disposable = value as IDisposable;
+					if (disposable != null)
+					{
+						try
+						{
+							disposable.Dispose();
+						}
+						catch (Exception)
+						{
+							// TODO: should log a message here.
+						}
+					}
+				}
+				_nodeData = null;
 			}
 		}
 
@@ -593,6 +696,11 @@ namespace Quokka.UI.Tasks
 					Task.Navigate(_prevNode);
 				}
 			}
+		}
+
+		public override string ToString()
+		{
+			return Name;
 		}
 	}
 }

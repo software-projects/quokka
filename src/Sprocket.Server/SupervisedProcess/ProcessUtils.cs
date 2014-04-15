@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using System.Security;
 using System.Threading;
 using Microsoft.Win32.SafeHandles;
 
@@ -11,6 +12,7 @@ namespace Sprocket.Server.SupervisedProcess
 		/// </summary>
 		/// <param name="processId">Process ID of the process</param>
 		/// <returns>A wait handle for the process</returns>
+		[SecuritySafeCritical]
 		public static WaitHandle GetProcessWaitHandle(int processId)
 		{
 			SafeWaitHandle safeWaitHandle = OpenProcess(Synchronize, 0, processId);

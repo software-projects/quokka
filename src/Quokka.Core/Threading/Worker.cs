@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using Quokka.UI.Tasks;
 
 namespace Quokka.Threading
 {
@@ -9,6 +10,17 @@ namespace Quokka.Threading
 	public class Worker
 	{
 		private int _workerActionCount;
+		private UITask _task;
+
+		public Worker()
+		{
+			// get the associated UITask, if any
+			_task = UITask.Current;
+
+			// Start with the synchronization context for the curren task.
+			// Most applications will have the Worker created on the UI thread.
+			SynchronizationContext = SynchronizationContext.Current;
+		}
 
 		/// <summary>
 		/// 	Raised when the <see cref = "Worker" /> starts processing.
@@ -93,7 +105,10 @@ namespace Quokka.Threading
 			try
 			{
 				var workerAction = (WorkerAction) state;
-				workerAction.Run();
+				using (SetCurrentTask())
+				{
+					workerAction.Run();
+				}
 			}
 			finally
 			{
@@ -138,13 +153,31 @@ namespace Quokka.Threading
 			{
 				if (SynchronizationContext == null)
 				{
-					action();
+					using (SetCurrentTask())
+					{
+						action();
+					}
 				}
 				else
 				{
-					SynchronizationContext.Send(obj => action(), null);
+					SynchronizationContext.Send(obj => {
+						using (SetCurrentTask())
+						{
+							action();
+						}
+					}, null);
 				}
 			}
+		}
+
+		private IDisposable SetCurrentTask()
+		{
+			if (_task == null)
+			{
+				// do nothing -- no current task
+				return new DisposableAction(null);
+			}
+			return UICurrentTask.SetCurrentTask(_task);
 		}
 	}
 }

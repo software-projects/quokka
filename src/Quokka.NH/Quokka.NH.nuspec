@@ -1,0 +1,28 @@
+﻿<?xml version="1.0"?>
+<package >
+	<metadata>
+		<id>Quokka.NH</id>
+		<version>0.0</version>
+		<title>Quokka NHibernate Integration</title>
+		<authors>John Jeffery</authors>
+		<licenseUrl>http://www.apache.org/licenses/LICENSE-2.0.html</licenseUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>Castle NHibernate Facility that integrates with Quokka UI Tasks.</description>
+		<copyright>Copyright 2004-2012 John Jeffery. All rights reserved</copyright>
+		<dependencies>
+			<dependency id="Quokka.Core" version=""/>
+			<dependency id="Iesi.Collections" version="[3.2,4.0)"/>
+			<dependency id="NHibernate" version="3.3.1"/>
+			<dependency id="Castle.Core" version="3.1.0"/>
+			<dependency id="Castle.Windsor" version="3.1.0"/>
+		</dependencies>
+		<frameworkAssemblies>
+			<frameworkAssembly assemblyName="System"/>
+			<frameworkAssembly assemblyName="System.Core"/>
+			<frameworkAssembly assemblyName="System.Data"/>
+			<frameworkAssembly assemblyName="System.Drawing"/>
+			<frameworkAssembly assemblyName="System.Windows.Forms"/>
+			<frameworkAssembly assemblyName="System.Xml"/>
+		</frameworkAssemblies>
+	</metadata>
+</package>

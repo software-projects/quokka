@@ -28,7 +28,6 @@
 
 using System;
 using Quokka.ServiceLocation;
-using Quokka.Uip;
 
 namespace Quokka.UI.Tasks
 {
@@ -36,8 +35,9 @@ namespace Quokka.UI.Tasks
 	/// 	Represents a User Interface Task.
 	/// </summary>
 	/// <remarks>
-	/// 	This interface contains common properties between the obsolete <see cref = "UipTask" /> and
+	/// 	This interface was created to contain common properties between the obsolete UipTask and
 	/// 	the newer <see cref = "UITask" />. It helps with providing some backwards compatibility.
+	///     The UipTask has now been removed, so this interface may be removed.
 	/// </remarks>
 	public interface IUITask
 	{

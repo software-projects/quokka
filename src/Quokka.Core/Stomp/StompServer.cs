@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net;
-using Common.Logging;
-using Quokka.Sandbox;
+using Castle.Core.Logging;
+using Quokka.Diagnostics;
 using Quokka.Stomp.Internal;
 using Quokka.Stomp.Transport;
 
@@ -11,7 +11,7 @@ namespace Quokka.Stomp
 {
 	public class StompServer : IDisposable
 	{
-		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+		private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
 		private readonly List<IListener<StompFrame>> _listeners = new List<IListener<StompFrame>>();
 		private readonly List<EndPoint> _listenEndPoints = new List<EndPoint>();
 		private readonly List<ServerSideConnection> _clientConnections = new List<ServerSideConnection>();

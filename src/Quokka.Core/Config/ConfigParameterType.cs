@@ -1,7 +1,25 @@
-﻿namespace Quantum.Constants
+#region License
+
+// Copyright 2004-2013 John Jeffery <john@jeffery.id.au>
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#endregion
+
+namespace Quokka.Config
 {
 	/// <summary>
-	/// Identifying the purpose of a configuration parameter.
+	/// Constants for identifying the type of a configuration parameter.
 	/// </summary>
 	public static class ConfigParameterType
 	{
@@ -26,14 +44,19 @@
 		public const string Url = "URL";
 
 		/// <summary>
-		/// String representing a password (value will be elided in user interface)
+		/// String representing a password (value should be elided in the user interface)
 		/// </summary>
 		public const string Password = "Password";
 
 		/// <summary>
-		/// String representing a directory on the quantum server.
+		/// String representing a directory.
 		/// </summary>
 		public const string Directory = "Directory";
+
+		/// <summary>
+		/// String representing the full path name for a file.
+		/// </summary>
+		public const string FilePath = "FilePath";
 
 		/// <summary>
 		/// Represents a date without any time component.
@@ -46,7 +69,6 @@
 		public const string TimeSpan = "TimeSpan";
 
 		// TODO: Other types requiring implementation include:
-		// * TimeSpan (would be very useful for timeouts, but need to parse strings like "15m" and "500ms")
 		// * DateTime
 		// * DateTimeOffset
 	}

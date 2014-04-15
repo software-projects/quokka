@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using Quokka.Diagnostics;
 
 namespace Quokka.Stomp
@@ -108,7 +109,7 @@ namespace Quokka.Stomp
 		/// 	is <c>null</c> or empty, the "content-length" header will still be set (and its
 		/// 	value will be "0").
 		/// </remarks>
-		internal byte[] ToArray()
+		public byte[] ToArray()
 		{
 			if (IsHeartBeat)
 			{
@@ -132,7 +133,11 @@ namespace Quokka.Stomp
 				{
 					// We do not want to close the writer when we finish, because
 					// we do not want to close the underlying stream.
-					var writer = new StreamWriter(stream, Encoding.UTF8);
+					// Note also that the StreamWriter is created without specifying the encoding.
+					// This means that the stream will write UTF-8, which is what is wanted, but
+					// will not prepend a BOM (byte order mark), which is also what we want. If you
+					// explicitly specify UTF8, you will get the three byte BOM at the beginning.
+					var writer = new StreamWriter(stream);
 					writer.WriteLine(Command);
 					if (Headers != null)
 					{
@@ -215,6 +220,11 @@ namespace Quokka.Stomp
 			AppendContentLength(sb);
 			AppendHeaderIfPresent(sb, StompHeader.NonStandard.ClrType);
 
+			if (Command == StompCommand.Send || Command == StompCommand.Message)
+			{
+				AppendBodyIfText(sb);
+			}
+
 			return sb.ToString();
 		}
 
@@ -247,6 +257,27 @@ namespace Quokka.Stomp
 				sb.Append(StompHeader.ContentLength);
 				sb.Append(':');
 				sb.Append(value);
+			}
+		}
+
+		private void AppendBodyIfText(StringBuilder sb)
+		{
+			var contentType = Headers[StompHeader.ContentType];
+			if (contentType.StartsWith("text/")
+			    || contentType.StartsWith("application/xml")
+			    || contentType.StartsWith("application/json"))
+			{
+				var whiteSpaceRegex = new Regex(@"\s+");
+				var text = (BodyText ?? string.Empty);
+				text = whiteSpaceRegex.Replace(text, " ");
+
+				if (text.Length > 350)
+				{
+					text = text.Substring(0, 350) + "...";
+				}
+
+				sb.Append(' ');
+				sb.Append(text.Trim());
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading;
-using Common.Logging;
+using Castle.Core.Logging;
 using Quokka.Diagnostics;
 using Quokka.Stomp.Transport;
 
@@ -8,11 +8,16 @@ namespace Quokka.Stomp.Internal
 {
 	internal class ServerSideConnection
 	{
-		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+		private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
 
 		private readonly ITransport<StompFrame> _transport;
 		private readonly ServerData _serverData;
-		private readonly object _lockObject = GlobalLock.Instance;
+		private readonly LockObject _lockObject = GlobalLock.LockObject;
+
+		// used for logging -- helps uniquely identify a server side connection
+		private readonly int _connectionNumber;
+		private readonly string _logMessagePrefix;
+		private static int _connectionCount;
 
 		private delegate void StateAction(StompFrame frame);
 
@@ -27,6 +32,8 @@ namespace Quokka.Stomp.Internal
 
 		public ServerSideConnection(ITransport<StompFrame> transport, ServerData serverData)
 		{
+			_connectionNumber = Interlocked.Increment(ref _connectionCount);
+			_logMessagePrefix = "#" + _connectionNumber + ": ";
 			_transport = Verify.ArgumentNotNull(transport, "transport");
 			_serverData = Verify.ArgumentNotNull(serverData, "serverData");
 			_transport.ConnectedChanged += TransportConnectedChanged;
@@ -38,15 +45,16 @@ namespace Quokka.Stomp.Internal
 			_connectTimer = new Timer(HandleConnectTimeout, null,
 			                          (int) serverData.Config.ConnectFrameTimeout.TotalMilliseconds,
 			                          Timeout.Infinite);
+			Log.Debug(_logMessagePrefix + "Connect established");
 		}
 
 		public void SendFrame(StompFrame frame)
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				if (_stateAction == ShuttingDown)
 				{
-					Log.Warn("Discarded frame: transport is shutting down: " + frame);
+					Log.Warn(_logMessagePrefix + "Discarded frame: transport is shutting down: " + frame);
 				}
 				else
 				{
@@ -58,7 +66,7 @@ namespace Quokka.Stomp.Internal
 
 		public void Disconnect()
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				DisconnectWithoutLocking();
 			}
@@ -68,19 +76,13 @@ namespace Quokka.Stomp.Internal
 		{
 			if (_stateAction == ShuttingDown)
 			{
-				Log.Warn("Ignoring duplicate Disconnect request");
+				Log.Warn(_logMessagePrefix + "Ignoring duplicate Disconnect request");
 			}
 			else
 			{
 				_transport.Shutdown();
 				_stateAction = ShuttingDown;
-				_outgoingHeartBeatTimer.Change(Timeout.Infinite, Timeout.Infinite);
-				_incomingHeartBeatTimer.Change(Timeout.Infinite, Timeout.Infinite);
-				if (_connectTimer != null)
-				{
-					_connectTimer.Dispose();
-					_connectTimer = null;
-				}
+				StopAllTimers();
 			}
 		}
 
@@ -102,7 +104,7 @@ namespace Quokka.Stomp.Internal
 				string message = "Expecting " + StompCommand.Connected 
 					+ " or " + StompCommand.Stomp
 					+ " command, received " + frame.Command;
-				Log.Error(message);
+				Log.Error(_logMessagePrefix + message);
 				var errorFrame = StompFrameUtils.CreateErrorFrame(message);
 				_transport.SendFrame(errorFrame);
 				DisconnectWithoutLocking();
@@ -115,14 +117,14 @@ namespace Quokka.Stomp.Internal
 			if (!Authenticate(login, passcode))
 			{
 				string message = "Received " + frame.Command + " frame, Access denied";
-				Log.Warn(message);
+				Log.Warn(_logMessagePrefix + message);
 				var errorFrame = StompFrameUtils.CreateErrorFrame(message);
 				_transport.SendFrame(errorFrame);
 				DisconnectWithoutLocking();
 				return;
 			}
 
-			Log.Debug("Received " + frame.Command + " frame, authenticated OK");
+			Log.Debug(_logMessagePrefix + "Received " + frame.Command + " frame, authenticated OK");
 
 			var sessionId = frame.Headers[StompHeader.Session];
 			ServerSideSession session = null;
@@ -132,9 +134,8 @@ namespace Quokka.Stomp.Internal
 				session = _serverData.FindSession(sessionId);
 				if (session == null)
 				{
-					Log.Warn("Received " + frame.Command + " frame for non-existent session: " + sessionId);
+					Log.Warn(_logMessagePrefix + "Received " + frame.Command + " frame for non-existent session: " + sessionId);
 					var message = ErrorMessages.SessionDoesNotExistPrefix + sessionId;
-					Log.Debug(message);
 					var errorFrame = StompFrameUtils.CreateErrorFrame(message);
 					_transport.SendFrame(errorFrame);
 					DisconnectWithoutLocking();
@@ -144,21 +145,21 @@ namespace Quokka.Stomp.Internal
 				if (!session.AddConnection(this))
 				{
 					var message = frame.Command + " frame requested a session already in use: " + sessionId;
-					Log.Warn(message);
+					Log.Warn(_logMessagePrefix + message);
 					var errorFrame = StompFrameUtils.CreateErrorFrame(message);
 					_transport.SendFrame(errorFrame);
 					DisconnectWithoutLocking();
 					return;
 				}
 
-				Log.Debug("Reconnected to session " + sessionId);
+				Log.Debug(_logMessagePrefix + "Reconnected to session " + sessionId);
 			}
 
 			if (session == null)
 			{
 				session = _serverData.CreateSession();
 				session.AddConnection(this);
-				Log.Debug("Created new session " + session.SessionId);
+				Log.Debug(_logMessagePrefix + "Created new session " + session.SessionId);
 			}
 
 			// helps with debugging if we give the session a more friendly name
@@ -187,21 +188,16 @@ namespace Quokka.Stomp.Internal
 				connectedFrame.Headers[StompHeader.HeartBeat] = _negotiatedHeartBeats.ToString();
 			}
 			_transport.SendFrame(connectedFrame);
-			if (_connectTimer != null)
-			{
-				_connectTimer.Change(Timeout.Infinite, Timeout.Infinite);
-				_connectTimer.Dispose();
-				_connectTimer = null;
-			}
+			StopConnectTimer();
 			StartIncomingHeartBeatTimer();
 			StartOutgoingHeartBeatTimer();
 			_stateAction = Connected;
-			Log.Debug("Session " + session + " connected");
+			Log.Debug(_logMessagePrefix + "Session " + session + " connected");
 		}
 
 		private void Connected(StompFrame frame)
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				StartIncomingHeartBeatTimer();
 				if (frame.IsHeartBeat)
@@ -232,7 +228,7 @@ namespace Quokka.Stomp.Internal
 						{
 							throw;
 						}
-						Log.Error("Unexpected error handling " + frame.Command + " frame: " + ex.Message, ex);
+						Log.Error(_logMessagePrefix + "Unexpected error handling " + frame.Command + " frame: " + ex.Message, ex);
 
 						try
 						{
@@ -251,23 +247,28 @@ namespace Quokka.Stomp.Internal
 			}
 		}
 
-		private static void ShuttingDown(StompFrame frame)
+		private void ShuttingDown(StompFrame frame)
 		{
-			Log.WarnFormat("Discarded {0} message as connection is shutting down", frame.Command);
+			Log.WarnFormat(_logMessagePrefix + "Discarded {0} message as connection is shutting down", frame.Command);
 		}
 
 		private void TransportConnectedChanged(object sender, EventArgs e)
 		{
 			if (_transport.Connected)
 			{
-				Log.Debug("Transport connected");
+				Log.Debug(_logMessagePrefix + "Transport connected");
 			}
 			else
 			{
-				Log.Debug("Transport disconnected");
-				if (ConnectionClosed != null)
+				using (_lockObject.Lock())
 				{
-					ConnectionClosed(this, EventArgs.Empty);
+					Log.Debug(_logMessagePrefix + "Transport disconnected");
+					StopAllTimers();
+					var connectionClosed = ConnectionClosed;
+					if (connectionClosed != null)
+					{
+						_lockObject.AfterUnlock(() => connectionClosed(this, EventArgs.Empty));
+					}
 				}
 			}
 		}
@@ -288,7 +289,7 @@ namespace Quokka.Stomp.Internal
 					return;
 				}
 
-				lock (_lockObject)
+				using (_lockObject.Lock())
 				{
 					try
 					{
@@ -296,7 +297,7 @@ namespace Quokka.Stomp.Internal
 					}
 					catch (Exception ex)
 					{
-						Log.Error("Unexpected exception: " + ex.Message, ex);
+						Log.Error(_logMessagePrefix + "Unexpected exception: " + ex.Message, ex);
 						if (_transport.Connected)
 						{
 							var errorFrame = StompFrameUtils.CreateErrorFrame("Internal server error");
@@ -308,9 +309,9 @@ namespace Quokka.Stomp.Internal
 			}
 		}
 
-		private static void TransportTransportException(object sender, ExceptionEventArgs e)
+		private void TransportTransportException(object sender, ExceptionEventArgs e)
 		{
-			Log.Error("Transport layer exception: " + e.Exception.Message, e.Exception);
+			Log.Error(_logMessagePrefix + "Transport layer exception: " + e.Exception.Message, e.Exception);
 		}
 
 		private void StartIncomingHeartBeatTimer()
@@ -331,13 +332,30 @@ namespace Quokka.Stomp.Internal
 			}
 		}
 
+		private void StopAllTimers()
+		{
+			_incomingHeartBeatTimer.Change(Timeout.Infinite, Timeout.Infinite);
+			_outgoingHeartBeatTimer.Change(Timeout.Infinite, Timeout.Infinite);
+			StopConnectTimer();
+		}
+
+		private void StopConnectTimer()
+		{
+			var connectTimer = _connectTimer;
+			_connectTimer = null;
+			if (connectTimer != null)
+			{
+				connectTimer.Dispose();
+			}
+		}
+
 		private void HandleIncomingHeartBeatTimeout(object state)
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				if (_stateAction == Connected)
 				{
-					Log.Warn("Incoming connection timed out, disconnecting");
+					Log.Warn(_logMessagePrefix + "Incoming connection timed out, disconnecting");
 					DisconnectWithoutLocking();
 				}
 			}
@@ -345,7 +363,7 @@ namespace Quokka.Stomp.Internal
 
 		private void HandleOutgoingHeartBeatTimeout(object state)
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				if (_stateAction == Connected)
 				{
@@ -357,12 +375,12 @@ namespace Quokka.Stomp.Internal
 
 		private void HandleConnectTimeout(object state)
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				if (_connectTimer != null && _stateAction == ExpectingConnect)
 				{
 					const string message = "Timed out waiting for " + StompCommand.Connect + " frame";
-					Log.Warn(message);
+					Log.Warn(_logMessagePrefix + message);
 					var errorFrame = StompFrameUtils.CreateErrorFrame(message);
 					_transport.SendFrame(errorFrame);
 					DisconnectWithoutLocking();

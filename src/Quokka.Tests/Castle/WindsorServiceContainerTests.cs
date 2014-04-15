@@ -1,5 +1,4 @@
 ﻿using Castle.Windsor;
-using Microsoft.Practices.ServiceLocation;
 using NUnit.Framework;
 using Quokka.ServiceLocation;
 

@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Quokka.Core</id>
+    <version>0.0</version>
+    <title>Quokka Core Library</title>
+    <authors>John Jeffery</authors>
+    <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0.html</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Quokka is a library for building rich client applications.</description>
+    <copyright>Copyright 2004-2012. All rights reserved</copyright>
+		<dependencies>
+			<dependency id="Castle.Core" version="3.1.0" />
+			<dependency id="Castle.Windsor" version="3.1.0" />
+		</dependencies>
+		<frameworkAssemblies>
+			<frameworkAssembly assemblyName="System"/>
+			<frameworkAssembly assemblyName="System.Core"/>
+			<frameworkAssembly assemblyName="System.Data"/>
+			<frameworkAssembly assemblyName="System.Drawing"/>
+			<frameworkAssembly assemblyName="System.Windows.Forms"/>
+			<frameworkAssembly assemblyName="System.Xml"/>
+		</frameworkAssemblies>
+	</metadata>
+</package>

@@ -69,7 +69,7 @@ namespace Quokka.Threading
 			action.Run();
 			Assert.IsFalse(whenCompleteCalled);
 			Assert.IsNotNull(exception);
-			Assert.IsInstanceOfType(typeof(ApplicationException), exception);
+			Assert.IsInstanceOf<ApplicationException>(exception);
 			Assert.AreEqual("Test exception", exception.Message);
 		}
 
@@ -659,7 +659,6 @@ namespace Quokka.Threading
 		public void Calls_multiple_module_functions_when_exception_thrown_by_Module_finished()
 		{
 			int callOrder = 0;
-			Exception exceptionThrown = null;
 			Exception errorExceptionThrown = null;
 
 			int module1BeforeCalled = 0;

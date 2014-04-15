@@ -1,0 +1,4 @@
+<?xml version="1.0" ?>
+<project name="Quokka" default="test" xmlns="http://nant.sf.net/release/0.91/nant.xsd">
+	
+</project>

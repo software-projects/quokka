@@ -2,7 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using Common.Logging;
+using Castle.Core.Logging;
 using Quokka.Diagnostics;
 using Quokka.Util;
 
@@ -11,7 +11,9 @@ namespace Quokka.Stomp.Transport
 	public class SocketClientTransport<TFrame, TFrameBuilder> : SocketTransport<TFrame>
 		where TFrameBuilder : IFrameBuilder<TFrame>, new()
 	{
-		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+		// ReSharper disable StaticFieldInGenericType
+		private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
+		// ReSharper restore StaticFieldInGenericType
 		private Timer _timer;
 		private bool _connectInProgress;
 		private bool _isDisposed;
@@ -26,7 +28,7 @@ namespace Quokka.Stomp.Transport
 
 			if (disposing)
 			{
-				lock (LockObject)
+				using (Lock())
 				{
 					_isDisposed = true;
 					DisposeUtils.DisposeOf(ref _timer);
@@ -38,7 +40,7 @@ namespace Quokka.Stomp.Transport
 
 		public void Connect()
 		{
-			lock (LockObject)
+			using (Lock())
 			{
 				if (_timer == null)
 				{
@@ -49,7 +51,7 @@ namespace Quokka.Stomp.Transport
 
 		private void TimerCallback(object state)
 		{
-			lock (LockObject)
+			using (Lock())
 			{
 				if (Socket == null || !Socket.Connected && !_connectInProgress && !_isDisposed)
 				{
@@ -71,7 +73,7 @@ namespace Quokka.Stomp.Transport
 			try
 			{
 				var socket = (Socket) ar.AsyncState;
-				lock (LockObject)
+				using (Lock())
 				{
 					if (socket != Socket)
 					{

@@ -32,10 +32,10 @@ namespace Quokka.Stomp
 			                    		Body = memoryStream,
 			                    	};
 
-			var builder = new StompFrameBuilder();
-			var segment = builder.ToArray(originalFrame);
+			byte[] data = originalFrame.ToArray();
 
-			builder.ReceiveBytes(segment.Array, segment.Offset, segment.Count);
+			var builder = new StompFrameBuilder();
+			builder.ReceiveBytes(data, 0, data.Length);
 
 			Assert.IsTrue(builder.IsFrameReady, "Unexpected result");
 
@@ -72,18 +72,18 @@ namespace Quokka.Stomp
 			                    		Body = memoryStream,
 			                    	};
 
-			var builder = new StompFrameBuilder();
-
-			var data1 = builder.ToArray(originalFrame);
+			byte[] data1 = originalFrame.ToArray();
 
 			originalFrame.Headers["destination"] = "/queue/b";
 			originalFrame.Headers["transaction"] = "tx-113";
 
-			var data2 = builder.ToArray(originalFrame);
+			byte[] data2 = originalFrame.ToArray();
 
-			byte[] combinedData = new byte[data1.Count + data2.Count];
-			Array.Copy(data1.Array, data1.Offset, combinedData, 0, data1.Count);
-			Array.Copy(data2.Array, data2.Offset, combinedData, data1.Count, data2.Count);
+			byte[] combinedData = new byte[data1.Length + data2.Length];
+			Array.Copy(data1, combinedData, data1.Length);
+			Array.Copy(data2, 0, combinedData, data1.Length, data2.Length);
+
+			var builder = new StompFrameBuilder();
 
 			builder.ReceiveBytes(combinedData, 0, combinedData.Length);
 			Assert.IsTrue(builder.IsFrameReady);
@@ -127,18 +127,18 @@ namespace Quokka.Stomp
 			                    		Body = memoryStream,
 			                    	};
 
-			var builder = new StompFrameBuilder();
-
-			var data1 = builder.ToArray(originalFrame);
+			byte[] data1 = originalFrame.ToArray();
 
 			originalFrame.Headers["destination"] = "/queue/b";
 			originalFrame.Headers["transaction"] = "tx-113";
 
-			var data2 = builder.ToArray(originalFrame);
+			byte[] data2 = originalFrame.ToArray();
 
-			byte[] combinedData = new byte[data1.Count + data2.Count];
-			Array.Copy(data1.Array, data1.Offset, combinedData, 0, data1.Count);
-			Array.Copy(data2.Array, data2.Offset, combinedData, data1.Count, data2.Count);
+			byte[] combinedData = new byte[data1.Length + data2.Length];
+			Array.Copy(data1, combinedData, data1.Length);
+			Array.Copy(data2, 0, combinedData, data1.Length, data2.Length);
+
+			var builder = new StompFrameBuilder();
 
 			foreach (byte @byte in combinedData)
 			{
@@ -187,20 +187,20 @@ namespace Quokka.Stomp
 			                    		Body = memoryStream,
 			                    	};
 
-			var builder = new StompFrameBuilder();
-
-			var data1 = builder.ToArray(originalFrame);
+			byte[] data1 = originalFrame.ToArray();
 
 			originalFrame.Headers["destination"] = "/queue/b";
 			originalFrame.Headers["transaction"] = "tx-113";
 
-			var data2 = builder.ToArray(originalFrame);
+			byte[] data2 = originalFrame.ToArray();
 
 
 			// by copying one byte less, we lose the null byte
-			byte[] combinedData = new byte[data1.Count + data2.Count - 2];
-			Array.Copy(data1.Array, data1.Offset, combinedData, 0, data1.Count - 1);
-			Array.Copy(data2.Array, data2.Offset, combinedData, data1.Count - 1, data2.Count - 1);
+			byte[] combinedData = new byte[data1.Length + data2.Length - 2];
+			Array.Copy(data1, combinedData, data1.Length - 1);
+			Array.Copy(data2, 0, combinedData, data1.Length - 1, data2.Length - 1);
+
+			var builder = new StompFrameBuilder();
 
 			builder.ReceiveBytes(combinedData, 0, combinedData.Length);
 			Assert.IsTrue(builder.IsFrameReady);
@@ -238,9 +238,9 @@ namespace Quokka.Stomp
 			                    			},
 			                    	};
 
+			byte[] data = originalFrame.ToArray();
 			var builder = new StompFrameBuilder();
-			var data = builder.ToArray(originalFrame);
-			builder.ReceiveBytes(data.Array, data.Offset, data.Count);
+			builder.ReceiveBytes(data, 0, data.Length);
 			var receivedFrame = builder.GetNextFrame();
 			Assert.IsNotNull(receivedFrame);
 			Assert.AreEqual(originalFrame.Headers["destination"], receivedFrame.Headers["destination"]);

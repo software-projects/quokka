@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Common.Logging;
+using Castle.Core.Logging;
+using Quokka.Diagnostics;
 using Quokka.Stomp.Transport;
 
 namespace Quokka.Stomp
 {
 	public class StompFrameBuilder : IFrameBuilder<StompFrame>
 	{
-		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+		private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
 		private StompFrame _frameUnderConstruction;
 		private readonly Queue<StompFrame> _readyFrames = new Queue<StompFrame>();
 

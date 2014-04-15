@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
-using Common.Logging;
+using Castle.Core.Logging;
 using Quokka.Diagnostics;
+using Quokka.Stomp.Internal;
 using Quokka.Util;
 
 namespace Quokka.Stomp.Transport
@@ -13,8 +14,8 @@ namespace Quokka.Stomp.Transport
 	/// </summary>
 	public abstract class SocketTransport<TFrame> : ITransport<TFrame>
 	{
-		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
-		protected readonly object LockObject = new object();
+		private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
+		private readonly LockObject _lockObject = new LockObject();
 		private readonly IFrameBuilder<TFrame> _frameBuilder;
 		protected Socket Socket;
 		private readonly Queue<TFrame> _pendingFrames = new Queue<TFrame>();
@@ -34,11 +35,21 @@ namespace Quokka.Stomp.Transport
 			Dispose(true);
 		}
 
+		protected IDisposable Lock()
+		{
+			return _lockObject.Lock();
+		}
+
+		protected void AfterUnlock(Action action)
+		{
+			_lockObject.AfterUnlock(action);
+		}
+
 		protected virtual void Dispose(bool disposing)
 		{
 			if (disposing)
 			{
-				lock (LockObject)
+				using(Lock())
 				{
 					_isDisposed = true;
 
@@ -76,7 +87,7 @@ namespace Quokka.Stomp.Transport
 
 		public TFrame GetNextFrame()
 		{
-			lock (LockObject)
+			using(Lock())
 			{
 				if (_frameBuilder != null && _frameBuilder.IsFrameReady)
 				{
@@ -89,7 +100,7 @@ namespace Quokka.Stomp.Transport
 
 		public void SendFrame(TFrame frame)
 		{
-			lock (LockObject)
+			using(Lock())
 			{
 				if (_shutdownPending)
 				{
@@ -107,7 +118,7 @@ namespace Quokka.Stomp.Transport
 
 		public void Shutdown()
 		{
-			lock (LockObject)
+			using(Lock())
 			{
 				if (Socket != null)
 				{
@@ -159,7 +170,7 @@ namespace Quokka.Stomp.Transport
 
 		protected virtual void HandleException(Exception ex)
 		{
-			lock (LockObject)
+			using(Lock())
 			{
 				try
 				{
@@ -193,7 +204,7 @@ namespace Quokka.Stomp.Transport
 		{
 			try
 			{
-				lock (LockObject)
+				using(Lock())
 				{
 					BeginReceiveHelper();
 				}
@@ -256,11 +267,9 @@ namespace Quokka.Stomp.Transport
 
 		private void ReceiveCallbackOnWorkerThread(IAsyncResult ar)
 		{
-			bool raiseFrameReady = false;
-
 			try
 			{
-				lock (LockObject)
+				using (Lock())
 				{
 					if (_isDisposed)
 					{
@@ -287,7 +296,7 @@ namespace Quokka.Stomp.Transport
 						_frameBuilder.ReceiveBytes(state.Segment.Array, state.Segment.Offset, byteCount);
 						if (_frameBuilder.IsFrameReady)
 						{
-							raiseFrameReady = true;
+							AfterUnlock(() => OnFrameReady(EventArgs.Empty));
 						}
 						BeginReceiveHelper();
 					}
@@ -300,14 +309,6 @@ namespace Quokka.Stomp.Transport
 					throw;
 				}
 				HandleException(ex);
-				return;
-			}
-
-			if (raiseFrameReady)
-			{
-				// Because we know we are on a worker thread, we can be sure that the
-				// lock has been released and we can raise the event.
-				OnFrameReady(EventArgs.Empty);
 			}
 		}
 
@@ -324,7 +325,7 @@ namespace Quokka.Stomp.Transport
 		private void StartSend(object obj)
 		{
 			//Log.Debug("-> StartSend");
-			lock (LockObject)
+			using (Lock())
 			{
 				if (!CheckConnected())
 				{
@@ -386,7 +387,7 @@ namespace Quokka.Stomp.Transport
 
 			try
 			{
-				lock (LockObject)
+				using (Lock())
 				{
 					if (_isDisposed)
 					{
@@ -438,7 +439,7 @@ namespace Quokka.Stomp.Transport
 
 		private bool CheckConnected()
 		{
-			var connected = Socket == null ? false : Socket.Connected;
+			var connected = Socket != null && Socket.Connected;
 			if (connected != _connected)
 			{
 				_connected = connected;
@@ -481,7 +482,7 @@ namespace Quokka.Stomp.Transport
 
 			try
 			{
-				lock (LockObject)
+				using (Lock())
 				{
 					if (!_isDisposed)
 					{

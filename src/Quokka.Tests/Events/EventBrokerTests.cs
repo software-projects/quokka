@@ -82,7 +82,6 @@ namespace Quokka.Events
 		{
 			_testActionCount = 0;
 			IEventBroker eventBroker = new EventBrokerImpl();
-			int count = 0;
 			TestEvent3 e3 = eventBroker.GetEvent<TestEvent3>();
 
 			// this is a bit tricky, the GC does not want to collect 

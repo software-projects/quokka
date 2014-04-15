@@ -1,14 +1,10 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Windows.Forms;
-using ComponentFactory.Krypton.Toolkit;
-using Dashboard.Services;
-using Dashboard.Services.Interfaces;
+using Castle.Windsor;
 using Dashboard.UI.Forms;
 using Dashboard.UI.Tasks;
 using Quokka.Krypton;
 using Quokka.ServiceLocation;
-using Quokka.Castle;
 using Quokka.WinForms;
 using Quokka.WinForms.Startup;
 
@@ -18,23 +14,24 @@ namespace Dashboard
 	{
 		protected override Form CreateShell()
 		{
-			MainForm mainForm = Locator.GetInstance<MainForm>();
+			var mainForm = Locator.GetInstance<MainForm>();
 
-			// TODO: this can go in module initialization
-			LoginTask task = new LoginTask();
+			var task = new LoginTask();
 			task.Start(mainForm.ViewDeck);
 			return mainForm;
 		}
 
-		protected override IServiceContainer CreateServiceContainer()
+		protected override IWindsorContainer CreateContainer(bool isChild)
 		{
-			return ServiceContainerFactory.CreateContainer();
+			var container = new WindsorContainer();
+			// TODO: can add facilities here
+			return container;
 		}
 
 		protected override void ConfigureServices()
 		{
-			Container.RegisterTypesInAssembly(Assembly.GetExecutingAssembly());
-			Container.RegisterType<IModalWindowFactory, KryptonModalWindowFactory>(ServiceLifecycle.Singleton);
+			ServiceContainer.RegisterTypesInAssembly(Assembly.GetExecutingAssembly());
+			ServiceContainer.RegisterType<IModalWindowFactory, KryptonModalWindowFactory>(ServiceLifecycle.Singleton);
 		}
 	}
 }

@@ -6,7 +6,9 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using Castle.Core.Logging;
 using NUnit.Framework;
+using Quokka.Diagnostics;
 using Quokka.Stomp.Internal;
 
 // ReSharper disable InconsistentNaming
@@ -19,7 +21,13 @@ namespace Quokka.Stomp
 		[SetUp]
 		public void SetUp()
 		{
-			Common.Logging.LogManager.Adapter = new Common.Logging.Simple.ConsoleOutLoggerFactoryAdapter();
+			//Common.Logging.LogManager.Adapter = new Common.Logging.Simple.ConsoleOutLoggerFactoryAdapter();
+			LoggerFactory.SetLoggerFactory(new ConsoleFactory());
+		}
+
+		public void TearDown()
+		{
+			LoggerFactory.SetLoggerFactory(null);
 		}
 
 		[Test]

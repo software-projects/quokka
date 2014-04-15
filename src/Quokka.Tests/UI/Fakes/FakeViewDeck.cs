@@ -9,9 +9,14 @@ using Quokka.UI.Tasks;
 
 namespace Quokka.UI.Fakes
 {
+	public interface IFakeViewThatLoads
+	{
+		void OnLoad();
+	}
+
 	public class FakeViewDeck : IViewDeck
 	{
-		private readonly HashSet<UITask> _tasks = new HashSet<UITask>();
+		private readonly HashSet<IUITask> _tasks = new HashSet<IUITask>();
 		private readonly HashSet<object> _views = new HashSet<object>();
 		private object _visibleView;
 		private int _transitionReferenceCount;
@@ -28,8 +33,8 @@ namespace Quokka.UI.Fakes
 		public void BeginTask(object task)
 		{
 			Assert.IsNotNull(task);
-			Assert.IsInstanceOfType(typeof(UITask), task);
-			var uitask = (UITask) task;
+			Assert.IsInstanceOf<IUITask>(task);
+			var uitask = (IUITask) task;
 			_tasks.Add(uitask);
 		}
 
@@ -37,13 +42,13 @@ namespace Quokka.UI.Fakes
 		{
 			Assert.IsNotNull(task);
 			Assert.IsNotNull(task);
-			Assert.IsInstanceOfType(typeof(UITask), task);
-			var uitask = (UITask)task;
+			Assert.IsInstanceOf<IUITask>(task);
+			var uitask = (IUITask)task;
 			Assert.IsTrue(_tasks.Contains(uitask));
 			_tasks.Remove(uitask);
 		}
 
-		public IViewTransition BeginTransition(UITask task)
+		public IViewTransition BeginTransition(IUITask task)
 		{
 			if (Interlocked.Increment(ref _transitionReferenceCount) <= 0)
 			{
@@ -78,12 +83,12 @@ namespace Quokka.UI.Fakes
 			Assert.IsNotNull(view);
 			Assert.IsTrue(_views.Contains(view), "View has not been added to the view deck");
 			_visibleView = view;
-			//            MockViewBase mockView = view as MockViewBase;
-			//            if (mockView != null)
-			//            {
-			//                // simulate on load event
-			//                mockView.OnLoad();
-			//            }
+            var fakeView = view as IFakeViewThatLoads;
+            if (fakeView != null)
+            {
+                // simulate on load event
+                fakeView.OnLoad();
+            }
 		}
 
 		public void HideView(object view)
@@ -118,10 +123,10 @@ namespace Quokka.UI.Fakes
 		private class ViewTransition : IViewTransition
 		{
 			private readonly FakeViewDeck _viewDeck;
-			private readonly UITask _task;
+			private readonly IUITask _task;
 			private bool _disposed;
 
-			public ViewTransition(FakeViewDeck viewDeck, UITask task)
+			public ViewTransition(FakeViewDeck viewDeck, IUITask task)
 			{
 				_viewDeck = Verify.ArgumentNotNull(viewDeck, "viewDeck");
 				_task = Verify.ArgumentNotNull(task, "task");

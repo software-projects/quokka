@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Threading;
-using Common.Logging;
+using Castle.Core.Logging;
 using Quokka.Diagnostics;
+using Quokka.Stomp.Internal;
 
 namespace Quokka.Stomp
 {
@@ -10,8 +11,8 @@ namespace Quokka.Stomp
 	///</summary>
 	public class StompSubscription : IDisposable
 	{
-		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
-		private readonly object _lockObject = new object();
+		private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
+		private readonly LockObject _lock;
 		private readonly string _subscriptionIdText;
 
 		public StompClient Client { get; private set; }
@@ -24,9 +25,10 @@ namespace Quokka.Stomp
 		public event EventHandler<StompMessageEventArgs> MessageArrived;
 		public event EventHandler StateChanged;
 
-		internal StompSubscription(StompClient client, int subscriptionId, string destination)
+		internal StompSubscription(StompClient client, LockObject lockObject, int subscriptionId, string destination)
 		{
 			Client = Verify.ArgumentNotNull(client, "client");
+			_lock = Verify.ArgumentNotNull(lockObject, "lockObject");
 			Destination = Verify.ArgumentNotNull(destination, "destination");
 			SubscriptionId = subscriptionId;
 			Ack = StompAck.Auto;
@@ -38,34 +40,24 @@ namespace Quokka.Stomp
 
 		public void SubscriptionLost()
 		{
-			var raiseStateChanged = false;
-
-			lock(_lockObject)
+			using (_lock.Lock())
 			{
 				if (State == StompSubscriptionState.Subscribed
 					|| State == StompSubscriptionState.Subscribing)
 				{
 					State = StompSubscriptionState.Unsubscribed;
-					raiseStateChanged = true;
+					_lock.AfterUnlock(RaiseStateChanged);
 				}
-			}
-
-			if (raiseStateChanged)
-			{
-				RaiseStateChanged();
 			}
 		}
 
 		public void Subscribe()
 		{
-			var raiseStateChanged = false;
-			StompFrame message = null;
-
-			lock (_lockObject)
+			using (_lock.Lock())
 			{
 				if (State == StompSubscriptionState.Unsubscribed)
 				{
-					message = new StompFrame(StompCommand.Subscribe)
+					var message = new StompFrame(StompCommand.Subscribe)
 					              	{
 					              		Headers =
 					              			{
@@ -74,33 +66,22 @@ namespace Quokka.Stomp
 					              				{StompHeader.Ack, Ack},
 					              			}
 					              	};
-					raiseStateChanged = true;
+					_lock.AfterUnlock(RaiseStateChanged);
 					State = StompSubscriptionState.Subscribing;
+					Client.SendRawMessage(message, true);
 				}
-			}
-
-			if (message != null)
-			{
-				Client.SendRawMessage(message, true);
-			}
-
-			if (raiseStateChanged)
-			{
-				RaiseStateChanged();
 			}
 		}
 
 		public void Dispose()
 		{
-			var raiseStateChanged = false;
-
-			lock (_lockObject)
+			using (_lock.Lock())
 			{
 				var oldState = State;
 				if (!IsDisposed())
 				{
 					State = StompSubscriptionState.Disposed;
-					raiseStateChanged = true;
+					_lock.AfterUnlock(RaiseStateChanged);
 					if (oldState == StompSubscriptionState.Subscribing || oldState == StompSubscriptionState.Subscribed)
 					{
 						var message = new StompFrame(StompCommand.Unsubscribe)
@@ -114,16 +95,13 @@ namespace Quokka.Stomp
 					}
 				}
 			}
-
-			if (raiseStateChanged)
-			{
-				RaiseStateChanged();
-			}
+			MessageArrived = null;
+			StateChanged = null;
 		}
 
 		internal void ReceiveMessage(StompFrame message)
 		{
-			lock (_lockObject)
+			using (_lock.Lock())
 			{
 				if (IsDisposed())
 				{
@@ -160,20 +138,13 @@ namespace Quokka.Stomp
 
 		internal void Confirm()
 		{
-			var raiseStateChanged = false;
-
-			lock (_lockObject)
+			using (_lock.Lock())
 			{
 				if (State == StompSubscriptionState.Subscribing)
 				{
 					State = StompSubscriptionState.Subscribed;
-					raiseStateChanged = true;
+					_lock.AfterUnlock(RaiseStateChanged);
 				}
-			}
-
-			if (raiseStateChanged)
-			{
-				RaiseStateChanged();
 			}
 		}
 

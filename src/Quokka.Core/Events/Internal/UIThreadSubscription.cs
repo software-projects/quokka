@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Threading;
+using Quokka.UI;
 
 namespace Quokka.Events.Internal
 {
@@ -9,7 +9,7 @@ namespace Quokka.Events.Internal
 	internal class UIThreadSubscription : EventSubscription
 	{
 		public UIThreadSubscription(EventBase parentEvent, Action action, ThreadOption threadOption,
-									ReferenceOption referenceOption)
+		                            ReferenceOption referenceOption)
 			: base(parentEvent, action, threadOption, referenceOption)
 		{
 			if (ThreadOption != ThreadOption.UIThread && ThreadOption != ThreadOption.UIThreadPost)
@@ -18,16 +18,15 @@ namespace Quokka.Events.Internal
 			}
 		}
 
-		protected override void InvokeAction(Action action )
+		protected override void InvokeAction(Action action)
 		{
-			SendOrPostCallback callback = delegate { action(); };
 			if (ThreadOption == ThreadOption.UIThread)
 			{
-				Event.EventBroker.UIThreadContext.Send(callback, null);
+				UIThread.Send(action);
 			}
 			else
 			{
-				Event.EventBroker.UIThreadContext.Post(callback, null);
+				UIThread.Post(action);
 			}
 		}
 	}

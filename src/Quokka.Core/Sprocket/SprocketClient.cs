@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using System.Threading;
-using System.Transactions;
 using Quokka.Stomp;
 using Quokka.Stomp.Internal;
 
@@ -86,6 +85,7 @@ namespace Quokka.Sprocket
 		void IDisposable.Dispose()
 		{
 			Close();
+			ConnectedChanged = null;
 		}
 
 		public SynchronizationContext SynchronizationContext { get; set; }
@@ -116,30 +116,7 @@ namespace Quokka.Sprocket
 			}
 
 			frame.Serialize(message);
-			TransactionalAwareSendMessage(frame);
-		}
-
-		private void TransactionalAwareSendMessage(StompFrame frame)
-		{
-			if (Transaction.Current == null)
-			{
-				// not in a transaction
-				_client.SendMessage(frame);
-			}
-			
-			if (Transaction.Current != null
-				&& Transaction.Current.TransactionInformation.Status == TransactionStatus.Active)
-			{
-				// this is a 'poor man's' transaction-aware implementation
-				Transaction.Current.TransactionCompleted += (sender, e) =>
-				                                            	{
-				                                            		if (e.Transaction.TransactionInformation.Status ==
-				                                            		    TransactionStatus.Committed)
-				                                            		{
-				                                            			_client.SendMessage(frame);
-				                                            		}
-				                                            	};
-			}
+			_client.SendMessage(frame);
 		}
 
 		public bool CanReply

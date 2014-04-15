@@ -11,6 +11,7 @@ namespace Quokka.UI.Tasks
 	{
 		public TaskBuilder Task { get; private set; }
 		public string Name { get; private set; }
+		public int Index { get; private set; }
 		public Type PresenterType { get; protected set; }
 		public Type DeclaredViewType { get; protected set; }
 		public Type InferredViewType { get; protected set; }
@@ -27,10 +28,11 @@ namespace Quokka.UI.Tasks
 
 		private bool _isValidated;
 
-		public NodeBuilder(TaskBuilder task, string name)
+		public NodeBuilder(TaskBuilder task, string name, int index)
 		{
 			Task = task;
 			Name = name;
+			Index = index;
 		}
 
 		public void Validate()
@@ -131,7 +133,54 @@ namespace Quokka.UI.Tasks
 
 		private string InferName()
 		{
-			return "TODO";
+			string inferredName = null;
+			const string nodeSuffix = "Node";
+
+			if (PresenterType != null)
+			{
+				const string presenterSuffix = "Presenter";
+				var presenterName = PresenterType.Name;
+				if (presenterName.EndsWith(presenterSuffix))
+				{
+					inferredName = presenterName.Substring(0, presenterName.Length - presenterSuffix.Length) + nodeSuffix;
+				}
+				else
+				{
+					inferredName = presenterName + nodeSuffix;
+				}
+			}
+			else if (DeclaredViewType != null)
+			{
+				const string viewSuffix = "View";
+				var viewName = ViewType.Name;
+				if (viewName.EndsWith(viewSuffix))
+				{
+					inferredName = viewName.Substring(0, viewName.Length - viewSuffix.Length) + nodeSuffix;
+				}
+				else
+				{
+					inferredName = viewName + nodeSuffix;
+				}
+			}
+			else if (NestedTaskType != null)
+			{
+				const string taskSuffix = "Task";
+				var taskName = NestedTaskType.Name;
+				if (taskName.EndsWith(taskSuffix))
+				{
+					inferredName = taskName.Substring(0, taskName.Length - taskSuffix.Length) + nodeSuffix;
+				}
+				else
+				{
+					inferredName = taskName + nodeSuffix;
+				}
+			}
+			else
+			{
+				inferredName = string.Format("Node[{0}]", Index);
+			}
+
+			return inferredName;
 		}
 
 		private void AddError(string reason)
@@ -266,6 +315,11 @@ namespace Quokka.UI.Tasks
 				InnerNodeBuilder.ShowModal();
 				return this;
 			}
+		}
+
+		public override string ToString()
+		{
+			return Name;
 		}
 	}
 }

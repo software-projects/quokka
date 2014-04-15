@@ -2,9 +2,9 @@
 using System.Diagnostics;
 using System.Net;
 using System.Threading;
-using Common.Logging;
+using Castle.Core.Logging;
 using NUnit.Framework;
-using Quokka.Sandbox;
+using Quokka.Diagnostics;
 using Quokka.Stomp.Transport;
 
 namespace Quokka.Stomp
@@ -12,7 +12,7 @@ namespace Quokka.Stomp
 	[TestFixture]
 	public class StompSocketTests
 	{
-		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+		private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
 		private StompListener _listener;
 		private ITransport<StompFrame> _server;
 		private StompClientTransport _clientTransport;

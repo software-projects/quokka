@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
-
 using NUnit.Framework;
 
+// ReSharper disable InconsistentNaming
 namespace Quokka.Reflection
 {
     [TestFixture]
@@ -22,15 +20,13 @@ namespace Quokka.Reflection
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void GetStringValue_ArgumentNull_1() {
-            PropertyUtil.GetStringValue(null, "XXX");
+            Assert.Throws<ArgumentNullException>(() => PropertyUtil.GetStringValue(null, "XXX"));
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void GetStringValue_ArgumentNull_2() {
-            PropertyUtil.GetStringValue(testObject, null);
+            Assert.Throws<ArgumentNullException>(() => PropertyUtil.GetStringValue(testObject, null));
         }
 
         [Test]
@@ -41,27 +37,23 @@ namespace Quokka.Reflection
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void GetValue_ArgumentNull_1() {
-            PropertyUtil.GetValue(null, "XXX");
+            Assert.Throws<ArgumentNullException>(() => PropertyUtil.GetValue(null, "XXX"));
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void GetValue_ArgumentNull_2() {
-            PropertyUtil.GetValue(testObject, null);
+            Assert.Throws<ArgumentNullException>(() => PropertyUtil.GetValue(testObject, null));
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void GetValue_ArgumentNull_3() {
-            PropertyUtil.GetValue(null, "XXX", "XYZ");
+            Assert.Throws<ArgumentNullException>(() => PropertyUtil.GetValue(null, "XXX", "XYZ"));
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void GetValue_ArgumentNull_4() {
-            PropertyUtil.GetValue(testObject, null, "XYZ");
+            Assert.Throws<ArgumentNullException>(() => PropertyUtil.GetValue(testObject, null, "XYZ"));
         }
 
         [Test]
@@ -69,7 +61,7 @@ namespace Quokka.Reflection
             testObject.StringProperty = "XXX";
             object objectValue = PropertyUtil.GetValue(testObject, "StringProperty");
             Assert.IsNotNull(objectValue);
-            Assert.IsTrue(objectValue.GetType() == typeof(string));
+            Assert.IsTrue(objectValue is string);
             Assert.AreEqual("XXX", objectValue.ToString());
         }
 
@@ -78,7 +70,7 @@ namespace Quokka.Reflection
             testObject.IntProperty = 42;
             object objectValue = PropertyUtil.GetValue(testObject, "IntProperty");
             Assert.IsNotNull(objectValue);
-            Assert.IsTrue(objectValue.GetType() == typeof(int));
+            Assert.IsTrue(objectValue is int);
             Assert.AreEqual(42, (int)objectValue);
         }
 
@@ -87,20 +79,18 @@ namespace Quokka.Reflection
             testObject.DoubleProperty = 42.5;
             object objectValue = PropertyUtil.GetValue(testObject, "DoubleProperty");
             Assert.IsNotNull(objectValue);
-            Assert.IsTrue(objectValue.GetType() == typeof(double));
+            Assert.IsTrue(objectValue is double);
             Assert.AreEqual(42.5, (double)objectValue);
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void TrySetValue_ArgumentNull_1() {
-            PropertyUtil.TrySetValue(null, "XXX", "XXX");
+            Assert.Throws<ArgumentNullException>(() => PropertyUtil.TrySetValue(null, "XXX", "XXX"));
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void TrySetValue_ArgumentNull_2() {
-            PropertyUtil.TrySetValue(testObject, null, "XXX");
+            Assert.Throws<ArgumentNullException>(() => PropertyUtil.TrySetValue(testObject, null, "XXX"));
         }
 
         [Test]
@@ -156,10 +146,9 @@ namespace Quokka.Reflection
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void SetValues_ArgumentNull_1() {
             PropertyCollection properties = new PropertyCollection();
-            PropertyUtil.SetValues(null, properties);
+            Assert.Throws<ArgumentNullException>(() => PropertyUtil.SetValues(null, properties));
 
         }
 
@@ -170,15 +159,13 @@ namespace Quokka.Reflection
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void CopyProperties_ArgumentNull_1() {
-            PropertyUtil.CopyProperties(null, testObject);
+            Assert.Throws<ArgumentNullException>(() => PropertyUtil.CopyProperties(null, testObject));
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void CopyProperties_ArgumentNull_2() {
-            PropertyUtil.CopyProperties(testObject, null);
+            Assert.Throws<ArgumentNullException>(() => PropertyUtil.CopyProperties(testObject, null));
         }
 
         [Test]

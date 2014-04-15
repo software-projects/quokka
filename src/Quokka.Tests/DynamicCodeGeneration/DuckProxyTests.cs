@@ -73,11 +73,10 @@ namespace Quokka.DynamicCodeGeneration
 		}
 
 		[Test]
-		[ExpectedException(typeof(NotSupportedException))]
 		public void NotImplementedException() {
 			Inner1 inner = new Inner1();
             ITest1 i = ProxyFactory.CreateDuckProxy<ITest1>(inner);
-			i.NotImplementedMethod();
+			Assert.Throws<NotSupportedException>(() => i.NotImplementedMethod());
 		}
 
 		[Test]
@@ -267,10 +266,9 @@ namespace Quokka.DynamicCodeGeneration
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentException))]
         public void NotAnInterface() {
             Inner1 inner = new Inner1();
-            Inner2 i2 = ProxyFactory.CreateDuckProxy<Inner2>(inner);
+            Assert.Throws<ArgumentException>(() => ProxyFactory.CreateDuckProxy<Inner2>(inner));
             
         }
 
@@ -308,12 +306,12 @@ namespace Quokka.DynamicCodeGeneration
         // Test for matching method with incompatible return types.
         // Invoking the method throws NotSupportedException.
         [Test]
-        [ExpectedException(typeof(NotSupportedException))]
         public void MismatchedReturnType_2() {
             Inner7 inner = new Inner7();
-            ITest7 i7 = ProxyFactory.CreateDuckProxy<ITest7>(inner);
 
-            int n = i7.ReturnSomething();
+			ITest7 i7 = ProxyFactory.CreateDuckProxy<ITest7>(inner);
+
+			Assert.Throws<NotSupportedException>(() => i7.ReturnSomething());
         }
 
         public interface Interface8

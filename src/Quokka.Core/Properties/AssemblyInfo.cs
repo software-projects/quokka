@@ -32,10 +32,14 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
 
-[assembly: AssemblyTitle("Quokka.Core")]
+#if NET40
+[assembly: AssemblyTitle("Quokka.Core (.NET 4.0)")]
+#endif
+#if NET35
+[assembly: AssemblyTitle("Quokka.Core (.NET 3.5)")]
+#endif
+
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
 [assembly: Guid("ef3ec75b-20eb-4612-905d-fac42df22b71")]
 
-// Allows partially trusted callers for a web hosting environment
-[assembly: AllowPartiallyTrustedCallers()]

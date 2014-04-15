@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
-using Common.Logging;
+using Castle.Core.Logging;
+using Quokka.Diagnostics;
 using Quokka.Stomp;
 
 namespace Quokka.Sprocket
@@ -9,7 +10,7 @@ namespace Quokka.Sprocket
 	{
 		private class Subscriber<T> : ISubscriber<T>
 		{
-			private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+			private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
 			private readonly SprocketClient _sprocket;
 			private readonly StompSubscription _subscription;
 			private volatile bool _isDisposed;
@@ -32,6 +33,7 @@ namespace Quokka.Sprocket
 			{
 				_isDisposed = true;
 				_subscription.Dispose();
+				_action = null;
 			}
 
 			public Type SubscriptionType

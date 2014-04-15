@@ -488,6 +488,9 @@ namespace Quokka.DynamicCodeGeneration
 		void OneValue();
 	}
 
+// Suppress warnings about obsolete code
+#pragma warning disable 612,618
+
 	public class NavigateProxy : INavigateExample
 	{
 		private IUipNavigator inner;
@@ -522,4 +525,8 @@ namespace Quokka.DynamicCodeGeneration
             get { return true; }
 	    }
 	}
+
+// Restore warning about obsolete code
+#pragma warning restore 612,618
+
 }

@@ -1,6 +1,6 @@
-﻿using Microsoft.Practices.ServiceLocation;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using Quokka.Castle;
+using Quokka.ServiceLocation;
 using Quokka.UI.Fakes;
 using Quokka.UI.Tasks;
 

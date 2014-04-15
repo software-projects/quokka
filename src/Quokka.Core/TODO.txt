@@ -1,10 +1,7 @@
-﻿TODO list for Quokka 0.6
+﻿TODO list for Quokka 0.7
 
 * Define a general-purpose interface for reporting error conditions (eg IErrorCondition), and inject it 
   into each UITask container.
   
-* [DONE] Provide a replacement for UipQuestion (eg UIMessage), and provide an interface (IUIMessageBox) to
-  display modal dialogs from a presenter.
-  
-* [DONE] Provide support for ShowModal option in a UINode.
+* [DONE] Replace dependencies on Microsoft.Practices.ServiceLocation with Castle.Windsor, and Common.Logging with Castle.Core.
 

@@ -26,17 +26,10 @@ namespace Quokka.UI.Commands
 		///		Is the user interface control checked. 
 		/// </summary>
 		/// <remarks>
-		///		If the user interface control does not support the concept of being checked, then
-		///		this property will always return <c>false</c>, and any attempt to set it will result
-		///		in a <see cref="NotSupportedException"/> being thrown. See also the <see cref="CanCheck"/> property.
+		///		Not all controls support being checked. If a control does not support being
+		///		checked, setting this property has not effect.
 		/// </remarks>
 		bool Checked { get; set; }
-
-		/// <summary>
-		///		Specifies whether the user interface supports the concept of being 'Checked'. 
-		///		See also the <see cref="Checked"/> property.
-		/// </summary>
-		bool CanCheck { get; }
 
 		/// <summary>
 		///		Gets or sets whether the user interface control is enabled.

@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using Common.Logging;
+using Castle.Core.Logging;
 using Quokka.Diagnostics;
+using Quokka.Stomp.Internal;
 using Quokka.Util;
 
 namespace Quokka.Stomp.Transport
@@ -12,9 +13,9 @@ namespace Quokka.Stomp.Transport
 	public class SocketListener<TFrame, TFrameBuilder> : IListener<TFrame>
 		where TFrameBuilder : IFrameBuilder<TFrame>, new()
 	{
-		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+		private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
 		private Socket _listenSocket;
-		private readonly object _lockObject = new object();
+		private readonly LockObject _lockObject = new LockObject();
 		private readonly Queue<SocketTransport<TFrame>> _transports = new Queue<SocketTransport<TFrame>>();
 		private Timer _timer;
 		private bool _isDisposed;
@@ -39,17 +40,19 @@ namespace Quokka.Stomp.Transport
 
 		public void Dispose()
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				DisposeUtils.DisposeOf(ref _listenSocket);
 				DisposeUtils.DisposeOf(ref _timer);
 				_isDisposed = true;
+				ClientConnected = null;
+				ListenException = null;
 			}
 		}
 
 		public void StartListening(EndPoint endPoint)
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				if (_timer == null)
 				{
@@ -70,7 +73,7 @@ namespace Quokka.Stomp.Transport
 		{
 			try
 			{
-				lock (_lockObject)
+				using (_lockObject.Lock())
 				{
 					if (_listenSocket == null)
 					{
@@ -104,12 +107,11 @@ namespace Quokka.Stomp.Transport
 
 		private void HandleException(Exception ex)
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				DisposeUtils.DisposeOf(ref _listenSocket);
+				_lockObject.AfterUnlock(() => OnListenException(new ExceptionEventArgs(ex)));
 			}
-
-			OnListenException(new ExceptionEventArgs(ex));
 		}
 
 		protected virtual void OnListenException(ExceptionEventArgs e)
@@ -122,7 +124,7 @@ namespace Quokka.Stomp.Transport
 
 		public ITransport<TFrame> GetNextTransport()
 		{
-			lock (_lockObject)
+			using (_lockObject.Lock())
 			{
 				if (_transports.Count > 0)
 				{
@@ -148,8 +150,7 @@ namespace Quokka.Stomp.Transport
 		{
 			try
 			{
-				bool clientConnected = false;
-				lock (_lockObject)
+				using (_lockObject.Lock())
 				{
 					if (!_isDisposed)
 					{
@@ -177,14 +178,9 @@ namespace Quokka.Stomp.Transport
 						{
 							var transport = new ServerTransport(handlerSocket, new TFrameBuilder());
 							_transports.Enqueue(transport);
-							clientConnected = true;
+							_lockObject.AfterUnlock(() => OnClientConnected(EventArgs.Empty));
 						}
 					}
-				}
-
-				if (clientConnected)
-				{
-					OnClientConnected(EventArgs.Empty);
 				}
 			}
 			catch (Exception ex)

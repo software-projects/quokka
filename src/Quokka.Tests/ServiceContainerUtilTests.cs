@@ -26,6 +26,9 @@
 //
 #endregion
 
+// Disable warnings about calling obsolete code
+#pragma warning disable 612,618
+
 namespace Quokka
 {
     using System;
@@ -49,16 +52,16 @@ namespace Quokka
             Assert.IsNotNull(i1);
         }
 
-        [Test, ExpectedException(typeof(ArgumentException), ExpectedMessage = "Constructor for Quokka.ServiceContainerUtilTests+Class1_StringParameter has a non-interface parameter: System.String connectionString")]
+        [Test]
         public void StringParameterInConstructor() {
             ServiceContainer container = new ServiceContainer();
-            ServiceContainerUtil.AddService(container, typeof(IInterface1), typeof(Class1_StringParameter));
+            Assert.Throws<ArgumentException>(() => ServiceContainerUtil.AddService(container, typeof(IInterface1), typeof(Class1_StringParameter)));
         }
 
-        [Test, ExpectedException(typeof(ArgumentException), ExpectedMessage = "Too many constructors for Quokka.ServiceContainerUtilTests+Class1_MultipleConstructors")]
+        [Test]
         public void MultipleConstructors() {
             ServiceContainer container = new ServiceContainer();
-            ServiceContainerUtil.AddService(container, typeof(IInterface1), typeof(Class1_MultipleConstructors));
+            Assert.Throws<ArgumentException>(() => ServiceContainerUtil.AddService(container, typeof(IInterface1), typeof(Class1_MultipleConstructors)));
         }
 
         [Test]
@@ -67,23 +70,23 @@ namespace Quokka
             ServiceContainerUtil.AddService(container, typeof(IInterface1), typeof(Class1_Generic<IInterface2>));
         }
 
-        [Test, ExpectedException(typeof(QuokkaException), ExpectedMessage = "Circular reference detected for Quokka.ServiceContainerUtilTests+IInterface1")]
+        [Test]
         public void CircularReference() {
             ServiceContainer container = new ServiceContainer();
             ServiceContainerUtil.AddService(container, typeof(IInterface1), typeof(Class1_DependsOnIInterface3));
             ServiceContainerUtil.AddService(container, typeof(IInterface2), typeof(Class2));
             ServiceContainerUtil.AddService(container, typeof(IInterface3), typeof(Class3));
 
-            container.GetService(typeof(IInterface1));
+            Assert.Throws<QuokkaException>(() => container.GetService(typeof(IInterface1)));
         }
 
-        [Test, ExpectedException(typeof(QuokkaException), ExpectedMessage = "No available implementation of Quokka.ServiceContainerUtilTests+IInterface1")]
+        [Test]
         public void MissingType() {
             ServiceContainer container = new ServiceContainer();
             ServiceContainerUtil.AddService(container, typeof(IInterface2), typeof(Class2));
             ServiceContainerUtil.AddService(container, typeof(IInterface3), typeof(Class3));
 
-            container.GetService(typeof(IInterface2));
+            Assert.Throws<QuokkaException>(() => container.GetService(typeof(IInterface2)));
         }
 
         [Test]
@@ -129,8 +132,9 @@ namespace Quokka
 			Assert.IsInstanceOfType(typeof(Class3), container.GetService(typeof(IInterface3)));
 		}
 
+		// testing obsolete class
+#pragma warning disable 612,618
 		[Test]
-		[ExpectedException(typeof(ArgumentException))]
 		public void AddServicesFailsIfOddNumberOfItems()
 		{
 			ServiceContainer container = new ServiceContainer();
@@ -139,7 +143,8 @@ namespace Quokka
 					typeof(IInterface2), typeof(Class2),
 					typeof(IInterface3), 
 			};
-			ServiceContainerUtil.AddServices(container, types);
+			Assert.Throws<ArgumentException>(() => ServiceContainerUtil.AddServices(container, types));
+#pragma warning restore 612,618
 		}
 
         #region Test interfaces

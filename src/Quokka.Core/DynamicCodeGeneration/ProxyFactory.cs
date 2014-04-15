@@ -53,7 +53,8 @@ namespace Quokka.DynamicCodeGeneration
 
 		public static object CreateProxy(Type interfaceType, ProxyType proxyType, object inner)
 		{
-			switch (proxyType) {
+			switch (proxyType)
+			{
 				case ProxyType.DuckProxy:
 					return CreateDuckProxy(interfaceType, inner);
 				case ProxyType.NavigatorProxy:
@@ -72,15 +73,18 @@ namespace Quokka.DynamicCodeGeneration
 
 		public static object CreateDuckProxy(Type interfaceType, object inner)
 		{
-			if (!interfaceType.IsInterface) {
+			if (!interfaceType.IsInterface)
+			{
 				throw new ArgumentException("Must be an interface", "interfaceType");
 			}
 
-			if (inner == null) {
+			if (inner == null)
+			{
 				return null;
 			}
 
-			if (interfaceType.IsInstanceOfType(inner)) {
+			if (interfaceType.IsInstanceOfType(inner))
+			{
 				// when the inner object already supports the interface, do
 				// not bother with a proxy
 				return inner;
@@ -90,17 +94,18 @@ namespace Quokka.DynamicCodeGeneration
 			Type proxyType = GetDuckProxyType(interfaceType, inner.GetType());
 
 			// get the constructor that accepts inner as a parameter
-			ConstructorInfo constructor = proxyType.GetConstructor(new Type[] {inner.GetType()});
+			ConstructorInfo constructor = proxyType.GetConstructor(new Type[] { inner.GetType() });
 
 			// construct an instance of the wrapper class and return
-			object proxy = constructor.Invoke(new object[] {inner});
+			object proxy = constructor.Invoke(new object[] { inner });
 			return proxy;
 		}
 
 		public static Type GetDuckProxyType(Type interfaceType, Type innerType)
 		{
 			Type proxyType = duckProxyStore.Find(interfaceType, innerType);
-			if (proxyType == null) {
+			if (proxyType == null)
+			{
 				proxyType = CreateDuckProxyType(interfaceType, innerType);
 				duckProxyStore.Add(interfaceType, innerType, proxyType);
 			}
@@ -127,15 +132,18 @@ namespace Quokka.DynamicCodeGeneration
 
 		public static object CreateNavigatorProxy(Type interfaceType, object inner)
 		{
-			if (!interfaceType.IsInterface) {
+			if (!interfaceType.IsInterface)
+			{
 				throw new ArgumentException("Must be an interface", "interfaceType");
 			}
 
-			if (inner == null) {
+			if (inner == null)
+			{
 				return null;
 			}
 
-			if (interfaceType.IsInstanceOfType(inner)) {
+			if (interfaceType.IsInstanceOfType(inner))
+			{
 				// when the inner object already supports the interface, do
 				// not bother with a proxy
 				return inner;
@@ -145,17 +153,18 @@ namespace Quokka.DynamicCodeGeneration
 			Type proxyType = GetNavigatorProxyType(interfaceType, inner.GetType());
 
 			// get the constructor that accepts inner as a parameter
-			ConstructorInfo constructor = proxyType.GetConstructor(new Type[] {inner.GetType()});
+			ConstructorInfo constructor = proxyType.GetConstructor(new Type[] { inner.GetType() });
 
 			// construct an instance of the wrapper class and return
-			object proxy = constructor.Invoke(new object[] {inner});
+			object proxy = constructor.Invoke(new object[] { inner });
 			return proxy;
 		}
 
 		public static Type GetNavigatorProxyType(Type interfaceType, Type innerType)
 		{
 			Type proxyType = navigatorProxyStore.Find(interfaceType, innerType);
-			if (proxyType == null) {
+			if (proxyType == null)
+			{
 				proxyType = CreateNavigatorProxyType(interfaceType, innerType);
 				navigatorProxyStore.Add(interfaceType, innerType, proxyType);
 			}
@@ -211,7 +220,7 @@ namespace Quokka.DynamicCodeGeneration
 			{
 				TypePair other = (TypePair)obj;
 				return InterfaceType == other.InterfaceType
-				       && InnerType == other.InnerType;
+					   && InnerType == other.InnerType;
 			}
 
 			public override int GetHashCode()

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using NUnit.Framework;
@@ -31,11 +32,9 @@ namespace Quokka.Stomp
 			            		Body = null,
 			            	};
 
-			var builder = new StompFrameBuilder();
+			var bytes = frame.ToArray();
 
-			var bytes = builder.ToArray(frame);
-
-			var text = new StreamReader(new MemoryStream(bytes.Array, bytes.Offset, bytes.Count), Encoding.UTF8).ReadToEnd();
+			var text = new StreamReader(new MemoryStream(bytes), Encoding.UTF8).ReadToEnd();
 
 			const string expectedText = "CONNECT\r\nlogin:scott\r\npasscode:tiger\r\ncontent-length:0\r\n\r\n\0";
 			Assert.AreEqual(expectedText, text);
@@ -59,10 +58,9 @@ namespace Quokka.Stomp
 			            		Body = body,
 			            	};
 
-			var builder = new StompFrameBuilder();
-			var bytes = builder.ToArray(frame);
+			var bytes = frame.ToArray();
 
-			var text = new StreamReader(new MemoryStream(bytes.Array, bytes.Offset, bytes.Count), Encoding.UTF8).ReadToEnd();
+			var text = new StreamReader(new MemoryStream(bytes), Encoding.UTF8).ReadToEnd();
 
 			string expectedText = "SEND\r\n"
 			                      + "content-type:application/xml; encoding=UTF8\r\n"
@@ -73,19 +71,17 @@ namespace Quokka.Stomp
 		}
 
 		[Test]
-		[ExpectedException(typeof (ArgumentNullException))]
 		public void Headers_cannot_be_set_to_null()
 		{
-			new StompFrame {Headers = null};
+			Assert.Throws<ArgumentNullException>(() => new StompFrame {Headers = null});
 		}
 
 		[Test]
 		public void Null_command_results_in_heartbeat()
 		{
-			var builder = new StompFrameBuilder();
-			var data = builder.ToArray(new StompFrame { Command = null });
-			Assert.AreEqual(1, data.Count);
-			Assert.AreEqual(10, data.Array[data.Offset]);
+			var data = new StompFrame { Command = null }.ToArray();
+			Assert.AreEqual(1, data.Length);
+			Assert.AreEqual(10, data[0]);
 		}
 
 		[Test]
@@ -196,6 +192,81 @@ namespace Quokka.Stomp
 			Assert.IsTrue(frame.IsHeartBeat);
 			frame.Command = "XXX";
 			Assert.IsFalse(frame.IsHeartBeat);
+		}
+		
+		[Test]
+		public void ToString_with_xml_body()
+		{
+			var frame = new StompFrame
+			{
+				Command = "MESSAGE",
+				Headers = new StompHeaderCollection
+			            		          	{
+			            		          		{"subscription", "1"},
+			            		          		{"content-length", "123"},
+												{"content-type", "application/xml"},
+												{"clr-type", "Test.Type,Test"},
+												{"message-id", "6"},
+			            		          	},
+				Body = new MemoryStream(),
+			};
+
+			var writer = new StreamWriter(frame.Body);
+			writer.WriteLine("<?xml version='1.0'>");
+			writer.WriteLine("<Test>");
+			writer.WriteLine("    <Name>This is the name</Name>");
+			writer.WriteLine("</Test>");
+			writer.Flush();
+
+			frame.Headers["content-length"] = frame.Body.Length.ToString(CultureInfo.InvariantCulture);
+
+			var actual = frame.ToString();
+			const string expected = "MESSAGE message-id:6 subscription:1 content-length:74 clr-type:Test.Type,Test "
+			                        + "<?xml version='1.0'> <Test> <Name>This is the name</Name> </Test>";
+			Assert.AreEqual(expected, actual);
+		}
+
+		[Test]
+		public void ToString_with_large_text_body()
+		{
+			var frame = new StompFrame
+			{
+				Command = "MESSAGE",
+				Headers = new StompHeaderCollection
+			            		          	{
+			            		          		{"subscription", "1"},
+			            		          		{"content-length", "123"},
+												{"content-type", "text/plain"},
+												{"message-id", "6"},
+			            		          	},
+				Body = new MemoryStream(),
+			};
+
+			var writer = new StreamWriter(frame.Body);
+			writer.WriteLine("12345678901234567890123456789012345678901234567890");
+			writer.WriteLine("12345678901234567890123456789012345678901234567890");
+			writer.WriteLine("12345678901234567890123456789012345678901234567890");
+			writer.WriteLine("12345678901234567890123456789012345678901234567890");
+			writer.WriteLine("12345678901234567890123456789012345678901234567890");
+			writer.WriteLine("12345678901234567890123456789012345678901234567890");
+			writer.WriteLine("12345678901234567890123456789012345678901234567890");
+			writer.WriteLine("12345678901234567890123456789012345678901234567890");
+			writer.WriteLine("12345678901234567890123456789012345678901234567890");
+			writer.WriteLine("12345678901234567890123456789012345678901234567890");
+			writer.Flush();
+
+			frame.Headers["content-length"] = frame.Body.Length.ToString(CultureInfo.InvariantCulture);
+
+			var actual = frame.ToString();
+			const string expected = "MESSAGE message-id:6 subscription:1 content-length:520 "
+			                        + "12345678901234567890123456789012345678901234567890 "
+			                        + "12345678901234567890123456789012345678901234567890 "
+									+ "12345678901234567890123456789012345678901234567890 "
+									+ "12345678901234567890123456789012345678901234567890 "
+									+ "12345678901234567890123456789012345678901234567890 "
+									+ "12345678901234567890123456789012345678901234567890 "
+									+ "12345678901234567890123456789012345678901234...";
+			Assert.AreEqual(expected, actual);
 		}
 	}
 }

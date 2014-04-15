@@ -28,18 +28,18 @@
 
 using System;
 using System.Collections.Generic;
-using Common.Logging;
-using Microsoft.Practices.ServiceLocation;
+using Castle.Core.Logging;
 using Quokka.Collections;
 using Quokka.Diagnostics;
 using Quokka.ServiceLocation;
 using Quokka.UI.Messages;
+using Quokka.Util;
 
 namespace Quokka.UI.Tasks
 {
 	public abstract class UITask : IUITask, IDisposable
 	{
-		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+		private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
 		private IList<UINode> _nodes;
 		private TaskBuilder _taskBuilder;
 		private bool _canCreateNode;
@@ -51,6 +51,8 @@ namespace Quokka.UI.Tasks
 		private bool _raiseTaskComplete;
 		private bool _raiseTaskStarted;
 		protected readonly DisposableCollection Disposables = new DisposableCollection();
+		private readonly ErrorReport _errorReport = new ErrorReport();
+		private readonly Dictionary<string, object> _taskData = new Dictionary<string, object>(); 
 
 		protected UITask()
 		{
@@ -116,6 +118,18 @@ namespace Quokka.UI.Tasks
 
 		public bool IsComplete { get; private set; }
 
+		/// <summary>
+		/// The current <see cref="UITask"/>. This value is non-null only if
+		/// a task is currently starting or navigating in the current call context.
+		/// </summary>
+		/// <remarks>
+		/// Used for implementing UITask-aware services, such as NHibernate session management.
+		/// </remarks>
+		public static UITask Current
+		{
+			get { return UICurrentTask.CurrentTask; }
+		}
+
 		#endregion
 
 		#region Internal properties
@@ -131,52 +145,93 @@ namespace Quokka.UI.Tasks
 
 		public void Start(IViewDeck viewDeck)
 		{
-			Verify.ArgumentNotNull(viewDeck, "viewDeck");
-			if (IsRunning)
+			using (UICurrentTask.SetCurrentTask(this))
 			{
-				string message = string.Format("Task {0} is already running", Name);
-				Log.Error(message);
-				throw new InvalidOperationException(message);
+				Verify.ArgumentNotNull(viewDeck, "viewDeck");
+				if (IsRunning)
+				{
+					string message = string.Format("Task {0} is already running", Name);
+					Log.Error(message);
+					throw new InvalidOperationException(message);
+				}
+				if (IsComplete)
+				{
+					// When a task has completed, there is
+					// quite a bit of cleaning up to do to re-use it. At the moment it is easier to
+					// just have the restriction that UI tasks cannot be reused.
+					const string message = "A task can only be run once.";
+					Log.Error(message);
+					throw new InvalidOperationException(message);
+				}
+
+				_errorReport.Clear();
+				_serviceContainer.RegisterInstance(_errorReport);
+
+				// Setup the ViewDeck property so that views can be displayed by this task.
+				//
+				// If you have a UI task that is run more than once you
+				// are going to have a problem, because each time you might be using a different IViewManager.
+				// One way to deal with this is to have (yet another) child container that is created each
+				// time the UI task is started.
+				//
+				// The way this is solved at the moment is to prevent re-use of UI tasks. See test before this
+				// for avoiding re-use of tasks.
+				_viewDeck = viewDeck;
+				_serviceContainer.RegisterInstance(_viewDeck);
+				_serviceContainer.RegisterType<UIMessageBox>(ServiceLifecycle.PerRequest);
+
+				try
+				{
+					// If the nodes have not been built yet, then build them
+					if (_nodes == null)
+					{
+						BuildNodes();
+					}
+
+					// throw an exception if the task is not valid
+					_taskBuilder.AssertValid();
+
+
+					try
+					{
+						CreateState();
+					}
+					catch (Exception ex)
+					{
+						var msg = string.Format("Exception thrown during CreateState method for UITask {0}", GetType());
+						_errorReport.ReportError(msg, ex);
+						throw;
+					}
+
+					// Now that the task has a view deck, we can inform the nodes and let them initialize.
+					foreach (var node in Nodes)
+					{
+						node.TaskStarting();
+					}
+				}
+				catch (UITaskInvalidException ex)
+				{
+					_errorReport.ReportError("UITask cannot start because it failed verification checks", ex.Message);
+					AddErrorReportPropertiesForTask();
+				}
+				catch (Exception ex)
+				{
+					if (!_errorReport.HasErrorOccurred)
+					{
+						_errorReport.ReportError("Exception thrown during UI task startup", ex);
+						AddErrorReportPropertiesForTask();
+					}
+				}
+
+				if (_errorReport.HasErrorOccurred)
+				{
+					ShowErrorView();
+				}
+				else
+				{
+					Navigate(Nodes[0]);
+				}
 			}
-			if (IsComplete)
-			{
-				// When a task has completed, there is
-				// quite a bit of cleaning up to do to re-use it. At the moment it is easier to
-				// just have the restriction that UI tasks cannot be reused.
-				const string message = "A task can only be run once.";
-				Log.Error(message);
-				throw new InvalidOperationException(message);
-			}
-
-			// If the nodes have not been built yet, then build them
-			if (_nodes == null)
-			{
-				BuildNodes();
-			}
-
-			// throw an exception if the task is not valid
-			_taskBuilder.AssertValid();
-
-			// If you have a UI task that is run more than once you
-			// are going to have a problem, because each time you might be using a different IViewManager.
-			// One way to deal with this is to have (yet another) child container that is created each
-			// time the UI task is started.
-			//
-			// The way this is solved at the moment is to prevent re-use of UI tasks. See test before this
-			// for avoiding re-use of tasks.
-			_viewDeck = viewDeck;
-			_serviceContainer.RegisterInstance(_viewDeck);
-			_serviceContainer.RegisterType<UIMessageBox>(ServiceLifecycle.PerRequest);
-
-			CreateState();
-
-			// Now that the task has a view deck, we can inform the nodes and let them initialize.
-			foreach (var node in Nodes)
-			{
-				node.TaskStarting();
-			}
-
-			Navigate(Nodes[0]);
 		}
 
 		public void Dispose()
@@ -198,6 +253,8 @@ namespace Quokka.UI.Tasks
 				node.CleanupNode();
 			}
 
+			ClearTaskData();
+
 			CurrentNode = null;
 			IsComplete = true;
 			_raiseTaskComplete = true;
@@ -207,6 +264,26 @@ namespace Quokka.UI.Tasks
 		protected virtual void Dispose(bool disposing)
 		{
 			
+		}
+
+		private void ClearTaskData()
+		{
+			// Dispose of any objects stored in the UITask context that implement IDisposable.
+			foreach (var obj in _taskData.Values)
+			{
+				try
+				{
+					DisposeUtils.DisposeOf(obj);
+				}
+				catch (Exception ex)
+				{
+					var message = string.Format("Unexpected exception disposing of context object of type {0}: {1}",
+												obj.GetType(), ex.Message);
+					Log.Error(message, ex);
+				}
+			}
+
+			_taskData.Clear();
 		}
 
 		/// <summary>
@@ -219,6 +296,93 @@ namespace Quokka.UI.Tasks
 		{
 			_endTaskRequested = true;
 			Navigate(null);
+		}
+
+		/// <summary>
+		/// Used for storing arbitrary data against the the UITask. Used by <see cref="UICurrentTask"/>
+		/// TODO: not well thought out, internal for now.
+		/// </summary>
+		internal void SetData(string slotName, object data)
+		{
+			Verify.ArgumentNotNull(slotName, "slotName");
+			lock (_taskData)
+			{
+				if (data == null)
+				{
+					_taskData.Remove(slotName);
+				}
+				else
+				{
+					_taskData[slotName] = data;
+				}
+			}
+		}
+
+		/// <summary>
+		/// Used for storing arbitrary data against the the UITask. Used by <see cref="UICurrentTask"/>.
+		/// Will be disposed when the task completes. TODO: not well thought out, internal for now.
+		/// </summary>
+		internal object GetData(string slotName)
+		{
+			Verify.ArgumentNotNull(slotName, "slotName");
+			object result;
+			lock(_taskData)
+			{
+				_taskData.TryGetValue(slotName, out result);
+			}
+			return result;
+		}
+
+
+		/// <summary>
+		/// Gets the object associated with the current node, or <c>null</c> if not found.
+		/// </summary>
+		public T GetTaskLifetimeObject<T>(string name) where T : class, IDisposable
+		{
+			return (T) GetData(SlotName<T>(name));
+		}
+
+		/// <summary>
+		/// Associates a disposable object with the current node. This object will be 
+		/// disposed when the current node changes.
+		/// </summary>
+		public void SetTaskLifetimeObject<T>(string name, T data) where T : class, IDisposable
+		{
+			SetData(SlotName<T>(name), data);
+		}
+
+		/// <summary>
+		/// Gets the object associated with the current node, or <c>null</c> if not found.
+		/// </summary>
+		public T GetNodeLifetimeObject<T>(string name) where T : class, IDisposable
+		{
+			if (CurrentNode == null)
+			{
+				throw new InvalidOperationException("No current node defined for task");
+			}
+			return (T) CurrentNode.GetData(SlotName<T>(name));
+		}
+
+		/// <summary>
+		/// Associates a disposable object with the current node. This object will be 
+		/// disposed when the current node changes.
+		/// </summary>
+		public void SetNodeLifetimeObject<T>(string name, T data) where T : class, IDisposable
+		{
+			if (CurrentNode == null)
+			{
+				throw new InvalidOperationException("No current node defined for task");
+			}
+			CurrentNode.SetData(SlotName<T>(name), data);
+		}
+
+		private static string SlotName<T>(string name)
+		{
+			if (name == null)
+			{
+				return "<NULL>-" + typeof(T).FullName;
+			}
+			return "(" + name + ")-" + typeof(T).FullName;
 		}
 
 		#endregion
@@ -286,6 +450,14 @@ namespace Quokka.UI.Tasks
 				{
 					CreateNodes();
 				}
+				catch (Exception ex)
+				{
+					// Report error message as close to catching the exception as possible.
+					// This will appear on the IErrorView view.
+					var message = string.Format("Exception thrown in CreateNodes method for UITask {0}", GetType());
+					_errorReport.ReportError(message, ex);
+					throw;
+				}
 				finally
 				{
 					_canCreateNode = false;
@@ -318,7 +490,7 @@ namespace Quokka.UI.Tasks
 
 			try
 			{
-				serviceLocator = Microsoft.Practices.ServiceLocation.ServiceLocator.Current;
+				serviceLocator = Quokka.ServiceLocation.ServiceLocator.Current;
 			}
 			catch (NullReferenceException)
 			{
@@ -342,6 +514,21 @@ namespace Quokka.UI.Tasks
 			}
 		}
 
+		internal void NavigationNotDefined(object sender, EventArgs e)
+		{
+			var navigateCommand = (NavigateCommand) sender;
+			var context = string.Format("Navigating from node " + navigateCommand.FromNode.Name);
+			var detail = string.Format("An attempt has been made to navigate from node {0}"
+			                           + " using a NavigateCommand whose transition has not been defined.",
+			                           navigateCommand.FromNode.Name);
+			var resolution = "Check for an INavigateCommand in your presenter or view that has not had a"
+			                 + " transition defined in the UITask.";
+			_errorReport.ReportError(context, detail);
+			_errorReport.Resolution = resolution;
+			AddErrorReportPropertiesForNode(navigateCommand.FromNode);
+			ShowErrorView();
+		}
+
 		internal void Navigating(object sender, EventArgs e)
 		{
 			var navigateCommand = (NavigateCommand) sender;
@@ -352,15 +539,23 @@ namespace Quokka.UI.Tasks
 				                               navigateCommand.FromNode,
 				                               navigateCommand.ToNode);
 				Log.Error(message);
-				throw new UITaskException(message);
+				_errorReport.ReportError("Navigation attempted on completed UI Task", message);
+				ShowErrorView();
+				return;
 			}
 
 			if (navigateCommand.FromNode != CurrentNode)
 			{
-				Log.WarnFormat("Attempt to navigate from {0} to {1} when the current node is {2}",
+				var message = string.Format("Attempt to navigate from {0} to {1} when the current node is {2}",
 				               navigateCommand.FromNode,
 				               navigateCommand.ToNode,
 				               CurrentNode);
+				Log.Error(message);
+				_errorReport.ReportError("Navigation error", message);
+				_errorReport.Properties.Add("UITask", GetType().FullName);
+				_errorReport.Properties.Add("FromNode", navigateCommand.FromNode.ToString());
+				_errorReport.Properties.Add("ToNode", navigateCommand.ToNode.ToString());
+				ShowErrorView();
 				return;
 			}
 
@@ -371,41 +566,111 @@ namespace Quokka.UI.Tasks
 
 		internal void Navigate(UINode nextNode)
 		{
-			if (IsComplete)
+			using (UICurrentTask.SetCurrentTask(this))
 			{
-				const string message = "Attempt to navigate when task has already completed";
-				Log.Error(message);
-				throw new UITaskException(message);
+				var errorReportedPriorToNavigation = _errorReport.HasErrorOccurred;
+				var fromNode = CurrentNode;
+
+				try
+				{
+					if (IsComplete)
+					{
+						const string message = "Attempt to navigate when task has already completed";
+						Log.Error(message);
+						throw new UITaskException(message);
+					}
+
+					_nextNode = nextNode;
+
+					if (nextNode == null)
+					{
+						_endTaskRequested = true;
+					}
+
+					if (_inNavigateMethod)
+					{
+						// Recursive calls to this method set the next node for navigation and exit.
+						return;
+					}
+
+
+					NavigateHelper();
+					while (_nextNode != null && !_endTaskRequested)
+					{
+						NavigateHelper();
+					}
+
+					// Cleanup any views and controllers for nodes that are now no longer 
+					// the current node.
+					foreach (var node in Nodes)
+					{
+						node.CleanupNode();
+					}
+
+				}
+				catch (Exception ex)
+				{
+					if (!_errorReport.HasErrorOccurred)
+					{
+						_errorReport.ReportError("Unexpected exception during UI navigation", ex);
+					}
+
+					if (_errorReport.Exception == null)
+					{
+						_errorReport.Exception = ex;
+					}
+
+					if (!_errorReport.Properties.ContainsKey("UITask"))
+					{
+						_errorReport.Properties.Add("UITask", GetType().FullName);
+					}
+					if (!_errorReport.Properties.ContainsKey("FromNode"))
+					{
+						_errorReport.Properties.Add("FromNode", fromNode);
+					}
+					if (!_errorReport.Properties.ContainsKey("ToNode"))
+					{
+						_errorReport.Properties.Add("ToNode", nextNode);
+					}
+				}
+
+				if (_errorReport.HasErrorOccurred && !errorReportedPriorToNavigation)
+				{
+					// An error report was generated during this method.
+					ShowErrorView();
+				}
+				else
+				{
+					RaiseEvents();
+				}
 			}
+		}
 
-			_nextNode = nextNode;
-
-			if (nextNode == null)
-			{
-				_endTaskRequested = true;
-			}
-
-			if (_inNavigateMethod)
-			{
-				// Recursive calls to this method set the next node for navigation and exit.
-				return;
-			}
-
-
-			NavigateHelper();
-			while (_nextNode != null && !_endTaskRequested)
-			{
-				NavigateHelper();
-			}
-
-			// Cleanup any views and controllers for nodes that are now no longer 
-			// the current node.
+		// Display an error view. This is the end of the line for the UI task in question.
+		private void ShowErrorView()
+		{
+			// Set the current node to null, and cleanup all nodes. This should get
+			// rid of any modal windows being displayed.
+			CurrentNode = null;
 			foreach (var node in Nodes)
 			{
 				node.CleanupNode();
 			}
 
-			RaiseEvents();
+			if (_viewDeck != null)
+			{
+				var errorView = ServiceContainer.Locator.GetInstance<IErrorReportView>();
+				errorView.AbortCommand.Enabled = false;
+				errorView.CancelCommand.Enabled = false;
+				errorView.RetryCommand.Enabled = false;
+				errorView.ErrorReport = _errorReport;
+
+				using (var transition = _viewDeck.BeginTransition(this))
+				{
+					transition.AddView(errorView);
+					transition.ShowView(errorView);
+				}
+			}
 		}
 
 		private void NavigateHelper()
@@ -419,7 +684,7 @@ namespace Quokka.UI.Tasks
 
 				if (nextNode != null)
 				{
-					using (var transition = nextNode.ViewDeck.BeginTransition(this))
+					using (var transition = nextNode.GetViewDeck(createIfNecessary:true).BeginTransition(this))
 					{
 						try {
 							do
@@ -467,13 +732,13 @@ namespace Quokka.UI.Tasks
 							Log.Error("Unexpected error in transition: " + ex.Message, ex);
 							throw;
 						}
-
 					}
 				}
 				if (_endTaskRequested)
 				{
 					CurrentNode = null;
 					IsComplete = true;
+					ClearTaskData();
 					_raiseTaskComplete = true;
 				}
 			}
@@ -484,11 +749,41 @@ namespace Quokka.UI.Tasks
 
 			if (showModalView && CurrentNode != null)
 			{
-				using (var transition = CurrentNode.ViewDeck.BeginTransition(this))
+				using (var transition = CurrentNode.GetViewDeck(createIfNecessary:true).BeginTransition(this))
 				{
 					transition.ShowView(CurrentNode.View);
 				}
-				CurrentNode.ModalWindow.ShowModal(false);
+				CurrentNode.GetModalWindow(createIfNecessary:true).ShowModal(false);
+			}
+		}
+
+		private void AddErrorReportPropertiesForTask()
+		{
+			_errorReport.Properties["UITask"] = GetType().FullName;
+			_errorReport.Properties["CurrentNode"] = CurrentNode;
+		}
+
+		private void AddErrorReportPropertiesForNode(UINode node)
+		{
+			AddErrorReportPropertiesForTask();
+			if (node.NestedTaskType != null)
+			{
+				_errorReport.Properties["Nested UITask"] = node.NestedTaskType.FullName;
+			}
+			else
+			{
+				if (node.DeclaredViewType != null)
+				{
+					_errorReport.Properties["Declared View"] = node.DeclaredViewType.FullName;
+				}
+				if (node.InferredViewType != null)
+				{
+					_errorReport.Properties["Inferred View"] = node.InferredViewType.FullName;
+				}
+				if (node.PresenterType != null)
+				{
+					_errorReport.Properties["Presenter"] = node.PresenterType.FullName;
+				}
 			}
 		}
 
@@ -543,7 +838,16 @@ namespace Quokka.UI.Tasks
 					}
 					else
 					{
-						CurrentNode.CreateView();
+						try
+						{
+							CurrentNode.CreateView();
+						}
+						catch (Exception ex)
+						{
+							_errorReport.ReportError("Unexpected exception creating view", ex);
+							AddErrorReportPropertiesForNode(CurrentNode);
+							throw;
+						}
 						if (p != null)
 						{
 							p.ViewObject = CurrentNode.View;
@@ -562,29 +866,67 @@ namespace Quokka.UI.Tasks
 					var p = CurrentNode.Presenter as PresenterBase;
 					if (p != null)
 					{
-						p.PerformPresenterInitialization();
+						try
+						{
+							p.PerformPresenterInitialization();
+						}
+						catch (Exception ex)
+						{
+							// This is a common enough error condition. The presenter has thrown an exception
+							// during initialization. Reporting as close as possible to where the exception is
+							// thrown greatly assists debugging.
+							_errorReport.ReportError("Unexpected exception thrown during presenter initialization", ex);
+							AddErrorReportPropertiesForNode(CurrentNode);
+							throw;
+						}
 					}
 				}
 
 				if (CurrentNode.NestedTask == null && CurrentNode.NestedTaskType != null)
 				{
-					CurrentNode.CreateNestedTask();
+					try
+					{
+						CurrentNode.CreateNestedTask();
+					}
+					catch (Exception ex)
+					{
+						_errorReport.ReportError("Unexpected exception thrown during nested task initialization", ex);
+						AddErrorReportPropertiesForNode(CurrentNode);
+						throw;
+					}
 				}
 			}
 		}
 
 		private void RaiseEvents()
 		{
-			if (_raiseTaskComplete)
+			string context = "Raising TaskComplete event";
+			bool showError = false;
+
+			try
 			{
-				OnTaskComplete(EventArgs.Empty);
-				_raiseTaskComplete = false;
+				if (_raiseTaskComplete)
+				{
+					OnTaskComplete(EventArgs.Empty);
+					_raiseTaskComplete = false;
+				}
+
+				context = "Raising TaskStarted event";
+				if (_raiseTaskStarted)
+				{
+					OnTaskStarted(EventArgs.Empty);
+					_raiseTaskStarted = false;
+				}
+			}
+			catch (Exception ex)
+			{
+				_errorReport.ReportError(context, ex);
+				showError = true;
 			}
 
-			if (_raiseTaskStarted)
+			if (showError)
 			{
-				OnTaskStarted(EventArgs.Empty);
-				_raiseTaskStarted = false;
+				ShowErrorView();
 			}
 		}
 

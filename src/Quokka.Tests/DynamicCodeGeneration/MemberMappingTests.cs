@@ -40,15 +40,13 @@ namespace Quokka.Tests
         public interface ITestInterface1 { }
 
         [Test]
-        [ExpectedException(typeof(QuokkaException))]
         public void ExpectInterfaceType() {
-            MemberMapping mm = new MemberMapping(typeof(TestClass1), typeof(Sample1));
+            Assert.Throws<QuokkaException>(() => new MemberMapping(typeof(TestClass1), typeof(Sample1)));
         }
 
         [Test]
-        [ExpectedException(typeof(QuokkaException))]
         public void ExpectConcreteType() {
-            MemberMapping mm = new MemberMapping(typeof(ISample), typeof(ITestInterface1));
+            Assert.Throws<QuokkaException>(() => new MemberMapping(typeof(ISample), typeof(ITestInterface1)));
         }
 
         [Test]

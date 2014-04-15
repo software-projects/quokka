@@ -1,0 +1,54 @@
+<?xml version="1.0" ?>
+<project name="nuget" default="pack" xmlns="http://nant.sf.net/release/0.91/nant.xsd">
+
+	<!--
+	bin.dir
+	bin35.dir
+	temp.dir
+	src.dir
+	artifacts.dir
+	nuget.dir
+	project.name
+	product.version
+	copyright
+	
+	-->
+	<target name="pack">
+		<mkdir dir="${temp.dir}/nuget/${project.name}"/>
+		<copy file="${src.dir}/${project.name}/${project.name}.nuspec" todir="${temp.dir}/nuget/${project.name}"/>
+		<copy file="${root.dir}/license.txt" todir="${temp.dir}/nuget/${project.name}"/>
+		<mkdir dir="${temp.dir}/nuget/${project.name}/lib/net40-client"/>
+		<copy todir="${temp.dir}/nuget/${project.name}/lib/net40-client">
+			<fileset basedir="${bin.dir}">
+				<include name="${project.name}.dll"/>
+				<include name="${project.name}.pdb"/>
+				<include name="${project.name}.xml"/>
+			</fileset>
+		</copy>
+		<mkdir dir="${temp.dir}/nuget/${project.name}/lib/net35"/>
+		<copy todir="${temp.dir}/nuget/${project.name}/lib/net35">
+			<fileset basedir="${bin35.dir}">
+				<include name="${project.name}.dll"/>
+				<include name="${project.name}.pdb"/>
+				<include name="${project.name}.xml"/>
+			</fileset>
+		</copy>
+		<xmlpoke file="${temp.dir}/nuget/${project.name}/${project.name}.nuspec" xpath="/package/metadata/copyright" value="${copyright}"/>
+		<xmlpoke file="${temp.dir}/nuget/${project.name}/${project.name}.nuspec" 
+						 xpath="//dependencies/dependency[@version='']/@version" 
+						 value="${product.version}"/>
+		<exec program="nuget.exe" basedir="${nuget.dir}">
+			<arg value="pack"/>
+			<arg file="${temp.dir}/nuget/${project.name}/${project.name}.nuspec"/>
+			<arg value="-BasePath"/>
+			<arg path="${temp.dir}/nuget/${project.name}/"/>
+			<arg value="-OutputDirectory"/>
+			<arg path="${artifacts.dir}"/>
+			<arg value="-Version"/>
+			<arg value="${product.version}"/>
+			<arg value="-Verbose"/>
+		</exec>
+		<!-- tell team city that the artifacts are ready, even though the build has not finished yet -->
+		<echo message="##teamcity[publishArtifacts '${artifacts.dir}/${project.name}.${product.version}.nupkg']"/>
+	</target>
+</project>

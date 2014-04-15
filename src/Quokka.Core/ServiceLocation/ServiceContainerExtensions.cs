@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Reflection;
-using Common.Logging;
+using Castle.Core.Logging;
 using Quokka.Diagnostics;
 
 namespace Quokka.ServiceLocation
 {
 	public static class ServiceContainerExtensions
 	{
-		private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+		private static readonly ILogger Log = LoggerFactory.GetCurrentClassLogger();
 
 		#region RegisterType overloads
 

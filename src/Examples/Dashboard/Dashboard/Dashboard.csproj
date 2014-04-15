@@ -32,6 +32,8 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\..\..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -53,17 +55,21 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ComponentFactory.Krypton.Navigator, Version=4.1.1.0, Culture=neutral, PublicKeyToken=08e6fb2283d9d93d, processorArchitecture=MSIL">
+    <Reference Include="Castle.Core, Version=3.1.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\lib\Krypton\ComponentFactory.Krypton.Navigator.dll</HintPath>
+      <HintPath>..\..\..\..\packages\Castle.Core.3.1.0\lib\net40-client\Castle.Core.dll</HintPath>
     </Reference>
-    <Reference Include="ComponentFactory.Krypton.Toolkit, Version=4.0.0.0, Culture=neutral, PublicKeyToken=08e6fb2283d9d93d, processorArchitecture=MSIL">
+    <Reference Include="Castle.Windsor, Version=3.1.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\lib\Krypton\ComponentFactory.Krypton.Toolkit.dll</HintPath>
+      <HintPath>..\..\..\..\packages\Castle.Windsor.3.1.0\lib\net40-client\Castle.Windsor.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="ComponentFactory.Krypton.Navigator, Version=4.3.2.0, Culture=neutral, PublicKeyToken=08e6fb2283d9d93d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\lib\CommonServiceLocator\Microsoft.Practices.ServiceLocation.dll</HintPath>
+      <HintPath>..\..\..\..\packages\ComponentFactory.Krypton.Navigator.4.3.2\lib\net20\ComponentFactory.Krypton.Navigator.dll</HintPath>
+    </Reference>
+    <Reference Include="ComponentFactory.Krypton.Toolkit, Version=4.3.2.0, Culture=neutral, PublicKeyToken=08e6fb2283d9d93d, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\..\..\..\packages\ComponentFactory.Krypton.Toolkit.4.3.2\lib\net20\ComponentFactory.Krypton.Toolkit.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -119,6 +125,7 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <None Include="app.config" />
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -185,24 +192,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Quokka.Castle\Quokka.Castle.csproj">
-      <Project>{36487FB8-01B3-4C16-AFFA-E4A86090E43B}</Project>
-      <Name>Quokka.Castle</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\Quokka.Core\Quokka.Core.csproj">
-      <Project>{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}</Project>
-      <Name>Quokka.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\Quokka.Krypton\Quokka.Krypton.csproj">
-      <Project>{7CAFB430-325C-4C28-A2A0-E03E8D1B0EBD}</Project>
-      <Name>Quokka.Krypton</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\Quokka.WinForms\Quokka.WinForms.csproj">
-      <Project>{2E9F1CF5-C91E-4B40-B5F0-273C0E2ADFB6}</Project>
-      <Name>Quokka.WinForms</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\IDCard.png" />
   </ItemGroup>
   <ItemGroup>
@@ -225,7 +214,18 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Quokka.Core\Quokka.Core.csproj">
+      <Project>{A6C8B3C0-480E-4EFD-81B1-6BE3CA5BB19B}</Project>
+      <Name>Quokka.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Quokka.Krypton\Quokka.Krypton.csproj">
+      <Project>{7CAFB430-325C-4C28-A2A0-E03E8D1B0EBD}</Project>
+      <Name>Quokka.Krypton</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

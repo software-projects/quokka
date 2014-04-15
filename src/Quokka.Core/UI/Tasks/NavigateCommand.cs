@@ -58,9 +58,10 @@ namespace Quokka.UI.Tasks
 	///		}
 	///	</code>
 	///</example>
-	internal sealed class NavigateCommand : INavigateCommand
+	internal sealed class NavigateCommand : INavigateCommand, IDisposable
 	{
 		public event EventHandler Navigating;
+		public event EventHandler NavigationNotDefined;
 
 		internal UINode FromNode { get; set; }
 		internal UINode ToNode { get; set; }
@@ -72,14 +73,39 @@ namespace Quokka.UI.Tasks
 
 		public void Navigate()
 		{
-			if (Navigating == null)
-			{
-				// TODO: need a better diagnostic message, which includes the name of the
-				// current node, and the name of the navigate command.
-				throw new InvalidOperationException("No transition is defined for this navigate command.");
-			}
+			UIThread.Send(NavigateOnUIThread);
+		}
 
-			Navigating(this, EventArgs.Empty);
+		private void NavigateOnUIThread()
+		{
+			// do not navigate if we have been disposed
+			if (!_isDisposed)
+			{
+				if (Navigating == null)
+				{
+					if (NavigationNotDefined != null)
+					{
+						NavigationNotDefined(this, EventArgs.Empty);
+					}
+					else
+					{
+						// This should not get called, because the UINode should always subscribe
+						// to the NavigationNotDefined event.
+						throw new InvalidOperationException("No transition is defined for this navigate command.");
+					}
+				}
+				else
+				{
+					Navigating(this, EventArgs.Empty);
+				}
+			}			
+		}
+
+		private bool _isDisposed;
+
+		public void Dispose()
+		{
+			_isDisposed = true;
 		}
 	}
 }

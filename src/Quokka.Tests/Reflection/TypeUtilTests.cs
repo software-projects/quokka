@@ -3,6 +3,7 @@ using System.Reflection;
 
 using NUnit.Framework;
 
+// ReSharper disable InconsistentNaming
 namespace Quokka.Reflection
 {
     [TestFixture]
@@ -21,13 +22,13 @@ namespace Quokka.Reflection
         [Test]
         public void FindType_Namespace() {
 			Assembly assembly = typeof(QuokkaException).Assembly;
-            string[] namespaces = new string[] { "Quokka", "Quokka.Uip" };
+            string[] namespaces = new string[] { "Quokka", "Quokka.UI.Tasks" };
 
             Type type = TypeUtil.FindType("Quokkaexception", namespaces, assembly);
 			Assert.AreEqual(typeof(QuokkaException), type);
 
-            type = TypeUtil.FindType("UipNode", namespaces, assembly);
-            Assert.AreEqual(typeof(Quokka.Uip.UipNode), type);
+            type = TypeUtil.FindType("UINode", namespaces, assembly);
+            Assert.AreEqual(typeof(Quokka.UI.Tasks.UINode), type);
 
             type = TypeUtil.FindType("UipNode3", namespaces, assembly);
             Assert.IsNull(type);
@@ -49,23 +50,20 @@ namespace Quokka.Reflection
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void FindType_ArgumentNull_1() {
-            Type type = TypeUtil.FindType(null, null, Assembly.GetExecutingAssembly());
+            Assert.Throws<ArgumentNullException>(() => TypeUtil.FindType(null, null, Assembly.GetExecutingAssembly()));
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void FindType_ArgumentNull_3a() {
             Assembly assembly = null;
-            Type type = TypeUtil.FindType("XYZ", null, assembly);
+            Assert.Throws<ArgumentNullException>(() => TypeUtil.FindType("XYZ", null, assembly));
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void FindType_ArgumentNull_3b() {
             Assembly[] assemblies = null;
-            Type type = TypeUtil.FindType("XYZ", null, assemblies);
+            Assert.Throws<ArgumentNullException>(() => TypeUtil.FindType("XYZ", null, assemblies));
         }
 
 		private class TestClass1
