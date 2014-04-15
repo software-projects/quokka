@@ -139,10 +139,8 @@
 			<arg value="/t"/>
 			<arg value="${timestamp.service.url}"/>
 			<arg file="${bin.dir}/Quokka.Core.dll"/>
-			<arg file="${bin.dir}/Quokka.Krypton.dll"/>
 			<arg file="${bin.dir}/Quokka.NH.dll"/>
 			<arg file="${bin35.dir}/Quokka.Core.dll"/>
-			<arg file="${bin35.dir}/Quokka.Krypton.dll"/>
 			<arg file="${bin35.dir}/Quokka.NH.dll"/>
 		</exec>
 	</target>
@@ -165,11 +163,6 @@
 		<nant buildfile="nuget/nuget.build" target="pack">
 			<properties>
 				<property name="project.name" value="Quokka.Core"/>
-			</properties>
-		</nant>
-		<nant buildfile="nuget/nuget.build" target="pack">
-			<properties>
-				<property name="project.name" value="Quokka.Krypton"/>
 			</properties>
 		</nant>
 		<nant buildfile="nuget/nuget.build" target="pack">

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -95,7 +95,6 @@
     <Compile Include="Config\TimeSpanExtensions.cs" />
     <Compile Include="Config\TimeSpanParameter.cs" />
     <Compile Include="Config\UrlParameter.cs" />
-    <Compile Include="Data\SqlExpressUtil.cs" />
     <Compile Include="Data\SqlMapper.cs" />
     <Compile Include="Diagnostics\LoggerFactory.cs" />
     <Compile Include="Diagnostics\Verify.cs" />
