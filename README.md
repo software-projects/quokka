@@ -26,7 +26,7 @@ provides:
 Assemblies
 ----------
 
-**Quokka.Core **is the core assembly and contains most of the functionality.
+**Quokka.Core** is the core assembly and contains most of the functionality.
 Apart from the CLR assemblies, Quokka.Core depends on:
 
 -   Castle.Core
@@ -45,6 +45,6 @@ Apart from the CLR assemblies, Quokka.NH depends on:
 Roadmap
 -------
 
-Quokka is not under active support. It is, however, used in a number of software
+Quokka is not under active development. It is, however, used in a number of software
 products used by clients of Software Projects. Bug fixes are applied as they are
 identified.
