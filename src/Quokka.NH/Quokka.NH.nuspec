@@ -1,4 +1,4 @@
-﻿<?xml version="1.0"?>
+<?xml version="1.0"?>
 <package >
 	<metadata>
 		<id>Quokka.NH</id>
@@ -7,6 +7,7 @@
 		<authors>John Jeffery</authors>
 		<licenseUrl>http://www.apache.org/licenses/LICENSE-2.0.html</licenseUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<projectUrl>https://github.com/software-projects/quokka</projectUrl>
 		<description>Castle NHibernate Facility that integrates with Quokka UI Tasks.</description>
 		<copyright>Copyright 2004-2012 John Jeffery. All rights reserved</copyright>
 		<dependencies>

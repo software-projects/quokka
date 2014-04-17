@@ -6,6 +6,7 @@
     <title>Quokka Core Library</title>
     <authors>John Jeffery</authors>
     <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0.html</licenseUrl>
+    <projectUrl>https://github.com/software-projects/quokka</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Quokka is a library for building rich client applications.</description>
     <copyright>Copyright 2004-2012. All rights reserved</copyright>
