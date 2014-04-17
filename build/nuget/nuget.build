@@ -17,7 +17,8 @@
 		<mkdir dir="${temp.dir}/nuget/${project.name}"/>
 		<copy file="${src.dir}/${project.name}/${project.name}.nuspec" todir="${temp.dir}/nuget/${project.name}"/>
 		<copy file="${root.dir}/license.txt" todir="${temp.dir}/nuget/${project.name}"/>
-		<mkdir dir="${temp.dir}/nuget/${project.name}/lib/net40-client"/>
+    <copy file="${root.dir}/version.txt" todir="${temp.dir}/nuget/${project.name}"/>
+    <mkdir dir="${temp.dir}/nuget/${project.name}/lib/net40-client"/>
 		<copy todir="${temp.dir}/nuget/${project.name}/lib/net40-client">
 			<fileset basedir="${bin.dir}">
 				<include name="${project.name}.dll"/>

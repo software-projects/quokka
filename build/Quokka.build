@@ -28,7 +28,11 @@
 
 	<property name="product.version" value="${environment::get-variable('BUILD_NUMBER')}" if="${environment::variable-exists('BUILD_NUMBER')}"/>
 	<property name="product.version" value="0.1.0.0" overwrite="false"/>
-	<echo message="product.version: ${product.version}"/>
+  <property name="vcs.version" value="${environment::get-variable('BUILD_VCS_NUMBER')" if="${environment::variable-exists('BUILD_VCS_NUMBER')}"/>
+  <property name="vcs.version" value="unknown" overwrite="false"/>
+  <echo message="product.version: ${product.version}"/>
+  <echo message="vcs.version: ${vcs.version}"/>
+  
 
 	<!-- parse the product.version for the major, minor, build and revision -->
 	<property name="version.major" value="${version::get-major(version::parse(product.version))}"/>
@@ -161,7 +165,13 @@
 		<echo message="##teamcity[publishArtifacts '${zip.file.path}']"/>
 	</target>
 
-	<target name="nuget" depends="artifacts.directory,codesign.assemblies">
+  <target name="version.txt" depends="timestamp">
+    <echo file="${root.dir}/version.txt" message="Version: ${full.product.version}&#13;&#10;"/>
+    <echo file="${root.dir}/version.txt" message="Git revision: ${vcs.version}&#13;&#10;" append="true"/>
+    <echo file="${root.dir}/version.txt" message="Build timestamp: ${build.timestamp}&#13;&#10;" append="true"/>
+  </target>
+
+	<target name="nuget" depends="artifacts.directory,codesign.assemblies,version.txt">
 		<nant buildfile="nuget/nuget.build" target="pack">
 			<properties>
 				<property name="project.name" value="Quokka.Core"/>

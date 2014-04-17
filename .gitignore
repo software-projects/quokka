@@ -7,6 +7,7 @@ CommonAssemblyInfo.cs
 *.Net35.csproj
 temp
 artifacts
+version.txt
 
 # User-specific files
 *.suo
