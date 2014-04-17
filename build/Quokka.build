@@ -58,7 +58,9 @@
 				<include name="${src.dir}/Quokka.*/obj/**"/>
 				<include name="${temp.dir}/**"/>
 				<include name="${artifacts.dir}/**"/>
-				<include name="CommonAssemblyInfo.cs"/>
+				<include name="${src.dir}/CommonAssemblyInfo.cs"/>
+        <include name="${root.dir}/Quokka.Net35.sln"/>
+        <include name="${src.dir}/**/*.Net35.csproj"/>
 			</fileset>
 		</delete>
 	</target>
