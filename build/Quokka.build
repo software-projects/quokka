@@ -28,7 +28,7 @@
 
 	<property name="product.version" value="${environment::get-variable('BUILD_NUMBER')}" if="${environment::variable-exists('BUILD_NUMBER')}"/>
 	<property name="product.version" value="0.1.0.0" overwrite="false"/>
-  <property name="vcs.version" value="${environment::get-variable('BUILD_VCS_NUMBER')" if="${environment::variable-exists('BUILD_VCS_NUMBER')}"/>
+  <property name="vcs.version" value="${environment::get-variable('BUILD_VCS_NUMBER')}" if="${environment::variable-exists('BUILD_VCS_NUMBER')}"/>
   <property name="vcs.version" value="unknown" overwrite="false"/>
   <echo message="product.version: ${product.version}"/>
   <echo message="vcs.version: ${vcs.version}"/>
