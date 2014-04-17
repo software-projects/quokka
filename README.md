@@ -23,10 +23,28 @@ provides:
 -   Convenient classes for saving UI settings (such as window sizes, splitter
     window location, etc)
 
-Quokka.Core depends on the following external components:
+Assemblies
+----------
+
+**Quokka.Core **is the core assembly and contains most of the functionality.
+Apart from the CLR assemblies, Quokka.Core depends on:
 
 -   Castle.Core
 
 -   Castle.Windsor
 
-In addition, Quokka.NH depends on NHibernate
+**Quokka.NH** contains additional functionality for integration with NHibernate.
+Apart from the CLR assemblies, Quokka.NH depends on:
+
+-   Castle.Core
+
+-   Castle.Windsor
+
+-   NHibernate
+
+Roadmap
+-------
+
+Quokka is not under active support. It is, however, used in a number of software
+products used by clients of Software Projects. Bug fixes are applied as they are
+identified.
