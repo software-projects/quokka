@@ -75,6 +75,10 @@ namespace Quokka.WinForms.Config
 			Verify.ArgumentNotNull(parameter, "parameter");
 			Parameter = parameter;
 			textBox.Text = parameter.GetValueText();
+		    if (parameter is PasswordParameter)
+		    {
+		        textBox.PasswordChar = '*';
+		    }
 		}
 
 		public string TextValue
