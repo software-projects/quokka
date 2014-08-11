@@ -111,5 +111,15 @@ namespace Quokka.Config
 		{
 			return value == null ? null : value.ToString();
 		}
+
+	    protected override string ConvertToDisplayString(object value)
+	    {
+	        if (value == null || string.IsNullOrEmpty(value.ToString()))
+	        {
+	            return null;
+	        }
+
+	        return "********";
+	    }
 	}
 }

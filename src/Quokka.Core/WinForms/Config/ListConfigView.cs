@@ -38,7 +38,7 @@ namespace Quokka.WinForms.Config
 				.WithDisplaySettings(_displaySettings)
 				.DefineCellValue(NameColumn, p => p.Name)
 				.DefineCellValue(ParameterTypeColumn, p => p.ParameterType)
-				.DefineCellValue(ValueColumn, p => p.GetValueText())
+				.DefineCellValue(ValueColumn, p => p.GetDisplayText())
 				.DefineCellValue(DescriptionColumn, p => p.Summary)
 				.SetDefaultSortOrder(NameColumn)
 				.SortBy(NameColumn);

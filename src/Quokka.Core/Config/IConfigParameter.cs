@@ -77,6 +77,13 @@ namespace Quokka.Config
 		/// Gets the default value of this parameter as a text string.
 		/// </summary>
 		string GetDefaultValueText();
+
+        /// <summary>
+        /// Gets the value of this parameter as a text string suitable for display
+        /// in a list. Most parameter types return the same value as <see cref="GetValueText"/>,
+        /// but passwords, for example, return elided text.
+        /// </summary>
+	    string GetDisplayText();
 	}
 
 	/// <summary>

@@ -109,6 +109,11 @@ namespace Quokka.Config
 			throw new NotImplementedException();
 		}
 
+	    string IConfigParameter.GetDisplayText()
+	    {
+	        throw new NotImplementedException();
+	    }
+
 		string IConfigParameter.GetDefaultValueText()
 		{
 			throw new NotImplementedException();
@@ -300,6 +305,11 @@ namespace Quokka.Config
 			return ConvertToString(GetDefaultValue());
 		}
 
+	    string IConfigParameter.GetDisplayText()
+	    {
+	        return ConvertToDisplayString(Value);
+	    }
+
 		string IConfigParameter<T>.Validate(T value)
 		{
 			return DoValidate(value);
@@ -372,5 +382,10 @@ namespace Quokka.Config
 		/// Convert the configuration value into a string suitable for persisting.
 		/// </summary>
 		protected abstract string ConvertToString(object value);
+
+	    protected virtual string ConvertToDisplayString(object value)
+	    {
+	        return ConvertToString(value);
+	    }
 	}
 }
