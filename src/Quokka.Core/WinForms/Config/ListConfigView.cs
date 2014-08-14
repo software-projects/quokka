@@ -68,7 +68,10 @@ namespace Quokka.WinForms.Config
 
 		private void DataGridViewCellDoubleClick(object sender, DataGridViewCellEventArgs e)
 		{
-			EditButton.PerformClick();
+		    if (e.RowIndex >= 0 && e.RowIndex < _adapter.DataSource.Count)
+		    {
+		        EditButton.PerformClick();
+		    }
 		}
 
 		private void ClearSearchTextButtonClick(object sender, EventArgs e)
