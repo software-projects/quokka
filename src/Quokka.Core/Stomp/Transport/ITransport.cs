@@ -17,6 +17,7 @@
 #endregion
 
 using System;
+using System.Net;
 
 namespace Quokka.Stomp.Transport
 {
@@ -69,5 +70,15 @@ namespace Quokka.Stomp.Transport
 		///		Closes the connection after ensuring that all pending frames have been transmitted.
 		/// </summary>
 		void Shutdown();
+
+		/// <summary>
+		/// The local endpoint for this transport.
+		/// </summary>
+		EndPoint LocalEndPoint { get; }
+
+		/// <summary>
+		/// The remote endpoint for this transport.
+		/// </summary>
+		EndPoint RemoteEndPoint { get; }
 	}
 }

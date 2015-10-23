@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using Castle.Core.Logging;
@@ -102,6 +103,31 @@ namespace Quokka.Stomp.Transport
 		{
 			get { return _connected; }
 		}
+
+		public EndPoint LocalEndPoint
+		{
+			get
+			{
+				if (Socket != null)
+				{
+					return Socket.LocalEndPoint;
+				}
+				return null;
+			}
+		}
+
+		public EndPoint RemoteEndPoint
+		{
+			get
+			{
+				if (Socket != null)
+				{
+					return Socket.RemoteEndPoint;
+				}
+				return null;
+			}
+		}
+
 
 		public TFrame GetNextFrame()
 		{
