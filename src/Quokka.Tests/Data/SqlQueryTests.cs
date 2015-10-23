@@ -17,7 +17,7 @@
 #endregion
 
 using System;
-using System.Data.SqlServerCe;
+using System.Data.SqlClient;
 using NUnit.Framework;
 using Quokka.Data.TestQueries;
 
@@ -48,7 +48,7 @@ namespace Quokka.Data
 		[Test]
 		public void Simple_query()
 		{
-			using (var conn = new SqlCeConnection(_testDB.ConnectionString))
+			using (var conn = new SqlConnection(_testDB.ConnectionString))
 			{
 				conn.Open();
 				var cmd = conn.CreateCommand();
@@ -77,7 +77,7 @@ namespace Quokka.Data
 		[Test]
 		public void Missing_property()
 		{
-			using (var conn = new SqlCeConnection(_testDB.ConnectionString))
+			using (var conn = new SqlConnection(_testDB.ConnectionString))
 			{
 				conn.Open();
 				var cmd = conn.CreateCommand();
@@ -133,7 +133,7 @@ namespace Quokka.Data
 		[Test]
 		public void Query_with_many_columns()
 		{
-			using (var conn = new SqlCeConnection(_testDB.ConnectionString))
+			using (var conn = new SqlConnection(_testDB.ConnectionString))
 			{
 				conn.Open();
 				var cmd = conn.CreateCommand();
@@ -172,7 +172,7 @@ create table Table1(
 		[Test]
 		public void Nested_property_query()
 		{
-			using (var conn = new SqlCeConnection(_testDB.ConnectionString))
+			using (var conn = new SqlConnection(_testDB.ConnectionString))
 			{
 				conn.Open();
 				var cmd = conn.CreateCommand();
