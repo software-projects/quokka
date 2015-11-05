@@ -1,6 +1,6 @@
 ﻿#region License
 
-// Copyright 2004-2014 John Jeffery
+// Copyright 2004-2015 John Jeffery
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -87,6 +87,8 @@ namespace Quokka.WinForms.Startup
 			return new DefaultSplashScreen(); ;
 		}
 
+		private bool _onIdleCalled;
+
 		/// <summary>
 		/// Gets run the first time that the application is idle -- displays the splash screen
 		/// </summary>
@@ -94,6 +96,13 @@ namespace Quokka.WinForms.Startup
 		{
 			// Unsubscribe to the Application.Idle event
 			Application.Idle -= ApplicationOnIdle;
+
+			// Make sure this is only called once.
+			if (_onIdleCalled)
+			{
+				return;
+			}
+			_onIdleCalled = true;
 
 			Form splashScreen = null;
 			if (DisplaySplashScreen)
