@@ -117,7 +117,7 @@ namespace Quokka.WinForms.Startup
 			}
 			else
 			{
-				Presenter.DisplaySplashScreen(CreateSplashScreen());
+				Presenter.DisplaySplashScreen(splashScreen);
 				MainForm = Presenter.SplashScreen;
 			}
 		}
